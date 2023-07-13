@@ -1,8 +1,8 @@
-import { Box, Button, InputLabel, Radio, RadioGroup, TextField, Typography, useTheme } from "@mui/material";
+import { Box, Button, InputLabel, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import { authStyles } from "../../styles/auth-styles";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
-import { ADD_ARTIST, USER_LOGIN, USER_SIGNUP } from "../graphql/mutations";
+import { ADD_ARTIST } from "../graphql/mutations";
 
 type Inputs = {
     name: string;
@@ -29,9 +29,7 @@ const AddArtist = () => {
     const {
         register,
         handleSubmit,
-        formState: { errors },
     } = useForm<Inputs>();
-    const theme = useTheme();
     const [ addArtist ] = useMutation(ADD_ARTIST);
     const onSubmit = async({
         name, 
@@ -53,7 +51,7 @@ const AddArtist = () => {
         markssignatureservice,    
     }: Inputs) => {
             try {
-                const response = await addArtist({
+                await addArtist({
                     variables: {
                         name, 
                         email,

@@ -1,4 +1,4 @@
-import { Box, LinearProgress, TextField, Typography } from "@mui/material"
+import { Box, LinearProgress, TextField } from "@mui/material"
 import { homepageStyles } from "../../styles/homepage-styles"
 import { useQuery } from "@apollo/client"
 import { GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries"

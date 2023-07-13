@@ -19,7 +19,7 @@ const Artist = () => {
     return data && (
         <Box sx={artistStyles.container}>
             <Box sx={artistStyles.bannerContainer}>
-                <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${data.artistByName.filename}.jpeg`} />
+                <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${data.artistByName.filename}.jpeg`} alt="" />
             </Box>
                 <Typography variant="h2" fontWeight={600}>{data.artistByName.name}</Typography>
                 {/* <Link sx={artistStyles.backLink} href="/">&#60; Back to All Artists</Link> */}
@@ -115,11 +115,11 @@ const Artist = () => {
                 </Box>
                 <Box sx={artistStyles.signatureSection}>
                     <Typography variant="h4">Example Signature</Typography>
-                    { data.artistByName.haveSignature == "true" &&
-                        <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} />
+                    { data.artistByName.haveSignature === "true" &&
+                        <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} alt="" />
                     }
-                    { data.artistByName.haveSignature == "false" &&
-                        <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/emptycardframe.jpg`} />
+                    { data.artistByName.haveSignature === "false" &&
+                        <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/emptycardframe.jpg`} alt="" />
                     }
                 </Box>
             </Box>

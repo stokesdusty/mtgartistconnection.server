@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(
 );
 
 const client = new ApolloClient({
-  uri: "http://localhost:8080/graphql", 
+  uri: "https://mtgartistconnectionwebservice-production.up.railway.app/graphql", 
   cache: new InMemoryCache()
 });
 

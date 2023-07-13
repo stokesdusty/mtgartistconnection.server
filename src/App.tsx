@@ -19,7 +19,7 @@ function App() {
     if(JSON.parse(data) !== null) {
       dispatch(authActions.login());
     }
-  }, []);
+  });
   return (
     <div >
       <header>

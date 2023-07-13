@@ -1,4 +1,3 @@
-import { dir } from "console";
 import { Styles } from "./homepage-styles";
 
 export const artistStyles: Styles = {

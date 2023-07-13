@@ -1,8 +1,7 @@
-import { AppBar, Box, Button, IconButton, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Tab, Tabs, Toolbar } from "@mui/material";
 import { headerStyles } from "../../styles/header-styles";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Header = () => {
     const [value, setValue] = useState(0);
@@ -11,6 +10,7 @@ const Header = () => {
         <Toolbar>
             <Link to="/" >
                 <img
+                    alt=""
                     src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/logo.png" 
                     width="300px"
                 />

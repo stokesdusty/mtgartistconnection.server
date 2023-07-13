@@ -1,5 +1,5 @@
 import { Box, Button, InputLabel, TextField, Typography, useTheme, useMediaQuery } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { authStyles } from "../../styles/auth-styles";
 import { ImBlogger } from "react-icons/im";
 import { useForm } from "react-hook-form";
@@ -75,6 +75,7 @@ const Auth = () => {
         }
     };
 
+    if (!isLoggedIn) return <p>Error</p>;
     return <Box sx={authStyles.container}>
         <Box sx={authStyles.logoTitle}>
             <ImBlogger size="30" style={{borderRadius: "50%", padding: "10px", background:"#6c5252"}} />

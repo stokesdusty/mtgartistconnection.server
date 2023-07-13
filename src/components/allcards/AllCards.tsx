@@ -11,7 +11,6 @@ const AllCards = () => {
     const [cards, setCards] = useState<any[]>([]);
     const [cardsLoaded, setCardsLoaded] = useState(false);
     const [totalCards, setTotalCards] = useState<any[] | string>("");
-    const bannerImage = artist.replace(/ /g, '').replace('-', '').toLowerCase();
     const aArtistName = artist.split(' ');
     const jSonFormattedName: any[] = [];
     console.log(artist);
@@ -67,7 +66,7 @@ const AllCards = () => {
   
     return <Box sx={allCardsStyles.container}>
         <Box sx={allCardsStyles.bannerContainer}>
-            <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${data.artistByName.filename}.jpeg`} />
+            <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${data.artistByName.filename}.jpeg`} alt="" />
         </Box>
             <Typography variant="h2" fontWeight={600}>All {artist} Cards ({totalCards})</Typography>
             {/* <Link sx={artistStyles.backLink} href="/">&#60; Back to All Artists</Link> */}

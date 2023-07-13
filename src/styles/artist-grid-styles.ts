@@ -1,6 +1,5 @@
 import { CSSProperties } from "react";
 import { Styles } from "./homepage-styles";
-import { display, fontWeight } from "@mui/system";
 
 export const artistGridStyles: Styles = {
     container: {
