@@ -51,7 +51,7 @@ const Header = () => {
                     onClick={handleClick}
                     sx={headerStyles.button}
                 >
-                    Dashboard
+                    Menu
                 </Button>
                 <Menu
                     id="basic-menu"
