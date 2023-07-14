@@ -1,10 +1,21 @@
-import { AppBar, Box, Tab, Tabs, Toolbar } from "@mui/material";
+import { AppBar, Box, Button, Menu, MenuItem, Tab, Tabs, Toolbar, useMediaQuery, useTheme } from "@mui/material";
 import { headerStyles } from "../../styles/header-styles";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
     const [value, setValue] = useState(0);
+    const navigate = useNavigate();
+    const theme = useTheme();
+    const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
     
     return <AppBar sx={headerStyles.appBar}>
         <Toolbar>
@@ -15,7 +26,7 @@ const Header = () => {
                     width="300px"
                 />
             </Link>
-            <Box sx={headerStyles.tabContainer}>
+            {!isBelowMedium && <Box sx={headerStyles.tabContainer}>
                 <Tabs 
                     TabIndicatorProps={{ style: {background: "#404040"}}}
                      textColor="inherit" 
@@ -30,7 +41,33 @@ const Header = () => {
                     {/* @ts-ignore */}
                     <Tab LinkComponent={Link} to="/calendar" disableRipple label="Calendar" />
                 </Tabs>
-            </Box>
+            </Box>}
+            {isBelowMedium &&  <Box sx={headerStyles.tabContainer}>
+                <Button
+                    id="basic-button"
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                    sx={headerStyles.button}
+                >
+                    Dashboard
+                </Button>
+                <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                    'aria-labelledby': 'basic-button',
+                    }}
+                >
+                    <MenuItem onClick={() => navigate("/")}>All Artists</MenuItem>
+                    <MenuItem onClick={() => navigate("/signingservices")}>Card Signing Services</MenuItem>
+                    <MenuItem onClick={() => navigate("/calendar")}>Calendar</MenuItem>
+                </Menu>
+                </Box>
+            }
         </Toolbar>
     </AppBar>;
 };

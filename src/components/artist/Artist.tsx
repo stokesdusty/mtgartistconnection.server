@@ -1,13 +1,15 @@
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router";
 import { GET_ARTIST_BY_NAME } from "../graphql/queries";
-import { Box, LinearProgress, Link, Typography } from "@mui/material";
+import { Box, LinearProgress, Link, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { artistStyles } from "../../styles/artist-styles";
 import { TbWorldWww } from "react-icons/tb";
 import { FaArtstation, FaFacebookF, FaInstagram, FaPatreon, FaTwitter, FaYoutube } from "react-icons/fa";
 
 const Artist = () => {
     const name = useParams().name;
+    const theme = useTheme();
+    const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
     const { data, error, loading } = useQuery(GET_ARTIST_BY_NAME, {
         variables: {
             name
@@ -22,13 +24,18 @@ const Artist = () => {
                 <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${data.artistByName.filename}.jpeg`} alt="" />
             </Box>
                 <Typography variant="h2" fontWeight={600}>{data.artistByName.name}</Typography>
+                <Box sx={artistStyles.infoRow}>
+                    <Link  sx={artistStyles.link} href={`/allcards/${data.artistByName.name}`}>
+                        <Typography color={"#159947"} variant="h5">{`View all ${data.artistByName.name} cards >`}</Typography>
+                    </Link>
+                </Box>
                 {/* <Link sx={artistStyles.backLink} href="/">&#60; Back to All Artists</Link> */}
-            <Box sx={artistStyles.infoSection}>
+            <Box sx={{...artistStyles.infoSection, flexDirection: isBelowMedium ? "column" : "row", alignItems: isBelowMedium ? "center" : "left"}}>
                 <Box sx={artistStyles.artistInfo}>
                     <Typography sx={artistStyles.sectionHeader} variant="h4">Artist Info</Typography>
                     <Box sx={artistStyles.infoRow}>
                         <Typography variant="h5">Social Media Links:</Typography>
-                        <Box sx={artistStyles.socialMedia}>
+                        <Box sx={{...artistStyles.socialMedia, alignItems: isBelowMedium ? "left" : "center"}}>
                             {data.artistByName.facebook !== "" && (
                                 <Link href={data.artistByName.facebook} target="_blank">
                                     <FaFacebookF size={30} color={"#4267B2"}/>
@@ -92,11 +99,6 @@ const Artist = () => {
                         <Typography variant="h5">Artist Proofs on website?:</Typography>
                         <Typography>{data.artistByName.artistProofs ? data.artistByName.artistProofs.charAt(0).toUpperCase() + data.artistByName.artistProofs.slice(1) : "Unknown"}</Typography>
                     </Box>
-                    <Box sx={artistStyles.infoRow}>
-                        <Link  sx={artistStyles.link} href={`/allcards/${data.artistByName.name}`}>
-                            <Typography color={"#159947"} variant="h5">{`View all ${data.artistByName.name} cards >`}</Typography>
-                        </Link>
-                    </Box>
                     {data.artistByName.signingComment && (
                         <Box sx={artistStyles.infoRow}>
                             <Typography variant="h6">{data.artistByName.signingComment}</Typography>
@@ -113,7 +115,7 @@ const Artist = () => {
                         </Box>
                     )}
                 </Box>
-                <Box sx={artistStyles.signatureSection}>
+                <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "center" : "left"}}>
                     <Typography variant="h4">Example Signature</Typography>
                     { data.artistByName.haveSignature === "true" &&
                         <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} alt="" />

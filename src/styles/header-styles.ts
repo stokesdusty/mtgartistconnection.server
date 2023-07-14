@@ -36,5 +36,8 @@ export const headerStyles:Styles = {
             borderRadius: 10,
             curser: "pointer",
         },
-    }
+    },
+    button: {
+        color: "white",
+    },
 };
