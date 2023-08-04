@@ -36,8 +36,9 @@ export const ADD_ARTIST = gql`
         $youtube:String,
         $mountainmage:String,
         $markssignatureservice:String,
-        $filename:String
-        $artstation:String
+        $filename:String,
+        $artstation:String,
+        $location:String,
         ){
             addArtist(
                 name: $name,
@@ -55,7 +56,8 @@ export const ADD_ARTIST = gql`
                 mountainmage: $mountainmage,
                 markssignatureservice: $markssignatureservice,
                 filename: $filename,
-                artstation: $artstation
+                artstation: $artstation.
+                location: $location,
             ){
                 name
         }

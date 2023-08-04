@@ -22,7 +22,7 @@ type Inputs = {
     artistProofs: string;
     haveSignature: string;
     signing: string;
-    markssignatureservice: string;    
+    markssignatureservice: string;
 }
 
 const AddArtist = () => {
@@ -70,7 +70,7 @@ const AddArtist = () => {
                         artistProofs,
                         haveSignature,
                         signing,
-                        markssignatureservice,  
+                        markssignatureservice, 
                     },
                 });
             } catch (err: any) {
