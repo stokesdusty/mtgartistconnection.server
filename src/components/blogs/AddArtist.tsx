@@ -3,6 +3,7 @@ import { authStyles } from "../../styles/auth-styles";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { ADD_ARTIST } from "../graphql/mutations";
+import { useSelector } from "react-redux";
 
 type Inputs = {
     name: string;
@@ -25,7 +26,7 @@ type Inputs = {
 }
 
 const AddArtist = () => {
-    // const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
+    const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
     const {
         register,
         handleSubmit,
@@ -77,6 +78,9 @@ const AddArtist = () => {
             }
     };
 
+    if (!isLoggedIn) {
+        return <p>Error</p>
+    }
     return <Box sx={authStyles.container}>
         <Box sx={authStyles.formContainer}>
             <Typography sx={authStyles.logoText}>

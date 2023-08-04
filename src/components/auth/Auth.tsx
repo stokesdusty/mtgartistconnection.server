@@ -75,7 +75,6 @@ const Auth = () => {
         }
     };
 
-    if (!isLoggedIn) return <p>Error</p>;
     return <Box sx={authStyles.container}>
         <Box sx={authStyles.logoTitle}>
             <ImBlogger size="30" style={{borderRadius: "50%", padding: "10px", background:"#6c5252"}} />
