@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 
 const Footer = () => {
     return <Box sx={homepageStyles.footerContainer}>
-            <Typography sx={homepageStyles.footerText}>With love, Dusty Stokes</Typography>
+            <Typography sx={homepageStyles.footerText}>©Copyright MTGArtistConnection </Typography>
         </Box>;
 };
 

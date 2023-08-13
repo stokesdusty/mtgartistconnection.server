@@ -8,7 +8,20 @@ export const homepageStyles:Styles = {
     container: {
         display: "flex",
         flexDirection: "column",
-        gap: 10
+        gap: 10,
+        minHeight: "75vh"
+    },
+    headerText: {
+        fontSize: 54,
+        fontWeight: "bold",
+        margin: "auto",
+        textAlign: "center"
+    },
+    count: {
+        fontSize: 26,
+        fontWeight: "bold",
+        margin: "auto",
+        textAlign: "center"
     },
     wrapper: {
         display: "flex",
