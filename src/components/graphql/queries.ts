@@ -28,6 +28,7 @@ export const GET_ARTIST_BY_NAME = gql`
             markssignatureservice
             filename
             artstation
+            location
         }
     }
 
