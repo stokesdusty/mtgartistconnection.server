@@ -58,6 +58,8 @@ const AllCards = () => {
     const getImage = (card: any) => { 
       if (card.image_uris) {
           return <img height={500} alt="" key={card.cardmarket_id} src={card.image_uris.normal} />
+      } else if (card.card_faces) {
+        return <img height={500} alt="" key={card.cardmarket_id} src={card.card_faces[0].image_uris.normal} />
       }
     }
 
