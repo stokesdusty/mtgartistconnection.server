@@ -31,7 +31,7 @@ const Homepage = () => {
         }
     };
 
-    if (loading) return <LinearProgress />;
+    if (loading) return (<Box sx={homepageStyles.container}><LinearProgress /></Box>);
     if (error) return <p>Error loading artists</p>;
     return data && (
         <Box sx={homepageStyles.container}>
