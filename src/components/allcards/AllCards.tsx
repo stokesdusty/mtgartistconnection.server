@@ -8,6 +8,7 @@ import { useQuery } from "@apollo/client";
 
 const AllCards = () => {
     const artist = useParams().name ?? "";
+    document.title = `MtG Artist Connection - All ` + artist + ` Cards`;
     const [cards, setCards] = useState<any[]>([]);
     const [cardsLoaded, setCardsLoaded] = useState(false);
     const [totalCards, setTotalCards] = useState<any[] | string>("");

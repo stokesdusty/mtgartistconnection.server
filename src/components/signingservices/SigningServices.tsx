@@ -3,6 +3,7 @@ import { Box } from "@mui/system"
 import { signingServicesStyles } from "../../styles/signing-services-styles";
 
 const SigningServices = () => {
+    document.title = 'MtG Artist Connection - Card Signing Services';
     return <Box sx={signingServicesStyles.container}>
         <Typography variant="h2" fontFamily="Work Sans" fontWeight={600} >Card Signing Services</Typography>
         <Typography sx={signingServicesStyles.text}> 

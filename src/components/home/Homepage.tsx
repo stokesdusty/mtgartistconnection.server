@@ -6,6 +6,7 @@ import ArtistGridItem from "./ArtistGridItem"
 import { useEffect, useState } from "react"
 
 const Homepage = () => {
+    document.title = 'MtG Artist Connection';
     const {data, error, loading}= useQuery(GET_ARTISTS_FOR_HOMEPAGE);
     const [userSearch, setUserSearch] = useState("");
     const [filteredData, setFilteredData] = useState<any[]>([]);

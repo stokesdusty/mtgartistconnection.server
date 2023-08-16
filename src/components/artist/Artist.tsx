@@ -8,6 +8,7 @@ import { FaArtstation, FaFacebookF, FaInstagram, FaPatreon, FaTwitter, FaYoutube
 
 const Artist = () => {
     const name = useParams().name;
+    document.title = `MtG Artist Connection - ` + name;
     const theme = useTheme();
     const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
     const { data, error, loading } = useQuery(GET_ARTIST_BY_NAME, {
