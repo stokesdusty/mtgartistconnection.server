@@ -11,6 +11,7 @@ import SigningServices from "./components/signingservices/SigningServices";
 import Auth from "./components/auth/Auth";
 import Artist from "./components/artist/Artist";
 import AllCards from "./components/allcards/AllCards";
+import MarksCalendar from "./components/markscalendar/MarksCalendar";
 
 function App() {
   const dispatch = useDispatch();
@@ -34,6 +35,7 @@ function App() {
           <Route path="/add" element={<AddArtist />} />
           <Route path="/artist/:name" element={<Artist />} />
           <Route path="/allcards/:name" element={<AllCards />} />
+          <Route path="/markscalendar" element={<MarksCalendar />} />
         </Routes>
       </main>
       <footer>

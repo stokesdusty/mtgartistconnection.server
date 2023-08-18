@@ -9,6 +9,7 @@ export const calendarStyles: Styles = {
         alignItems: "center",
         padding: 4,
         gap: 4,
+        minHeight: "75vh"
     },
     eventContainer: {
         // border: "1px solid rgba(0,0,0,0.5)",
