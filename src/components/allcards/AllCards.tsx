@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import axios from 'axios';
-import { Box, LinearProgress, Typography } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, LinearProgress, Typography } from "@mui/material";
 import { allCardsStyles } from "../../styles/all-cards-styles";
 import { GET_ARTIST_BY_NAME } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
@@ -9,9 +9,12 @@ import { useQuery } from "@apollo/client";
 const AllCards = () => {
     const artist = useParams().name ?? "";
     document.title = `MtG Artist Connection - All ` + artist + ` Cards`;
-    const [cards, setCards] = useState<any[]>([]);
+    const [cardsWithDupes, setCardsWithDupes] = useState<any[]>([]);
+    const [cardsWithoutDupes, setCardsWithoutDupes] = useState<any[]>([]);
     const [cardsLoaded, setCardsLoaded] = useState(false);
-    const [totalCards, setTotalCards] = useState<any[] | string>("");
+    const [totalCardsWithDupes, setTotalCardsWithDupes] = useState<string>("");
+    const [totalCardsWithoutDupes, setTotalCardsWithoutDupes] = useState<string>("");
+    const [showDupes, setShowDupes] = useState<boolean>(false);
     const aArtistName = artist.split(' ');
     const jSonFormattedName: any[] = [];
     console.log(artist);
@@ -34,49 +37,110 @@ const AllCards = () => {
       sQuery = sQuery.slice(0,-1);
     }
     
-    const scryfallQuery = `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
-  
-    useEffect(() => {
-      axios.get(scryfallQuery).then((response) => {
-        let returnedData = [response.data];
-        if (response.data.has_more === true) {
-          axios.get(response.data.next_page).then((response2) => {
-              returnedData = returnedData[0].data.concat(response2.data.data);
-              const allCardData = Object.assign(returnedData);
-              setCards(
-                  [{
-                      data: allCardData
-                  }]);
-              setCardsLoaded(true);
-          });
+    const scryfallQueryWithDuplicates = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
+    const scryfallQueryWithOutDuplicates = `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
+
+    const handleQueryDataWithMoreData = (data: any, response: any) : any[] => {
+      if (response.data.has_more === false) {
+        console.log('test')
+        return [response.data] ?? [];
+      }
+      console.log('Hi')
+      axios.get(response.data.next_page).then((response2) => {
+        console.log(response2.data[0])
+        if (response2.data.has_more === true) {
+          console.log('hi ' + response2.data.data)
+          data = data.concat(response2.data.data);
+          console.log(data)
+          handleQueryDataWithMoreData(data, response2);
+        } else {
+          console.log({test: data})
+          return data.concat(response2.data.data);
         }
-        setCards(returnedData);
-        setTotalCards(returnedData[0].total_cards);
-        setCardsLoaded(true);
+      })
+      return []
+    }
+
+    useEffect(() => {
+      axios.get(scryfallQueryWithOutDuplicates).then((response) => {
+        let returnedDataWithoutDupes: any[] = handleQueryDataWithMoreData([], response);
+        // let returnedDataWithoutDupes = [response.data];
+        // let returnedData = [response.data];
+        // if (response.data.has_more === true) {
+        //   axios.get(response.data.next_page).then((response2) => {
+        //       returnedData = returnedData[0].data.concat(response2.data.data);
+        //       const allCardData = Object.assign(returnedData);
+        //       setCardsWithoutDupes(
+        //           [{
+        //               data: allCardData
+        //           }]);
+        //   });
+        // }
+        console.log(returnedDataWithoutDupes)
+        setCardsWithoutDupes(returnedDataWithoutDupes);
+        setTotalCardsWithoutDupes(returnedDataWithoutDupes[0].total_cards);
       });
-    }, [scryfallQuery]);
+      setCardsLoaded(true);
+      axios.get(scryfallQueryWithDuplicates).then((response) => {
+        let returnedData = handleQueryDataWithMoreData([], response);
+        // let returnedData = [response.data];
+        // if (response.data.has_more === true) {
+        //   axios.get(response.data.next_page).then((response2) => {
+        //       returnedData = returnedData[0].data.concat(response2.data.data);
+        //       const allCardData = Object.assign(returnedData);
+        //       setCardsWithDupes(
+        //           [{
+        //               data: allCardData
+        //           }]);
+        //   });
+        // }
+        setCardsWithDupes(returnedData);
+        console.log(returnedData);
+        setTotalCardsWithDupes(returnedData[0]?.total_cards);
+      });
+    }, [scryfallQueryWithDuplicates, scryfallQueryWithOutDuplicates]);
   
     const getImage = (card: any) => { 
       if (card.image_uris) {
-          return <img height={500} alt="" key={card.cardmarket_id} src={card.image_uris.normal} />
+          return <img height={500} alt="" key={card.cardmarket_id} src={card.image_uris?.normal} />
       } else if (card.card_faces) {
-        return <img height={500} alt="" key={card.cardmarket_id} src={card.card_faces[0].image_uris.normal} />
+        return <img height={500} alt="" key={card.cardmarket_id} src={card.card_faces[0]?.image_uris?.normal} />
       }
     }
 
-    if (loading  || !cards ) return <LinearProgress />;
+    const handleCheck = () => {
+      setShowDupes(!showDupes);
+    }
+
+    if (loading  || !cardsWithoutDupes ) return <LinearProgress />;
     if (error) return <p>Error loading artist</p>;
   
     return <Box sx={allCardsStyles.container}>
         <Box sx={allCardsStyles.bannerContainer}>
             <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${data.artistByName.filename}.jpeg`} alt="" />
         </Box>
-            <Typography variant="h2" fontWeight={600}>All {artist} Cards ({totalCards})</Typography>
+            <Typography variant="h2" fontWeight={600}>All {artist} Cards ({ showDupes ? totalCardsWithDupes : totalCardsWithoutDupes})</Typography>
             {/* <Link sx={artistStyles.backLink} href="/">&#60; Back to All Artists</Link> */}
+            <FormControlLabel 
+              control={
+                <Checkbox
+                  checked={showDupes}
+                  onChange={handleCheck}
+                />            
+              } 
+              label="Show Duplicate Printings" 
+            />
             <Box sx={allCardsStyles.cards}>
-            {cardsLoaded === true && (
+            {cardsLoaded === true && showDupes && cardsWithDupes[0]?.data && (
             <>
-                {cards[0].data.map((card: any) => (
+                {cardsWithDupes[0].data.map((card: any) => (
+                    getImage(card)
+                ))}
+            </>
+            )}
+            {cardsLoaded === true && !showDupes && cardsWithoutDupes[0]?.data && (
+            <>
+                {cardsWithoutDupes[0].data.map((card: any) => (
                     getImage(card)
                 ))}
             </>
