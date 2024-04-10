@@ -17,7 +17,6 @@ const AllCards = () => {
     const [showDupes, setShowDupes] = useState<boolean>(false);
     const aArtistName = artist.split(' ');
     const jSonFormattedName: any[] = [];
-    console.log(artist);
     const { data, error, loading } = useQuery(GET_ARTIST_BY_NAME, {
         variables: {
             name: artist
@@ -40,71 +39,65 @@ const AllCards = () => {
     const scryfallQueryWithDuplicates = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
     const scryfallQueryWithOutDuplicates = `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
 
-    const handleQueryDataWithMoreData = (data: any, response: any) : any[] => {
-      if (response.data.has_more === false) {
-        console.log('test')
-        return [response.data] ?? [];
-      }
-      console.log('Hi')
-      axios.get(response.data.next_page).then((response2) => {
-        console.log(response2.data[0])
-        if (response2.data.has_more === true) {
-          console.log('hi ' + response2.data.data)
-          data = data.concat(response2.data.data);
-          console.log(data)
-          handleQueryDataWithMoreData(data, response2);
+    const handleQueryDataWithMoreData = (data: any, response: any, showDuplicates: boolean) :void => {
+      if (!data) {
+        if (showDuplicates) {
+          setCardsWithDupes([response.data])
         } else {
-          console.log({test: data})
-          return data.concat(response2.data.data);
+          setCardsWithoutDupes([response.data])
         }
-      })
-      return []
+      }
+      console.log(response.data.next_page)
+      if (response.data.next_page !== undefined){
+        axios.get(response.data.next_page).then((response2) => {
+          let returnData
+          if(data?.data) {
+            returnData = data.data
+          } else {
+            returnData = response.data
+          }
+          let newData = [...returnData.data, ...response2.data.data]
+          response.data.data = newData
+          response.data.has_more = response2.data.has_more
+          response.data.next_page = response2.data.next_page
+          if (response2.data.has_more === true) {
+            handleQueryDataWithMoreData(response, response2, showDuplicates);
+          } else {
+            if (showDuplicates){
+              setCardsWithDupes([response.data]);
+            } else {
+              setCardsWithoutDupes([response.data])
+            }
+          }
+        })
+      }
+      if (showDuplicates){
+        setCardsWithDupes([response.data]);
+      } else {
+        setCardsWithoutDupes([response.data])
+      }
     }
 
     useEffect(() => {
       axios.get(scryfallQueryWithOutDuplicates).then((response) => {
-        let returnedDataWithoutDupes: any[] = handleQueryDataWithMoreData([], response);
-        // let returnedDataWithoutDupes = [response.data];
-        // let returnedData = [response.data];
-        // if (response.data.has_more === true) {
-        //   axios.get(response.data.next_page).then((response2) => {
-        //       returnedData = returnedData[0].data.concat(response2.data.data);
-        //       const allCardData = Object.assign(returnedData);
-        //       setCardsWithoutDupes(
-        //           [{
-        //               data: allCardData
-        //           }]);
-        //   });
-        // }
-        console.log(returnedDataWithoutDupes)
-        setCardsWithoutDupes(returnedDataWithoutDupes);
-        setTotalCardsWithoutDupes(returnedDataWithoutDupes[0].total_cards);
+        handleQueryDataWithMoreData([], response, false);
+        // setCardsWithoutDupes(returnedDataWithoutDupes);
+        setTotalCardsWithoutDupes(response.data.total_cards);
       });
       setCardsLoaded(true);
       axios.get(scryfallQueryWithDuplicates).then((response) => {
-        let returnedData = handleQueryDataWithMoreData([], response);
-        // let returnedData = [response.data];
-        // if (response.data.has_more === true) {
-        //   axios.get(response.data.next_page).then((response2) => {
-        //       returnedData = returnedData[0].data.concat(response2.data.data);
-        //       const allCardData = Object.assign(returnedData);
-        //       setCardsWithDupes(
-        //           [{
-        //               data: allCardData
-        //           }]);
-        //   });
-        // }
-        setCardsWithDupes(returnedData);
-        console.log(returnedData);
-        setTotalCardsWithDupes(returnedData[0]?.total_cards);
+        handleQueryDataWithMoreData([], response, true);
+        // console.log(returnedData)
+        // setCardsWithDupes(returnedData);
+        setTotalCardsWithDupes(response.data.total_cards);
       });
     }, [scryfallQueryWithDuplicates, scryfallQueryWithOutDuplicates]);
   
     const getImage = (card: any) => { 
       if (card.image_uris) {
-          return <img height={500} alt="" key={card.cardmarket_id} src={card.image_uris?.normal} />
+          return <img height={500} alt="" key={card.id} src={card.image_uris?.normal} />
       } else if (card.card_faces) {
-        return <img height={500} alt="" key={card.cardmarket_id} src={card.card_faces[0]?.image_uris?.normal} />
+        return <img height={500} alt="" key={card.id} src={card.card_faces[0]?.image_uris?.normal} />
       }
     }
 
@@ -131,16 +124,16 @@ const AllCards = () => {
               label="Show Duplicate Printings" 
             />
             <Box sx={allCardsStyles.cards}>
-            {cardsLoaded === true && showDupes && cardsWithDupes[0]?.data && (
+            {cardsLoaded === true && !showDupes && cardsWithoutDupes[0]?.data && (
             <>
-                {cardsWithDupes[0].data.map((card: any) => (
+                {cardsWithoutDupes[0].data.map((card: any) => (
                     getImage(card)
                 ))}
             </>
             )}
-            {cardsLoaded === true && !showDupes && cardsWithoutDupes[0]?.data && (
+            {cardsLoaded === true && showDupes && cardsWithDupes[0]?.data && (
             <>
-                {cardsWithoutDupes[0].data.map((card: any) => (
+                {cardsWithDupes[0].data.map((card: any) => (
                     getImage(card)
                 ))}
             </>
