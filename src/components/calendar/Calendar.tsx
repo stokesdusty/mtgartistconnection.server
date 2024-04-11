@@ -1,6 +1,6 @@
 import { Box } from "@mui/system"
 import { calendarStyles } from "../../styles/calendar-styles";
-import { Link, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 const Calendar = () => {
     document.title = 'MtG Artist Connection - Calendar';

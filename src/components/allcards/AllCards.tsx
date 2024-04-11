@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import axios from 'axios';
 import { Box, Checkbox, FormControlLabel, LinearProgress, Typography } from "@mui/material";
@@ -39,7 +39,7 @@ const AllCards = () => {
     const scryfallQueryWithDuplicates = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
     const scryfallQueryWithOutDuplicates = `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
 
-    const handleQueryDataWithMoreData = (data: any, response: any, showDuplicates: boolean) :void => {
+    const handleQueryDataWithMoreData = useCallback((data: any, response: any, showDuplicates: boolean) :void => {
       if (!data) {
         if (showDuplicates) {
           setCardsWithDupes([response.data])
@@ -76,7 +76,7 @@ const AllCards = () => {
       } else {
         setCardsWithoutDupes([response.data])
       }
-    }
+    }, [])
 
     useEffect(() => {
       axios.get(scryfallQueryWithOutDuplicates).then((response) => {
@@ -91,7 +91,7 @@ const AllCards = () => {
         // setCardsWithDupes(returnedData);
         setTotalCardsWithDupes(response.data.total_cards);
       });
-    }, [scryfallQueryWithDuplicates, scryfallQueryWithOutDuplicates]);
+    }, [scryfallQueryWithDuplicates, scryfallQueryWithOutDuplicates, handleQueryDataWithMoreData ]);
   
     const getImage = (card: any) => { 
       if (card.image_uris) {

@@ -5,7 +5,7 @@ import { ImBlogger } from "react-icons/im";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { USER_LOGIN, USER_SIGNUP } from "../graphql/mutations";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { authActions } from "../../store/auth-slice";
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +18,7 @@ type Inputs = {
 const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
+    // const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
     const {
         register,
         handleSubmit,
