@@ -47,7 +47,6 @@ const AllCards = () => {
           setCardsWithoutDupes([response.data])
         }
       }
-      console.log(response.data.next_page)
       if (response.data.next_page !== undefined){
         axios.get(response.data.next_page).then((response2) => {
           let returnData
@@ -81,14 +80,11 @@ const AllCards = () => {
     useEffect(() => {
       axios.get(scryfallQueryWithOutDuplicates).then((response) => {
         handleQueryDataWithMoreData([], response, false);
-        // setCardsWithoutDupes(returnedDataWithoutDupes);
         setTotalCardsWithoutDupes(response.data.total_cards);
       });
       setCardsLoaded(true);
       axios.get(scryfallQueryWithDuplicates).then((response) => {
         handleQueryDataWithMoreData([], response, true);
-        // console.log(returnedData)
-        // setCardsWithDupes(returnedData);
         setTotalCardsWithDupes(response.data.total_cards);
       });
     }, [scryfallQueryWithDuplicates, scryfallQueryWithOutDuplicates, handleQueryDataWithMoreData ]);
