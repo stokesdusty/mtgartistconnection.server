@@ -7,6 +7,7 @@ export const artistStyles: Styles = {
         justifyContent: "center",
         alignItems: "center",
         height: "auto",
+        paddingTop: "100px",
         gap: 4,
     },
     bannerContainer: {

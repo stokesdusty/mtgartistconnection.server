@@ -5,6 +5,7 @@ export const authStyles:Styles = {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
+        paddingTop: "100px",
         alignItems: "center",
         margin: "auto",
     },

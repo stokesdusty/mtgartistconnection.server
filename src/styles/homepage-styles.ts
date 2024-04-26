@@ -9,7 +9,8 @@ export const homepageStyles:Styles = {
         display: "flex",
         flexDirection: "column",
         gap: 10,
-        minHeight: "75vh"
+        minHeight: "75vh",
+        paddingTop: "125px"
     },
     headerText: {
         fontSize: 54,

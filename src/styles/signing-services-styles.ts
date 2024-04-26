@@ -6,6 +6,7 @@ export const signingServicesStyles: Styles = {
         flexDirection: "column",
         margin: "auto",
         padding: 4,
+        paddingTop: "100px",
         justifyContent: "center",
         alignItems: "center",
         gap: 4,

@@ -32,14 +32,13 @@ const Header = () => {
                      textColor="inherit" 
                      value={value} 
                      onChange={(e, val) => setValue(val)}
-                    
                     >
                     {/* @ts-ignore */}
-                    <Tab LinkComponent={Link} to="/" disableRipple label="All Artists" />
+                    <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/" disableRipple label="All Artists" />
                     {/* @ts-ignore */}
-                    <Tab LinkComponent={Link} to="/signingservices" disableRipple label="Card Signing Services" />
+                    <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/signingservices" disableRipple label="Card Signing Services" />
                     {/* @ts-ignore */}
-                    <Tab LinkComponent={Link} to="/calendar" disableRipple label="Calendar" />
+                    <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/calendar" disableRipple label="Calendar" />
                 </Tabs>
             </Box>}
             {isBelowMedium &&  <Box sx={headerStyles.tabContainer}>

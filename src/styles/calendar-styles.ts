@@ -6,6 +6,7 @@ export const calendarStyles: Styles = {
         flexDirection: "column",
         margin: "auto",
         justifyContent: "center",
+        paddingTop: "100px",
         alignItems: "center",
         padding: 4,
         gap: 4,

@@ -2,7 +2,7 @@ import { Styles } from './homepage-styles';
 
 export const headerStyles:Styles = {
     appBar: {
-        position: "sticky",
+        position: "fixed",
         bgcolor: "#404040",
     },
     tabContainer: {
@@ -11,6 +11,12 @@ export const headerStyles:Styles = {
         display: "flex",
         justifyContent: "flex-end",
         alignItems: "center",
+    },
+    tabText: {
+        '&:hover': {
+            color: '#159947',
+            opacity: 1,
+          },
     },
     authButton: {
         marginLeft: 2,
