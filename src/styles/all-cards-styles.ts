@@ -3,7 +3,7 @@ import { Styles } from "./homepage-styles";
 export const allCardsStyles: Styles = {
     container: {
         display: "flex",
-        paddingTop: "100px",
+        paddingTop: "64px",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",

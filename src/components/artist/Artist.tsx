@@ -5,6 +5,7 @@ import { Box, LinearProgress, Link, Typography, useMediaQuery, useTheme } from "
 import { artistStyles } from "../../styles/artist-styles";
 import { TbWorldWww } from "react-icons/tb";
 import { FaArtstation, FaFacebookF, FaInstagram, FaPatreon, FaTwitter, FaYoutube } from "react-icons/fa";
+import { Timeline } from "react-twitter-widgets";
 
 const Artist = () => {
     const name = useParams().name;
@@ -19,6 +20,18 @@ const Artist = () => {
 
     if (loading) return <LinearProgress />;
     if (error) return <p>Error loading artist</p>;
+
+    const getTwitterHandle = (twitterUrl: any) => {
+        if (!twitterUrl) return null;
+        const match = twitterUrl.match(/^https?:\/\/(www\.)?twitter.com\/@?(?<handle>\w+)/);
+        return match?.groups?.handle ? `@${match.groups.handle}` : null;
+    }
+
+    let twitterHandle;
+    if (data.artistByName.twitter) {
+        twitterHandle = getTwitterHandle(data.artistByName.twitter)?.replace('@', '');
+    }
+
     return data && (
         <Box sx={artistStyles.container}>
             <Box sx={artistStyles.bannerContainer}>
@@ -116,7 +129,7 @@ const Artist = () => {
                         </Box>
                     )}
                 </Box>
-                <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "center" : "left"}}>
+                <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "center" : "left", paddingTop: isBelowMedium ? "16px" : "0px"}}>
                     <Typography variant="h4">Example Signature</Typography>
                     { data.artistByName.haveSignature === "true" &&
                         <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} alt="" />
@@ -125,6 +138,12 @@ const Artist = () => {
                         <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/emptycardframe.jpg`} alt="" />
                     }
                 </Box>
+            </Box>
+            <Box sx={{paddingBottom: "25px"}}>
+                { twitterHandle && <Timeline
+                    dataSource={{ sourceType: "profile", screenName: twitterHandle }}
+                    options={{ width: "400", height: "600" }}
+                />}
             </Box>
         </Box>
     )

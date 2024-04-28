@@ -7,7 +7,7 @@ export const artistStyles: Styles = {
         justifyContent: "center",
         alignItems: "center",
         height: "auto",
-        paddingTop: "100px",
+        paddingTop: "64px",
         gap: 4,
     },
     bannerContainer: {
@@ -57,6 +57,7 @@ export const artistStyles: Styles = {
         flexDirection: "column",
         gap: 2,
         padding: 4,
+        paddingTop: "0px !important"
     },
     socialMedia: {
         display: "flex",
