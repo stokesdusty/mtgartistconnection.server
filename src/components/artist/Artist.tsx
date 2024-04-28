@@ -32,7 +32,7 @@ const Artist = () => {
                 </Box>
                 {/* <Link sx={artistStyles.backLink} href="/">&#60; Back to All Artists</Link> */}
             <Box sx={{...artistStyles.infoSection, flexDirection: isBelowMedium ? "column" : "row", alignItems: isBelowMedium ? "center" : "left"}}>
-                <Box sx={artistStyles.artistInfo}>
+                <Box sx={{...artistStyles.artistInfo, alignItems: isBelowMedium ? "center" : "left"}}>
                     <Typography sx={artistStyles.sectionHeader} variant="h4">Artist Info</Typography>
                     <Box sx={artistStyles.infoRow}>
                         <Typography variant="h5">Social Media Links:</Typography>
@@ -69,7 +69,7 @@ const Artist = () => {
                             }
                         </Box>
                     </Box>
-                    <Box sx={artistStyles.infoRow}>
+                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
                         <Typography variant="h5">Artist Website:</Typography>
                         <Typography>
                             {data.artistByName.url.length > 0 ?
@@ -78,7 +78,7 @@ const Artist = () => {
                             }
                         </Typography>
                     </Box>
-                    <Box sx={artistStyles.infoRow}>
+                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
                         <Typography variant="h5">Artist Email:</Typography>
                         <Typography>
                             {
@@ -88,29 +88,29 @@ const Artist = () => {
                             }
                         </Typography>
                     </Box>
-                    <Box sx={artistStyles.infoRow}>
+                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
                         <Typography variant="h5">Location:</Typography>
                         <Typography>{data.artistByName.location ? data.artistByName.location : "Unknown"}</Typography>
                     </Box>
-                    <Box sx={artistStyles.infoRow}>
+                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
                         <Typography variant="h5">Offer Signing?:</Typography>
                         <Typography>{data.artistByName.signing ? data.artistByName.signing.charAt(0).toUpperCase() + data.artistByName.signing.slice(1) : "Unknown"}</Typography>
                     </Box>
-                    <Box sx={artistStyles.infoRow}>
-                        <Typography variant="h5">Artist Proofs on website?:</Typography>
+                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
+                        <Typography variant="h5" sx={{alignText:"center"}}>Artist Proofs on website?:</Typography>
                         <Typography>{data.artistByName.artistProofs ? data.artistByName.artistProofs.charAt(0).toUpperCase() + data.artistByName.artistProofs.slice(1) : "Unknown"}</Typography>
                     </Box>
                     {data.artistByName.signingComment && (
-                        <Box sx={artistStyles.infoRow}>
+                        <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
                             <Typography variant="h6">{data.artistByName.signingComment}</Typography>
                         </Box>
                     )}
-                    {data.artistByName.markssignatureservice && (
+                    {data.artistByName.markssignatureservice && data.artistByName.markssignatureservice !== "false" && (
                         <Box sx={artistStyles.infoRow}>
                             <Link  sx={artistStyles.link} href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share" >Services offered via Marks Signature Service</Link>
                         </Box>
                     )}
-                    {data.artistByName.mountainmage && (
+                    {data.artistByName.mountainmage && data.artistByName.mountainmage !== "false" && (
                         <Box sx={artistStyles.infoRow}>
                             <Link  sx={artistStyles.link} href={data.artistByName.mountainmage} >Services offered via Mountain Mage Service</Link>
                         </Box>

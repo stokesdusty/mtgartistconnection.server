@@ -51,6 +51,7 @@ const Homepage = () => {
                             fontFamily: "Work Sans",
                             marginLeft: "auto",
                             marginRight: "auto",
+                            backgroundColor: "#fff"
                         }, 
                         }
                     } 

@@ -205,12 +205,12 @@ const AddArtist = () => {
                 <label>Have Signature</label>
                 <RadioGroup
                     aria-label="haveSignature"
-                    defaultValue={false}
+                    defaultValue={"false"}
                     sx={authStyles.radioGroup}
                     {...register("haveSignature")}
                 >
-                    <Radio value={false} /><label>No</label>
-                    <Radio value={true} /><label>Yes</label>
+                    <Radio value={"false"} /><label>No</label>
+                    <Radio value={"true"} /><label>Yes</label>
                 </RadioGroup>
                 <label>Signing</label>
                 <RadioGroup
