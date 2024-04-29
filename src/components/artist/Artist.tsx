@@ -131,8 +131,8 @@ const Artist = () => {
                                 </Box>
                             )}
                         </Box>
-                        <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "right" : "left", paddingTop: isBelowMedium ? "16px" : "0px"}}>
-                            <Typography variant="h4">Example Signature</Typography>
+                        <Box sx={{...artistStyles.signatureSection, paddingLeft: isBelowMedium ? "50px" : "", justifyContent: isBelowMedium ? "right" : "left", paddingTop: isBelowMedium ? "16px" : "0px"}}>
+                            <Typography sx={{textAlign: isBelowMedium ? "center" : "left"}} variant="h4">Example Signature</Typography>
                             { data.artistByName.haveSignature === "true" &&
                                 <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} alt="" />
                             }
@@ -141,7 +141,7 @@ const Artist = () => {
                             }
                         </Box>
                         { twitterHandle &&
-                        <Box sx={{paddingBottom: "25px", justifyContent: isBelowMedium ? "right" : "left"}}>
+                        <Box sx={{paddingBottom: "25px", paddingLeft: isBelowMedium ? "50px" : "", justifyContent: isBelowMedium ? "right" : "left"}}>
                             <Timeline
                                 dataSource={{ sourceType: "profile", screenName: twitterHandle }}
                                 options={{ width: "400", height: "600" }}
