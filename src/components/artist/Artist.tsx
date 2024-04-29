@@ -84,7 +84,7 @@ const Artist = () => {
                                     }
                                 </Box>
                             </Box>
-                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "right" : "left"}}>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
                                 <Typography variant="h5">Artist Website:</Typography>
                                 <Typography>
                                     {data.artistByName.url.length > 0 ?
@@ -93,7 +93,7 @@ const Artist = () => {
                                     }
                                 </Typography>
                             </Box>
-                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "right" : "left"}}>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
                                 <Typography variant="h5">Artist Email:</Typography>
                                 <Typography>
                                     {
@@ -131,7 +131,7 @@ const Artist = () => {
                                 </Box>
                             )}
                         </Box>
-                        <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "center" : "left", paddingTop: isBelowMedium ? "16px" : "0px"}}>
+                        <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "right" : "left", paddingTop: isBelowMedium ? "16px" : "0px"}}>
                             <Typography variant="h4">Example Signature</Typography>
                             { data.artistByName.haveSignature === "true" &&
                                 <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} alt="" />
@@ -141,7 +141,7 @@ const Artist = () => {
                             }
                         </Box>
                         { twitterHandle &&
-                        <Box sx={{paddingBottom: "25px"}}>
+                        <Box sx={{paddingBottom: "25px", justifyContent: isBelowMedium ? "right" : "left"}}>
                             <Timeline
                                 dataSource={{ sourceType: "profile", screenName: twitterHandle }}
                                 options={{ width: "400", height: "600" }}
