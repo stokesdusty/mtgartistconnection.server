@@ -84,7 +84,7 @@ const Artist = () => {
                                     }
                                 </Box>
                             </Box>
-                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "right" : "left"}}>
                                 <Typography variant="h5">Artist Website:</Typography>
                                 <Typography>
                                     {data.artistByName.url.length > 0 ?
@@ -93,7 +93,7 @@ const Artist = () => {
                                     }
                                 </Typography>
                             </Box>
-                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "right" : "left"}}>
                                 <Typography variant="h5">Artist Email:</Typography>
                                 <Typography>
                                     {
