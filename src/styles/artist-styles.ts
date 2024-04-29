@@ -10,6 +10,13 @@ export const artistStyles: Styles = {
         paddingTop: "64px",
         gap: 4,
     },
+    artistPage: {
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: "#808080",
+        borderRadius: "25px",
+        marginBottom: "20px"
+    },
     bannerContainer: {
         display: "flex",
         justifyContent: "center",
@@ -47,7 +54,7 @@ export const artistStyles: Styles = {
         textDecoration: "none",
         fontSize: 18,
         fontWeight: "500",
-        color: "#159947",
+        color: "#083d1c",
     },
     sectionHeader: {
         alignItems: "center"

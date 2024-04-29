@@ -44,106 +44,112 @@ const Artist = () => {
                     </Link>
                 </Box>
                 {/* <Link sx={artistStyles.backLink} href="/">&#60; Back to All Artists</Link> */}
-            <Box sx={{...artistStyles.infoSection, flexDirection: isBelowMedium ? "column" : "row", alignItems: isBelowMedium ? "center" : "left"}}>
-                <Box sx={{...artistStyles.artistInfo, alignItems: isBelowMedium ? "center" : "left"}}>
-                    <Typography sx={artistStyles.sectionHeader} variant="h4">Artist Info</Typography>
-                    <Box sx={artistStyles.infoRow}>
-                        <Typography variant="h5">Social Media Links:</Typography>
-                        <Box sx={{...artistStyles.socialMedia, alignItems: isBelowMedium ? "left" : "center"}}>
-                            {data.artistByName.facebook !== "" && (
-                                <Link href={data.artistByName.facebook} target="_blank">
-                                    <FaFacebookF size={30} color={"#4267B2"}/>
-                                </Link>)
+            <Box sx={artistStyles.artistPage}>
+                <Box sx={{margin:"10px", display: "ruby"}}>
+                    <Box sx={{...artistStyles.infoSection, flexDirection: isBelowMedium ? "column" : "row", alignItems: isBelowMedium ? "center" : "left"}}>
+                        <Box sx={{...artistStyles.artistInfo, alignItems: isBelowMedium ? "center" : "left", minWidth: isBelowMedium ? "" : "400px"}}>
+                            <Typography sx={artistStyles.sectionHeader} variant="h4">Artist Info</Typography>
+                            <Box sx={artistStyles.infoRow}>
+                                <Typography sx={{textAlign: isBelowMedium ? "center" : "left",}} variant="h5">Social Media Links:</Typography>
+                                <Box sx={{...artistStyles.socialMedia, alignItems: isBelowMedium ? "left" : "center"}}>
+                                    {data.artistByName.facebook !== "" && (
+                                        <Link href={data.artistByName.facebook} target="_blank">
+                                            <FaFacebookF size={30} color={"#4267B2"}/>
+                                        </Link>)
+                                    }
+                                    {data.artistByName.instagram !== "" && (
+                                        <Link href={data.artistByName.instagram} target="_blank">
+                                            <FaInstagram size={30} color={"#C13584"}/>
+                                        </Link>)
+                                    }
+                                    {data.artistByName.twitter !== "" && (
+                                        <Link href={data.artistByName.twitter} target="_blank">
+                                            <FaTwitter size={30} color={"#1DA1F2"}/>
+                                        </Link>)
+                                    }
+                                    {data.artistByName.patreon !== "" && (
+                                        <Link href={data.artistByName.patreon} target="_blank">
+                                            <FaPatreon size={30} color={"#f96854"}/>
+                                        </Link>)
+                                    }
+                                    {data.artistByName.youtube !== "" && (
+                                        <Link href={data.artistByName.youtube} target="_blank">
+                                            <FaYoutube size={30} color={"#FF0000"}/>
+                                        </Link>)
+                                    }
+                                    {data.artistByName.artstation && data.artistByName.artstation !== "" && (
+                                        <Link href={data.artistByName.artstation} target="_blank">
+                                            <FaArtstation size={30} color={"#13AFF0"}/>
+                                        </Link>)
+                                    }
+                                </Box>
+                            </Box>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
+                                <Typography variant="h5">Artist Website:</Typography>
+                                <Typography>
+                                    {data.artistByName.url.length > 0 ?
+                                    <Link href={data.artistByName.url} target="_blank"><TbWorldWww size={30} color={"black"} /></Link> : 
+                                    "None"
+                                    }
+                                </Typography>
+                            </Box>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
+                                <Typography variant="h5">Artist Email:</Typography>
+                                <Typography>
+                                    {
+                                    data.artistByName.email ? 
+                                    <Link sx={artistStyles.link} href={`mailto:${data.artistByName.email}`}>{data.artistByName.email}</Link> : 
+                                    "Unknown"
+                                    }
+                                </Typography>
+                            </Box>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
+                                <Typography variant="h5">Location:</Typography>
+                                <Typography>{data.artistByName.location ? data.artistByName.location : "Unknown"}</Typography>
+                            </Box>
+                            <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
+                                <Typography variant="h5">Offer Signing?:</Typography>
+                                <Typography>{data.artistByName.signing ? data.artistByName.signing.charAt(0).toUpperCase() + data.artistByName.signing.slice(1) : "Unknown"}</Typography>
+                            </Box>
+                            <Box sx={{...artistStyles.infoRow, textAlign: isBelowMedium ? "center" : "left", alignItems: isBelowMedium ? "center" : "left"}}>
+                                <Typography variant="h5" sx={{alignText:"center"}}>Artist Proofs on website?:</Typography>
+                                <Typography>{data.artistByName.artistProofs ? data.artistByName.artistProofs.charAt(0).toUpperCase() + data.artistByName.artistProofs.slice(1) : "Unknown"}</Typography>
+                            </Box>
+                            {data.artistByName.signingComment && (
+                                <Box sx={{...artistStyles.infoRow, textAlign: isBelowMedium ? "center" : "left", alignItems: isBelowMedium ? "center" : "left"}}>
+                                    <Typography variant="h6">{data.artistByName.signingComment}</Typography>
+                                </Box>
+                            )}
+                            {data.artistByName.markssignatureservice && data.artistByName.markssignatureservice !== "false" && (
+                                <Box sx={artistStyles.infoRow}>
+                                    <Link  sx={artistStyles.link} href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share" >Services offered via Marks Signature Service</Link>
+                                </Box>
+                            )}
+                            {data.artistByName.mountainmage && data.artistByName.mountainmage !== "false" && (
+                                <Box sx={artistStyles.infoRow}>
+                                    <Link  sx={artistStyles.link} href={data.artistByName.mountainmage} >Services offered via Mountain Mage Service</Link>
+                                </Box>
+                            )}
+                        </Box>
+                        <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "center" : "left", paddingTop: isBelowMedium ? "16px" : "0px"}}>
+                            <Typography variant="h4">Example Signature</Typography>
+                            { data.artistByName.haveSignature === "true" &&
+                                <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} alt="" />
                             }
-                            {data.artistByName.instagram !== "" && (
-                                <Link href={data.artistByName.instagram} target="_blank">
-                                    <FaInstagram size={30} color={"#C13584"}/>
-                                </Link>)
-                            }
-                            {data.artistByName.twitter !== "" && (
-                                <Link href={data.artistByName.twitter} target="_blank">
-                                    <FaTwitter size={30} color={"#1DA1F2"}/>
-                                </Link>)
-                            }
-                            {data.artistByName.patreon !== "" && (
-                                <Link href={data.artistByName.patreon} target="_blank">
-                                    <FaPatreon size={30} color={"#f96854"}/>
-                                </Link>)
-                            }
-                            {data.artistByName.youtube !== "" && (
-                                <Link href={data.artistByName.youtube} target="_blank">
-                                    <FaYoutube size={30} color={"#FF0000"}/>
-                                </Link>)
-                            }
-                            {data.artistByName.artstation && data.artistByName.artstation !== "" && (
-                                <Link href={data.artistByName.artstation} target="_blank">
-                                    <FaArtstation size={30} color={"#13AFF0"}/>
-                                </Link>)
+                            { data.artistByName.haveSignature === "false" &&
+                                <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/emptycardframe.jpg`} alt="" />
                             }
                         </Box>
-                    </Box>
-                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
-                        <Typography variant="h5">Artist Website:</Typography>
-                        <Typography>
-                            {data.artistByName.url.length > 0 ?
-                             <Link href={data.artistByName.url} target="_blank"><TbWorldWww size={30} color={"black"} /></Link> : 
-                             "None"
-                            }
-                        </Typography>
-                    </Box>
-                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
-                        <Typography variant="h5">Artist Email:</Typography>
-                        <Typography>
-                            {
-                            data.artistByName.email ? 
-                            <Link sx={artistStyles.link} href={`mailto:${data.artistByName.email}`}>{data.artistByName.email}</Link> : 
-                            "Unknown"
-                            }
-                        </Typography>
-                    </Box>
-                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
-                        <Typography variant="h5">Location:</Typography>
-                        <Typography>{data.artistByName.location ? data.artistByName.location : "Unknown"}</Typography>
-                    </Box>
-                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
-                        <Typography variant="h5">Offer Signing?:</Typography>
-                        <Typography>{data.artistByName.signing ? data.artistByName.signing.charAt(0).toUpperCase() + data.artistByName.signing.slice(1) : "Unknown"}</Typography>
-                    </Box>
-                    <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
-                        <Typography variant="h5" sx={{alignText:"center"}}>Artist Proofs on website?:</Typography>
-                        <Typography>{data.artistByName.artistProofs ? data.artistByName.artistProofs.charAt(0).toUpperCase() + data.artistByName.artistProofs.slice(1) : "Unknown"}</Typography>
-                    </Box>
-                    {data.artistByName.signingComment && (
-                        <Box sx={{...artistStyles.infoRow, alignItems: isBelowMedium ? "center" : "left"}}>
-                            <Typography variant="h6">{data.artistByName.signingComment}</Typography>
+                        { twitterHandle &&
+                        <Box sx={{paddingBottom: "25px"}}>
+                            <Timeline
+                                dataSource={{ sourceType: "profile", screenName: twitterHandle }}
+                                options={{ width: "400", height: "600" }}
+                            />
                         </Box>
-                    )}
-                    {data.artistByName.markssignatureservice && data.artistByName.markssignatureservice !== "false" && (
-                        <Box sx={artistStyles.infoRow}>
-                            <Link  sx={artistStyles.link} href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share" >Services offered via Marks Signature Service</Link>
-                        </Box>
-                    )}
-                    {data.artistByName.mountainmage && data.artistByName.mountainmage !== "false" && (
-                        <Box sx={artistStyles.infoRow}>
-                            <Link  sx={artistStyles.link} href={data.artistByName.mountainmage} >Services offered via Mountain Mage Service</Link>
-                        </Box>
-                    )}
+                        }
+                    </Box>
                 </Box>
-                <Box sx={{...artistStyles.signatureSection, justifyContent: isBelowMedium ? "center" : "left", paddingTop: isBelowMedium ? "16px" : "0px"}}>
-                    <Typography variant="h4">Example Signature</Typography>
-                    { data.artistByName.haveSignature === "true" &&
-                        <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${data.artistByName.filename}.jpg`} alt="" />
-                    }
-                    { data.artistByName.haveSignature === "false" &&
-                        <img src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/emptycardframe.jpg`} alt="" />
-                    }
-                </Box>
-            </Box>
-            <Box sx={{paddingBottom: "25px"}}>
-                { twitterHandle && <Timeline
-                    dataSource={{ sourceType: "profile", screenName: twitterHandle }}
-                    options={{ width: "400", height: "600" }}
-                />}
             </Box>
         </Box>
     )
