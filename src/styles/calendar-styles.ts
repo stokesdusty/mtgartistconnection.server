@@ -8,7 +8,6 @@ export const calendarStyles: Styles = {
         justifyContent: "center",
         paddingTop: "100px",
         alignItems: "center",
-        padding: 4,
         gap: 4,
         minHeight: "75vh"
     },
@@ -30,5 +29,22 @@ export const calendarStyles: Styles = {
         fontWeight: "500",
         color: "#159947",
         fontSize: 20,
+    },
+    groupingContainer: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "baseline",
+        width: "100%",
+        paddingBottom: 2,
+    },
+    signingEventsContainer: {
+        display: "flex",
+        flexDirection: "row",
+        margin: "auto",
+        justifyContent: "space-between",
+        paddingTop: "45px",
+        alignItems: "center",
+        width: "75vw",
     }
 };

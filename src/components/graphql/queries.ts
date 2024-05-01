@@ -31,5 +31,15 @@ export const GET_ARTIST_BY_NAME = gql`
             location
         }
     }
+`;
 
+export const GET_SIGNINGEVENTS = gql`
+    query {
+        signingEvent {
+            name
+            city
+            startDate
+            endDate
+        }
+    }
 `;
