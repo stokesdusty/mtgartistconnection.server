@@ -49,9 +49,11 @@ export const authStyles:Styles = {
         width: "200px",
         borderRadius: 10,
         bgcolor: "#273238",
+        marginLeft: "auto",
+        marginRight: "auto",
         ":hover": {
             color: "white",
-            bgcolor: "orangered",
+            bgcolor: "#159947",
             boxShadow: "10px 10px 20px #ccc",
         },
     },

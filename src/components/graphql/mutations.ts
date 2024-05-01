@@ -63,3 +63,21 @@ export const ADD_ARTIST = gql`
         }
     }
 `;
+
+export const ADD_SIGNINGEVENT = gql`
+    mutation addSigningEvent(
+        $name:String!,
+        $city:String!,
+        $startDate:String!,
+        $endDate:String!,
+        ){
+            signingEvent(
+                name: $name,
+                city: $city,
+                startDate: $startDate,
+                endDate: $endDate,
+            ){
+                name
+        }
+    }
+`;

@@ -12,6 +12,9 @@ import Auth from "./components/auth/Auth";
 import Artist from "./components/artist/Artist";
 import AllCards from "./components/allcards/AllCards";
 import MarksCalendar from "./components/markscalendar/MarksCalendar";
+import AddEvent from "./components/blogs/AddEvent";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 function App() {
   const dispatch = useDispatch();
@@ -22,26 +25,29 @@ function App() {
     }
   });
   return (
-    <div >
-      <header>
-        <Header />
-      </header>
-      <main>
-        <Routes>
-          <Route path="/" element={<Homepage />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/signingservices" element={<SigningServices />} />
-          <Route path="/add" element={<AddArtist />} />
-          <Route path="/artist/:name" element={<Artist />} />
-          <Route path="/allcards/:name" element={<AllCards />} />
-          <Route path="/markscalendar" element={<MarksCalendar />} />
-        </Routes>
-      </main>
-      <footer>
-        <Footer />
-      </footer>
-    </div>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <div >
+        <header>
+          <Header />
+        </header>
+        <main>
+          <Routes>
+            <Route path="/" element={<Homepage />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/signingservices" element={<SigningServices />} />
+            <Route path="/add" element={<AddArtist />} />
+            <Route path="/addevent" element={<AddEvent />} />
+            <Route path="/artist/:name" element={<Artist />} />
+            <Route path="/allcards/:name" element={<AllCards />} />
+            <Route path="/markscalendar" element={<MarksCalendar />} />
+          </Routes>
+        </main>
+        <footer>
+          <Footer />
+        </footer>
+      </div>
+    </LocalizationProvider>
   );
 }
 
