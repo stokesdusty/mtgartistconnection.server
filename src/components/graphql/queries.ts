@@ -36,10 +36,19 @@ export const GET_ARTIST_BY_NAME = gql`
 export const GET_SIGNINGEVENTS = gql`
     query {
         signingEvent {
+            id
             name
             city
             startDate
             endDate
+        }
+    }
+`;
+
+export const GET_ARTISTSBYEVENTID = gql`
+    query mapArtistToEventByEventId($eventId:String!){
+        mapArtistToEventByEventId(eventId:$eventId){
+            artistName
         }
     }
 `;

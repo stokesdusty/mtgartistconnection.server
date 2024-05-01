@@ -81,3 +81,17 @@ export const ADD_SIGNINGEVENT = gql`
         }
     }
 `;
+
+export const ADD_ARTISTTOEVENT = gql`
+    mutation addArtistToEvent(
+        $artistName:String!,
+        $eventId:String!,
+        ){
+            mapArtistToEvent(
+                artistName: $artistName,
+                eventId: $eventId,
+            ){
+                artistName
+        }
+    }
+`;

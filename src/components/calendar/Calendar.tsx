@@ -1,7 +1,7 @@
 import { Box } from "@mui/system"
 import { calendarStyles } from "../../styles/calendar-styles";
 import { LinearProgress, Typography } from "@mui/material";
-import { GET_SIGNINGEVENTS } from "../graphql/queries";
+import { GET_ARTISTSBYEVENTID, GET_SIGNINGEVENTS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import { homepageStyles } from "../../styles/homepage-styles";
 import SigningEvent from "./SigningEvent";
@@ -25,7 +25,6 @@ const Calendar = () => {
             data.signingEvent.forEach((eventData: any) => {
                 let endDate = new Date(eventData.endDate)
                 if (endDate >= today) {
-                    // eventData.endDate = endDate;
                     filtered.push(eventData)
                 }
             })
@@ -33,13 +32,11 @@ const Calendar = () => {
             const sorted = filtered.sort((a, b) =>
                 new Date(a.endDate).getTime()
                 - new Date(b.endDate).getTime()
-              )
-            console.log(sorted)
-            console.log(filtered)
+              );
             setFilteredData(sorted);
-           }  else {
-                setFilteredData([])
-            }
+        } else {
+            setFilteredData([])
+        }
     };      
 
     if (loading) return (<Box sx={homepageStyles.container}><LinearProgress /></Box>);

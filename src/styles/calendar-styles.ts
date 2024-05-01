@@ -40,11 +40,22 @@ export const calendarStyles: Styles = {
     },
     signingEventsContainer: {
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         margin: "auto",
         justifyContent: "space-between",
         paddingTop: "45px",
         alignItems: "center",
         width: "75vw",
-    }
+    },
+    linksContainer: {
+        display: "flex",
+        flexDirection: "column"
+    },
+    link: {
+        textDecoration: "none",
+        fontSize: 24,
+        fontWeight: "500",
+        color: "#083d1c",
+        paddingBottom: "10px"
+    },
 };
