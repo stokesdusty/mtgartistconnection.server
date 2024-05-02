@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { ADD_ARTIST } from "../graphql/mutations";
 import { useSelector } from "react-redux";
+import { useState } from "react";
 
 type Inputs = {
     name: string;
@@ -32,6 +33,11 @@ const AddArtist = () => {
         handleSubmit,
     } = useForm<Inputs>();
     const [ addArtist ] = useMutation(ADD_ARTIST);
+    const [signature, setSignature] = useState("false");
+    const [artistProof, setArtistProof] = useState("false");
+    const [isSigning, setIsSigning] = useState("false");
+    const [marks, setMarks] = useState("false");
+
     const onSubmit = async({
         name, 
         email,
@@ -67,10 +73,10 @@ const AddArtist = () => {
                         url,
                         location,
                         signingComment,
-                        artistProofs,
-                        haveSignature,
-                        signing,
-                        markssignatureservice, 
+                        artistProofs: artistProof,
+                        haveSignature: signature,
+                        signing: isSigning,
+                        markssignatureservice: marks, 
                     },
                 });
             } catch (err: any) {
@@ -195,19 +201,19 @@ const AddArtist = () => {
                 <label>Artist Proofs</label>
                 <RadioGroup
                     aria-label="artistProofs"
-                    defaultValue={false}
+                    defaultValue={"false"}
                     sx={authStyles.radioGroup}
-                    {...register("artistProofs")}
+                    onChange={(e) => setArtistProof(e.target.value)}
                 >
-                    <Radio value={false} /><label>No</label>
-                    <Radio value={true} /><label>Yes</label>
+                    <Radio value={"false"} /><label>No</label>
+                    <Radio value={"true"} /><label>Yes</label>
                 </RadioGroup>
                 <label>Have Signature</label>
                 <RadioGroup
                     aria-label="haveSignature"
                     defaultValue={"false"}
                     sx={authStyles.radioGroup}
-                    {...register("haveSignature")}
+                    onChange={(e) => setSignature(e.target.value)}
                 >
                     <Radio value={"false"} /><label>No</label>
                     <Radio value={"true"} /><label>Yes</label>
@@ -215,22 +221,22 @@ const AddArtist = () => {
                 <label>Signing</label>
                 <RadioGroup
                     aria-label="signing"
-                    defaultValue={false}
+                    defaultValue={"false"}
                     sx={authStyles.radioGroup}
-                    {...register("signing")}
+                    onChange={(e) => setIsSigning(e.target.value)}
                 >
-                    <Radio value={false} /><label>No</label>
-                    <Radio value={true} /><label>Yes</label>
+                    <Radio value={"false"} /><label>No</label>
+                    <Radio value={"true"} /><label>Yes</label>
                 </RadioGroup>
                 <label>Marks Signature Service</label>
                 <RadioGroup
                     aria-label="markssignatureservice"
-                    defaultValue={false}
+                    defaultValue={"false"}
                     sx={authStyles.radioGroup}
-                    {...register("markssignatureservice")}
+                    onChange={(e) => setMarks(e.target.value)}
                 >
-                    <Radio value={false} /><label>No</label>
-                    <Radio value={true} /><label>Yes</label>
+                    <Radio value={"false"} /><label>No</label>
+                    <Radio value={"true"} /><label>Yes</label>
                 </RadioGroup>
                 <Button type="submit" variant="contained" sx={authStyles.submitButton}>Submit</Button>
             </form>
