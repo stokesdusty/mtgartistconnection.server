@@ -1,7 +1,7 @@
 import { Box } from "@mui/system"
 import { calendarStyles } from "../../styles/calendar-styles";
 import { LinearProgress, Typography } from "@mui/material";
-import { GET_ARTISTSBYEVENTID, GET_SIGNINGEVENTS } from "../graphql/queries";
+import { GET_SIGNINGEVENTS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import { homepageStyles } from "../../styles/homepage-styles";
 import SigningEvent from "./SigningEvent";

@@ -38,6 +38,14 @@ export const calendarStyles: Styles = {
         width: "100%",
         paddingBottom: 2,
     },
+    groupingContainerSmall: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        paddingBottom: 2,
+    },
     signingEventsContainer: {
         display: "flex",
         flexDirection: "column",
