@@ -122,12 +122,12 @@ const Artist = () => {
                             )}
                             {data.artistByName.markssignatureservice && data.artistByName.markssignatureservice !== "false" && (
                                 <Box sx={artistStyles.infoRow}>
-                                    <Link  sx={artistStyles.link} href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share" >Services offered via Marks Signature Service</Link>
+                                    <Link sx={artistStyles.link} target="_blank" href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share" >Services offered via Marks Signature Service</Link>
                                 </Box>
                             )}
                             {data.artistByName.mountainmage && data.artistByName.mountainmage !== "false" && (
                                 <Box sx={artistStyles.infoRow}>
-                                    <Link  sx={artistStyles.link} href={data.artistByName.mountainmage} >Services offered via Mountain Mage Service</Link>
+                                    <Link sx={artistStyles.link} target="_blank" href={data.artistByName.mountainmage} >Services offered via Mountain Mage Service</Link>
                                 </Box>
                             )}
                         </Box>
