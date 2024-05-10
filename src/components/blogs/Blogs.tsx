@@ -895,7 +895,7 @@ export const artistData = {
 		name: "Alix Branwyn",
 		patreon: "",
 		signing: "no",
-        signingComment: "Also works with Mountain Mage but doesn't currently have a link.",
+        signingComment: "Also works with MountainMage but doesn't currently have a link.",
 		twitter: "https://twitter.com/AlixBranwyn",
 		url: "http://www.alixbranwyn.com/",
         youtube: "",

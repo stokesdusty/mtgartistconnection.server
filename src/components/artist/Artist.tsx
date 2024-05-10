@@ -127,7 +127,7 @@ const Artist = () => {
                             )}
                             {data.artistByName.mountainmage && data.artistByName.mountainmage !== "false" && (
                                 <Box sx={artistStyles.infoRow}>
-                                    <Link sx={artistStyles.link} target="_blank" href={data.artistByName.mountainmage} >Services offered via Mountain Mage Service</Link>
+                                    <Link sx={artistStyles.link} target="_blank" href={data.artistByName.mountainmage} >Services offered via MountainMage Service</Link>
                                 </Box>
                             )}
                         </Box>

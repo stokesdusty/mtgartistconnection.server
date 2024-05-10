@@ -7,9 +7,9 @@ const SigningServices = () => {
     return <Box sx={signingServicesStyles.container}>
         <Typography variant="h2" fontFamily="Work Sans" fontWeight={600} >Card Signing Services</Typography>
         <Typography sx={signingServicesStyles.text}> 
-            For us, signed Magic the Gathering cards put the Collectible in Collectible Card Game. but
+            For us, signed Magic: the Gathering cards put the Collectible in Collectible Card Game. But
             it should come as no surprise that we are biased. But hey, we like to think that most people's
-            interest picques when they see a signed card enter the battlefield. That interest may soon turn 
+            interest piques when they see a signed card enter the battlefield. That interest may soon turn 
             to jealousy or even desire, but how do they go about getting their own cards signed?
         </Typography>
         <Typography sx={signingServicesStyles.text}> 
@@ -31,7 +31,7 @@ const SigningServices = () => {
         <Typography sx={signingServicesStyles.text}> 
              Turnaround times for receiving your cards back can vary pretty greatly depending on the service and the artist,
             but in our personal experiences, these services are quite communicative and do a fairly good job of getting 
-            everyones signatures in an expediant fashion.
+            everyone's signatures in an expedient fashion.
         </Typography>
         <Typography variant="h3">Mark's Signature Service</Typography>
         <Box sx={signingServicesStyles.serviceContainer}>
@@ -57,7 +57,7 @@ const SigningServices = () => {
                 </Typography>
             </Box>
         </Box>
-        <Typography variant="h3">Mountain Mage MTG Signature Service</Typography>
+        <Typography variant="h3">MountainMage MTG Signature Service</Typography>
         <Box sx={signingServicesStyles.serviceContainer}>
             <Box sx={signingServicesStyles.serviceStats}>
                 <Typography variant="h5" fontWeight={600}># of Artists</Typography>
@@ -65,13 +65,13 @@ const SigningServices = () => {
                 <Typography variant="h5" fontWeight={600}>Cost Per Signaure</Typography>
                 <Typography>$2-$8 Regular, Unknown Shadow</Typography>
                 <Typography variant="h5" fontWeight={600}>Services Offered</Typography>
-                <Typography>Signing</Typography>
+                <Typography>Signing, Proofs, Original Art</Typography>
             </Box>
             <Box sx={signingServicesStyles.serviceInfo}>
                 <Typography sx={signingServicesStyles.text}>
-                If Facebook is not your forte, Mountain Mage is another signature service that has its own 
+                If Facebook is not your forte, MountainMage is another signature service that has its own 
                 {/*  */}<Link href="https://mountainmagesigs.com/"> website. </Link>
-                Offering a very extensive list of artists, Mountain Mage is another of the biggest services out there. You can
+                Offering a very extensive list of artists, MountainMage is another of the biggest services out there. You can
                 select the artist you want, throw a signature in the shopping cart, and pay your way into the next signing. 
                 </Typography>
                 <br />
