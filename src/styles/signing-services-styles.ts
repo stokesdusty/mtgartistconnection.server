@@ -29,5 +29,18 @@ export const signingServicesStyles: Styles = {
         alignItems: "center",
         gap: 3,
         minWidth: "50%",
+    },
+    serviceGroupContainer: {
+        backgroundColor: "#808080",
+        borderRadius: "10px",
+        marginBottom: "25px",
+        paddingTop: "25px",
+        paddingBottom: "25px",
+        paddingLeft: "10px",
+        paddingRight: "10px",
+    },
+    link: {
+        color: "#083d1c",
+        textDecoration: "none"
     }
 };

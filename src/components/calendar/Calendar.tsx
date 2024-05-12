@@ -8,7 +8,7 @@ import SigningEvent from "./SigningEvent";
 import { useEffect, useState } from "react";
 
 const Calendar = () => {
-    document.title = 'MtG Artist Connection - Calendar';
+    document.title = 'MtG Artist Connection - Events Calendar';
 
     const {data, error, loading}= useQuery(GET_SIGNINGEVENTS);
     const [filteredData, setFilteredData] = useState<any[]>([]);
@@ -42,7 +42,7 @@ const Calendar = () => {
     if (loading) return (<Box sx={homepageStyles.container}><LinearProgress /></Box>);
     if (error) return <p>Error loading calendar</p>;
     return <Box sx={calendarStyles.container}>
-        <Typography variant="h2" fontFamily={"Work Sans"} fontWeight={600}>Signing Calendar</Typography>
+        <Typography variant="h2" fontFamily={"Work Sans"} fontWeight={600}>Events Calendar</Typography>
         <Box>
            {!loading && filteredData && filteredData.map((eventData: any) => {
             const endDate = new Date(eventData.endDate);

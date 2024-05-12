@@ -33,7 +33,7 @@ export const calendarStyles: Styles = {
     groupingContainer: {
         display: "flex",
         flexDirection: "row",
-        justifyContent: "center",
+        justifyContent: "space-evenly",
         alignItems: "baseline",
         width: "100%",
         paddingBottom: 2,
@@ -51,13 +51,19 @@ export const calendarStyles: Styles = {
         flexDirection: "column",
         margin: "auto",
         justifyContent: "space-between",
-        paddingTop: "45px",
+        paddingTop: "25px",
+        paddingBottom: "25px",
+        paddingLeft: "10px",
+        paddingRight: "10px",
         alignItems: "center",
         width: "75vw",
+        backgroundColor: "#808080",
+        borderRadius: "10px",
+        marginBottom: "25px",
     },
     linksContainer: {
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
     },
     link: {
         textDecoration: "none",

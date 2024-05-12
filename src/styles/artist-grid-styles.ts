@@ -35,8 +35,7 @@ export const artistGridStyles: Styles = {
 
 export const gridHtmlElementStyles: { [key: string]: CSSProperties } = {
     img: {
-        borderRadius: 20,
-        border: "1px solid black",
+        borderRadius: 10,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

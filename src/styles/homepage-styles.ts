@@ -66,6 +66,7 @@ export const homepageStyles:Styles = {
     },
     textField: {
         width: "100%",
-        margin: "auto"
+        margin: "auto",
+        color: "#000"
     },
 };

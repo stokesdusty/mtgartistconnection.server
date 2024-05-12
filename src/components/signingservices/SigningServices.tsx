@@ -33,54 +33,57 @@ const SigningServices = () => {
             but in our personal experiences, these services are quite communicative and do a fairly good job of getting 
             everyone's signatures in an expedient fashion.
         </Typography>
-        <Typography variant="h3">Mark's Signature Service</Typography>
-        <Box sx={signingServicesStyles.serviceContainer}>
-            <Box sx={signingServicesStyles.serviceStats}>
-                <Typography variant="h5" fontWeight={600}># of Artists</Typography>
-                <Typography>100+</Typography>
-                <Typography variant="h5" fontWeight={600}>Cost Per Signaure</Typography>
-                <Typography>$3-$5 Regular, $7-$10 Shadow</Typography>
-                <Typography variant="h5" fontWeight={600}>Services Offered</Typography>
-                <Typography>Signing, Proofs, Playmats, Original Art</Typography>
-            </Box>
-            <Box sx={signingServicesStyles.serviceInfo}>
-                <Typography sx={signingServicesStyles.text}>
-                Probably the most well known of the signing services, Mark's Artist Signature Signing Service operates
-                    out of a Facebook group. With 6.4k members, and plenty of happy customers posting in the group daily,
-                    he is a trusted resource. Often seen with artists at MtG related events, Mark offers signing for a big
-                    list of artists, as well as artist proofs, prints, playmats, and even original artwork. 
-                </Typography>
-                <br />
-                <Typography sx={signingServicesStyles.text}>
-                You can view and join his Facebook group {/*  */}
-                    <Link href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"> here.</Link>
-                </Typography>
+        <Box sx={signingServicesStyles.serviceGroupContainer}>
+            <Typography variant="h3">Mark's Signature Service</Typography>
+            <Box sx={signingServicesStyles.serviceContainer}>
+                <Box sx={signingServicesStyles.serviceStats}>
+                    <Typography variant="h5" fontWeight={600}># of Artists</Typography>
+                    <Typography>100+</Typography>
+                    <Typography variant="h5" fontWeight={600}>Cost Per Signaure</Typography>
+                    <Typography>$3-$5 Regular, $7-$10 Shadow</Typography>
+                    <Typography variant="h5" fontWeight={600}>Services Offered</Typography>
+                    <Typography>Signing, Proofs, Playmats, Original Art</Typography>
+                </Box>
+                <Box sx={signingServicesStyles.serviceInfo}>
+                    <Typography sx={signingServicesStyles.text}>
+                    Probably the most well known of the signing services, Mark's Artist Signature Signing Service operates
+                        out of a Facebook group. With 6.4k members, and plenty of happy customers posting in the group daily,
+                        he is a trusted resource. Often seen with artists at MtG related events, Mark offers signing for a big
+                        list of artists, as well as artist proofs, prints, playmats, and even original artwork. 
+                    </Typography>
+                    <br />
+                    <Typography sx={signingServicesStyles.text}>
+                    You can view and join his Facebook group {/*  */}
+                        <Link sx={signingServicesStyles.link} href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"> here.</Link>
+                    </Typography>
+                </Box>
             </Box>
         </Box>
-        <Typography variant="h3">MountainMage MTG Signature Service</Typography>
-        <Box sx={signingServicesStyles.serviceContainer}>
-            <Box sx={signingServicesStyles.serviceStats}>
-                <Typography variant="h5" fontWeight={600}># of Artists</Typography>
-                <Typography>150+</Typography>
-                <Typography variant="h5" fontWeight={600}>Cost Per Signaure</Typography>
-                <Typography>$2-$8 Regular, Unknown Shadow</Typography>
-                <Typography variant="h5" fontWeight={600}>Services Offered</Typography>
-                <Typography>Signing, Proofs, Original Art</Typography>
+        <Box sx={signingServicesStyles.serviceGroupContainer}>
+            <Typography variant="h3">MountainMage MTG Signature Service</Typography>
+            <Box sx={signingServicesStyles.serviceContainer}>
+                <Box sx={signingServicesStyles.serviceStats}>
+                    <Typography variant="h5" fontWeight={600}># of Artists</Typography>
+                    <Typography>150+</Typography>
+                    <Typography variant="h5" fontWeight={600}>Cost Per Signaure</Typography>
+                    <Typography>$2-$8 Regular, Unknown Shadow</Typography>
+                    <Typography variant="h5" fontWeight={600}>Services Offered</Typography>
+                    <Typography>Signing, Proofs, Original Art</Typography>
+                </Box>
+                <Box sx={signingServicesStyles.serviceInfo}>
+                    <Typography sx={signingServicesStyles.text}>
+                    If Facebook is not your forte, MountainMage is another signature service that has its own 
+                    {/*  */}<Link sx={signingServicesStyles.link} href="https://mountainmagesigs.com/"> website. </Link>
+                    Offering a very extensive list of artists, MountainMage is another of the biggest services out there. You can
+                    select the artist you want, throw a signature in the shopping cart, and pay your way into the next signing. 
+                    </Typography>
+                    <br />
+                    <Typography sx={signingServicesStyles.text}>
+                    You can view and join his Facebook group {/*  */}
+                        <Link sx={signingServicesStyles.link} href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"> here.</Link>
+                    </Typography>
+                </Box>
             </Box>
-            <Box sx={signingServicesStyles.serviceInfo}>
-                <Typography sx={signingServicesStyles.text}>
-                If Facebook is not your forte, MountainMage is another signature service that has its own 
-                {/*  */}<Link href="https://mountainmagesigs.com/"> website. </Link>
-                Offering a very extensive list of artists, MountainMage is another of the biggest services out there. You can
-                select the artist you want, throw a signature in the shopping cart, and pay your way into the next signing. 
-                </Typography>
-                <br />
-                <Typography sx={signingServicesStyles.text}>
-                You can view and join his Facebook group {/*  */}
-                    <Link href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"> here.</Link>
-                </Typography>
-            </Box>
-            
         </Box>
     </Box>;
 };

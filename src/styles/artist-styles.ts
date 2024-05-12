@@ -14,7 +14,7 @@ export const artistStyles: Styles = {
         display: "flex",
         justifyContent: "center",
         backgroundColor: "#808080",
-        borderRadius: "25px",
+        borderRadius: "20px",
         marginBottom: "20px"
     },
     bannerContainer: {
