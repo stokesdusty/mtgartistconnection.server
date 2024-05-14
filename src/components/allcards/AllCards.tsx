@@ -91,7 +91,7 @@ const AllCards = () => {
   
     const getImage = (card: any) => { 
       if (card.image_uris) {
-          return <img height={500} alt="" key={card.id} src={card.image_uris?.normal} />
+          return <img height={500} alt="" key={card.id} src={card.image_uris?.border_crop} />
       } else if (card.card_faces) {
         return <img height={500} alt="" key={card.id} src={card.card_faces[0]?.image_uris?.normal} />
       }

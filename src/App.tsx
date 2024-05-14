@@ -16,6 +16,7 @@ import AddEvent from "./components/blogs/AddEvent";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import AddArtistToEvent from "./components/blogs/AddArtistToEvent";
+import RandomFlavorText from "./components/randomflavortext/RandomFlavorText";
 
 function App() {
   const dispatch = useDispatch();
@@ -43,6 +44,7 @@ function App() {
             <Route path="/artist/:name" element={<Artist />} />
             <Route path="/allcards/:name" element={<AllCards />} />
             <Route path="/markscalendar" element={<MarksCalendar />} />
+            <Route path="/randomflavortext" element={<RandomFlavorText />} />
           </Routes>
         </main>
         <footer>

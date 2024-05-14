@@ -58,7 +58,7 @@ const Homepage = () => {
                 />
                     {filteredData && filteredData.length > 0 && 
                     filteredData.map((artist: any) => {
-                        return <ArtistGridItem artistData={artist} />
+                        return <ArtistGridItem artistData={artist} key={artist.name} />
                     })}
             </Box>
         </Box>
