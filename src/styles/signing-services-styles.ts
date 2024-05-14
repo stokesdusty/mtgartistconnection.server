@@ -22,6 +22,11 @@ export const signingServicesStyles: Styles = {
         flexDirection: "row",
         gap: 4,
     },
+    serviceContainerMobile: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 4,
+    },
     serviceStats: {
         display: "flex",
         flexDirection: "column",

@@ -1,9 +1,12 @@
-import { Link, Typography } from "@mui/material";
+import { Link, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { Box } from "@mui/system"
 import { signingServicesStyles } from "../../styles/signing-services-styles";
 
 const SigningServices = () => {
     document.title = 'MtG Artist Connection - Card Signing Services';
+    const theme = useTheme();
+    const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
+
     return <Box sx={signingServicesStyles.container}>
         <Typography variant="h2" fontFamily="Work Sans" fontWeight={600} >Card Signing Services</Typography>
         <Typography sx={signingServicesStyles.text}> 
@@ -35,7 +38,7 @@ const SigningServices = () => {
         </Typography>
         <Box sx={signingServicesStyles.serviceGroupContainer}>
             <Typography variant="h3">Mark's Signature Service</Typography>
-            <Box sx={signingServicesStyles.serviceContainer}>
+            <Box sx={isBelowMedium ? signingServicesStyles.serviceContainerMobile : signingServicesStyles.serviceContainer}>
                 <Box sx={signingServicesStyles.serviceStats}>
                     <Typography variant="h5" fontWeight={600}># of Artists</Typography>
                     <Typography>100+</Typography>
@@ -61,7 +64,7 @@ const SigningServices = () => {
         </Box>
         <Box sx={signingServicesStyles.serviceGroupContainer}>
             <Typography variant="h3">MountainMage MTG Signature Service</Typography>
-            <Box sx={signingServicesStyles.serviceContainer}>
+            <Box sx={isBelowMedium ? signingServicesStyles.serviceContainerMobile : signingServicesStyles.serviceContainer}>
                 <Box sx={signingServicesStyles.serviceStats}>
                     <Typography variant="h5" fontWeight={600}># of Artists</Typography>
                     <Typography>150+</Typography>
