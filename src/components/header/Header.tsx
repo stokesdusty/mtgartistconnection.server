@@ -39,6 +39,8 @@ const Header = () => {
                     <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/signingservices" disableRipple label="Card Signing Services" />
                     {/* @ts-ignore */}
                     <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/calendar" disableRipple label="Calendar" />
+                    {/* @ts-ignore */}
+                    <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/randomflavortext" disableRipple label="Random Flavor Text" />
                 </Tabs>
             </Box>}
             {isBelowMedium &&  <Box sx={headerStyles.tabContainer}>
@@ -64,6 +66,7 @@ const Header = () => {
                     <MenuItem onClick={() => navigate("/")}>All Artists</MenuItem>
                     <MenuItem onClick={() => navigate("/signingservices")}>Card Signing Services</MenuItem>
                     <MenuItem onClick={() => navigate("/calendar")}>Calendar</MenuItem>
+                    <MenuItem onClick={() => navigate("/randomflavortext")}>Random Flavor Text</MenuItem>
                 </Menu>
                 </Box>
             }
