@@ -9,6 +9,14 @@ export const randomFlavorStyles: Styles = {
         margin: "auto",
         maxWidth: "750px"
     },
+    containerMobile: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        margin: "auto",
+        maxWidth: "250px"
+    },
     imageContainer: {
          paddingBottom: "12px"
     },
