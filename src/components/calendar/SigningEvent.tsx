@@ -1,6 +1,6 @@
 import { Box } from "@mui/system";
 import { calendarStyles } from "../../styles/calendar-styles";
-import { LinearProgress, Typography, Link } from "@mui/material";
+import { LinearProgress, Typography, Link, useTheme, useMediaQuery } from "@mui/material";
 import { GET_ARTISTSBYEVENTID } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import { homepageStyles } from "../../styles/homepage-styles";
@@ -9,6 +9,8 @@ const SigningEvent = (SigningEventProps: any) => {
     const startDateFormatted = new Date(SigningEventProps.props.startDate).toLocaleDateString();
     const endDateFormatted = new Date(SigningEventProps.props.endDate).toLocaleDateString();
     const eventId = SigningEventProps.props.id;
+    const theme = useTheme();
+    const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
     const {data: artistData, error, loading} = useQuery(GET_ARTISTSBYEVENTID, {
         variables: {
             eventId
@@ -20,7 +22,7 @@ const SigningEvent = (SigningEventProps: any) => {
     return (
         <Box sx={calendarStyles.signingEventsContainer} key={SigningEventProps.props.name}>
             <Box>
-                <Typography variant="h2" >{SigningEventProps.props.name}</Typography>
+                <Typography variant={isBelowMedium ? "h3" : "h2"} >{SigningEventProps.props.name}</Typography>
             </Box>
             <Box sx={calendarStyles.groupingContainer}>
                 <Typography variant="h5" >{startDateFormatted} - {endDateFormatted}</Typography>
