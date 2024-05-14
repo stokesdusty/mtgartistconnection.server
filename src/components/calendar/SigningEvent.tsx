@@ -22,7 +22,7 @@ const SigningEvent = (SigningEventProps: any) => {
     return (
         <Box sx={calendarStyles.signingEventsContainer} key={SigningEventProps.props.name}>
             <Box>
-                <Typography variant={isBelowMedium ? "h3" : "h2"} >{SigningEventProps.props.name}</Typography>
+                <Typography variant={isBelowMedium ? "h4" : "h2"} >{SigningEventProps.props.name}</Typography>
             </Box>
             <Box sx={calendarStyles.groupingContainer}>
                 <Typography variant="h5" >{startDateFormatted} - {endDateFormatted}</Typography>
