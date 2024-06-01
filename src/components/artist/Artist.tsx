@@ -23,7 +23,12 @@ const Artist = () => {
 
     const getTwitterHandle = (twitterUrl: any) => {
         if (!twitterUrl) return null;
-        const match = twitterUrl.match(/^https?:\/\/(www\.)?twitter.com\/@?(?<handle>\w+)/);
+        let match = twitterUrl.match(/^https?:\/\/(www\.)?twitter.com\/@?(?<handle>\w+)/);
+
+        if (!match) {
+            match = twitterUrl.match(/^https?:\/\/(www\.)?x.com\/@?(?<handle>\w+)/);
+        }
+        
         return match?.groups?.handle ? `@${match.groups.handle}` : null;
     }
 
