@@ -38,7 +38,7 @@ const Header = () => {
                     {/* @ts-ignore */}
                     <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/signingservices" disableRipple label="Card Signing Services" />
                     {/* @ts-ignore */}
-                    <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/calendar" disableRipple label="Calendar" />
+                    <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/calendar" disableRipple label="Signing Events" />
                     {/* @ts-ignore */}
                     <Tab LinkComponent={Link} sx={headerStyles.tabText} to="/randomflavortext" disableRipple label="Random Flavor Text" />
                 </Tabs>
