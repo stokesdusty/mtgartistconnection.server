@@ -24,18 +24,20 @@ const AllCards = () => {
     });
   
     aArtistName.forEach((aArtistName) => {
-      jSonFormattedName.push(JSON.stringify(aArtistName.replace(/ /g, '')));
+      jSonFormattedName.push(aArtistName.toString());
     }, aArtistName);
   
-    let sQuery = "";
+    let sQuery = 'artist%3A"';
     jSonFormattedName.forEach((jSonFormattedName) => {
-      sQuery = sQuery + "artist%3A" + jSonFormattedName + "+";
+      sQuery = sQuery.concat(jSonFormattedName).concat(' ');
     })
   
-    if (sQuery.endsWith("+")) {
+    if (sQuery.endsWith(" ")) {
       sQuery = sQuery.slice(0,-1);
     }
     
+    sQuery = sQuery.concat('"');
+
     const scryfallQueryWithDuplicates = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
     const scryfallQueryWithOutDuplicates = `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28game%3Apaper%29+%28${sQuery}%29`;
 
