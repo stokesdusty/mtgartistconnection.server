@@ -29,7 +29,6 @@ export const artistStyles: Styles = {
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "baseline",
-        width: "80%",
         paddingBottom: 2,
     },
     backLink: {
@@ -49,6 +48,7 @@ export const artistStyles: Styles = {
     infoRow: {
         display: "flex",
         flexDirection: "column",
+        maxWidth: "400px"
     },
     link: {
         textDecoration: "none",
