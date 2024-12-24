@@ -39,6 +39,7 @@ export const ADD_ARTIST = gql`
         $filename:String,
         $artstation:String,
         $location:String,
+        $bluesky:String
         ){
             addArtist(
                 name: $name,
@@ -58,6 +59,7 @@ export const ADD_ARTIST = gql`
                 filename: $filename,
                 artstation: $artstation,
                 location: $location,
+                bluesky: $bluesky
             ){
                 name
         }

@@ -5,6 +5,7 @@ import { Box, LinearProgress, Link, Typography, useMediaQuery, useTheme } from "
 import { artistStyles } from "../../styles/artist-styles";
 import { TbWorldWww } from "react-icons/tb";
 import { FaArtstation, FaFacebookF, FaInstagram, FaPatreon, FaTwitter, FaYoutube } from "react-icons/fa";
+import { FaBluesky } from "react-icons/fa6";
 import { Timeline } from "react-twitter-widgets";
 
 const Artist = () => {
@@ -85,6 +86,11 @@ const Artist = () => {
                                     {data.artistByName.artstation && data.artistByName.artstation !== "" && (
                                         <Link href={data.artistByName.artstation} target="_blank">
                                             <FaArtstation size={30} color={"#13AFF0"}/>
+                                        </Link>)
+                                    }
+                                    {data.artistByName.bluesky && data.artistByName.bluesky !== "" && (
+                                        <Link href={data.artistByName.bluesky} target="_blank">
+                                            <FaBluesky size={30} color={"#1285FE"}/>
                                         </Link>)
                                     }
                                 </Box>

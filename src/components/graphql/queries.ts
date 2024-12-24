@@ -29,6 +29,7 @@ export const GET_ARTIST_BY_NAME = gql`
             filename
             artstation
             location
+            bluesky
         }
     }
 `;
