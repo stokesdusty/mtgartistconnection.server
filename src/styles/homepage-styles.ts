@@ -5,6 +5,13 @@ export type Styles = {
 };
 
 export const homepageStyles:Styles = {
+    loadingContainerStyles: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        height: "100vh",
+    },
     container: {
         display: "flex",
         flexDirection: "column",
@@ -43,12 +50,13 @@ export const homepageStyles:Styles = {
         borderRadius: 20,
     },
     footerContainer: {
+        bgcolor: "#404040",
+        color: "white",
+        height: "100px",
         display: "flex",
         alignItems: "center",
-        height: "20vh",
         justifyContent: "center",
-        gap: 20,
-        bgcolor: "#404040",
+        width: "100%",
     },
     footerButton: {
         borderRadius: 10,
@@ -61,7 +69,7 @@ export const homepageStyles:Styles = {
     footerText: {
         fontFamily: "Work Sans",
         fontWeight: "500",
-        fontSize: 20,
+        fontSize: "1.2rem",
         color: "white",
     },
     textField: {

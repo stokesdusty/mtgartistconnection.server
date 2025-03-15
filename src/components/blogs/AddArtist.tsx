@@ -46,7 +46,7 @@ const AddArtist = () => {
         instagram,
         patreon,
         twitter,
-        youtube,
+        youtube, 
         artstation,
         mountainmage,
         url,
