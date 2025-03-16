@@ -26,7 +26,6 @@ import {
     { label: "Random Flavor Text", to: "/randomflavortext" },
   ];
   
-  // Custom Link component to handle the relationship between Tab and react-router-dom Link
   const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
     ({ to, ...props }, ref) => (
       <Link to={to} ref={ref} {...props} role={undefined} />
@@ -70,9 +69,9 @@ import {
       return navItems.map((item) => (
         <Tab
           key={item.to}
-          component={NavLink} // Use the custom component here
+          component={NavLink}
           sx={headerStyles.tabText}
-          to={item.to} // Pass the 'to' prop as normal
+          to={item.to}
           disableRipple
           label={item.label}
           value={item.to}

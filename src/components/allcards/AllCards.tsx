@@ -61,7 +61,6 @@ const AllCards = () => {
     total_cards: 0,
   });
 
-  //Handle if no artist was provided.
   useEffect(() => {
     if (!artist) {
       navigate("/");
@@ -178,7 +177,7 @@ const AllCards = () => {
     setShowDupes(!showDupes);
   };
 
-  if (!artist) return null; // Render nothing if there is no artist
+  if (!artist) return null;
   if (loading || isFetching || !cardsWithoutDupes)
     return <LinearProgress />;
   if (error) return <p>Error loading artist</p>;

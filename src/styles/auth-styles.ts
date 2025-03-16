@@ -41,7 +41,7 @@ export const authStyles:Styles = {
         padding: 4,
         justifyContent: "center",
         alignItems: "center",
-    },
+    }  as React.CSSProperties,
     submitButton: {
         fontFamily: "Work Sans",
         marginTop: 1,

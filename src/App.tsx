@@ -2,9 +2,9 @@ import { Route, Routes } from "react-router-dom";
 import Header from "./components/header/Header";
 import Footer from "./components/home/Footer";
 import Homepage from "./components/home/Homepage";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { authActions } from "./store/auth-slice";
+import { login } from "./store/auth-slice";
 import AddArtist from "./components/blogs/AddArtist";
 import Calendar from "./components/calendar/Calendar";
 import SigningServices from "./components/signingservices/SigningServices";
@@ -17,15 +17,20 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import AddArtistToEvent from "./components/blogs/AddArtistToEvent";
 import RandomFlavorText from "./components/randomflavortext/RandomFlavorText";
+import { RootState } from "./store/store";
 
 function App() {
+  const isLoggedIn = useSelector((state: RootState) => state.isLoggedIn);
   const dispatch = useDispatch();
   useEffect(() => {
-    const data: string = localStorage.getItem("userData") as string;
-    if(JSON.parse(data) !== null) {
-      dispatch(authActions.login());
+    const storedData = localStorage.getItem("userData");
+    if (storedData) {
+      const data = JSON.parse(storedData);
+      if (data && !isLoggedIn) {
+        dispatch(login());
+      }
     }
-  });
+  }, [dispatch, isLoggedIn]);
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div >

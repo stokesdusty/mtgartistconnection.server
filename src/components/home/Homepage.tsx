@@ -1,14 +1,13 @@
 import { Box, LinearProgress, TextField, Typography } from "@mui/material";
 import { homepageStyles } from "../../styles/homepage-styles";
 import { useQuery } from "@apollo/client";
-import { GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries"; // Corrected type
+import { GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 
 interface Artist {
   name: string;
   filename: string;
-  // ... other properties
 }
 
 const Homepage = () => {
@@ -27,7 +26,7 @@ const Homepage = () => {
       return data?.artists || [];
     }
 
-    const searchTerm = userSearch.toLowerCase().replace(/\s/g, ""); // Remove spaces
+    const searchTerm = userSearch.toLowerCase().replace(/\s/g, "");
 
     return data.artists.filter((artist: Artist) =>
       artist.filename.includes(searchTerm)
