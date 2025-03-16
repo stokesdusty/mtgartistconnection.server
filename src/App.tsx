@@ -20,6 +20,7 @@ import RandomFlavorText from "./components/randomflavortext/RandomFlavorText";
 import { RootState } from "./store/store";
 import PrivacyPolicy from "./components/home/PrivacyPolicy";
 import TermsOfService from "./components/home/TermsOfService";
+import ContactPage from "./components/home/Contact";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.isLoggedIn);
@@ -54,6 +55,7 @@ function App() {
             <Route path="/randomflavortext" element={<RandomFlavorText />} />
             <Route path="/privacypolicy" element={<div><PrivacyPolicy /></div>} />
             <Route path="/termsofservice" element={<div><TermsOfService /></div>} />
+            <Route path="/contact" element={<div><ContactPage /></div>} />
           </Routes>
         </main>
         <footer>

@@ -2,12 +2,12 @@ import {
   Box,
   Link,
   Typography,
-  useMediaQuery,
-  useTheme,
+  Container,
+  Paper,
+  Divider,
+  Grid,
 } from "@mui/material";
-import { signingServicesStyles } from "../../styles/signing-services-styles"; //Removed un-needed import
 import { useEffect } from "react";
-import { SystemStyleObject } from "@mui/system";
 
 interface Service {
   name: string;
@@ -54,133 +54,211 @@ const howItWorksParagraphs = [
   "Turnaround times for receiving your cards back can vary pretty greatly depending on the service and the artist, but in our personal experiences, these services are quite communicative and do a fairly good job of getting everyone's signatures in an expedient fashion.",
 ];
 
-const mobileParagraph: SystemStyleObject = {
-  textAlign: "center",
-  marginBottom: "16px",
-};
-
 const SigningServices = () => {
   useEffect(() => {
     document.title = "MtG Artist Connection - Card Signing Services";
   }, []);
-  const theme = useTheme();
-  const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
+  
+  // Modern styles to match homepage theme
+  const styles = {
+    container: {
+      backgroundColor: "#507A60",
+      minHeight: "100vh",
+      padding: { xs: 2, md: 4 },
+    },
+    wrapper: {
+      maxWidth: 1200,
+      margin: "0 auto",
+      padding: { xs: 2, md: 4 },
+      backgroundColor: "#fff",
+      borderRadius: 2,
+      boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+    },
+    headerText: {
+      color: "#507A60",
+      fontWeight: 700,
+      fontSize: { xs: "2rem", md: "3rem" },
+      marginBottom: 3,
+      textAlign: { xs: "center", md: "left" },
+    },
+    sectionTitle: {
+      color: "#507A60",
+      fontWeight: 600,
+      fontSize: { xs: "1.5rem", md: "2rem" },
+      marginTop: 4,
+      marginBottom: 2,
+      textAlign: { xs: "center", md: "left" },
+    },
+    paragraph: {
+      fontSize: "1.1rem",
+      color: "#555",
+      lineHeight: 1.6,
+      marginBottom: 2,
+      textAlign: { xs: "center", md: "left" },
+    },
+    serviceCard: {
+      marginTop: 4,
+      padding: 3,
+      borderRadius: 2,
+      border: "1px solid rgba(80, 122, 96, 0.2)",
+      backgroundColor: "rgba(80, 122, 96, 0.05)",
+    },
+    serviceName: {
+      color: "#507A60",
+      fontWeight: 700,
+      fontSize: { xs: "1.5rem", md: "2rem" },
+      marginBottom: 2,
+      textAlign: "center",
+    },
+    serviceStats: {
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      justifyContent: "space-between",
+      gap: 3,
+      marginBottom: 3,
+      padding: 2,
+      backgroundColor: "white",
+      borderRadius: 1,
+    },
+    statItem: {
+      textAlign: { xs: "center", md: "left" },
+      flex: 1,
+    },
+    statLabel: {
+      color: "#507A60",
+      fontWeight: 600,
+      fontSize: "1.1rem",
+      marginBottom: 0.5,
+    },
+    statValue: {
+      fontSize: "1rem",
+    },
+    serviceInfo: {
+      textAlign: { xs: "center", md: "left" },
+    },
+    link: {
+      color: "#507A60",
+      fontWeight: 500,
+      textDecoration: "none",
+      "&:hover": {
+        textDecoration: "underline",
+      },
+    },
+    divider: {
+      margin: "20px 0",
+      backgroundColor: "rgba(80, 122, 96, 0.2)",
+    },
+  };
 
   const ServiceStatItem = ({ label, value }: { label: string; value: string }) => {
-    const mobileStatItem: SystemStyleObject = {
-      textAlign: "center",
-      marginBottom: "16px",
-    };
     return (
-      <Box sx={isBelowMedium ? mobileStatItem : {}}>
-        <Typography variant="h5" fontWeight={600}>
-          {label}
-        </Typography>
-        <Typography>{value}</Typography>
+      <Box sx={styles.statItem}>
+        <Typography sx={styles.statLabel}>{label}</Typography>
+        <Typography sx={styles.statValue}>{value}</Typography>
       </Box>
     );
   };
 
   const ServiceGroupContainer = ({ service }: { service: Service }) => {
-    const mobileServiceContainer: SystemStyleObject = {
-      flexDirection: "column",
-      alignItems: "center",
-    };
-    const mobileServiceInfo: SystemStyleObject = {
-      textAlign: "center",
-    };
     return (
-      <Box sx={signingServicesStyles.serviceGroupContainer}>
-        <Typography variant="h3">{service.name}</Typography>
-        <Box
-          sx={[
-            signingServicesStyles.serviceContainer,
-            ...(isBelowMedium ? [mobileServiceContainer] : []), //Corrected line
-          ]}
-        >
-          <Box sx={signingServicesStyles.serviceStats}>
-            <ServiceStatItem label="# of Artists" value={service.artistCount} />
-            <ServiceStatItem
-              label="Cost Per Signature"
-              value={service.costPerSignature}
-            />
-            <ServiceStatItem
-              label="Services Offered"
-              value={service.servicesOffered}
-            />
-          </Box>
-          <Box
-            sx={[
-              signingServicesStyles.serviceInfo,
-              ...(isBelowMedium ? [mobileServiceInfo] : []), //Corrected line
-            ]}
-          >
-            <Typography sx={signingServicesStyles.text}>
-              {service.description}
-            </Typography>
-            <br />
-            <Typography sx={signingServicesStyles.text}>
-              You can view and join his Facebook group{" "}
+      <Paper elevation={0} sx={styles.serviceCard}>
+        <Typography variant="h3" sx={styles.serviceName}>
+          {service.name}
+        </Typography>
+        
+        <Box sx={styles.serviceStats}>
+          <ServiceStatItem label="# of Artists" value={service.artistCount} />
+          <ServiceStatItem
+            label="Cost Per Signature"
+            value={service.costPerSignature}
+          />
+          <ServiceStatItem
+            label="Services Offered"
+            value={service.servicesOffered}
+          />
+        </Box>
+        
+        <Box sx={styles.serviceInfo}>
+          <Typography sx={styles.paragraph}>
+            {service.description}
+          </Typography>
+          <Box mt={2}>
+            <Typography sx={{ ...styles.paragraph, mb: 0 }}>
+              You can view and join their Facebook group{" "}
               <Link
-                sx={signingServicesStyles.link}
+                sx={styles.link}
                 href={service.facebookGroup}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                here.
+                here
               </Link>
               {service.website && (
                 <>
                   {" "}
                   or visit their{" "}
-                  <Link sx={signingServicesStyles.link} href={service.website}>
+                  <Link 
+                    sx={styles.link} 
+                    href={service.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     website
                   </Link>
                 </>
-              )}
+              )}.
             </Typography>
           </Box>
         </Box>
-      </Box>
+      </Paper>
     );
   };
 
   return (
-    <Box sx={signingServicesStyles.container}>
-      <Typography
-        variant="h2"
-        fontFamily="Work Sans"
-        fontWeight={600}
-        sx={[signingServicesStyles.text, ...(isBelowMedium ? [mobileParagraph] : [])]} //Corrected line
-      >
-        Card Signing Services
-      </Typography>
-      {introParagraphs.map((paragraph, index) => (
-        <Typography
-          key={index}
-          sx={[signingServicesStyles.text, ...(isBelowMedium ? [mobileParagraph] : [])]} //Corrected line
-        >
-          {paragraph}
-        </Typography>
-      ))}
-      <Typography
-        variant="h3"
-        fontFamily="Work Sans"
-        fontWeight={600}
-        sx={[signingServicesStyles.text, ...(isBelowMedium ? [mobileParagraph] : [])]} //Corrected line
-      >
-        How Do These Services Work?
-      </Typography>
-      {howItWorksParagraphs.map((paragraph, index) => (
-        <Typography
-          key={index}
-          sx={[signingServicesStyles.text, ...(isBelowMedium ? [mobileParagraph] : [])]} //Corrected line
-        >
-          {paragraph}
-        </Typography>
-      ))}
-
-      {services.map((service) => (
-        <ServiceGroupContainer key={service.name} service={service} />
-      ))}
+    <Box sx={styles.container}>
+      <Container maxWidth="lg">
+        <Paper elevation={0} sx={styles.wrapper}>
+          <Typography variant="h2" sx={styles.headerText}>
+            Card Signing Services
+          </Typography>
+          
+          <Box mb={4}>
+            {introParagraphs.map((paragraph, index) => (
+              <Typography key={index} sx={styles.paragraph}>
+                {paragraph}
+              </Typography>
+            ))}
+          </Box>
+          
+          <Divider sx={styles.divider} />
+          
+          <Typography variant="h3" sx={styles.sectionTitle}>
+            How Do These Services Work?
+          </Typography>
+          
+          <Box mb={4}>
+            {howItWorksParagraphs.map((paragraph, index) => (
+              <Typography key={index} sx={styles.paragraph}>
+                {paragraph}
+              </Typography>
+            ))}
+          </Box>
+          
+          <Divider sx={styles.divider} />
+          
+          <Typography variant="h3" sx={styles.sectionTitle}>
+            Available Services
+          </Typography>
+          
+          <Grid container spacing={3}>
+            {services.map((service) => (
+              <Grid item xs={12} key={service.name}>
+                <ServiceGroupContainer service={service} />
+              </Grid>
+            ))}
+          </Grid>
+        </Paper>
+      </Container>
     </Box>
   );
 };

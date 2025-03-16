@@ -1,3 +1,4 @@
+import { forwardRef, useEffect, useState } from "react";
 import {
   AppBar,
   Box,
@@ -10,7 +11,6 @@ import {
   useTheme,
   IconButton,
 } from "@mui/material";
-import { useState, forwardRef } from "react";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from '@mui/icons-material/Menu';
 
@@ -34,7 +34,7 @@ const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
 
 const Header = () => {
   const location = useLocation();
-  const [value, setValue] = useState<string>(location.pathname);
+  const [value, setValue] = useState<string>(location.pathname);  // Default to current pathname
   const navigate = useNavigate();
   const theme = useTheme();
   const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
@@ -57,6 +57,11 @@ const Header = () => {
     navigate(to);
     handleClose();
   };
+
+  // Update the tab value when the location changes (like clicking the logo)
+  useEffect(() => {
+    setValue(location.pathname);
+  }, [location.pathname]);
 
   const styles = {
     appBar: {

@@ -10,15 +10,18 @@ import axios from "axios";
 import {
   Box,
   Checkbox,
+  CircularProgress,
   FormControlLabel,
-  LinearProgress,
+  Link,
   Typography,
+  Container,
+  Paper,
 } from "@mui/material";
-import { allCardsStyles } from "../../styles/all-cards-styles";
 import { GET_ARTIST_BY_NAME } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 
 interface Card {
+  related_uris: any;
   id: string;
   image_uris?: {
     border_crop: string;
@@ -153,21 +156,33 @@ const AllCards = () => {
   const getImage = (card: Card) => {
     if (card.image_uris) {
       return (
-        <img
-          height={500}
-          alt=""
-          key={card.id}
-          src={card.image_uris.border_crop}
-        />
+        <Link
+          href={card?.related_uris.gatherer}
+          target="_blank"
+        >
+          <img
+            height={500}
+            alt=""
+            key={card.id}
+            src={card.image_uris.border_crop}
+            style={styles.cardImage}
+          />
+        </Link>
       );
     } else if (card.card_faces) {
       return (
-        <img
-          height={500}
-          alt=""
-          key={card.id}
-          src={card.card_faces[0]?.image_uris?.normal}
-        />
+        <Link 
+          href={card?.related_uris?.gatherer}
+          target="_blank"
+        >
+          <img
+            height={500}
+            alt=""
+            key={card.id}
+            src={card.card_faces[0]?.image_uris?.normal}
+            style={styles.cardImage}
+          />
+        </Link>
       );
     }
     return null;
@@ -177,30 +192,144 @@ const AllCards = () => {
     setShowDupes(!showDupes);
   };
 
+  // Modernized styles to match homepage
+  const styles = {
+    container: {
+      backgroundColor: "#507A60",
+      minHeight: "100vh",
+      padding: { xs: 2, md: 4 },
+    },
+    wrapper: {
+      maxWidth: 1200,
+      margin: "0 auto",
+      padding: { xs: 2, md: 4 },
+      backgroundColor: "#fff",
+      borderRadius: 2,
+      boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+    },
+    bannerContainer: {
+      width: "100%",
+      height: { xs: "150px", md: "200px" },
+      overflow: "hidden",
+      marginBottom: 4,
+      borderRadius: 2,
+      "& img": {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+      },
+    },
+    headerText: {
+      color: "#507A60",
+      fontWeight: 700,
+      fontSize: { xs: "1.8rem", md: "2.5rem" },
+      marginBottom: 2,
+    },
+    checkbox: {
+      color: "#507A60",
+      "&.Mui-checked": {
+        color: "#507A60",
+      },
+    },
+    checkboxLabel: {
+      marginBottom: 2,
+      "& .MuiFormControlLabel-label": {
+        fontWeight: 600,
+      },
+    },
+    cards: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+      gap: 3,
+      justifyContent: "center",
+    },
+    cardImage: {
+      width: "100%",
+      height: "auto",
+      borderRadius: 2,
+      transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+      ":hover": {
+        transform: "scale(1.02)",
+        boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+      },
+    },
+    loadingContainer: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "50vh",
+      "& .MuiCircularProgress-root": {
+        color: "#507A60",
+      },
+    },
+    errorMessage: {
+      color: "#d32f2f",
+      textAlign: "center",
+      padding: 4,
+      backgroundColor: "rgba(211, 47, 47, 0.1)",
+      borderRadius: 2,
+    },
+  };
+
   if (!artist) return null;
   if (loading || isFetching || !cardsWithoutDupes)
-    return <LinearProgress />;
-  if (error) return <p>Error loading artist</p>;
-  if (!artistData?.artistByName) return <p>Error artist not found</p>;
+    return (
+      <Box sx={styles.container}>
+        <Box sx={styles.loadingContainer}>
+          <CircularProgress sx={{ color: "#507A60" }} />
+        </Box>
+      </Box>
+    );
+  if (error) 
+    return (
+      <Box sx={styles.container}>
+        <Box sx={styles.wrapper}>
+          <Typography sx={styles.errorMessage}>
+            Error loading artist: {error.message}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  if (!artistData?.artistByName) 
+    return (
+      <Box sx={styles.container}>
+        <Box sx={styles.wrapper}>
+          <Typography sx={styles.errorMessage}>
+            Artist not found
+          </Typography>
+        </Box>
+      </Box>
+    );
 
   return (
-    <Box sx={allCardsStyles.container}>
-      <Box sx={allCardsStyles.bannerContainer}>
-        <img
-          src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistData.artistByName.filename}.jpeg`}
-          alt=""
-        />
-      </Box>
-      <Typography variant="h2" fontWeight={600}>
-        All {artist} Cards ({totalCards})
-      </Typography>
-      <FormControlLabel
-        control={<Checkbox checked={showDupes} onChange={handleCheck} />}
-        label="Show All Printings"
-      />
-      <Box sx={allCardsStyles.cards}>
-        {cards.map((card) => getImage(card))}
-      </Box>
+    <Box sx={styles.container}>
+      <Container maxWidth="lg">
+        <Paper elevation={0} sx={styles.wrapper}>
+          <Box sx={styles.bannerContainer}>
+            <img
+              src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistData.artistByName.filename}.jpeg`}
+              alt={`${artist} banner`}
+            />
+          </Box>
+          <Typography variant="h2" sx={styles.headerText}>
+            All {artist} Cards ({totalCards})
+          </Typography>
+          <FormControlLabel
+            control={
+              <Checkbox 
+                checked={showDupes} 
+                onChange={handleCheck} 
+                sx={styles.checkbox}
+              />
+            }
+            label="Show All Printings"
+            sx={styles.checkboxLabel}
+          />
+          <Box sx={styles.cards}>
+            {cards.map((card) => getImage(card))}
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 };

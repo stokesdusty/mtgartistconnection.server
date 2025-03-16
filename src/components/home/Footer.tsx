@@ -1,7 +1,7 @@
 import { Box, Typography, Container, Link } from "@mui/material";
 
 const currentYear = new Date().getFullYear();
-const copyrightText = `©Copyright ${currentYear} MTGArtistConnection`;
+const copyrightText = `© Copyright ${currentYear} MtGArtistConnection`;
 
 const Footer = () => {
   // Modern styles with #507A60 as primary color
@@ -49,7 +49,7 @@ const Footer = () => {
           <Box sx={styles.footerLinks}>
             <Link href="/privacypolicy" sx={styles.link}>Privacy Policy</Link>
             <Link href="/termsofservice" sx={styles.link}>Terms of Service</Link>
-            <Link href="#" sx={styles.link}>Contact</Link>
+            <Link href="/contact" sx={styles.link}>Contact</Link>
           </Box>
         </Box>
       </Container>

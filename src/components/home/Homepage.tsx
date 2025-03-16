@@ -39,7 +39,7 @@ const Homepage = () => {
   // Modernized styles with #507A60 as primary color
   const styles = {
     container: {
-      backgroundColor: "#f8f9fa",
+      backgroundColor: "#507A60",
       minHeight: "100vh",
       padding: { xs: 2, md: 4 },
     },

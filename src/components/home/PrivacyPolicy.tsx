@@ -7,7 +7,7 @@ const PrivacyPolicy = () => {
 
   const styles = {
     container: {
-      backgroundColor: "#f8f9fa",
+      backgroundColor: "#507A60",
       minHeight: "100vh",
       padding: { xs: 2, md: 4 },
       paddingTop: { xs: 4, md: 6 },
