@@ -1,51 +1,41 @@
-import { Styles } from "./homepage-styles";
+import { SystemStyleObject } from '@mui/system';
 
-export const signingServicesStyles: Styles = {
+export const signingServicesStyles:Record<string, SystemStyleObject> = {
     container: {
+        padding: 10,
         display: "flex",
         flexDirection: "column",
-        margin: "auto",
-        padding: 4,
-        paddingTop: "100px",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 4,
-        width: "60%"
+        gap: 10,
+        minHeight: "75vh",
+        paddingTop: "125px"
     },
     text: {
-        fontWeight: "600",
-        fontSize: 20,
-        textAlign: "justify"
+        fontSize: "1.2rem",
+    },
+    serviceGroupContainer: {
+        display: "flex",
+        flexDirection: "column",
+        padding: 2,
+        gap: 1,
     },
     serviceContainer: {
         display: "flex",
-        flexDirection: "row",
-        gap: 4,
-    },
-    serviceContainerMobile: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
+        gap: 1,
+        padding: 2,
     },
     serviceStats: {
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 3,
-        minWidth: "50%",
+        flex: 1,
+        justifyContent: "space-around",
+        gap: 2,
     },
-    serviceGroupContainer: {
-        backgroundColor: "#808080",
-        borderRadius: "10px",
-        marginBottom: "25px",
-        paddingTop: "25px",
-        paddingBottom: "25px",
-        paddingLeft: "10px",
-        paddingRight: "10px",
+    serviceInfo: {
+        display: "flex",
+        flexDirection: "column",
+        flex: 3,
     },
     link: {
-        color: "#083d1c",
-        textDecoration: "none"
-    }
+        color: "blue"
+    },
 };

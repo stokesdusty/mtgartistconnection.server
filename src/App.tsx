@@ -18,6 +18,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import AddArtistToEvent from "./components/blogs/AddArtistToEvent";
 import RandomFlavorText from "./components/randomflavortext/RandomFlavorText";
 import { RootState } from "./store/store";
+import PrivacyPolicy from "./components/home/PrivacyPolicy";
+import TermsOfService from "./components/home/TermsOfService";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.isLoggedIn);
@@ -50,6 +52,8 @@ function App() {
             <Route path="/allcards/:name" element={<AllCards />} />
             <Route path="/markscalendar" element={<MarksCalendar />} />
             <Route path="/randomflavortext" element={<RandomFlavorText />} />
+            <Route path="/privacypolicy" element={<div><PrivacyPolicy /></div>} />
+            <Route path="/termsofservice" element={<div><TermsOfService /></div>} />
           </Routes>
         </main>
         <footer>

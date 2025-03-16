@@ -44,7 +44,7 @@ export const homepageStyles:Styles = {
         fontFamily: "Work Sans",
         fontWeight: "500",
         textShadow: "12px 10px 8px #ccc",
-    },
+    } as SxProps,
     image: {
         boxShadow: "10px 10px 25px #000",
         borderRadius: 20,
