@@ -21,6 +21,8 @@ import { RootState } from "./store/store";
 import PrivacyPolicy from "./components/home/PrivacyPolicy";
 import TermsOfService from "./components/home/TermsOfService";
 import ContactPage from "./components/home/Contact";
+import ArtistCardAnalysis from "./components/artist/ArtistCardBreakdown";
+import { LoadingProvider } from "./LoadingContext";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.isLoggedIn);
@@ -36,32 +38,35 @@ function App() {
   }, [dispatch, isLoggedIn]);
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <div >
-        <header>
-          <Header />
-        </header>
-        <main>
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/signingservices" element={<SigningServices />} />
-            <Route path="/add" element={<AddArtist />} />
-            <Route path="/addevent" element={<AddEvent />} />
-            <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
-            <Route path="/artist/:name" element={<Artist />} />
-            <Route path="/allcards/:name" element={<AllCards />} />
-            <Route path="/markscalendar" element={<MarksCalendar />} />
-            <Route path="/randomflavortext" element={<RandomFlavorText />} />
-            <Route path="/privacypolicy" element={<div><PrivacyPolicy /></div>} />
-            <Route path="/termsofservice" element={<div><TermsOfService /></div>} />
-            <Route path="/contact" element={<div><ContactPage /></div>} />
-          </Routes>
-        </main>
-        <footer>
-          <Footer />
-        </footer>
-      </div>
+      <LoadingProvider>
+        <div >
+          <header>
+            <Header />
+          </header>
+          <main>
+            <Routes>
+              <Route path="/" element={<Homepage />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/signingservices" element={<SigningServices />} />
+              <Route path="/add" element={<AddArtist />} />
+              <Route path="/addevent" element={<AddEvent />} />
+              <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
+              <Route path="/artist/:name" element={<Artist />} />
+              <Route path="/allcards/:name" element={<AllCards />} />
+              <Route path="/markscalendar" element={<MarksCalendar />} />
+              <Route path="/randomflavortext" element={<RandomFlavorText />} />
+              <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+              <Route path="/termsofservice" element={<TermsOfService />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />
+            </Routes>
+          </main>
+          <footer>
+            <Footer />
+          </footer>
+        </div>
+      </LoadingProvider>
     </LocalizationProvider>
   );
 }

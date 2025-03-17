@@ -7,19 +7,9 @@
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="Get in contact with your favorite MTG Artists"
+      content="Web site created using create-react-app"
     />
-    <meta name="google-site-verification" content="4_onSfX94DaOBf4lWs-X7mVBLtj3reXwAkQgSPjO6Pc" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GGY95C3RHZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-GGY95C3RHZ');
-    </script>
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -35,6 +25,12 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>MtG Artist Connection</title>
+
+    <!-- Preload CSS Files -->
+    <link rel="preload" href="%PUBLIC_URL%/index.css" as="style" />
+    <link rel="stylesheet" href="%PUBLIC_URL%/index.css" />
+    <link rel="preload" href="%PUBLIC_URL%/App.css" as="style" />
+    <link rel="stylesheet" href="%PUBLIC_URL%/App.css" />
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

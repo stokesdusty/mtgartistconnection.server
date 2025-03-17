@@ -26,7 +26,6 @@ import {
       }
     });
   
-    // Modernized styles to match homepage
     const styles = {
       eventCard: {
         backgroundColor: "#fff",

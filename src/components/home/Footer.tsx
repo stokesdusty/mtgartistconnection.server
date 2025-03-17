@@ -4,10 +4,9 @@ const currentYear = new Date().getFullYear();
 const copyrightText = `© Copyright ${currentYear} MtGArtistConnection`;
 
 const Footer = () => {
-  // Modern styles with #507A60 as primary color
   const styles = {
     footerContainer: {
-      backgroundColor: "#f8f9fa",
+      backgroundColor: "#fff",
       borderTop: "1px solid #e9ecef",
       padding: { xs: "1.5rem 1rem", md: "2rem" },
       marginTop: "auto",

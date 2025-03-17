@@ -32,7 +32,6 @@ const Calendar = () => {
     );
   }, [data]);
 
-  // Modernized styles to match homepage
   const styles = {
     container: {
       backgroundColor: "#507A60",

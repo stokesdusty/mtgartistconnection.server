@@ -34,7 +34,7 @@ const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
 
 const Header = () => {
   const location = useLocation();
-  const [value, setValue] = useState<string>(location.pathname);  // Default to current pathname
+  const [value, setValue] = useState<string>(location.pathname);
   const navigate = useNavigate();
   const theme = useTheme();
   const isBelowMedium = useMediaQuery(theme.breakpoints.down("md"));
@@ -58,7 +58,6 @@ const Header = () => {
     handleClose();
   };
 
-  // Update the tab value when the location changes (like clicking the logo)
   useEffect(() => {
     setValue(location.pathname);
   }, [location.pathname]);

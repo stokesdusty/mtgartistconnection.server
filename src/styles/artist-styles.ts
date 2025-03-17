@@ -13,7 +13,6 @@ export const artistStyles: Styles = {
     artistPage: {
         display: "flex",
         justifyContent: "center",
-        backgroundColor: "#808080",
         borderRadius: "20px",
         marginBottom: "20px"
     },

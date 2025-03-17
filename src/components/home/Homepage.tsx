@@ -36,7 +36,6 @@ const Homepage = () => {
     if (!userSearch) return;
   }, [userSearch]);
 
-  // Modernized styles with #507A60 as primary color
   const styles = {
     container: {
       backgroundColor: "#507A60",
@@ -105,6 +104,7 @@ const Homepage = () => {
       marginTop: 4,
     },
     loadingContainer: {
+      backgroundColor: "#507A60",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",

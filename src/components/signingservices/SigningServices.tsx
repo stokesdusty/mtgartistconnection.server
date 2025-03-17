@@ -59,7 +59,6 @@ const SigningServices = () => {
     document.title = "MtG Artist Connection - Card Signing Services";
   }, []);
   
-  // Modern styles to match homepage theme
   const styles = {
     container: {
       backgroundColor: "#507A60",

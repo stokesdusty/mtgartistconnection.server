@@ -57,7 +57,7 @@ export const calendarStyles: Styles = {
         paddingRight: "10px",
         alignItems: "center",
         width: "75vw",
-        backgroundColor: "#808080",
+        backgroundColor: "#507A60",
         borderRadius: "10px",
         marginBottom: "25px",
     },

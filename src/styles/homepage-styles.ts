@@ -13,6 +13,7 @@ export const homepageStyles:Styles = {
         height: "100vh",
     },
     container: {
+        bgcolor: "507A60",
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -50,7 +51,7 @@ export const homepageStyles:Styles = {
         borderRadius: 20,
     },
     footerContainer: {
-        bgcolor: "#404040",
+        bgcolor: "#507A60",
         color: "white",
         height: "100px",
         display: "flex",

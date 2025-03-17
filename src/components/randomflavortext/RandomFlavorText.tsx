@@ -28,7 +28,6 @@ const RandomFlavorText = () => {
 
   const scryfallQuery = "https://api.scryfall.com/cards/random?q=has%3Aflavor";
 
-  // Modernized styles to match homepage
   const styles = {
     container: {
       backgroundColor: "#507A60",

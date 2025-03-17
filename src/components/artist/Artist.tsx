@@ -52,7 +52,6 @@ const Artist = () => {
     return match?.groups?.handle ? `@${match.groups.handle}` : null;
   };
 
-  // Modernized styles to match homepage
   const styles = {
     container: {
       backgroundColor: "#507A60",
@@ -160,6 +159,7 @@ const Artist = () => {
       width: { xs: "100%", md: "400px" },
     },
     loadingContainer: {
+      backgroundColor: "#507A60",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
@@ -187,13 +187,14 @@ const Artist = () => {
     },
   };
 
-  // Early return for loading or error states
   if (!name) return <Typography sx={{ textAlign: "center", p: 4 }}>No artist provided</Typography>;
   if (loading)
     return (
-      <Box sx={styles.loadingContainer}>
-        <CircularProgress sx={{ color: "#507A60" }} />
-      </Box>
+      <Box sx={styles.container}>
+        <Box sx={styles.loadingContainer}>
+          <CircularProgress sx={{ color: "#507A60" }} />
+        </Box>
+      </Box> 
     );
   if (error)
     return (
@@ -206,7 +207,6 @@ const Artist = () => {
       </Box>
     );
 
-  // Ensure data exists before proceeding
   if (!data?.artistByName) {
     return (
       <Box sx={styles.container}>

@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { GET_ARTIST_BY_NAME } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
+import { useLoading } from '../../LoadingContext'; // Import the useLoading hook
 
 interface Card {
   related_uris: any;
@@ -54,7 +55,8 @@ const AllCards = () => {
   const { name: artist } = useParams<{ name?: string }>();
   const navigate = useNavigate();
   const [showDupes, setShowDupes] = useState<boolean>(false);
-  const [isFetching, setIsFetching] = useState(false);
+  const { setIsLoading } = useLoading();
+  const [isCardViewChanging, setIsCardViewChanging] = useState(false);
   const [cardsWithDupes, setCardsWithDupes] = useState<CardData>({
     data: [],
     total_cards: 0,
@@ -99,7 +101,6 @@ const AllCards = () => {
       showDuplicates: boolean,
       previousData: Card[] = []
     ): Promise<Card[] | null> => {
-      setIsFetching(true);
       try {
         const response = await axios.get<ScryfallResponse>(url);
         let allData: Card[] = [...previousData, ...response.data.data];
@@ -110,31 +111,24 @@ const AllCards = () => {
             showDuplicates,
             allData
           );
-          if(nextPageData) allData = nextPageData;
+          if (nextPageData) allData = nextPageData;
         }
 
         return allData;
       } catch (error) {
         console.error("Error fetching cards:", error);
         return null;
-      } finally {
-        setIsFetching(false);
       }
     },
     []
   );
 
-  const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
-    if (!scryfallQuery) {
-      return { cards: [], totalCards: 0 };
-    }
-    const selectedData = showDupes ? cardsWithDupes : cardsWithoutDupes;
-    return { cards: selectedData.data, totalCards: selectedData.total_cards };
-  }, [showDupes, scryfallQuery, cardsWithDupes, cardsWithoutDupes]);
-
   useEffect(() => {
     const fetchData = async () => {
       if (!scryfallQuery) return;
+      
+      setIsLoading(true);
+      
       const noDupesData = await fetchCards(
         scryfallQuery.withoutDuplicates,
         false
@@ -149,9 +143,30 @@ const AllCards = () => {
       if (withDupesData) {
         setCardsWithDupes({data: withDupesData, total_cards: withDupesData.length});
       }
+      
+      setIsLoading(false);
     };
+    
     fetchData();
-  }, [scryfallQuery, fetchCards]);
+  }, [scryfallQuery, fetchCards, setIsLoading]);
+
+  useEffect(() => {
+    if (cardsWithDupes.data.length > 0 && cardsWithoutDupes.data.length > 0) {
+      setIsCardViewChanging(true);
+      const timeoutId = setTimeout(() => {
+        setIsCardViewChanging(false);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [showDupes, cardsWithDupes, cardsWithoutDupes]);
+
+  const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
+    if (!scryfallQuery) {
+      return { cards: [], totalCards: 0 };
+    }
+    const selectedData = showDupes ? cardsWithDupes : cardsWithoutDupes;
+    return { cards: selectedData.data, totalCards: selectedData.total_cards };
+  }, [showDupes, scryfallQuery, cardsWithDupes, cardsWithoutDupes]);
 
   const getImage = (card: Card) => {
     if (card.image_uris) {
@@ -192,7 +207,6 @@ const AllCards = () => {
     setShowDupes(!showDupes);
   };
 
-  // Modernized styles to match homepage
   const styles = {
     container: {
       backgroundColor: "#507A60",
@@ -262,6 +276,22 @@ const AllCards = () => {
         color: "#507A60",
       },
     },
+    loadingCardsContainer: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 4,
+      minHeight: "300px",
+      "& .MuiCircularProgress-root": {
+        color: "#507A60",
+      },
+    },
+    loadingCardsText: {
+      marginTop: 2,
+      color: "#507A60",
+      fontWeight: 600,
+    },
     errorMessage: {
       color: "#d32f2f",
       textAlign: "center",
@@ -269,14 +299,25 @@ const AllCards = () => {
       backgroundColor: "rgba(211, 47, 47, 0.1)",
       borderRadius: 2,
     },
+    viewCardsLink: {
+      color: "#507A60",
+      textDecoration: "none",
+      fontWeight: 600,
+      display: "inline-block",
+      marginBottom: 3,
+      transition: "color 0.2s ease",
+      "&:hover": {
+        color: "#3c5c48",
+      },
+    },
   };
 
   if (!artist) return null;
-  if (loading || isFetching || !cardsWithoutDupes)
+  if (loading)
     return (
       <Box sx={styles.container}>
         <Box sx={styles.loadingContainer}>
-          <CircularProgress sx={{ color: "#507A60" }} />
+          <CircularProgress size={40} sx={{ color: "#507A60" }} />
         </Box>
       </Box>
     );
@@ -314,20 +355,44 @@ const AllCards = () => {
           <Typography variant="h2" sx={styles.headerText}>
             All {artist} Cards ({totalCards})
           </Typography>
+          { totalCards === 0 && (
+            <Typography sx={styles.errorMessage}>
+              Loading....
+            </Typography>
+          )}
+          <Link 
+            href={`/artistcardbreakdown/${artist}`}
+            underline="none"
+            sx={styles.viewCardsLink}
+          >
+            <Typography variant="h5">{`Card Statistics`}</Typography>
+          </Link>
+          <br />
           <FormControlLabel
             control={
               <Checkbox 
                 checked={showDupes} 
                 onChange={handleCheck} 
                 sx={styles.checkbox}
+                disabled={isCardViewChanging}
               />
             }
             label="Show All Printings"
             sx={styles.checkboxLabel}
           />
-          <Box sx={styles.cards}>
-            {cards.map((card) => getImage(card))}
-          </Box>
+          
+          {isCardViewChanging ? (
+            <Box sx={styles.loadingCardsContainer}>
+              <CircularProgress size={40} />
+              <Typography sx={styles.loadingCardsText}>
+                Loading cards...
+              </Typography>
+            </Box>
+          ) : (
+            <Box sx={styles.cards}>
+              {cards.map((card) => getImage(card))}
+            </Box>
+          )}
         </Paper>
       </Container>
     </Box>
