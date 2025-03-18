@@ -282,7 +282,7 @@ const ArtistCardAnalysis = () => {
     const styles = {
         container: {
             maxWidth: 1200,
-            margin: "0 auto",
+            margin: "30px auto",
             padding: { xs: 2, md: 4 },
             backgroundColor: "#fff",
             borderRadius: 2,
