@@ -1,248 +1,436 @@
-import { Box, Button, InputLabel, Radio, RadioGroup, TextField, Typography } from "@mui/material";
-import { authStyles } from "../../styles/auth-styles";
-import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
-import { ADD_ARTIST } from "../graphql/mutations";
-import { useSelector } from "react-redux";
-import { useState } from "react";
-
-type Inputs = {
-    name: string;
-    email: string;
-    filename: string;
-    facebook: string;
-    instagram: string;
-    patreon: string;
-    twitter: string;
-    youtube: string;
-    artstation: string;
-    mountainmage: string;
-    url: string;
-    location: string;
-    signingComment: string;
-    artistProofs: string;
-    haveSignature: string;
-    signing: string;
-    markssignatureservice: string;
-}
-
-const AddArtist = () => {
-    const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
-    const {
-        register,
-        handleSubmit,
-    } = useForm<Inputs>();
-    const [ addArtist ] = useMutation(ADD_ARTIST);
-    const [signature, setSignature] = useState("false");
-    const [artistProof, setArtistProof] = useState("false");
-    const [isSigning, setIsSigning] = useState("false");
-    const [marks, setMarks] = useState("false");
-
-    const onSubmit = async({
-        name, 
-        email,
-        filename,
-        facebook,
-        instagram,
-        patreon,
-        twitter,
-        youtube, 
-        artstation,
-        mountainmage,
-        url,
-        location,
-        signingComment,
-        artistProofs,
-        haveSignature,
-        signing,
-        markssignatureservice,    
-    }: Inputs) => {
-            try {
-                await addArtist({
-                    variables: {
-                        name, 
-                        email,
-                        filename,
-                        facebook,
-                        instagram,
-                        patreon,
-                        twitter,
-                        youtube,
-                        artstation,
-                        mountainmage,
-                        url,
-                        location,
-                        signingComment,
-                        artistProofs: artistProof,
-                        haveSignature: signature,
-                        signing: isSigning,
-                        markssignatureservice: marks, 
-                    },
-                });
-            } catch (err: any) {
-                console.log(err.message);
-            }
-    };
-
-    if (!isLoggedIn) {
-        return <p>Error</p>
-    }
-    return <Box sx={authStyles.container}>
-        <Box sx={authStyles.formContainer}>
-            <Typography sx={authStyles.logoText}>
-              Add Artist
-            </Typography>{" "}
-            {/* @ts-ignore */}
-            <form onSubmit={handleSubmit(onSubmit)} style={authStyles.form}>
-                <InputLabel aria-label="name"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="name" 
-                    label="Name" 
-                    {...register("name")}
-                />           
-                <InputLabel aria-label="email"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="email" 
-                    label="Email" 
-                    {...register("email")}
-                />
-                <InputLabel aria-label="filename"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="filename" 
-                    label="File Name" 
-                    {...register("filename")}
-                />
-                <InputLabel aria-label="facebook"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="facebook" 
-                    label="Facebook" 
-                    {...register("facebook")}
-                />
-                <InputLabel aria-label="instagram"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="instagram" 
-                    label="Instagram" 
-                    {...register("instagram")}
-                />
-                <InputLabel aria-label="patreon"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="patreon" 
-                    label="Patreon" 
-                    {...register("patreon")}
-                />
-                <InputLabel aria-label="twitter"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="twitter" 
-                    label="Twitter" 
-                    {...register("twitter")}
-                />
-                <InputLabel aria-label="youtube"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="youtube" 
-                    label="Youtube" 
-                    {...register("youtube")}
-                />
-                <InputLabel aria-label="artstation"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="artstation" 
-                    label="Artstation" 
-                    {...register("artstation")}
-                />
-                <InputLabel aria-label="mountainmage"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="mountainmage" 
-                    label="Mountainmage" 
-                    {...register("mountainmage")}
-                />
-                <InputLabel aria-label="url"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="url" 
-                    label="URL" 
-                    {...register("url")}
-                />
-                <InputLabel aria-label="location"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="location" 
-                    label="Location" 
-                    {...register("location")}
-                />
-                <InputLabel aria-label="signingComment"></InputLabel>
-                <TextField 
-                    margin="normal" 
-                    InputProps={{style: {borderRadius: 20}}}
-                    aria-label="signingComment" 
-                    label="Signing Comment" 
-                    {...register("signingComment")}
-                />
-                <label>Artist Proofs</label>
-                <RadioGroup
-                    aria-label="artistProofs"
-                    defaultValue={"false"}
-                    sx={authStyles.radioGroup}
-                    onChange={(e) => setArtistProof(e.target.value)}
-                >
-                    <Radio value={"false"} /><label>No</label>
-                    <Radio value={"true"} /><label>Yes</label>
-                </RadioGroup>
-                <label>Have Signature</label>
-                <RadioGroup
-                    aria-label="haveSignature"
-                    defaultValue={"false"}
-                    sx={authStyles.radioGroup}
-                    onChange={(e) => setSignature(e.target.value)}
-                >
-                    <Radio value={"false"} /><label>No</label>
-                    <Radio value={"true"} /><label>Yes</label>
-                </RadioGroup>
-                <label>Signing</label>
-                <RadioGroup
-                    aria-label="signing"
-                    defaultValue={"false"}
-                    sx={authStyles.radioGroup}
-                    onChange={(e) => setIsSigning(e.target.value)}
-                >
-                    <Radio value={"false"} /><label>No</label>
-                    <Radio value={"true"} /><label>Yes</label>
-                </RadioGroup>
-                <label>Marks Signature Service</label>
-                <RadioGroup
-                    aria-label="markssignatureservice"
-                    defaultValue={"false"}
-                    sx={authStyles.radioGroup}
-                    onChange={(e) => setMarks(e.target.value)}
-                >
-                    <Radio value={"false"} /><label>No</label>
-                    <Radio value={"true"} /><label>Yes</label>
-                </RadioGroup>
-                <Button type="submit" variant="contained" sx={authStyles.submitButton}>Submit</Button>
-            </form>
-        </Box>
-    </Box>;
-};
-
-export default AddArtist;
-
+import { 
+    Box, 
+    Button, 
+    Radio, 
+    RadioGroup, 
+    TextField, 
+    Typography, 
+    Container, 
+    Paper,
+    FormControlLabel,
+    FormControl,
+    FormLabel
+  } from "@mui/material";
+  import { useForm } from "react-hook-form";
+  import { useMutation } from "@apollo/client";
+  import { ADD_ARTIST } from "../graphql/mutations";
+  import { useSelector } from "react-redux";
+  import { useState } from "react";
+  
+  type Inputs = {
+      name: string;
+      email: string;
+      filename: string;
+      facebook: string;
+      instagram: string;
+      patreon: string;
+      twitter: string;
+      youtube: string;
+      artstation: string;
+      mountainmage: string;
+      url: string;
+      location: string;
+      signingComment: string;
+      artistProofs: string;
+      haveSignature: string;
+      signing: string;
+      markssignatureservice: string;
+  }
+  
+  const AddArtist = () => {
+      const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
+      const {
+          register,
+          handleSubmit,
+      } = useForm<Inputs>();
+      const [ addArtist ] = useMutation(ADD_ARTIST);
+      const [signature, setSignature] = useState("false");
+      const [artistProof, setArtistProof] = useState("false");
+      const [isSigning, setIsSigning] = useState("false");
+      const [marks, setMarks] = useState("false");
+  
+      const styles = {
+          container: {
+              backgroundColor: "#507A60",
+              minHeight: "100vh",
+              padding: { xs: 2, md: 4 },
+          },
+          contentWrapper: {
+              maxWidth: 800,
+              margin: "0 auto",
+              padding: { xs: 3, md: 4 },
+              backgroundColor: "#fff",
+              borderRadius: 2,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          },
+          pageTitle: {
+              color: "#507A60",
+              fontWeight: 700,
+              fontSize: { xs: "2rem", md: "2.5rem" },
+              marginBottom: 3,
+              textAlign: "center",
+          },
+          sectionHeader: {
+              color: "#507A60",
+              fontWeight: 600,
+              fontSize: "1.5rem",
+              marginBottom: 2,
+              marginTop: 3,
+              paddingBottom: 1,
+              borderBottom: "2px solid #507A60",
+          },
+          form: {
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+          },
+          textField: {
+              "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                      borderColor: "#507A60",
+                  },
+                  "&.Mui-focused fieldset": {
+                      borderColor: "#507A60",
+                  },
+              },
+              "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                      color: "#507A60",
+                  },
+              },
+          },
+          radioGroup: {
+              "& .MuiFormControlLabel-root": {
+                  margin: "0 16px 0 0",
+              },
+              "& .MuiRadio-root": {
+                  color: "#507A60",
+                  "&.Mui-checked": {
+                      color: "#507A60",
+                  },
+              },
+          },
+          formControl: {
+              marginTop: 2,
+              marginBottom: 1,
+          },
+          formLabel: {
+              color: "#507A60",
+              fontWeight: 600,
+              fontSize: "1rem",
+              "&.Mui-focused": {
+                  color: "#507A60",
+              },
+          },
+          submitButton: {
+              backgroundColor: "#507A60",
+              color: "white",
+              marginTop: 3,
+              padding: "12px 24px",
+              fontSize: "1.1rem",
+              fontWeight: 600,
+              borderRadius: "8px",
+              "&:hover": {
+                  backgroundColor: "#3c5c48",
+              },
+          },
+          fieldSection: {
+              marginBottom: 2,
+          },
+          errorMessage: {
+              color: "#d32f2f",
+              textAlign: "center",
+              padding: 4,
+              backgroundColor: "rgba(211, 47, 47, 0.1)",
+              borderRadius: 2,
+              marginBottom: 2,
+          },
+      };
+  
+      const onSubmit = async({
+          name, 
+          email,
+          filename,
+          facebook,
+          instagram,
+          patreon,
+          twitter,
+          youtube, 
+          artstation,
+          mountainmage,
+          url,
+          location,
+          signingComment,
+          artistProofs,
+          haveSignature,
+          signing,
+          markssignatureservice,    
+      }: Inputs) => {
+              try {
+                  await addArtist({
+                      variables: {
+                          name, 
+                          email,
+                          filename,
+                          facebook,
+                          instagram,
+                          patreon,
+                          twitter,
+                          youtube,
+                          artstation,
+                          mountainmage,
+                          url,
+                          location,
+                          signingComment,
+                          artistProofs: artistProof,
+                          haveSignature: signature,
+                          signing: isSigning,
+                          markssignatureservice: marks, 
+                      },
+                  });
+              } catch (err: any) {
+                  console.log(err.message);
+              }
+      };
+  
+      if (!isLoggedIn) {
+          return (
+              <Box sx={styles.container}>
+                  <Container maxWidth="md">
+                      <Paper elevation={0} sx={styles.contentWrapper}>
+                          <Typography sx={styles.errorMessage}>
+                              Error: You must be logged in to add an artist
+                          </Typography>
+                      </Paper>
+                  </Container>
+              </Box>
+          );
+      }
+  
+      return (
+          <Box sx={styles.container}>
+              <Container maxWidth="md">
+                  <Paper elevation={0} sx={styles.contentWrapper}>
+                      <Typography variant="h2" sx={styles.pageTitle}>
+                          Add Artist
+                      </Typography>
+                      
+                      <form onSubmit={handleSubmit(onSubmit)} style={styles.form as React.CSSProperties}>
+                          <Typography sx={styles.sectionHeader} variant="h4">
+                              Basic Information
+                          </Typography>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Artist Name"
+                                  {...register("name")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Email"
+                                  type="email"
+                                  {...register("email")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="File Name"
+                                  {...register("filename")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Location"
+                                  {...register("location")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Website URL"
+                                  {...register("url")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+  
+                          <Typography sx={styles.sectionHeader} variant="h4">
+                              Social Media Links
+                          </Typography>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Facebook"
+                                  {...register("facebook")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Instagram"
+                                  {...register("instagram")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Twitter"
+                                  {...register("twitter")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="YouTube"
+                                  {...register("youtube")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="ArtStation"
+                                  {...register("artstation")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Patreon"
+                                  {...register("patreon")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+  
+                          <Typography sx={styles.sectionHeader} variant="h4">
+                              Signing Information
+                          </Typography>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Signing Comment"
+                                  multiline
+                                  rows={3}
+                                  {...register("signingComment")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="MountainMage Service"
+                                  {...register("mountainmage")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+  
+                          <Typography sx={styles.sectionHeader} variant="h4">
+                              Artist Options
+                          </Typography>
+                          
+                          <FormControl sx={styles.formControl}>
+                              <FormLabel sx={styles.formLabel}>Artist Proofs Available</FormLabel>
+                              <RadioGroup
+                                  row
+                                  value={artistProof}
+                                  onChange={(e) => setArtistProof(e.target.value)}
+                                  sx={styles.radioGroup}
+                              >
+                                  <FormControlLabel value="false" control={<Radio />} label="No" />
+                                  <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                              </RadioGroup>
+                          </FormControl>
+                          
+                          <FormControl sx={styles.formControl}>
+                              <FormLabel sx={styles.formLabel}>Have Signature Example</FormLabel>
+                              <RadioGroup
+                                  row
+                                  value={signature}
+                                  onChange={(e) => setSignature(e.target.value)}
+                                  sx={styles.radioGroup}
+                              >
+                                  <FormControlLabel value="false" control={<Radio />} label="No" />
+                                  <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                              </RadioGroup>
+                          </FormControl>
+                          
+                          <FormControl sx={styles.formControl}>
+                              <FormLabel sx={styles.formLabel}>Offers Signing Services</FormLabel>
+                              <RadioGroup
+                                  row
+                                  value={isSigning}
+                                  onChange={(e) => setIsSigning(e.target.value)}
+                                  sx={styles.radioGroup}
+                              >
+                                  <FormControlLabel value="false" control={<Radio />} label="No" />
+                                  <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                              </RadioGroup>
+                          </FormControl>
+                          
+                          <FormControl sx={styles.formControl}>
+                              <FormLabel sx={styles.formLabel}>Mark's Signature Service</FormLabel>
+                              <RadioGroup
+                                  row
+                                  value={marks}
+                                  onChange={(e) => setMarks(e.target.value)}
+                                  sx={styles.radioGroup}
+                              >
+                                  <FormControlLabel value="false" control={<Radio />} label="No" />
+                                  <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                              </RadioGroup>
+                          </FormControl>
+                          
+                          <Button 
+                              type="submit" 
+                              variant="contained" 
+                              sx={styles.submitButton}
+                              fullWidth
+                          >
+                              Add Artist
+                          </Button>
+                      </form>
+                  </Paper>
+              </Container>
+          </Box>
+      );
+  };
+  
+  export default AddArtist;

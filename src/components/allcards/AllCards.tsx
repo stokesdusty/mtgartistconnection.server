@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useState,
   useMemo,
@@ -19,7 +18,7 @@ import {
 } from "@mui/material";
 import { GET_ARTIST_BY_NAME } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
-import { useLoading } from '../../LoadingContext'; // Import the useLoading hook
+import { useLoading } from '../../LoadingContext';
 
 interface Card {
   related_uris: any;
@@ -95,8 +94,8 @@ const AllCards = () => {
     };
   }, [formattedArtistName, artist]);
 
-  const fetchCards = useCallback(
-    async (
+  useEffect(() => {
+    const fetchCards = async (
       url: string,
       showDuplicates: boolean,
       previousData: Card[] = []
@@ -119,11 +118,8 @@ const AllCards = () => {
         console.error("Error fetching cards:", error);
         return null;
       }
-    },
-    []
-  );
+    };
 
-  useEffect(() => {
     const fetchData = async () => {
       if (!scryfallQuery) return;
       
@@ -148,7 +144,7 @@ const AllCards = () => {
     };
     
     fetchData();
-  }, [scryfallQuery, fetchCards, setIsLoading]);
+  }, [scryfallQuery, setIsLoading]);
 
   useEffect(() => {
     if (cardsWithDupes.data.length > 0 && cardsWithoutDupes.data.length > 0) {
@@ -292,6 +288,13 @@ const AllCards = () => {
       color: "#507A60",
       fontWeight: 600,
     },
+    loadingMessage: {
+      color: "#507A60",
+      textAlign: "center",
+      padding: 4,
+      backgroundColor: "#999999",
+      borderRadius: 2,
+    },
     errorMessage: {
       color: "#d32f2f",
       textAlign: "center",
@@ -356,7 +359,7 @@ const AllCards = () => {
             All {artist} Cards ({totalCards})
           </Typography>
           { totalCards === 0 && (
-            <Typography sx={styles.errorMessage}>
+            <Typography sx={styles.loadingMessage}>
               Loading....
             </Typography>
           )}
