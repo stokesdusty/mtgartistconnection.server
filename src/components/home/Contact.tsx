@@ -120,11 +120,11 @@ import {
               <Box sx={styles.emailContainer}>
                 <FaBluesky color={styles.emailIcon.color} size={24} />
                 <Link
-                  href="https://bsky.app/profile/mtgartistconnection.bsky.social"
+                  href="https://bsky.app/profile/mtgartistconnect.bsky.social"
                   target="_blank"
                   sx={styles.emailLink}
                 >
-                  @mtgartistconnection.bsky.social
+                  @mtgartistconnect.bsky.social
                 </Link>
               </Box>
               

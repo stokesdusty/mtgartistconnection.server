@@ -60,7 +60,7 @@ const Footer = () => {
             <Link href="/privacypolicy" sx={styles.link}>Privacy Policy</Link>
             <Link href="/termsofservice" sx={styles.link}>Terms of Service</Link>
             <Link href="/contact" sx={styles.link}>Contact</Link>
-            <Link href="https://bsky.app/profile/mtgartistconnection.bsky.social" target="_blank" rel="noopener noreferrer" sx={styles.iconLink}>
+            <Link href="https://bsky.app/profile/mtgartistconnect.bsky.social" target="_blank" rel="noopener noreferrer" sx={styles.iconLink}>
               <FaBluesky size={24} />
             </Link>
           </Box>
