@@ -6,6 +6,7 @@ import {
     Link,
   } from "@mui/material";
   import EmailIcon from '@mui/icons-material/Email';
+  import { FaBluesky } from "react-icons/fa6";
   
   const ContactPage = () => {
     document.title = "MtG Artist Connection - Contact Us";
@@ -103,7 +104,7 @@ import {
               </Typography>
               
               <Typography sx={styles.paragraph}>
-                For any questions, content submissions, or concerns, please email us directly at:
+                For any questions, content submissions, or concerns, please reach out to us:
               </Typography>
               
               <Box sx={styles.emailContainer}>
@@ -113,6 +114,17 @@ import {
                   sx={styles.emailLink}
                 >
                   mtgartistconnection@gmail.com
+                </Link>
+              </Box>
+
+              <Box sx={styles.emailContainer}>
+                <FaBluesky color={styles.emailIcon.color} size={24} />
+                <Link
+                  href="https://bsky.app/profile/mtgartistconnection.bsky.social"
+                  target="_blank"
+                  sx={styles.emailLink}
+                >
+                  @mtgartistconnection.bsky.social
                 </Link>
               </Box>
               

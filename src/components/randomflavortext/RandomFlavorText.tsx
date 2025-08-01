@@ -74,6 +74,7 @@ const RandomFlavorText = () => {
       textAlign: "center",
     },
     imageContainer: {
+      position: "relative",
       width: "100%",
       borderRadius: 1,
       overflow: "hidden",
@@ -146,7 +147,7 @@ const RandomFlavorText = () => {
     fetchCardData();
   };
 
-  if (isLoading)
+  if (isLoading && !cardData)
     return (
       <Box sx={styles.container}>
         <Box sx={styles.loadingContainer}>
@@ -177,6 +178,24 @@ const RandomFlavorText = () => {
                 </Typography>
                 
                 <Box sx={styles.imageContainer}>
+                  {isLoading && cardData && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1,
+                      }}
+                    >
+                      <CircularProgress />
+                    </Box>
+                  )}
                   <img
                     alt={`${cardData.name} artwork`}
                     key={cardData.id}
@@ -191,12 +210,15 @@ const RandomFlavorText = () => {
               
               <Button
                 variant="contained"
-                startIcon={<AutorenewIcon />}
+                startIcon={
+                  isLoading ? <CircularProgress size={24} color="inherit" /> : <AutorenewIcon />
+                }
                 sx={styles.button}
                 onClick={handleReload}
+                disabled={isLoading}
                 disableElevation
               >
-                Get Another Quote
+                {isLoading ? "Loading..." : "Get Another Quote"}
               </Button>
             </Box>
           )}

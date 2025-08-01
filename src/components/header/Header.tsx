@@ -24,6 +24,7 @@ const navItems: NavItem[] = [
   { label: "Card Signing Services", to: "/signingservices" },
   { label: "Signing Events", to: "/calendar" },
   { label: "Random Flavor Text", to: "/randomflavortext" },
+  { label: "Contact", to: "/contact" },
 ];
 
 const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(

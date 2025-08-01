@@ -107,7 +107,7 @@ const Homepage = () => {
     // Mountain Mage Filter
     if (mountainMageFilter) {
       filteredArtists = filteredArtists.filter(
-        (artist: Artist) => artist.mountainmage !== ""
+        (artist: Artist) => artist.mountainmage && artist.mountainmage !== "" && artist.mountainmage !== "false"
       );
     }
 

@@ -1,4 +1,5 @@
 import { Box, Typography, Container, Link } from "@mui/material";
+import { FaBluesky } from "react-icons/fa6";
 
 const currentYear = new Date().getFullYear();
 const copyrightText = `© Copyright ${currentYear} MtGArtistConnection`;
@@ -27,6 +28,7 @@ const Footer = () => {
     footerLinks: {
       display: "flex",
       gap: { xs: "1rem", md: "2rem" },
+      alignItems: "center",
     },
     link: {
       color: "#507A60",
@@ -37,6 +39,15 @@ const Footer = () => {
         color: "#3d5d49",
         textDecoration: "underline",
       },
+    },
+    iconLink: {
+      color: "#507A60",
+      transition: "color 0.2s",
+      "&:hover": {
+        color: "#3d5d49",
+      },
+      // To prevent any extra vertical space from the link
+      lineHeight: 0,
     },
   };
 
@@ -49,6 +60,9 @@ const Footer = () => {
             <Link href="/privacypolicy" sx={styles.link}>Privacy Policy</Link>
             <Link href="/termsofservice" sx={styles.link}>Terms of Service</Link>
             <Link href="/contact" sx={styles.link}>Contact</Link>
+            <Link href="https://bsky.app/profile/mtgartistconnection.bsky.social" target="_blank" rel="noopener noreferrer" sx={styles.iconLink}>
+              <FaBluesky size={24} />
+            </Link>
           </Box>
         </Box>
       </Container>
