@@ -5,6 +5,10 @@ export const GET_ARTISTS_FOR_HOMEPAGE = gql`
         artists{
             name
             filename
+            location
+            signing
+            markssignatureservice
+            mountainmage
         }
     }
 `;
