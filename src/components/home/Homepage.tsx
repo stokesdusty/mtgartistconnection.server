@@ -277,12 +277,21 @@ const Homepage = () => {
         <Typography variant="h1" sx={styles.headerText}>
           Welcome to MTG Artist Connection
         </Typography>
-        <Typography sx={styles.description}>
-          We all love and appreciate the art in our favorite card game. Finding
-          the artists to get cards signed, view their other work, and following
-          their socials shouldn't be as tough as it is. So we created MTG Artist
-          Connection, a place where we aspire to collect as much useful data to
-          help fans connect with the art in a whole new way.
+
+        <Typography variant="h6" sx={styles.description}>
+          Looking for your favorite Magic artist's website, social links, or online store? You’re in the right place! MTG Artist Connection is your go-to hub for discovering:
+        </Typography>
+        <Typography variant="body1" sx={styles.description}>
+          <b>Artist Profiles</b> – Find official sites, social media pages, and portfolios for hundreds of MTG artists.
+        </Typography>
+        <Typography variant="body1" sx={styles.description}>
+          <b>Where to Buy</b> – Easily locate artist stores for playmats, prints, tokens, and signed cards.
+        </Typography>
+        <Typography variant="body1" sx={styles.description}>
+          <b>Upcoming Events</b> – See which conventions, signings, or streams your favorite artists will be attending.
+        </Typography>
+        <Typography variant="h6" sx={styles.description}>
+          Whether you're hunting for a signature, commissioning custom art, or just exploring the incredible talent behind the cards, this is your gateway to the MTG art community.
         </Typography>
         <Typography sx={styles.count}>
           {data.artists.length} artists and counting!
