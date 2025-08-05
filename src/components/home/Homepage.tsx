@@ -213,6 +213,12 @@ const Homepage = () => {
       gap: 1,
       marginBottom: { xs: 2, md: 0 }, // Add some spacing on smaller screens
     },
+   signingAgentLabel: { // Style for the label
+      fontWeight: 600,
+      color: '#507A60',
+      marginBottom: '0.5rem',
+      textAlign: { xs: 'center', md: 'left' }, // Adjust text alignment
+    },
     artistsGrid: {
       display: "grid",
       gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr 1fr" },
@@ -340,29 +346,31 @@ const Homepage = () => {
               ))}
             </Select>
           </FormControl>
-
-          <FormGroup sx={styles.checkboxesContainer}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={mountainMageFilter}
-                  onChange={handleMountainMageChange}
-                  name="mountainMage"
-                />
-              }
-              label="Mountain Mage"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={marksSigServiceFilter}
-                  onChange={handleMarksSigServiceChange}
-                  name="marksSigService"
-                />
-              }
-              label="Marks Signature Service"
-            />
-          </FormGroup>
+          <Box>
+           <Typography sx={styles.signingAgentLabel}>Signing Agent</Typography>
+            <FormGroup sx={styles.checkboxesContainer}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={marksSigServiceFilter}
+                    onChange={handleMarksSigServiceChange}
+                    name="marksSigService"
+                  />
+                }
+                label="Marks Signature Service"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={mountainMageFilter}
+                    onChange={handleMountainMageChange}
+                    name="mountainMage"
+                  />
+                }
+                label="Mountain Mage"
+              />
+            </FormGroup>
+          </Box>
         </Box>
 
         <Box sx={styles.artistsGrid}>
