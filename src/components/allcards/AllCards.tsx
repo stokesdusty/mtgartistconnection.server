@@ -54,16 +54,7 @@ const AllCards = () => {
   const { name: artist } = useParams<{ name?: string }>();
   const navigate = useNavigate();
   const [showDupes, setShowDupes] = useState<boolean>(false);
-  const { setIsLoading } = useLoading();
-  const [isCardViewChanging, setIsCardViewChanging] = useState(false);
-  const [cardsWithDupes, setCardsWithDupes] = useState<CardData>({
-    data: [],
-    total_cards: 0,
-  });
-  const [cardsWithoutDupes, setCardsWithoutDupes] = useState<CardData>({
-    data: [],
-    total_cards: 0,
-  });
+  const [cardData, setCardData] = useState<CardData | null>(null);
 
   useEffect(() => {
     if (!artist) {
@@ -95,74 +86,39 @@ const AllCards = () => {
   }, [formattedArtistName, artist]);
 
   useEffect(() => {
-    const fetchCards = async (
-      url: string,
-      showDuplicates: boolean,
-      previousData: Card[] = []
-    ): Promise<Card[] | null> => {
+    const fetchAllCards = async (url: string, allCards: Card[] = []): Promise<Card[]> => {
       try {
         const response = await axios.get<ScryfallResponse>(url);
-        let allData: Card[] = [...previousData, ...response.data.data];
-
+        const newCards = [...allCards, ...response.data.data];
+        
         if (response.data.has_more && response.data.next_page) {
-          const nextPageData = await fetchCards(
-            response.data.next_page,
-            showDuplicates,
-            allData
-          );
-          if (nextPageData) allData = nextPageData;
+          return await fetchAllCards(response.data.next_page, newCards);
         }
-
-        return allData;
+        
+        return newCards;
       } catch (error) {
         console.error("Error fetching cards:", error);
-        return null;
+        return allCards; // Return what we have so far
       }
     };
 
     const fetchData = async () => {
       if (!scryfallQuery) return;
-      
-      setIsLoading(true);
-      
-      const noDupesData = await fetchCards(
-        scryfallQuery.withoutDuplicates,
-        false
-      );
-      if (noDupesData) {
-        setCardsWithoutDupes({data: noDupesData, total_cards: noDupesData.length});
-      }
-      const withDupesData = await fetchCards(
-        scryfallQuery.withDuplicates,
-        true
-      );
-      if (withDupesData) {
-        setCardsWithDupes({data: withDupesData, total_cards: withDupesData.length});
-      }
-      
-      setIsLoading(false);
+
+      const url = showDupes ? scryfallQuery.withDuplicates : scryfallQuery.withoutDuplicates;
+      const fetchedCards = await fetchAllCards(url);
+      setCardData({ data: fetchedCards, total_cards: fetchedCards.length });
     };
     
     fetchData();
-  }, [scryfallQuery, setIsLoading]);
-
-  useEffect(() => {
-    if (cardsWithDupes.data.length > 0 && cardsWithoutDupes.data.length > 0) {
-      setIsCardViewChanging(true);
-      const timeoutId = setTimeout(() => {
-        setIsCardViewChanging(false);
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [showDupes, cardsWithDupes, cardsWithoutDupes]);
+  }, [scryfallQuery, showDupes]);
 
   const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
-    if (!scryfallQuery) {
+    if (!cardData) {
       return { cards: [], totalCards: 0 };
     }
-    const selectedData = showDupes ? cardsWithDupes : cardsWithoutDupes;
-    return { cards: selectedData.data, totalCards: selectedData.total_cards };
-  }, [showDupes, scryfallQuery, cardsWithDupes, cardsWithoutDupes]);
+    return { cards: cardData.data, totalCards: cardData.total_cards };
+  }, [cardData]);
 
   const getImage = (card: Card) => {
     if (card.image_uris) {
@@ -377,14 +333,14 @@ const AllCards = () => {
                 checked={showDupes} 
                 onChange={handleCheck} 
                 sx={styles.checkbox}
-                disabled={isCardViewChanging}
+                disabled={!cardData}
               />
             }
             label="Show All Printings"
             sx={styles.checkboxLabel}
           />
           
-          {isCardViewChanging ? (
+          {!cardData ? (
             <Box sx={styles.loadingCardsContainer}>
               <CircularProgress size={40} />
               <Typography sx={styles.loadingCardsText}>
