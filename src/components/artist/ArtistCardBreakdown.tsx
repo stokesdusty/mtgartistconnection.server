@@ -280,67 +280,176 @@ const ArtistCardAnalysis = () => {
     const mostCommonColor = colorData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.fullName || 'N/A';
 
     const styles = {
+        outerContainer: {
+            background: "linear-gradient(135deg, #507A60 0%, #3c5c48 50%, #2d4a36 100%)",
+            minHeight: "100vh",
+            padding: { xs: 3, md: 6 },
+            position: "relative",
+            "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+                pointerEvents: "none",
+            },
+        },
         container: {
             maxWidth: 1200,
-            margin: "30px auto",
-            padding: { xs: 2, md: 4 },
-            backgroundColor: "#fff",
-            borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+            margin: "0 auto",
+            padding: { xs: 2, md: 3 },
+            background: "rgba(255, 255, 255, 0.98)",
+            backdropFilter: "blur(30px) saturate(1.2)",
+            borderRadius: 4,
+            boxShadow: "0 32px 80px rgba(0,0,0,0.12), 0 16px 40px rgba(80, 122, 96, 0.15), inset 0 1px 0 rgba(255,255,255,0.9)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            position: "relative",
+            zIndex: 1,
+        },
+        pageTitle: {
+            background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            fontWeight: 800,
+            fontSize: { xs: "2rem", md: "2.8rem" },
+            marginBottom: 1.5,
+            textAlign: "center",
+            letterSpacing: "-0.02em",
+            lineHeight: 1,
+            fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+        },
+        artistTitle: {
+            background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            fontWeight: 600,
+            fontSize: { xs: "1.3rem", md: "1.6rem" },
+            marginBottom: 3,
+            textAlign: "center",
+            fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+        },
+        chartCard: {
+            background: "rgba(255, 255, 255, 0.9)",
+            backdropFilter: "blur(20px) saturate(1.1)",
+            borderRadius: 3,
+            padding: 2.5,
+            boxShadow: "0 12px 32px rgba(0,0,0,0.06), 0 6px 16px rgba(80, 122, 96, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
+            border: "1px solid rgba(255, 255, 255, 0.4)",
+            transition: "all 0.3s ease",
+            "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 16px 40px rgba(0,0,0,0.08), 0 8px 20px rgba(80, 122, 96, 0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+            },
+        },
+        chartTitle: {
+            background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            fontWeight: 700,
+            fontSize: "1.4rem",
+            marginBottom: 2.5,
+            fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+            letterSpacing: "-0.01em",
+            position: "relative",
+            "&::after": {
+                content: '""',
+                position: "absolute",
+                bottom: "-8px",
+                left: 0,
+                width: "50px",
+                height: "2px",
+                background: "linear-gradient(90deg, #507A60, #6b9d73, transparent)",
+                borderRadius: "1px",
+            },
+        },
+        gridContainer: {
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+            gap: 3,
+            marginBottom: 4,
         },
         loadingContainer: {
+            background: "linear-gradient(135deg, #507A60 0%, #3c5c48 100%)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "50vh",
-            "& .MuiCircularProgress-root": {
-              color: "#507A60",
+            height: "100vh",
+            position: "relative",
+            "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)",
             },
-          },
-          errorMessage: {
+            "& .MuiCircularProgress-root": {
+                color: "white",
+                zIndex: 1,
+            },
+        },
+        errorMessage: {
             color: "#d32f2f",
             textAlign: "center",
             padding: 4,
-            backgroundColor: "rgba(211, 47, 47, 0.1)",
-            borderRadius: 2,
-          },
+            background: "linear-gradient(135deg, rgba(211, 47, 47, 0.08) 0%, rgba(211, 47, 47, 0.12) 100%)",
+            borderRadius: 3,
+            border: "1px solid rgba(211, 47, 47, 0.2)",
+            backdropFilter: "blur(10px)",
+            fontSize: "1.1rem",
+            fontWeight: 500,
+        },
     };
 
     if (isFetching) {
         return (
             <Box sx={styles.loadingContainer}>
-              <CircularProgress sx={{ color: "#507A60" }} />
+              <CircularProgress size={60} />
             </Box>
           );
     }
     if(error) {
         return (
-            <Box sx={styles.container}>
-              <Typography sx={styles.errorMessage}>
-                Error loading cards: {error}
-              </Typography>
+            <Box sx={styles.outerContainer}>
+                <Box sx={styles.container}>
+                    <Typography sx={styles.errorMessage}>
+                        Error loading cards: {error}
+                    </Typography>
+                </Box>
             </Box>
           );
     }
     if (!cardsWithDupes || cardsWithDupes.length === 0) {
         return (
-            <Box sx={styles.container}>
-              <Typography sx={styles.errorMessage}>
-                No cards found for {artist}
-              </Typography>
+            <Box sx={styles.outerContainer}>
+                <Box sx={styles.container}>
+                    <Typography sx={styles.errorMessage}>
+                        No cards found for {artist}
+                    </Typography>
+                </Box>
             </Box>
           );
     }
     return (
-        <Box sx={styles.container}>
-            <div className="flex flex-col p-2 sm:p-4 md:p-6 bg-gray-50 rounded-lg w-full">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-4 md:mb-6 text-center text-gray-800">MTG Card Analysis Dashboard</h1>
-                <h2 className="text-lg sm:text-xl font-semibold mb-4 md:mb-6 text-center text-gray-600">Artist: {cardsWithDupes[0].artist}</h2>
+        <Box sx={styles.outerContainer}>
+            <Box sx={styles.container}>
+                <Typography sx={styles.pageTitle}>
+                    MTG Card Analysis Dashboard
+                </Typography>
+                <Typography sx={styles.artistTitle}>
+                    Artist: {cardsWithDupes[0].artist}
+                </Typography>
     
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <Box sx={styles.gridContainer}>
                     {/* Mana Cost Distribution */}
-                    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-md border border-gray-200 transition-transform hover:translate-y-[-5px]">
-                        <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-gray-700" style={{ borderBottom: '2px solid #8884d8', paddingBottom: '8px', display: 'inline-block' }}>Mana Cost Distribution</h2>
+                    <Box sx={styles.chartCard}>
+                        <Typography sx={styles.chartTitle}>Mana Cost Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={manaCostData} margin={{ top: 20, right: 10, left: 0, bottom: 40 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -375,11 +484,11 @@ const ArtistCardAnalysis = () => {
                                 </defs>
                             </BarChart>
                         </ResponsiveContainer>
-                    </div>
+                    </Box>
     
                     {/* Card Type Distribution */}
-                    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-md border border-gray-200 transition-transform hover:translate-y-[-5px]">
-                        <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-gray-700" style={{ borderBottom: '2px solid #00C49F', paddingBottom: '8px', display: 'inline-block' }}>Card Type Distribution</h2>
+                    <Box sx={styles.chartCard}>
+                        <Typography sx={styles.chartTitle}>Card Type Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                                 <Pie
@@ -425,11 +534,11 @@ const ArtistCardAnalysis = () => {
                                 />
                             </PieChart>
                         </ResponsiveContainer>
-                    </div>
+                    </Box>
     
                     {/* Color Distribution */}
-                    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-md border border-gray-200 transition-transform hover:translate-y-[-5px]">
-                        <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-gray-700" style={{ borderBottom: '2px solid #FF8042', paddingBottom: '8px', display: 'inline-block' }}>Color Distribution</h2>
+                    <Box sx={styles.chartCard}>
+                        <Typography sx={styles.chartTitle}>Color Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={colorData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -463,11 +572,11 @@ const ArtistCardAnalysis = () => {
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
-                    </div>
+                    </Box>
     
                     {/* Set Distribution */}
-                    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-md border border-gray-200 transition-transform hover:translate-y-[-5px]">
-                        <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-gray-700" style={{ borderBottom: '2px solid #FFBB28', paddingBottom: '8px', display: 'inline-block' }}>Set Distribution (Top 10)</h2>
+                    <Box sx={styles.chartCard}>
+                        <Typography sx={styles.chartTitle}>Set Distribution (Top 10)</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart 
                                 data={setData.slice(0, 10)} 
@@ -506,96 +615,104 @@ const ArtistCardAnalysis = () => {
                                 </defs>
                             </BarChart>
                         </ResponsiveContainer>
-                    </div>
-                </div>
+                    </Box>
+                </Box>
     
                 {/* Card List */}
-                <div className="bg-white p-3 sm:p-4 rounded-lg shadow-md border border-gray-200 mt-4 md:mt-6">
-                    <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-gray-700">Card Details</h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full bg-white text-xs sm:text-sm md:text-base" style={{ borderCollapse: 'collapse', border: '1px solid #e5e7eb' }}>
-                            <thead className="bg-gray-100">
-                                <tr>
-                                    <th className="p-2 md:p-3 text-left font-semibold border-b border-r border-gray-300">Name</th>
-                                    <th className="p-2 md:p-3 text-left font-semibold border-b border-r border-gray-300">Mana Cost</th>
-                                    <th className="p-2 md:p-3 text-left font-semibold border-b border-r border-gray-300">Type</th>
-                                    <th className="p-2 md:p-3 text-left font-semibold border-b border-r border-gray-300">Color</th>
-                                    <th className="p-2 md:p-3 text-left font-semibold border-b border-r border-gray-300">Set</th>
-                                    <th className="p-2 md:p-3 text-left font-semibold border-b border-gray-300">Oracle Text</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                <Box sx={{ ...styles.chartCard, marginTop: 4 }}>
+                    <Typography sx={styles.chartTitle}>Card Details</Typography>
+                    <Box sx={{ overflowX: 'auto' }}>
+                        <Box component="table" sx={{ 
+                            minWidth: '100%', 
+                            background: 'white', 
+                            fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }, 
+                            borderCollapse: 'collapse', 
+                            border: '1px solid #e5e7eb',
+                            borderRadius: 2,
+                            overflow: 'hidden'
+                        }}>
+                            <Box component="thead" sx={{ background: 'rgba(243, 244, 246, 0.8)' }}>
+                                <Box component="tr">
+                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Name</Box>
+                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Mana Cost</Box>
+                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Type</Box>
+                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Color</Box>
+                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Set</Box>
+                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db' }}>Oracle Text</Box>
+                                </Box>
+                            </Box>
+                            <Box component="tbody">
                                 {cardsWithDupes.map((card, index) => (
-                                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                        <td className="p-2 md:p-3 font-medium text-blue-600 border-b border-r border-gray-300">{card.name}</td>
-                                        <td className="p-2 md:p-3 border-b border-r border-gray-300">{card.mana_cost}</td>
-                                        <td className="p-2 md:p-3 border-b border-r border-gray-300">{card.type_line}</td>
-                                        <td className="p-2 md:p-3 border-b border-r border-gray-300">
+                                    <Box component="tr" key={index} sx={{ background: index % 2 === 0 ? 'white' : 'rgba(249, 250, 251, 0.8)' }}>
+                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, fontWeight: 500, color: '#2563eb', borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.name}</Box>
+                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.mana_cost}</Box>
+                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.type_line}</Box>
+                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>
                                             {card.colors?.map(color => colorNames[color as keyof typeof colorNames]).join(', ') || 'Colorless'}
-                                        </td>
-                                        <td className="p-2 md:p-3 border-b border-r border-gray-300">{card.set_name}</td>
-                                        <td className="p-2 md:p-3 text-xs sm:text-sm border-b border-gray-300 max-w-xs lg:max-w-md truncate">{card.oracle_text}</td>
-                                    </tr>
+                                        </Box>
+                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.set_name}</Box>
+                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, fontSize: { xs: '0.75rem', sm: '0.875rem' }, borderBottom: '1px solid #d1d5db', maxWidth: { xs: '300px', lg: '400px' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.oracle_text}</Box>
+                                    </Box>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box>
     
                 {/* Card Statistics Summary */}
-                <div className="bg-white p-3 sm:p-4 rounded-lg shadow-md border border-gray-200 mt-4 md:mt-6">
-                    <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4 text-gray-700">Card Statistics Summary</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div className="bg-gray-50 p-3 md:p-5 rounded-lg border border-gray-200">
-                            <h3 className="font-semibold text-base md:text-lg mb-2 md:mb-3 text-gray-700">General Stats</h3>
-                            <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
-                                <li className="flex justify-between">
-                                    <span className="font-medium text-gray-600">Total Cards:</span> 
-                                    <span className="text-gray-800">{cardsWithDupes.length}</span>
-                                </li>
-                                <li className="flex justify-between">
-                                    <span className="font-medium text-gray-600">Average CMC:</span> 
-                                    <span className="text-gray-800">{avgCmc.toFixed(2)}</span>
-                                </li>
-                                <li className="flex justify-between">
-                                    <span className="font-medium text-gray-600">Most Common Type:</span> 
-                                    <span className="text-gray-800">{mostCommonType}</span>
-                                </li>
-                                <li className="flex justify-between">
-                                    <span className="font-medium text-gray-600">Most Common Color:</span> 
-                                    <span className="text-gray-800">{mostCommonColor}</span>
-                                </li>
-                            </ul>
-                        </div>
+                <Box sx={{ ...styles.chartCard, marginTop: 4 }}>
+                    <Typography sx={styles.chartTitle}>Card Statistics Summary</Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 4, md: 6 } }}>
+                        <Box sx={{ background: 'rgba(249, 250, 251, 0.8)', p: { xs: 3, md: 5 }, borderRadius: 2, border: '1px solid rgba(229, 231, 235, 0.6)', backdropFilter: 'blur(10px)' }}>
+                            <Typography sx={{ fontWeight: 600, fontSize: { xs: '1rem', md: '1.125rem' }, mb: { xs: 2, md: 3 }, color: '#374151' }}>General Stats</Typography>
+                            <Box component="ul" sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, fontSize: { xs: '0.875rem', md: '1rem' } }}>
+                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Total Cards:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{cardsWithDupes.length}</Typography>
+                                </Box>
+                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Average CMC:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{avgCmc.toFixed(2)}</Typography>
+                                </Box>
+                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Most Common Type:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{mostCommonType}</Typography>
+                                </Box>
+                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Most Common Color:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{mostCommonColor}</Typography>
+                                </Box>
+                            </Box>
+                        </Box>
                         
-                        <div className="bg-gray-50 p-3 md:p-5 rounded-lg border border-gray-200">
-                            <h3 className="font-semibold text-base md:text-lg mb-2 md:mb-3 text-gray-700">Artist Info</h3>
-                            <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
-                                <li className="flex justify-between">
-                                    <span className="font-medium text-gray-600">Artist:</span> 
-                                    <span className="text-gray-800">{cardsWithDupes[0].artist}</span>
-                                </li>
-                                <li className="flex justify-between">
-                                    <span className="font-medium text-gray-600">Sets Illustrated:</span> 
-                                    <span className="text-gray-800">{setData.length}</span>
-                                </li>
-                                <li className="flex justify-between">
-                                    <span className="font-medium text-gray-600">Creature Types:</span> 
-                                    <span className="text-gray-800">{creatureTypeData.length}</span>
-                                </li>
-                                <li className="flex flex-col sm:flex-row sm:justify-between">
-                                    <span className="font-medium text-gray-600">Rarity Distribution:</span> 
-                                    <span className="text-gray-800 text-right">
+                        <Box sx={{ background: 'rgba(249, 250, 251, 0.8)', p: { xs: 3, md: 5 }, borderRadius: 2, border: '1px solid rgba(229, 231, 235, 0.6)', backdropFilter: 'blur(10px)' }}>
+                            <Typography sx={{ fontWeight: 600, fontSize: { xs: '1rem', md: '1.125rem' }, mb: { xs: 2, md: 3 }, color: '#374151' }}>Artist Info</Typography>
+                            <Box component="ul" sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, fontSize: { xs: '0.875rem', md: '1rem' } }}>
+                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Artist:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{cardsWithDupes[0].artist}</Typography>
+                                </Box>
+                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Sets Illustrated:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{setData.length}</Typography>
+                                </Box>
+                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Creature Types:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{creatureTypeData.length}</Typography>
+                                </Box>
+                                <Box component="li" sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: { sm: 'space-between' } }}>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Rarity Distribution:</Typography> 
+                                    <Typography component="span" sx={{ color: '#1f2937', textAlign: { sm: 'right' } }}>
                                         {Object.entries(rarityDist)
                                             .map(([rarity, count]) => `${rarity.charAt(0).toUpperCase() + rarity.slice(1)}: ${count}`)
                                             .join(', ')}
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
         </Box>
     );
 };

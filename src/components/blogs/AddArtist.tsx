@@ -35,6 +35,7 @@ import {
       haveSignature: string;
       signing: string;
       markssignatureservice: string;
+      bluesky: string;
   }
   
   const AddArtist = () => {
@@ -42,6 +43,7 @@ import {
       const {
           register,
           handleSubmit,
+          reset,
       } = useForm<Inputs>();
       const [ addArtist ] = useMutation(ADD_ARTIST);
       const [signature, setSignature] = useState("false");
@@ -165,7 +167,8 @@ import {
           artistProofs,
           haveSignature,
           signing,
-          markssignatureservice,    
+          markssignatureservice,
+          bluesky,    
       }: Inputs) => {
               try {
                   await addArtist({
@@ -186,9 +189,17 @@ import {
                           artistProofs: artistProof,
                           haveSignature: signature,
                           signing: isSigning,
-                          markssignatureservice: marks, 
+                          markssignatureservice: marks,
+                          bluesky, 
                       },
                   });
+                  
+                  // Reset form fields after successful submission
+                  reset();
+                  setSignature("false");
+                  setArtistProof("false");
+                  setIsSigning("false");
+                  setMarks("false");
               } catch (err: any) {
                   console.log(err.message);
               }
@@ -332,6 +343,16 @@ import {
                                   margin="normal"
                                   label="Patreon"
                                   {...register("patreon")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+                          
+                          <Box sx={styles.fieldSection}>
+                              <TextField 
+                                  fullWidth
+                                  margin="normal"
+                                  label="Bluesky"
+                                  {...register("bluesky")}
                                   sx={styles.textField}
                               />
                           </Box>

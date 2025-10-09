@@ -142,82 +142,188 @@ const Homepage = () => {
 
   const styles = {
     container: {
-      backgroundColor: "#507A60",
+      background: "linear-gradient(135deg, #507A60 0%, #3c5c48 50%, #2d4a36 100%)",
       minHeight: "100vh",
-      padding: { xs: 2, md: 4 },
+      padding: { xs: 3, md: 6 },
+      position: "relative",
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+        pointerEvents: "none",
+      },
     },
     wrapper: {
       maxWidth: 1200,
       margin: "0 auto",
-      padding: { xs: 3, md: 5 },
-      backgroundColor: "#fff",
-      borderRadius: 2,
-      boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+      padding: { xs: 2, md: 3 },
+      background: "rgba(255, 255, 255, 0.98)",
+      backdropFilter: "blur(30px) saturate(1.2)",
+      borderRadius: 4,
+      boxShadow: "0 32px 80px rgba(0,0,0,0.12), 0 16px 40px rgba(80, 122, 96, 0.15), inset 0 1px 0 rgba(255,255,255,0.9)",
+      border: "1px solid rgba(255, 255, 255, 0.3)",
+      position: "relative",
+      zIndex: 1,
     },
     headerText: {
-      color: "#507A60",
-      fontWeight: 700,
-      fontSize: { xs: "2rem", md: "3rem" },
+      background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      backgroundClip: "text",
+      fontWeight: 800,
+      fontSize: { xs: "2.2rem", md: "3.2rem" },
       marginBottom: 3,
-      textAlign: { xs: "center", md: "left" },
+      textAlign: "center",
+      letterSpacing: "-0.02em",
+      lineHeight: 1,
+      fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+      position: "relative",
+      "&::after": {
+        content: '""',
+        position: "absolute",
+        bottom: "-8px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "100px",
+        height: "3px",
+        background: "linear-gradient(90deg, transparent, #507A60, transparent)",
+        borderRadius: "2px",
+      },
     },
     description: {
       fontSize: "1.1rem",
-      color: "#555",
-      lineHeight: 1.6,
-      marginBottom: 3,
+      color: "#2d3748",
+      lineHeight: 1.7,
+      marginBottom: 2.5,
+      fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+      fontWeight: 400,
     },
     count: {
-      color: "#507A60",
-      fontSize: "1.2rem",
-      fontWeight: 600,
-      marginTop: 2,
-      marginBottom: 3,
+      background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
+      color: "white",
+      fontSize: "1.3rem",
+      fontWeight: 700,
+      marginTop: 3,
+      marginBottom: 4,
       display: "block",
-      padding: "8px 16px",
-      backgroundColor: "rgba(80, 122, 96, 0.1)",
-      borderRadius: 2,
+      padding: "16px 32px",
+      borderRadius: 3,
       textAlign: "center",
       width: "fit-content",
-      margin: "2rem auto",
+      margin: "3rem auto",
+      boxShadow: "0 12px 32px rgba(80, 122, 96, 0.25), 0 4px 12px rgba(80, 122, 96, 0.15)",
+      border: "1px solid rgba(255, 255, 255, 0.2)",
+      fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+      letterSpacing: "0.5px",
+      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+      "&:hover": {
+        transform: "translateY(-2px)",
+        boxShadow: "0 16px 40px rgba(80, 122, 96, 0.3), 0 6px 16px rgba(80, 122, 96, 0.2)",
+      },
     },
     searchContainer: {
+      background: "rgba(255, 255, 255, 0.9)",
+      backdropFilter: "blur(20px) saturate(1.1)",
+      borderRadius: 3,
+      padding: 3,
+      boxShadow: "0 12px 32px rgba(0,0,0,0.06), 0 6px 16px rgba(80, 122, 96, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
+      border: "1px solid rgba(255, 255, 255, 0.4)",
       display: "flex",
-      flexDirection: { xs: "column", md: "row" }, // Stack on small screens
+      flexDirection: { xs: "column", md: "row" },
       justifyContent: "center",
-      alignItems: "center", // Vertically center items
+      alignItems: "center",
       marginBottom: 4,
-      width: "100%",
-      gap: { xs: 2, md: 2 },
+      gap: { xs: 2, md: 3 },
+      transition: "all 0.3s ease",
+      "&:hover": {
+        transform: "translateY(-1px)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.08), 0 8px 20px rgba(80, 122, 96, 0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+      },
     },
     textField: {
       width: { xs: "100%", md: "40%" },
-      marginBottom: { xs: 2, md: 0 }, // Add some spacing on smaller screens
       "& .MuiOutlinedInput-root": {
-        borderRadius: 4,
+        borderRadius: 3,
+        background: "rgba(255, 255, 255, 0.8)",
+        backdropFilter: "blur(10px)",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          background: "rgba(255, 255, 255, 0.95)",
+          transform: "translateY(-1px)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        },
         "&:hover fieldset": {
           borderColor: "#507A60",
         },
         "&.Mui-focused fieldset": {
           borderColor: "#507A60",
+          borderWidth: "2px",
+        },
+      },
+      "& .MuiInputLabel-root": {
+        "&.Mui-focused": {
+          color: "#507A60",
         },
       },
     },
     locationSelect: {
       width: { xs: "100%", md: "30%" },
-      marginBottom: { xs: 2, md: 0 }, // Add some spacing on smaller screens
+      "& .MuiOutlinedInput-root": {
+        borderRadius: 3,
+        background: "rgba(255, 255, 255, 0.8)",
+        backdropFilter: "blur(10px)",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          background: "rgba(255, 255, 255, 0.95)",
+          transform: "translateY(-1px)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        },
+        "&:hover .MuiOutlinedInput-notchedOutline": {
+          borderColor: "#507A60",
+        },
+        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+          borderColor: "#507A60",
+          borderWidth: "2px",
+        },
+      },
+      "& .MuiInputLabel-root": {
+        "&.Mui-focused": {
+          color: "#507A60",
+        },
+      },
+    },
+    checkboxContainer: {
+      background: "rgba(255, 255, 255, 0.7)",
+      borderRadius: 2,
+      padding: 2,
+      border: "1px solid rgba(255, 255, 255, 0.5)",
+      transition: "all 0.3s ease",
+      "&:hover": {
+        background: "rgba(255, 255, 255, 0.9)",
+        transform: "translateY(-1px)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      },
     },
     checkboxesContainer: {
       display: "flex",
-      flexDirection: { xs: "column", md: "row" }, // Stack on small screens
+      flexDirection: { xs: "column", md: "row" },
       gap: 1,
-      marginBottom: { xs: 2, md: 0 }, // Add some spacing on smaller screens
     },
-   signingAgentLabel: { // Style for the label
-      fontWeight: 600,
-      color: '#507A60',
-      marginBottom: '0.5rem',
-      textAlign: { xs: 'center', md: 'left' }, // Adjust text alignment
+    signingAgentLabel: {
+      background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      backgroundClip: "text",
+      fontWeight: 700,
+      fontSize: "1.1rem",
+      marginBottom: 1,
+      textAlign: "center",
+      fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+      letterSpacing: "-0.01em",
     },
     artistsGrid: {
       display: "grid",
@@ -226,32 +332,49 @@ const Homepage = () => {
       marginTop: 4,
     },
     loadingContainer: {
-      backgroundColor: "#507A60",
+      background: "linear-gradient(135deg, #507A60 0%, #3c5c48 100%)",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      height: "50vh",
+      height: "100vh",
+      position: "relative",
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)",
+      },
     },
     errorMessage: {
       color: "#d32f2f",
       textAlign: "center",
       padding: 4,
-      backgroundColor: "rgba(211, 47, 47, 0.1)",
-      borderRadius: 2,
+      background: "linear-gradient(135deg, rgba(211, 47, 47, 0.08) 0%, rgba(211, 47, 47, 0.12) 100%)",
+      borderRadius: 3,
+      border: "1px solid rgba(211, 47, 47, 0.2)",
+      backdropFilter: "blur(10px)",
+      fontSize: "1.1rem",
+      fontWeight: 500,
     },
     noResults: {
       textAlign: "center",
       padding: 4,
-      color: "#666",
+      color: "#2d3748",
+      fontSize: "1.1rem",
+      fontWeight: 500,
+      background: "rgba(255, 255, 255, 0.8)",
+      borderRadius: 2,
+      backdropFilter: "blur(10px)",
     },
   };
 
   if (loading)
     return (
-      <Box sx={styles.container}>
-        <Box sx={styles.loadingContainer}>
-          <CircularProgress sx={{ color: "#507A60" }} />
-        </Box>
+      <Box sx={styles.loadingContainer}>
+        <CircularProgress size={60} sx={{ color: "white", zIndex: 1 }} />
       </Box>
     );
 
@@ -346,7 +469,7 @@ const Homepage = () => {
               ))}
             </Select>
           </FormControl>
-          <Box>
+          <Box sx={styles.checkboxContainer}>
            <Typography sx={styles.signingAgentLabel}>Signing Agent</Typography>
             <FormGroup sx={styles.checkboxesContainer}>
               <FormControlLabel
@@ -355,6 +478,12 @@ const Homepage = () => {
                     checked={marksSigServiceFilter}
                     onChange={handleMarksSigServiceChange}
                     name="marksSigService"
+                    sx={{
+                      color: "#507A60",
+                      "&.Mui-checked": {
+                        color: "#507A60",
+                      },
+                    }}
                   />
                 }
                 label="Marks Signature Service"
@@ -365,6 +494,12 @@ const Homepage = () => {
                     checked={mountainMageFilter}
                     onChange={handleMountainMageChange}
                     name="mountainMage"
+                    sx={{
+                      color: "#507A60",
+                      "&.Mui-checked": {
+                        color: "#507A60",
+                      },
+                    }}
                   />
                 }
                 label="Mountain Mage"
