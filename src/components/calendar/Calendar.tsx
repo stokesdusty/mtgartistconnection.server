@@ -28,7 +28,7 @@ const Calendar = () => {
 
     return filtered.sort(
       (a: any, b: any) =>
-        new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     );
   }, [data]);
 
@@ -89,7 +89,7 @@ const Calendar = () => {
     eventsContainer: {
       display: "flex",
       flexDirection: "column",
-      gap: 4,
+      gap: 2,
       marginTop: 2,
     },
     loadingContainer: {
