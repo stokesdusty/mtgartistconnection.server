@@ -34,6 +34,7 @@ export const GET_ARTIST_BY_NAME = gql`
             artstation
             location
             bluesky
+            omalink
         }
     }
 `;

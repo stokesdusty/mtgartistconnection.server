@@ -140,7 +140,6 @@ const Artist = () => {
       textDecoration: "none",
       fontWeight: 600,
       display: "inline-block",
-      marginBottom: 5,
       padding: "16px 32px",
       borderRadius: 3,
       textAlign: "center",
@@ -167,6 +166,36 @@ const Artist = () => {
         "&::before": {
           left: "100%",
         },
+      },
+    },
+    omaLink: {
+      background: "#fff",
+      color: "#000",
+      textDecoration: "none",
+      fontWeight: 600,
+      display: "inline-flex",
+      alignItems: "center",
+      padding: "20px 24px",
+      borderRadius: 3,
+      textAlign: "center",
+      fontSize: "1rem",
+      letterSpacing: "0.5px",
+      boxShadow: "0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)",
+      border: "1px solid rgba(0, 0, 0, 0.1)",
+      transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+      "&:hover": {
+        transform: "translateY(-3px) scale(1.02)",
+        boxShadow: "0 20px 48px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1)",
+      },
+      "& .oma-logo": {
+        marginLeft: 1,
+        height: "24px",
+        width: "92px",
+        verticalAlign: "middle",
+      },
+      "& .oma-text": {
+        fontWeight: 600,
+        color: "black",
       },
     },
     artistPage: {
@@ -508,14 +537,41 @@ const Artist = () => {
             {artistByName.name}
           </Typography>
           
-          <Link 
-            href={`/allcards/${artistByName.name}`}
-            underline="none"
-            sx={styles.viewCardsLink}
-          >
-            <Typography variant="h5">{`View all ${artistByName.name} cards >`}</Typography>
-          </Link>
-          
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' }, 
+            alignItems: 'center',
+            justifyContent: { 
+              xs: 'center', 
+              md: artistByName.omalink ? 'space-between' : 'flex-start' 
+            }, 
+            gap: { xs: 2, md: 3 }, mb: 5 
+          }} >
+            <Link 
+              href={`/allcards/${artistByName.name}`}
+              underline="none"
+              sx={styles.viewCardsLink}
+            >
+              <Typography variant="h5">{`View all ${artistByName.name} cards >`}</Typography>
+            </Link>
+            {artistByName.omalink && (
+              <Link
+                href={artistByName.omalink}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="none"
+                sx={{
+                  ...styles.omaLink,
+                  padding: "20px 24px", // Increased vertical padding to match height
+                  fontSize: styles.viewCardsLink.fontSize,
+                }}
+              >
+                <Typography component="span" sx={styles.omaLink['& .oma-text']}>Buy this artist's prints & playmats at</Typography>
+                <img src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/OMALogo.png" alt="Original Magic Art logo" className="oma-logo" />
+              </Link>
+            )}
+          </Box>
+
           <Box sx={styles.artistPage}>
             <Box sx={styles.infoSection}>
               <Box sx={styles.artistInfo}>
