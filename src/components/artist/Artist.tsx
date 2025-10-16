@@ -19,7 +19,6 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
-import { Timeline } from "react-twitter-widgets";
 import { useEffect } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 
@@ -44,13 +43,6 @@ const Artist = () => {
       skip: !name,
     }
   );
-
-  const getTwitterHandle = (twitterUrl: string): string | null => {
-    const match = twitterUrl.match(
-      /^https?:\/\/(www\.)?(x|twitter).com\/@?(?<handle>\w+)/
-    );
-    return match?.groups?.handle ? `@${match.groups.handle}` : null;
-  };
 
   const styles = {
     container: {
@@ -203,7 +195,7 @@ const Artist = () => {
     },
     infoSection: {
       display: "grid",
-      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
+      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
       gap: 2.5,
       alignItems: "start",
       marginTop: 1,
@@ -348,28 +340,15 @@ const Artist = () => {
       },
       "& img": {
         maxWidth: "100%",
-        width: "260px",
+        width: "90%",
         borderRadius: 3,
         boxShadow: "0 16px 40px rgba(0,0,0,0.12), 0 8px 20px rgba(80, 122, 96, 0.08)",
         border: "1px solid rgba(255, 255, 255, 0.3)",
         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "&:hover": {
-          transform: "scale(1.08) rotate(1deg)",
+          transform: "scale(1.05) rotate(1deg)",
           boxShadow: "0 24px 60px rgba(0,0,0,0.15), 0 12px 30px rgba(80, 122, 96, 0.12)",
         },
-      },
-    },
-    twitterSection: {
-      background: "rgba(255, 255, 255, 0.9)",
-      backdropFilter: "blur(20px) saturate(1.1)",
-      borderRadius: 3,
-      padding: 2.5,
-      boxShadow: "0 16px 48px rgba(0,0,0,0.06), 0 8px 24px rgba(80, 122, 96, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
-      border: "1px solid rgba(255, 255, 255, 0.4)",
-      transition: "all 0.3s ease",
-      "&:hover": {
-        transform: "translateY(-2px)",
-        boxShadow: "0 24px 64px rgba(0,0,0,0.08), 0 12px 32px rgba(80, 122, 96, 0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
       },
     },
     loadingContainer: {
@@ -468,9 +447,6 @@ const Artist = () => {
   }
 
   const { artistByName } = data;
-  const twitterHandle = artistByName.twitter
-    ? getTwitterHandle(artistByName.twitter)?.replace("@", "")
-    : null;
 
   const socialMediaLinks: ArtistSocialLink[] = [
     {
@@ -717,18 +693,6 @@ const Artist = () => {
                 </Typography>
                 <img src={signatureImage} alt={`${artistByName.name} signature example`} />
               </Box>
-              
-              {twitterHandle && (
-                <Box sx={styles.twitterSection}>
-                  <Typography sx={styles.sectionHeader} variant="h4">
-                    Latest Updates
-                  </Typography>
-                  <Timeline
-                    dataSource={{ sourceType: "profile", screenName: twitterHandle }}
-                    options={{ width: "100%", height: "600" }}
-                  />
-                </Box>
-              )}
             </Box>
           </Box>
         </Paper>
