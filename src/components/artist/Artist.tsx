@@ -113,6 +113,7 @@ const Artist = () => {
       letterSpacing: "-0.03em",
       lineHeight: 0.9,
       fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+      padding: "0px 0px 12px 0px",
       position: "relative",
       "&::after": {
         content: '""',
