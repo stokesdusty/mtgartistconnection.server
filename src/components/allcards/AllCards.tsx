@@ -228,6 +228,7 @@ const AllCards = () => {
       letterSpacing: "-0.02em",
       lineHeight: 1,
       fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+      padding: "0px 0px 12px 0px",
       position: "relative",
       "&::after": {
         content: '""',
