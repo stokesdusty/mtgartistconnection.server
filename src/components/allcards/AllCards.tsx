@@ -80,8 +80,8 @@ const AllCards = () => {
     const baseQuery = "artist%3A";
     const formattedQuery = `${baseQuery}"${formattedArtistName}"`;
     return {
-      withDuplicates: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${formattedQuery}%29`,
-      withoutDuplicates: `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28game%3Apaper%29+%28${formattedQuery}%29`,
+      withDuplicates: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28${formattedQuery}%29`,
+      withoutDuplicates: `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28${formattedQuery}%29`,
     };
   }, [formattedArtistName, artist]);
 
