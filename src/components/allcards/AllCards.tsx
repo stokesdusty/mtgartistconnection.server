@@ -114,7 +114,8 @@ const AllCards = () => {
         return str
           .toLowerCase()
           .normalize("NFD") // Decompose combined characters
-          .replace(/[\u0300-\u036f]/g, ""); // Remove diacritics
+          .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+          .replace(/\./g, ""); // Remove periods
       };
 
       // Filter for artist match (exact or as part of multiple artists)
