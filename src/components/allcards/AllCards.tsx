@@ -108,14 +108,25 @@ const AllCards = () => {
 
       const url = showDupes ? scryfallQuery.withDuplicates : scryfallQuery.withoutDuplicates;
       const fetchedCards = await fetchAllCards(url);
+
+      // Normalize function to remove diacritics and special characters
+      const normalize = (str: string) => {
+        return str
+          .toLowerCase()
+          .normalize("NFD") // Decompose combined characters
+          .replace(/[\u0300-\u036f]/g, ""); // Remove diacritics
+      };
+
       // Filter for artist match (exact or as part of multiple artists)
-      const exactArtist = artist?.toLowerCase() || "";
+      const normalizedArtist = normalize(artist || "");
       const filteredCards = fetchedCards.filter((card) => {
-        const cardArtist = card.artist?.toLowerCase() || "";
+        const cardArtist = card.artist || "";
+        const normalizedCardArtist = normalize(cardArtist);
+
         // Match if exact match OR artist name appears in the string
         // This handles cases like "Artist A & Artist B" or "Artist A, Artist B"
-        return cardArtist === exactArtist ||
-               cardArtist.split(/[&,]/).some(name => name.trim() === exactArtist);
+        return normalizedCardArtist === normalizedArtist ||
+               normalizedCardArtist.split(/[&,]/).some(name => name.trim() === normalizedArtist);
       });
 
 setCardData({ data: filteredCards, total_cards: filteredCards.length });
