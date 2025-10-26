@@ -108,11 +108,15 @@ const AllCards = () => {
 
       const url = showDupes ? scryfallQuery.withDuplicates : scryfallQuery.withoutDuplicates;
       const fetchedCards = await fetchAllCards(url);
-      // Filter for exact artist match
+      // Filter for artist match (exact or as part of multiple artists)
       const exactArtist = artist?.toLowerCase() || "";
-      const filteredCards = fetchedCards.filter(
-        (card) => card.artist?.toLowerCase() === exactArtist
-      );
+      const filteredCards = fetchedCards.filter((card) => {
+        const cardArtist = card.artist?.toLowerCase() || "";
+        // Match if exact match OR artist name appears in the string
+        // This handles cases like "Artist A & Artist B" or "Artist A, Artist B"
+        return cardArtist === exactArtist ||
+               cardArtist.split(/[&,]/).some(name => name.trim() === exactArtist);
+      });
 
 setCardData({ data: filteredCards, total_cards: filteredCards.length });
 
