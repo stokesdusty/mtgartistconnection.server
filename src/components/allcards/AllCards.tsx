@@ -23,6 +23,7 @@ import { useLoading } from '../../LoadingContext';
 interface Card {
   related_uris: any;
   id: string;
+  artist?: string;
   image_uris?: {
     border_crop: string;
   };
@@ -72,7 +73,7 @@ const AllCards = () => {
   });
 
   const formattedArtistName = useMemo(() => {
-    return artist?.split(" ").join(" ") || "";
+    return "!" + artist?.split(" ").join(" ") || "";
   }, [artist]);
 
   const scryfallQuery = useMemo(() => {
@@ -107,7 +108,14 @@ const AllCards = () => {
 
       const url = showDupes ? scryfallQuery.withDuplicates : scryfallQuery.withoutDuplicates;
       const fetchedCards = await fetchAllCards(url);
-      setCardData({ data: fetchedCards, total_cards: fetchedCards.length });
+      // Filter for exact artist match
+      const exactArtist = artist?.toLowerCase() || "";
+      const filteredCards = fetchedCards.filter(
+        (card) => card.artist?.toLowerCase() === exactArtist
+      );
+
+setCardData({ data: filteredCards, total_cards: filteredCards.length });
+
     };
     
     fetchData();

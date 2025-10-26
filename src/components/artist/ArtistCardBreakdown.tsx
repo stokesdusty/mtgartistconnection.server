@@ -122,16 +122,18 @@ const ArtistCardAnalysis = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!scryfallQuery) return;
-            const withDupesData = await fetchCards(
-                scryfallQuery
-            );
+            if (!scryfallQuery || !artist) return;
+            const withDupesData = await fetchCards(scryfallQuery);
             if (withDupesData) {
-                setCardsWithDupes(withDupesData);
+                // Case-insensitive exact artist filter
+                const filtered = withDupesData.filter(
+                    (card) => card.artist?.toLowerCase().trim() === artist.toLowerCase().trim()
+                );
+                setCardsWithDupes(filtered);
             }
         };
         fetchData();
-    }, [scryfallQuery, fetchCards]);
+    }, [scryfallQuery, fetchCards, artist]);
 
     // Function to extract the main card type
     const getMainCardType = (typeLine: string) => {
