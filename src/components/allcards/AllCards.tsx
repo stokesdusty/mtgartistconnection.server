@@ -119,7 +119,8 @@ const AllCards = () => {
           .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
           .replace(/\./g, "") // Remove periods
           .replace(/-/g, " ") // Replace hyphens with spaces
-          .replace(/"/g, ""); // Remove quotation marks
+          .replace(/"/g, "") // Remove quotation marks
+          .replace(/[()]/g, ""); // Remove parentheses
       };
 
       // Filter for artist match (exact or as part of multiple artists)
