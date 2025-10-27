@@ -116,7 +116,8 @@ const AllCards = () => {
           .normalize("NFD") // Decompose combined characters
           .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
           .replace(/\./g, "") // Remove periods
-          .replace(/-/g, " "); // Replace hyphens with spaces
+          .replace(/-/g, " ") // Replace hyphens with spaces
+          .replace(/"/g, ""); // Remove quotation marks
       };
 
       // Filter for artist match (exact or as part of multiple artists)
