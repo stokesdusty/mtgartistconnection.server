@@ -56,6 +56,7 @@ const AllCards = () => {
   const navigate = useNavigate();
   const [showDupes, setShowDupes] = useState<boolean>(false);
   const [cardData, setCardData] = useState<CardData | null>(null);
+  const [includeDigital, setIncludeDigital] = useState<boolean>(false);
 
   useEffect(() => {
     if (!artist) {
@@ -80,11 +81,12 @@ const AllCards = () => {
     if (!artist) return null;
     const baseQuery = "artist%3A";
     const formattedQuery = `${baseQuery}"${formattedArtistName}"`;
+    const gameFilter = includeDigital ? "" : "%28game%3Apaper%29+";
     return {
-      withDuplicates: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${formattedQuery}%29`,
-      withoutDuplicates: `https://api.scryfall.com/cards/search?as=grid&order=name&q=%28game%3Apaper%29+%28${formattedQuery}%29`,
+      withDuplicates: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=${gameFilter}%28${formattedQuery}%29`,
+      withoutDuplicates: `https://api.scryfall.com/cards/search?as=grid&order=name&q=${gameFilter}%28${formattedQuery}%29`,
     };
-  }, [formattedArtistName, artist]);
+  }, [formattedArtistName, artist, includeDigital]);
 
   useEffect(() => {
     const fetchAllCards = async (url: string, allCards: Card[] = []): Promise<Card[]> => {
@@ -135,9 +137,9 @@ const AllCards = () => {
 setCardData({ data: filteredCards, total_cards: filteredCards.length });
 
     };
-    
+
     fetchData();
-  }, [scryfallQuery, showDupes]);
+  }, [scryfallQuery, showDupes, includeDigital]);
 
   const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
     if (!cardData) {
@@ -183,6 +185,10 @@ setCardData({ data: filteredCards, total_cards: filteredCards.length });
 
   const handleCheck = () => {
     setShowDupes(!showDupes);
+  };
+
+  const handleExpandSearch = () => {
+    setIncludeDigital(true);
   };
 
   const styles = {
@@ -355,8 +361,17 @@ setCardData({ data: filteredCards, total_cards: filteredCards.length });
       color: "#507A60",
       textAlign: "center",
       padding: 4,
-      backgroundColor: "#999999",
+      backgroundColor: "#ffffff",
       borderRadius: 2,
+    },
+    expandSearchLink: {
+      color: "#507A60",
+      textDecoration: "underline",
+      cursor: "pointer",
+      fontWeight: 600,
+      "&:hover": {
+        color: "#6b9d73",
+      },
     },
     errorMessage: {
       color: "#d32f2f",
@@ -449,9 +464,17 @@ setCardData({ data: filteredCards, total_cards: filteredCards.length });
           <Typography variant="h2" sx={styles.headerText}>
             All {artist} Cards ({totalCards})
           </Typography>
-          { totalCards === 0 && (
+          { totalCards === 0 && cardData && (
             <Typography sx={styles.loadingMessage}>
-              Loading....
+              No results found. This artist may have only done digital cards for Arena or MTG-related artwork such as Vanguard.
+              {!includeDigital && (
+                <>
+                  {" "}
+                  <span onClick={handleExpandSearch} style={styles.expandSearchLink}>
+                    Click here to expand card search to include these.
+                  </span>
+                </>
+              )}
             </Typography>
           )}
           <Link 

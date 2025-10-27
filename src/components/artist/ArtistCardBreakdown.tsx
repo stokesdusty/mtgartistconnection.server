@@ -64,6 +64,7 @@ const ArtistCardAnalysis = () => {
     const { setIsLoading } = useLoading(); // Get the setIsLoading function from the context
     const [error, setError] = useState<string | null>(null);
     const [cardsWithDupes, setCardsWithDupes] = useState<Card[]>([]);
+    const [hasTriedBothQueries, setHasTriedBothQueries] = useState(false);
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -83,10 +84,13 @@ const ArtistCardAnalysis = () => {
     }, [artist]);
 
     const scryfallQuery = useMemo(() => {
-        if (!formattedArtistName) return "";
+        if (!formattedArtistName) return { withPaper: "", withoutPaper: "" };
         const baseQuery = "artist%3A";
         const formattedQuery = `${baseQuery}"${formattedArtistName}"`;
-        return `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${formattedQuery}%29`;
+        return {
+            withPaper: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${formattedQuery}%29`,
+            withoutPaper: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28${formattedQuery}%29`
+        };
     }, [formattedArtistName]);
 
     const fetchCards = useCallback(
@@ -122,14 +126,28 @@ const ArtistCardAnalysis = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!scryfallQuery || !artist) return;
-            const withDupesData = await fetchCards(scryfallQuery);
+            if (!scryfallQuery.withPaper || !artist) return;
+
+            // Try with game:paper filter first
+            let withDupesData = await fetchCards(scryfallQuery.withPaper);
+
+            // If we got null (404 error), try without game:paper filter
+            if (!withDupesData) {
+                console.log("No results with game:paper, retrying without filter...");
+                setError(null); // Clear the error before retrying
+                withDupesData = await fetchCards(scryfallQuery.withoutPaper);
+                setHasTriedBothQueries(true);
+            }
+
             if (withDupesData) {
                 // Case-insensitive exact artist filter
                 const filtered = withDupesData.filter(
                     (card) => card.artist?.toLowerCase().trim() === artist.toLowerCase().trim()
                 );
                 setCardsWithDupes(filtered);
+            } else if (hasTriedBothQueries) {
+                // If we've tried both queries and still have no data, set a user-friendly error
+                setError("No cards found");
             }
         };
         fetchData();
@@ -277,9 +295,15 @@ const ArtistCardAnalysis = () => {
     };
 
     // Calculate some statistics
-    const avgCmc = cardsWithDupes.reduce((sum, card) => sum + card.cmc, 0) / cardsWithDupes.length;
-    const mostCommonType = typeData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.type || 'N/A';
-    const mostCommonColor = colorData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.fullName || 'N/A';
+    const avgCmc = cardsWithDupes.length > 0
+        ? cardsWithDupes.reduce((sum, card) => sum + card.cmc, 0) / cardsWithDupes.length
+        : 0;
+    const mostCommonType = typeData.length > 0
+        ? typeData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.type || 'N/A'
+        : 'N/A';
+    const mostCommonColor = colorData.length > 0
+        ? colorData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.fullName || 'N/A'
+        : 'N/A';
 
     const styles = {
         outerContainer: {
@@ -421,7 +445,7 @@ const ArtistCardAnalysis = () => {
             <Box sx={styles.outerContainer}>
                 <Box sx={styles.container}>
                     <Typography sx={styles.errorMessage}>
-                        Error loading cards: {error}
+                        {error === "No cards found" ? `No cards found for ${artist}` : `Error loading cards: ${error}`}
                     </Typography>
                 </Box>
             </Box>
@@ -445,7 +469,7 @@ const ArtistCardAnalysis = () => {
                     MTG Card Analysis Dashboard
                 </Typography>
                 <Typography sx={styles.artistTitle}>
-                    Artist: {cardsWithDupes[0].artist}
+                    Artist: {cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}
                 </Typography>
     
                 <Box sx={styles.gridContainer}>
@@ -691,8 +715,8 @@ const ArtistCardAnalysis = () => {
                             <Typography sx={{ fontWeight: 600, fontSize: { xs: '1rem', md: '1.125rem' }, mb: { xs: 2, md: 3 }, color: '#374151' }}>Artist Info</Typography>
                             <Box component="ul" sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, fontSize: { xs: '0.875rem', md: '1rem' } }}>
                                 <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Artist:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{cardsWithDupes[0].artist}</Typography>
+                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Artist:</Typography>
+                                    <Typography component="span" sx={{ color: '#1f2937' }}>{cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}</Typography>
                                 </Box>
                                 <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Sets Illustrated:</Typography> 
