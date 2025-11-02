@@ -153,6 +153,12 @@ const Header = () => {
           borderRadius: "2px",
           boxShadow: "0 2px 8px rgba(80, 122, 96, 0.3)",
         },
+        "&:hover": {
+          background: "linear-gradient(135deg, #5a8b6a 0%, #75a97d 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        },
       },
       "&:hover": {
         background: "rgba(80, 122, 96, 0.08)",

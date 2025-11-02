@@ -281,7 +281,7 @@ const Artist = () => {
       flexWrap: "wrap",
       gap: { xs: 1.5, md: 3 },
       marginTop: { xs: 1.5, md: 3 },
-      justifyContent: "center",
+      justifyContent: "flex-start",
     },
     socialIcon: {
       background: "rgba(255, 255, 255, 0.95)",
@@ -514,15 +514,17 @@ const Artist = () => {
             {artistByName.name}
           </Typography>
           
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: { xs: 'column', md: 'row' }, 
+          <Box sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
-            justifyContent: { 
-              xs: 'center', 
-              md: artistByName.omalink ? 'space-between' : 'flex-start' 
-            }, 
-            gap: { xs: 2, md: 3 }, mb: 5 
+            justifyContent: {
+              xs: 'center',
+              md: artistByName.omalink ? 'space-between' : 'flex-start'
+            },
+            gap: { xs: 2, md: 3 },
+            mb: 5,
+            mt: 3
           }} >
             <Link 
               href={`/allcards/${artistByName.name}`}
@@ -618,7 +620,7 @@ const Artist = () => {
                 </Box>
                 
                 <Box sx={styles.infoRow}>
-                  <Typography variant="h5">Offer Signing?:</Typography>
+                  <Typography variant="h5">Currently Signing?:</Typography>
                   <Typography>
                     {capitalizeFirstLetter(artistByName.signing) ||
                       "Unknown"}

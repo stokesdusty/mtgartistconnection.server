@@ -98,7 +98,8 @@ const SigningServices = () => {
       marginBottom: 3,
       textAlign: "center",
       letterSpacing: "-0.02em",
-      lineHeight: 1,
+      lineHeight: 1.2,
+      paddingBottom: "12px",
       fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
       position: "relative",
       "&::after": {

@@ -13,7 +13,7 @@ import {
   import { useState } from "react";
   
   const SigningEvent = (SigningEventProps: any) => {
-    const [artistsExpanded, setArtistsExpanded] = useState(false);
+    const [artistsExpanded, setArtistsExpanded] = useState(true);
     const startDateFormatted = new Date(SigningEventProps.props.startDate).toLocaleDateString();
     const endDateFormatted = new Date(SigningEventProps.props.endDate).toLocaleDateString();
     const eventId = SigningEventProps.props.id;
