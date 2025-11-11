@@ -39,7 +39,7 @@ const services: Service[] = [
       "If Facebook is not your forte, MountainMage is another signature service that has its own website. Offering a very extensive list of artists, MountainMage is another of the biggest services out there. You can select the artist you want, throw a signature in the shopping cart, and pay your way into the next signing.",
     website: "https://mountainmagesigs.com/",
     facebookGroup:
-      "https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share",
+      "https://www.facebook.com/groups/313741109039074",
   },
 ];
 
