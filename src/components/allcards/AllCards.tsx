@@ -18,12 +18,12 @@ import {
 } from "@mui/material";
 import { GET_ARTIST_BY_NAME } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
-import { useLoading } from '../../LoadingContext';
 
 interface Card {
   related_uris: any;
   id: string;
   artist?: string;
+  scryfall_uri?: string;
   image_uris?: {
     border_crop: string;
   };
@@ -135,12 +135,11 @@ const AllCards = () => {
                normalizedCardArtist.split(/[&,]/).some(name => name.trim() === normalizedArtist);
       });
 
-setCardData({ data: filteredCards, total_cards: filteredCards.length });
-
-    };
+    setCardData({ data: filteredCards, total_cards: filteredCards.length });
+  };
 
     fetchData();
-  }, [scryfallQuery, showDupes, includeDigital]);
+  }, [scryfallQuery, showDupes, includeDigital, artist]);
 
   const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
     if (!cardData) {
@@ -153,7 +152,7 @@ setCardData({ data: filteredCards, total_cards: filteredCards.length });
     if (card.image_uris) {
       return (
         <Link
-          href={card?.related_uris.gatherer}
+          href={card?.scryfall_uri}
           target="_blank"
         >
           <img
@@ -168,7 +167,7 @@ setCardData({ data: filteredCards, total_cards: filteredCards.length });
     } else if (card.card_faces) {
       return (
         <Link 
-          href={card?.related_uris?.gatherer}
+          href={card?.scryfall_uri}
           target="_blank"
         >
           <img
