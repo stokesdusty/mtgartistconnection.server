@@ -1,13 +1,15 @@
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, CircularProgress, Typography, Container, Paper } from '@mui/material';
 import axios from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
-import { useLoading } from '../../LoadingContext'; // Import the useLoading hook
+import { useLoading } from '../../LoadingContext';
 import { useNavigate } from "react-router-dom";
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell
 } from 'recharts';
+import { cardBreakdownStyles } from '../../styles/card-breakdown-styles';
+import { spacing } from '../../styles/design-tokens';
 
 interface Card {
     related_uris: {
@@ -305,177 +307,109 @@ const ArtistCardAnalysis = () => {
         ? colorData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.fullName || 'N/A'
         : 'N/A';
 
-    const styles = {
-        outerContainer: {
-            background: "linear-gradient(135deg, #507A60 0%, #3c5c48 50%, #2d4a36 100%)",
-            minHeight: "100vh",
-            padding: { xs: 3, md: 6 },
-            position: "relative",
-            "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%)",
-                pointerEvents: "none",
-            },
-        },
-        container: {
-            maxWidth: 1200,
-            margin: "0 auto",
-            padding: { xs: 2, md: 3 },
-            background: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(30px) saturate(1.2)",
-            borderRadius: 4,
-            boxShadow: "0 32px 80px rgba(0,0,0,0.12), 0 16px 40px rgba(80, 122, 96, 0.15), inset 0 1px 0 rgba(255,255,255,0.9)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-            position: "relative",
-            zIndex: 1,
-        },
-        pageTitle: {
-            background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.8rem" },
-            marginBottom: 1.5,
-            textAlign: "center",
-            letterSpacing: "-0.02em",
-            lineHeight: 1,
-            fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
-        },
-        artistTitle: {
-            background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            fontWeight: 600,
-            fontSize: { xs: "1.3rem", md: "1.6rem" },
-            marginBottom: 3,
-            textAlign: "center",
-            fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
-        },
-        chartCard: {
-            background: "rgba(255, 255, 255, 0.9)",
-            backdropFilter: "blur(20px) saturate(1.1)",
-            borderRadius: 3,
-            padding: 2.5,
-            boxShadow: "0 12px 32px rgba(0,0,0,0.06), 0 6px 16px rgba(80, 122, 96, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
-            border: "1px solid rgba(255, 255, 255, 0.4)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 16px 40px rgba(0,0,0,0.08), 0 8px 20px rgba(80, 122, 96, 0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
-            },
-        },
-        chartTitle: {
-            background: "linear-gradient(135deg, #507A60 0%, #6b9d73 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            fontWeight: 700,
-            fontSize: "1.4rem",
-            marginBottom: 2.5,
-            fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
-            letterSpacing: "-0.01em",
-            position: "relative",
-            "&::after": {
-                content: '""',
-                position: "absolute",
-                bottom: "-8px",
-                left: 0,
-                width: "50px",
-                height: "2px",
-                background: "linear-gradient(90deg, #507A60, #6b9d73, transparent)",
-                borderRadius: "1px",
-            },
-        },
-        gridContainer: {
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-            gap: 3,
-            marginBottom: 4,
-        },
-        loadingContainer: {
-            background: "linear-gradient(135deg, #507A60 0%, #3c5c48 100%)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            position: "relative",
-            "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: "radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%)",
-            },
-            "& .MuiCircularProgress-root": {
-                color: "white",
-                zIndex: 1,
-            },
-        },
-        errorMessage: {
-            color: "#d32f2f",
-            textAlign: "center",
-            padding: 4,
-            background: "linear-gradient(135deg, rgba(211, 47, 47, 0.08) 0%, rgba(211, 47, 47, 0.12) 100%)",
-            borderRadius: 3,
-            border: "1px solid rgba(211, 47, 47, 0.2)",
-            backdropFilter: "blur(10px)",
-            fontSize: "1.1rem",
-            fontWeight: 500,
-        },
-    };
 
     if (isFetching) {
         return (
-            <Box sx={styles.loadingContainer}>
-              <CircularProgress size={60} />
+            <Box sx={cardBreakdownStyles.loadingContainer}>
+              <CircularProgress size={60} sx={cardBreakdownStyles.loadingSpinner} />
             </Box>
           );
     }
     if(error) {
         return (
-            <Box sx={styles.outerContainer}>
-                <Box sx={styles.container}>
-                    <Typography sx={styles.errorMessage}>
-                        {error === "No cards found" ? `No cards found for ${artist}` : `Error loading cards: ${error}`}
-                    </Typography>
-                </Box>
+            <Box sx={cardBreakdownStyles.container}>
+                <Container maxWidth="lg">
+                    <Paper elevation={0} sx={cardBreakdownStyles.contentWrapper}>
+                        <Typography sx={cardBreakdownStyles.errorMessage}>
+                            {error === "No cards found" ? `No cards found for ${artist}` : `Error loading cards: ${error}`}
+                        </Typography>
+                    </Paper>
+                </Container>
             </Box>
           );
     }
     if (!cardsWithDupes || cardsWithDupes.length === 0) {
         return (
-            <Box sx={styles.outerContainer}>
-                <Box sx={styles.container}>
-                    <Typography sx={styles.errorMessage}>
-                        No cards found for {artist}
-                    </Typography>
-                </Box>
+            <Box sx={cardBreakdownStyles.container}>
+                <Container maxWidth="lg">
+                    <Paper elevation={0} sx={cardBreakdownStyles.contentWrapper}>
+                        <Typography sx={cardBreakdownStyles.errorMessage}>
+                            No cards found for {artist}
+                        </Typography>
+                    </Paper>
+                </Container>
             </Box>
           );
     }
     return (
-        <Box sx={styles.outerContainer}>
-            <Box sx={styles.container}>
-                <Typography sx={styles.pageTitle}>
-                    MTG Card Analysis Dashboard
-                </Typography>
-                <Typography sx={styles.artistTitle}>
-                    Artist: {cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}
-                </Typography>
-    
-                <Box sx={styles.gridContainer}>
+        <Box sx={cardBreakdownStyles.container}>
+            <Container maxWidth="lg">
+                <Paper elevation={0} sx={cardBreakdownStyles.contentWrapper}>
+                    <Typography sx={cardBreakdownStyles.pageTitle}>
+                        Card Analysis Dashboard
+                    </Typography>
+                    <Typography sx={cardBreakdownStyles.artistTitle}>
+                        {cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}
+                    </Typography>
+
+                    {/* Card Statistics Summary */}
+                    <Box sx={{ ...cardBreakdownStyles.chartCard, marginBottom: 4 }}>
+                        <Typography sx={cardBreakdownStyles.chartTitle}>Card Statistics Summary</Typography>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: spacing.xl, md: spacing.xxl } }}>
+                            <Box sx={cardBreakdownStyles.statsCard}>
+                                <Typography sx={cardBreakdownStyles.statsTitle}>General Stats</Typography>
+                                <Box component="ul" sx={cardBreakdownStyles.statsList}>
+                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Total Cards:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{cardsWithDupes.length}</Typography>
+                                    </Box>
+                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Average CMC:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{avgCmc.toFixed(2)}</Typography>
+                                    </Box>
+                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Most Common Type:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{mostCommonType}</Typography>
+                                    </Box>
+                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Most Common Color:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{mostCommonColor}</Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            <Box sx={cardBreakdownStyles.statsCard}>
+                                <Typography sx={cardBreakdownStyles.statsTitle}>Artist Info</Typography>
+                                <Box component="ul" sx={cardBreakdownStyles.statsList}>
+                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Artist:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}</Typography>
+                                    </Box>
+                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Sets Illustrated:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{setData.length}</Typography>
+                                    </Box>
+                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Creature Types:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{creatureTypeData.length}</Typography>
+                                    </Box>
+                                    <Box component="li" sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: { sm: 'space-between' } }}>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Rarity Distribution:</Typography>
+                                        <Typography component="span" sx={{ ...cardBreakdownStyles.statsValue, textAlign: { sm: 'right' } }}>
+                                            {Object.entries(rarityDist)
+                                                .map(([rarity, count]) => `${rarity.charAt(0).toUpperCase() + rarity.slice(1)}: ${count}`)
+                                                .join(', ')}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
+
+                    <Box sx={cardBreakdownStyles.gridContainer}>
                     {/* Mana Cost Distribution */}
-                    <Box sx={styles.chartCard}>
-                        <Typography sx={styles.chartTitle}>Mana Cost Distribution</Typography>
+                    <Box sx={cardBreakdownStyles.chartCard}>
+                        <Typography sx={cardBreakdownStyles.chartTitle}>Mana Cost Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={manaCostData} margin={{ top: 20, right: 10, left: 0, bottom: 40 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -513,8 +447,8 @@ const ArtistCardAnalysis = () => {
                     </Box>
     
                     {/* Card Type Distribution */}
-                    <Box sx={styles.chartCard}>
-                        <Typography sx={styles.chartTitle}>Card Type Distribution</Typography>
+                    <Box sx={cardBreakdownStyles.chartCard}>
+                        <Typography sx={cardBreakdownStyles.chartTitle}>Card Type Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                                 <Pie
@@ -563,8 +497,8 @@ const ArtistCardAnalysis = () => {
                     </Box>
     
                     {/* Color Distribution */}
-                    <Box sx={styles.chartCard}>
-                        <Typography sx={styles.chartTitle}>Color Distribution</Typography>
+                    <Box sx={cardBreakdownStyles.chartCard}>
+                        <Typography sx={cardBreakdownStyles.chartTitle}>Color Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={colorData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -601,8 +535,8 @@ const ArtistCardAnalysis = () => {
                     </Box>
     
                     {/* Set Distribution */}
-                    <Box sx={styles.chartCard}>
-                        <Typography sx={styles.chartTitle}>Set Distribution (Top 10)</Typography>
+                    <Box sx={cardBreakdownStyles.chartCard}>
+                        <Typography sx={cardBreakdownStyles.chartTitle}>Set Distribution (Top 10)</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart 
                                 data={setData.slice(0, 10)} 
@@ -645,100 +579,39 @@ const ArtistCardAnalysis = () => {
                 </Box>
     
                 {/* Card List */}
-                <Box sx={{ ...styles.chartCard, marginTop: 4 }}>
-                    <Typography sx={styles.chartTitle}>Card Details</Typography>
+                <Box sx={{ ...cardBreakdownStyles.chartCard, marginTop: 4 }}>
+                    <Typography sx={cardBreakdownStyles.chartTitle}>Card Details</Typography>
                     <Box sx={{ overflowX: 'auto' }}>
-                        <Box component="table" sx={{ 
-                            minWidth: '100%', 
-                            background: 'white', 
-                            fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }, 
-                            borderCollapse: 'collapse', 
-                            border: '1px solid #e5e7eb',
-                            borderRadius: 2,
-                            overflow: 'hidden'
-                        }}>
-                            <Box component="thead" sx={{ background: 'rgba(243, 244, 246, 0.8)' }}>
+                        <Box component="table" sx={cardBreakdownStyles.table}>
+                            <Box component="thead" sx={cardBreakdownStyles.tableHead}>
                                 <Box component="tr">
-                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Name</Box>
-                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Mana Cost</Box>
-                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Type</Box>
-                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Color</Box>
-                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>Set</Box>
-                                    <Box component="th" sx={{ p: { xs: 2, md: 3 }, textAlign: 'left', fontWeight: 600, borderBottom: '1px solid #d1d5db' }}>Oracle Text</Box>
+                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Name</Box>
+                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Mana Cost</Box>
+                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Type</Box>
+                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Color</Box>
+                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Set</Box>
+                                    <Box component="th" sx={{ ...cardBreakdownStyles.tableHeaderCell, borderRight: 'none' }}>Oracle Text</Box>
                                 </Box>
                             </Box>
                             <Box component="tbody">
                                 {cardsWithDupes.map((card, index) => (
-                                    <Box component="tr" key={index} sx={{ background: index % 2 === 0 ? 'white' : 'rgba(249, 250, 251, 0.8)' }}>
-                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, fontWeight: 500, color: '#2563eb', borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.name}</Box>
-                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.mana_cost}</Box>
-                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.type_line}</Box>
-                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>
+                                    <Box component="tr" key={index} sx={cardBreakdownStyles.tableRow}>
+                                        <Box component="td" sx={cardBreakdownStyles.tableCellName}>{card.name}</Box>
+                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>{card.mana_cost}</Box>
+                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>{card.type_line}</Box>
+                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>
                                             {card.colors?.map(color => colorNames[color as keyof typeof colorNames]).join(', ') || 'Colorless'}
                                         </Box>
-                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, borderBottom: '1px solid #d1d5db', borderRight: '1px solid #d1d5db' }}>{card.set_name}</Box>
-                                        <Box component="td" sx={{ p: { xs: 2, md: 3 }, fontSize: { xs: '0.75rem', sm: '0.875rem' }, borderBottom: '1px solid #d1d5db', maxWidth: { xs: '300px', lg: '400px' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.oracle_text}</Box>
+                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>{card.set_name}</Box>
+                                        <Box component="td" sx={{ ...cardBreakdownStyles.tableCellOracleText, borderRight: 'none' }}>{card.oracle_text}</Box>
                                     </Box>
                                 ))}
                             </Box>
                         </Box>
                     </Box>
                 </Box>
-    
-                {/* Card Statistics Summary */}
-                <Box sx={{ ...styles.chartCard, marginTop: 4 }}>
-                    <Typography sx={styles.chartTitle}>Card Statistics Summary</Typography>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 4, md: 6 } }}>
-                        <Box sx={{ background: 'rgba(249, 250, 251, 0.8)', p: { xs: 3, md: 5 }, borderRadius: 2, border: '1px solid rgba(229, 231, 235, 0.6)', backdropFilter: 'blur(10px)' }}>
-                            <Typography sx={{ fontWeight: 600, fontSize: { xs: '1rem', md: '1.125rem' }, mb: { xs: 2, md: 3 }, color: '#374151' }}>General Stats</Typography>
-                            <Box component="ul" sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, fontSize: { xs: '0.875rem', md: '1rem' } }}>
-                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Total Cards:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{cardsWithDupes.length}</Typography>
-                                </Box>
-                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Average CMC:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{avgCmc.toFixed(2)}</Typography>
-                                </Box>
-                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Most Common Type:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{mostCommonType}</Typography>
-                                </Box>
-                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Most Common Color:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{mostCommonColor}</Typography>
-                                </Box>
-                            </Box>
-                        </Box>
-                        
-                        <Box sx={{ background: 'rgba(249, 250, 251, 0.8)', p: { xs: 3, md: 5 }, borderRadius: 2, border: '1px solid rgba(229, 231, 235, 0.6)', backdropFilter: 'blur(10px)' }}>
-                            <Typography sx={{ fontWeight: 600, fontSize: { xs: '1rem', md: '1.125rem' }, mb: { xs: 2, md: 3 }, color: '#374151' }}>Artist Info</Typography>
-                            <Box component="ul" sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, fontSize: { xs: '0.875rem', md: '1rem' } }}>
-                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Artist:</Typography>
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}</Typography>
-                                </Box>
-                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Sets Illustrated:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{setData.length}</Typography>
-                                </Box>
-                                <Box component="li" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Creature Types:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937' }}>{creatureTypeData.length}</Typography>
-                                </Box>
-                                <Box component="li" sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: { sm: 'space-between' } }}>
-                                    <Typography component="span" sx={{ fontWeight: 500, color: '#4b5563' }}>Rarity Distribution:</Typography> 
-                                    <Typography component="span" sx={{ color: '#1f2937', textAlign: { sm: 'right' } }}>
-                                        {Object.entries(rarityDist)
-                                            .map(([rarity, count]) => `${rarity.charAt(0).toUpperCase() + rarity.slice(1)}: ${count}`)
-                                            .join(', ')}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Box>
-                    </Box>
-                </Box>
-            </Box>
+                </Paper>
+            </Container>
         </Box>
     );
 };
