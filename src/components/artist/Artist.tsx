@@ -164,6 +164,15 @@ const Artist = () => {
                 <img src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/OMALogo.png" alt="Original Magic Art logo" className="oma-logo" />
               </Link>
             )}
+            <Link
+              href={`https://www.ebay.com/sch/i.html?_nkw=${artistByName.name.split(" ").join("+")}+signed+cards+mtg&_sacat=0&_from=R40&_trksid=p2334524.m570.l1313&_odkw=${artistByName.name.split(" ").join("+")}+signed+cards&_osacat=0&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339140903&customid=&toolid=10001&mkevt=1`}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="none"
+              sx={artistStyles.ebayLink}
+            >
+              Search <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/EBay_logo.svg" alt="eBay" style={{ height: '20px', verticalAlign: 'middle', margin: '0 4px' }} /> for signed {artistByName.name} cards
+            </Link>
           </Box>
 
           <Box sx={artistStyles.artistPage}>

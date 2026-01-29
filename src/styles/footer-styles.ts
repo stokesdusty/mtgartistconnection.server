@@ -59,4 +59,42 @@ export const footerStyles: Record<string, SxProps<Theme>> = {
       backgroundColor: colors.neutral[50],
     },
   },
+  supportBanner: {
+    backgroundColor: colors.neutral[50],
+    borderTop: `1px solid ${colors.neutral[200]}`,
+    padding: { xs: spacing.xl, md: spacing.xxl },
+    textAlign: 'center',
+  },
+  supportBannerInner: {
+    maxWidth: '680px',
+    margin: '0 auto',
+  },
+  supportHeading: {
+    color: colors.text.primary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.primary,
+    marginBottom: spacing.md,
+  },
+  supportBody: {
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.primary,
+    lineHeight: typography.lineHeight.relaxed,
+    marginBottom: spacing.lg,
+  },
+  supportActions: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  supportSubtext: {
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.primary,
+    lineHeight: typography.lineHeight.relaxed,
+  },
 };

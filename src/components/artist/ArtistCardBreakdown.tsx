@@ -132,12 +132,14 @@ const ArtistCardAnalysis = () => {
 
             // Try with game:paper filter first
             let withDupesData = await fetchCards(scryfallQuery.withPaper);
+            let triedBothQueries = false;
 
             // If we got null (404 error), try without game:paper filter
             if (!withDupesData) {
                 console.log("No results with game:paper, retrying without filter...");
                 setError(null); // Clear the error before retrying
                 withDupesData = await fetchCards(scryfallQuery.withoutPaper);
+                triedBothQueries = true;
                 setHasTriedBothQueries(true);
             }
 
@@ -147,7 +149,7 @@ const ArtistCardAnalysis = () => {
                     (card) => card.artist?.toLowerCase().trim() === artist.toLowerCase().trim()
                 );
                 setCardsWithDupes(filtered);
-            } else if (hasTriedBothQueries) {
+            } else if (triedBothQueries) {
                 // If we've tried both queries and still have no data, set a user-friendly error
                 setError("No cards found");
             }
