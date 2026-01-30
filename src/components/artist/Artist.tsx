@@ -159,6 +159,15 @@ const Artist = () => {
                 rel="noopener noreferrer"
                 underline="none"
                 sx={artistStyles.omaLink}
+                onClick={() => {
+                  if ((window as any).gtag) {
+                    (window as any).gtag("event", "oma_link_click", {
+                      event_category: "artist_page",
+                      event_label: artistByName.name,
+                      artist_name: artistByName.name,
+                    });
+                  }
+                }}
               >
                 <Typography component="span">Buy prints & playmats at</Typography>
                 <img src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/OMALogo.png" alt="Original Magic Art logo" className="oma-logo" />
@@ -170,6 +179,15 @@ const Artist = () => {
               rel="noopener noreferrer"
               underline="none"
               sx={artistStyles.ebayLink}
+              onClick={() => {
+                if ((window as any).gtag) {
+                  (window as any).gtag("event", "ebay_link_click", {
+                    event_category: "artist_page",
+                    event_label: artistByName.name,
+                    artist_name: artistByName.name,
+                  });
+                }
+              }}
             >
               Search <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/EBay_logo.svg" alt="eBay" style={{ height: '20px', verticalAlign: 'middle', margin: '0 4px' }} /> for signed {artistByName.name} cards
             </Link>
