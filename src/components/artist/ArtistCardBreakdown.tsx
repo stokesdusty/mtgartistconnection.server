@@ -144,10 +144,25 @@ const ArtistCardAnalysis = () => {
             }
 
             if (withDupesData) {
-                // Case-insensitive exact artist filter
-                const filtered = withDupesData.filter(
-                    (card) => card.artist?.toLowerCase().trim() === artist.toLowerCase().trim()
-                );
+                // Normalize to handle diacritics, apostrophes, and other special characters
+                const normalize = (str: string) => {
+                    return str
+                        .toLowerCase()
+                        .trim()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/'/g, " ")
+                        .replace(/\./g, "")
+                        .replace(/-/g, " ")
+                        .replace(/\s+/g, " ")
+                        .trim();
+                };
+                const normalizedArtist = normalize(artist);
+                const filtered = withDupesData.filter((card) => {
+                    const normalizedCardArtist = normalize(card.artist || "");
+                    return normalizedCardArtist === normalizedArtist ||
+                           normalizedCardArtist.split(/[&,]/).some(name => normalize(name) === normalizedArtist);
+                });
                 setCardsWithDupes(filtered);
             } else if (triedBothQueries) {
                 // If we've tried both queries and still have no data, set a user-friendly error

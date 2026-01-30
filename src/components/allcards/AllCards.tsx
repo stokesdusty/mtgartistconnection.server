@@ -122,7 +122,10 @@ const AllCards = () => {
           .replace(/\./g, "") // Remove periods
           .replace(/-/g, " ") // Replace hyphens with spaces
           .replace(/"/g, "") // Remove quotation marks
-          .replace(/[()]/g, ""); // Remove parentheses
+          .replace(/[()]/g, "") // Remove parentheses
+          .replace(/'/g, " ") // Replace apostrophes with spaces
+          .replace(/\s+/g, " ") // Collapse multiple spaces
+          .trim();
       };
 
       // Filter for artist match (exact or as part of multiple artists)
