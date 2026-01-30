@@ -45,6 +45,10 @@ const KofiButton = () => {
         renderedRef.current = true;
         kofi.init("Support us", "#2d4a36", "Y8Y71T8GEF");
         el.innerHTML = kofi.getHTML();
+        const anchor = el.querySelector("a");
+        if (anchor && anchor.href) {
+          anchor.href += "?utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=kofi_support_click";
+        }
       })
       .catch(console.error);
 
@@ -107,7 +111,22 @@ const PayPalButton = () => {
     };
   }, []);
 
-  return <div id="paypal-donate-button" />;
+  return (
+    <div
+      id="paypal-donate-button"
+      onClick={() => {
+        if ((window as any).gtag) {
+          (window as any).gtag("event", "paypal_support_click", {
+            event_category: "donations",
+            event_label: "paypal_footer",
+            utm_source: "mtgartistconnection",
+            utm_medium: "referral",
+            utm_campaign: "paypal_support_click",
+          });
+        }
+      }}
+    />
+  );
 };
 
 const Footer = () => {
