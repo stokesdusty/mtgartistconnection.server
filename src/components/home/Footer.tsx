@@ -57,6 +57,7 @@ const KofiButton = () => {
                 utm_source: "mtgartistconnection",
                 utm_medium: "referral",
                 utm_campaign: "kofi_support_click",
+                transport_type: "beacon",
               });
             }
           });
