@@ -6,7 +6,6 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
     background: colors.neutral.white,
     color: colors.text.primary,
     boxShadow: shadows.sm,
-    borderBottom: `1px solid ${colors.neutral[200]}`,
     borderRadius: 0,
     position: 'sticky',
   },
