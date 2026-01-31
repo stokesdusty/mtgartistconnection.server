@@ -48,19 +48,6 @@ const KofiButton = () => {
         const anchor = el.querySelector("a");
         if (anchor && anchor.href) {
           anchor.href += "?utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=kofi_support_click";
-          // Add Google Analytics event tracking
-          anchor.addEventListener("click", () => {
-            if ((window as any).gtag) {
-              (window as any).gtag("event", "kofi_support_click", {
-                event_category: "donations",
-                event_label: "kofi_footer",
-                utm_source: "mtgartistconnection",
-                utm_medium: "referral",
-                utm_campaign: "kofi_support_click",
-                transport_type: "beacon",
-              });
-            }
-          });
         }
       })
       .catch(console.error);
@@ -71,7 +58,16 @@ const KofiButton = () => {
     };
   }, []);
 
-  return <div ref={containerRef} />;
+  const handleClick = () => {
+    if ((window as any).gtag) {
+      (window as any).gtag("event", "kofi_support_click", {
+        event_category: "donations",
+        event_label: "kofi_footer",
+      });
+    }
+  };
+
+  return <div ref={containerRef} onClick={handleClick} />;
 };
 
 // Load the PayPal SDK once globally, reuse across mounts
