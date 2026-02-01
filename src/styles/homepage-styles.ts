@@ -261,6 +261,17 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.medium,
   },
+  scrollToTop: {
+    position: 'fixed',
+    bottom: spacing.xl,
+    right: spacing.xl,
+    backgroundColor: colors.primary.main,
+    color: colors.neutral.white,
+    boxShadow: shadows.lg,
+    '&:hover': {
+      backgroundColor: colors.primary.dark,
+    },
+  },
   noResults: {
     textAlign: 'center',
     padding: spacing.xxxl,

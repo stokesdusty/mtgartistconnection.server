@@ -22,6 +22,9 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import { homepageStyles } from "../../styles/homepage-styles";
 import { useNavigate } from "react-router-dom";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import Fab from "@mui/material/Fab";
+import Fade from "@mui/material/Fade";
 
 interface Artist {
   name: string;
@@ -59,6 +62,7 @@ const Homepage = () => {
   const [hasUpcomingEventFilter, setHasUpcomingEventFilter] = useState(false);
   const [artistsWithEvents, setArtistsWithEvents] = useState<Set<string>>(new Set());
   const [letterFilter, setLetterFilter] = useState("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const navigate = useNavigate();
 
   // Get upcoming events
@@ -107,6 +111,19 @@ const Homepage = () => {
     const timer = setTimeout(preloadBatch, 2000);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [data]);
+
+  // Show scroll-to-top button when user scrolls below the fold
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > window.innerHeight);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserSearch(event.target.value);
@@ -450,6 +467,17 @@ const Homepage = () => {
         }
         </Box>
       </Box>
+
+      <Fade in={showScrollTop}>
+        <Fab
+          size="medium"
+          aria-label="scroll to top"
+          onClick={scrollToTop}
+          sx={homepageStyles.scrollToTop}
+        >
+          <KeyboardArrowUpIcon />
+        </Fab>
+      </Fade>
     </Box>
   );
 };
