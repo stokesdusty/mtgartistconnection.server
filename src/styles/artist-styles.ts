@@ -253,4 +253,36 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
       lineHeight: typography.lineHeight.relaxed,
     },
   },
+  eventsListContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+  },
+  eventCard: {
+    backgroundColor: colors.neutral.white,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    border: `1px solid ${colors.neutral[200]}`,
+  },
+  eventName: {
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.semibold,
+    fontSize: typography.fontSize.base,
+    marginBottom: spacing.sm,
+  },
+  eventDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing.xs,
+  },
+  eventDetail: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: spacing.xs,
+    '& p': {
+      color: colors.text.secondary,
+      fontSize: typography.fontSize.sm,
+    },
+  },
 };

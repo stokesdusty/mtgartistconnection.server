@@ -58,3 +58,15 @@ export const GET_ARTISTSBYEVENTID = gql`
         }
     }
 `;
+
+export const GET_EVENTS_BY_ARTIST = gql`
+    query getEventsByArtist($artistName: String!) {
+        signingEvent {
+            id
+            name
+            city
+            startDate
+            endDate
+        }
+    }
+`;

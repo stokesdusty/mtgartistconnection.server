@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
-import { GET_ARTIST_BY_NAME } from "../graphql/queries";
+import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID } from "../graphql/queries";
 import {
   Box,
   Link,
@@ -8,6 +8,7 @@ import {
   CircularProgress,
   Container,
   Paper,
+  Chip,
 } from "@mui/material";
 import { TbWorldWww } from "react-icons/tb";
 import {
@@ -19,9 +20,10 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
-import { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 import { artistStyles } from "../../styles/artist-styles";
+import { CalendarToday, LocationOn } from '@mui/icons-material';
 
 interface ArtistSocialLink {
   label: string;
@@ -29,6 +31,104 @@ interface ArtistSocialLink {
   icon: React.ComponentType<{ size: number; color: string }>;
   color: string;
 }
+
+const ArtistEventCard = ({ event }: { event: any }) => {
+  const startDateFormatted = new Date(event.startDate).toLocaleDateString();
+  const endDateFormatted = new Date(event.endDate).toLocaleDateString();
+
+  return (
+    <Box sx={artistStyles.eventCard}>
+      <Typography variant="h6" sx={artistStyles.eventName}>
+        {event.name}
+      </Typography>
+      <Box sx={artistStyles.eventDetails}>
+        <Box sx={artistStyles.eventDetail}>
+          <CalendarToday fontSize="small" sx={{ color: '#2d4a36' }} />
+          <Typography variant="body2">
+            {startDateFormatted}{startDateFormatted !== endDateFormatted && ` - ${endDateFormatted}`}
+          </Typography>
+        </Box>
+        <Box sx={artistStyles.eventDetail}>
+          <LocationOn fontSize="small" sx={{ color: '#2d4a36' }} />
+          <Typography variant="body2">{event.city}</Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+// Individual event checker component
+const EventAttendanceChecker = ({ event, artistName, onAttendanceChecked }: { event: any; artistName: string; onAttendanceChecked: (isAttending: boolean) => void }) => {
+  const { data, loading } = useQuery(GET_ARTISTSBYEVENTID, {
+    variables: { eventId: event.id }
+  });
+
+  React.useEffect(() => {
+    if (!loading && data) {
+      const isAttending = data?.mapArtistToEventByEventId?.some(
+        (artist: any) => artist.artistName === artistName
+      );
+      onAttendanceChecked(isAttending);
+    }
+  }, [loading, data, artistName, onAttendanceChecked]);
+
+  return null;
+};
+
+// Helper component to check and display events for an artist
+const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: string; upcomingEvents: any[] }) => {
+  const [attendanceMap, setAttendanceMap] = React.useState<{ [key: string]: boolean }>({});
+  const [checkedCount, setCheckedCount] = React.useState(0);
+
+  const handleAttendanceChecked = React.useCallback((eventId: string, isAttending: boolean) => {
+    setAttendanceMap(prev => {
+      if (prev[eventId] === undefined) {
+        setCheckedCount(c => c + 1);
+      }
+      return { ...prev, [eventId]: isAttending };
+    });
+  }, []);
+
+  // Filter events where artist is attending
+  const artistEvents = upcomingEvents.filter(event => attendanceMap[event.id] === true);
+
+  // Don't show section if still checking or no events
+  if (checkedCount < upcomingEvents.length || artistEvents.length === 0) {
+    return (
+      <>
+        {upcomingEvents.map(event => (
+          <EventAttendanceChecker
+            key={event.id}
+            event={event}
+            artistName={artistName}
+            onAttendanceChecked={(isAttending) => handleAttendanceChecked(event.id, isAttending)}
+          />
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {upcomingEvents.map(event => (
+        <EventAttendanceChecker
+          key={event.id}
+          event={event}
+          artistName={artistName}
+          onAttendanceChecked={(isAttending) => handleAttendanceChecked(event.id, isAttending)}
+        />
+      ))}
+      <Box sx={artistStyles.infoRow}>
+        <Typography variant="h5">Upcoming Events</Typography>
+        <Box sx={artistStyles.eventsListContainer}>
+          {artistEvents.map((event: any) => (
+            <ArtistEventCard key={event.id} event={event} />
+          ))}
+        </Box>
+      </Box>
+    </>
+  );
+};
 
 const Artist = () => {
   const { name } = useParams<{ name: string }>();
@@ -44,6 +144,21 @@ const Artist = () => {
       skip: !name,
     }
   );
+
+  const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
+
+  // Filter upcoming events where this artist is attending - must be before early returns
+  const upcomingEvents = useMemo(() => {
+    if (!eventsData?.signingEvent) return [];
+
+    const today = new Date();
+    return eventsData.signingEvent.filter((event: any) => {
+      const endDate = new Date(event.endDate);
+      return endDate >= today;
+    }).sort((a: any, b: any) =>
+      new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    );
+  }, [eventsData]);
 
   if (!name) return <Typography sx={{ textAlign: "center", p: 4 }}>No artist provided</Typography>;
   if (loading)
@@ -80,6 +195,12 @@ const Artist = () => {
   const { artistByName } = data;
 
   const socialMediaLinks: ArtistSocialLink[] = [
+    {
+      label: "Website",
+      url: artistByName.url,
+      icon: TbWorldWww,
+      color: "#2d4a36",
+    },
     {
       label: "Facebook",
       url: artistByName.facebook,
@@ -202,7 +323,7 @@ const Artist = () => {
 
                 <Box sx={artistStyles.infoRow}>
                   <Typography variant="h5">
-                    Social Media Links
+                    Website/Social Media Links
                   </Typography>
                   <Box sx={artistStyles.socialMedia}>
                     {socialMediaLinks.map(
@@ -222,19 +343,6 @@ const Artist = () => {
                         )
                     )}
                   </Box>
-                </Box>
-
-                <Box sx={artistStyles.infoRow}>
-                  <Typography variant="h5">Artist Website</Typography>
-                  <Typography>
-                    {artistByName.url ? (
-                      <Link href={artistByName.url} target="_blank" sx={artistStyles.socialIcon}>
-                        <TbWorldWww size={20} color={"#2d4a36"} />
-                      </Link>
-                    ) : (
-                      "None"
-                    )}
-                  </Typography>
                 </Box>
 
                 <Box sx={artistStyles.infoRow}>
@@ -281,14 +389,10 @@ const Artist = () => {
 
                 {artistByName.signingComment && (
                   <Box sx={artistStyles.infoRow}>
-                    <Paper
-                      elevation={0}
-                      sx={artistStyles.signingCommentBox}
-                    >
-                      <Typography variant="body1">
-                        "{artistByName.signingComment}"
-                      </Typography>
-                    </Paper>
+                    <Typography variant="h5">Notes</Typography>
+                    <Typography>
+                      {artistByName.signingComment}
+                    </Typography>
                   </Box>
                 )}
 
@@ -317,6 +421,13 @@ const Artist = () => {
                       </Link>
                     </Box>
                   )}
+
+                {upcomingEvents.length > 0 && (
+                  <UpcomingEventsSection
+                    artistName={artistByName.name}
+                    upcomingEvents={upcomingEvents}
+                  />
+                )}
               </Box>
 
               <Box sx={artistStyles.signatureSection}>

@@ -13,9 +13,9 @@ import {
   Button,
 } from "@mui/material";
 import { useQuery } from "@apollo/client";
-import { GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
+import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
-import { ChangeEvent, useMemo, useState } from "react";
+import React, { ChangeEvent, useMemo, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
@@ -32,14 +32,53 @@ interface Artist {
   mountainmage?: string;
 }
 
+// Component to fetch artists for a single event
+const EventArtistsFetcher = ({ eventId, onArtistsFetched }: { eventId: string; onArtistsFetched: (eventId: string, artists: string[]) => void }) => {
+  const { data } = useQuery(GET_ARTISTSBYEVENTID, {
+    variables: { eventId }
+  });
+
+  React.useEffect(() => {
+    if (data?.mapArtistToEventByEventId) {
+      const artistNames = data.mapArtistToEventByEventId.map((a: any) => a.artistName);
+      onArtistsFetched(eventId, artistNames);
+    }
+  }, [data, eventId, onArtistsFetched]);
+
+  return null;
+};
+
 const Homepage = () => {
   document.title = "MtG Artist Connection";
   const { data, error, loading } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
+  const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
   const [userSearch, setUserSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [mountainMageFilter, setMountainMageFilter] = useState(false);
   const [marksSigServiceFilter, setMarksSigServiceFilter] = useState(false);
+  const [hasUpcomingEventFilter, setHasUpcomingEventFilter] = useState(false);
+  const [artistsWithEvents, setArtistsWithEvents] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+
+  // Get upcoming events
+  const upcomingEvents = useMemo(() => {
+    if (!eventsData?.signingEvent) return [];
+
+    const today = new Date();
+    return eventsData.signingEvent.filter((event: any) => {
+      const endDate = new Date(event.endDate);
+      return endDate >= today;
+    });
+  }, [eventsData]);
+
+  // Callback to collect artists from events
+  const handleArtistsFetched = React.useCallback((eventId: string, artists: string[]) => {
+    setArtistsWithEvents(prev => {
+      const newSet = new Set(prev);
+      artists.forEach(artist => newSet.add(artist));
+      return newSet;
+    });
+  }, []);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserSearch(event.target.value);
@@ -55,6 +94,10 @@ const Homepage = () => {
 
   const handleMarksSigServiceChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMarksSigServiceFilter(event.target.checked);
+  };
+
+  const handleHasUpcomingEventChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setHasUpcomingEventFilter(event.target.checked);
   };
 
   const handleRandomArtist = () => {
@@ -131,6 +174,13 @@ const Homepage = () => {
       );
     }
 
+    // Has Upcoming Event Filter
+    if (hasUpcomingEventFilter) {
+      filteredArtists = filteredArtists.filter(
+        (artist: Artist) => artistsWithEvents.has(artist.name)
+      );
+    }
+
     // Search Filter
     if (userSearch.length >= 2) {
       const searchTerm = userSearch.toLowerCase().replace(/\s/g, "");
@@ -151,6 +201,8 @@ const Homepage = () => {
     locationFilter,
     mountainMageFilter,
     marksSigServiceFilter,
+    hasUpcomingEventFilter,
+    artistsWithEvents,
   ]);
 
   if (loading)
@@ -184,6 +236,15 @@ const Homepage = () => {
 
   return (
     <Box sx={homepageStyles.container}>
+      {/* Fetch artists for all upcoming events */}
+      {upcomingEvents.map((event: any) => (
+        <EventArtistsFetcher
+          key={event.id}
+          eventId={event.id}
+          onArtistsFetched={handleArtistsFetched}
+        />
+      ))}
+
       <Box sx={homepageStyles.wrapper}>
         <Box sx={homepageStyles.headerSection}>
           <Typography variant="h1" sx={homepageStyles.headerText}>
@@ -265,7 +326,7 @@ const Homepage = () => {
             </FormControl>
 
             <Box sx={homepageStyles.checkboxContainer}>
-              <Typography sx={homepageStyles.signingAgentLabel}>Signing Agent</Typography>
+              <Typography sx={homepageStyles.signingAgentLabel}>Filters</Typography>
               <FormGroup sx={homepageStyles.checkboxesContainer}>
                 <FormControlLabel
                   control={
@@ -287,7 +348,18 @@ const Homepage = () => {
                       sx={homepageStyles.checkbox}
                     />
                   }
-                  label="Mountain Mage"
+                  label="Mountain Mage Signing Service"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={hasUpcomingEventFilter}
+                      onChange={handleHasUpcomingEventChange}
+                      name="hasUpcomingEvent"
+                      sx={homepageStyles.checkbox}
+                    />
+                  }
+                  label="Has Upcoming Event"
                 />
               </FormGroup>
             </Box>
@@ -302,7 +374,8 @@ const Homepage = () => {
           ) : (userSearch.length >= 2 ||
             locationFilter !== "" ||
             mountainMageFilter ||
-            marksSigServiceFilter) && filteredData.length === 0 ? (
+            marksSigServiceFilter ||
+            hasUpcomingEventFilter) && filteredData.length === 0 ? (
             <Typography sx={homepageStyles.noResults}>
               No artists found matching your search.
             </Typography>
