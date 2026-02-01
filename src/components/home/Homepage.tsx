@@ -15,7 +15,7 @@ import {
 import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
-import React, { ChangeEvent, useMemo, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
@@ -58,6 +58,7 @@ const Homepage = () => {
   const [marksSigServiceFilter, setMarksSigServiceFilter] = useState(false);
   const [hasUpcomingEventFilter, setHasUpcomingEventFilter] = useState(false);
   const [artistsWithEvents, setArtistsWithEvents] = useState<Set<string>>(new Set());
+  const [letterFilter, setLetterFilter] = useState("");
   const navigate = useNavigate();
 
   // Get upcoming events
@@ -80,6 +81,33 @@ const Homepage = () => {
     });
   }, []);
 
+  // Preload all artist images in the background so letter filtering is instant
+  useEffect(() => {
+    if (!data?.artists) return;
+
+    let cancelled = false;
+    const batchSize = 10;
+    const artists = data.artists;
+    let index = 0;
+
+    const preloadBatch = () => {
+      if (cancelled) return;
+      const end = Math.min(index + batchSize, artists.length);
+      for (let i = index; i < end; i++) {
+        const img = new Image();
+        img.src = `https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${artists[i].filename}.jpg`;
+      }
+      index = end;
+      if (index < artists.length) {
+        requestIdleCallback ? requestIdleCallback(preloadBatch) : setTimeout(preloadBatch, 100);
+      }
+    };
+
+    // Delay slightly so initial render isn't competing for bandwidth
+    const timer = setTimeout(preloadBatch, 2000);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [data]);
+
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserSearch(event.target.value);
   };
@@ -98,6 +126,10 @@ const Homepage = () => {
 
   const handleHasUpcomingEventChange = (event: ChangeEvent<HTMLInputElement>) => {
     setHasUpcomingEventFilter(event.target.checked);
+  };
+
+  const handleLetterFilter = (letter: string) => {
+    setLetterFilter(prev => prev === letter ? "" : letter);
   };
 
   const handleRandomArtist = () => {
@@ -181,6 +213,26 @@ const Homepage = () => {
       );
     }
 
+    // Letter Filter
+    if (letterFilter) {
+      // Normalize to NFD so accented characters (é, ó, etc.) decompose to base letter + combining mark
+      const getBaseChar = (name: string) => name.normalize('NFD').charAt(0).toUpperCase();
+
+      if (letterFilter === 'Other') {
+        filteredArtists = filteredArtists.filter((artist: Artist) =>
+          !/^[a-zA-Z0-9]/.test(artist.name.normalize('NFD'))
+        );
+      } else if (letterFilter === '0-9') {
+        filteredArtists = filteredArtists.filter((artist: Artist) =>
+          /^[0-9]/.test(artist.name)
+        );
+      } else {
+        filteredArtists = filteredArtists.filter((artist: Artist) =>
+          getBaseChar(artist.name) === letterFilter
+        );
+      }
+    }
+
     // Search Filter
     if (userSearch.length >= 2) {
       const searchTerm = userSearch.toLowerCase().replace(/\s/g, "");
@@ -203,6 +255,7 @@ const Homepage = () => {
     marksSigServiceFilter,
     hasUpcomingEventFilter,
     artistsWithEvents,
+    letterFilter,
   ]);
 
   if (loading)
@@ -364,6 +417,20 @@ const Homepage = () => {
               </FormGroup>
             </Box>
           </Box>
+        </Box>
+
+        <Box sx={homepageStyles.alphabetBar}>
+          {['A','B','C','D','E','F','G','H','I','J','K','L','M',
+            'N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0-9','Other'].map((letter) => (
+            <Box
+              key={letter}
+              component="button"
+              onClick={() => handleLetterFilter(letter)}
+              sx={letterFilter === letter ? homepageStyles.alphabetLinkActive : homepageStyles.alphabetLink}
+            >
+              {letter}
+            </Box>
+          ))}
         </Box>
 
         <Box sx={homepageStyles.artistsGrid}>
