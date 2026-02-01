@@ -89,6 +89,28 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     gap: spacing.lg,
     alignItems: 'start',
   },
+  searchContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing.sm,
+  },
+  randomButton: {
+    backgroundColor: colors.primary.main,
+    color: colors.neutral.white,
+    fontWeight: typography.fontWeight.semibold,
+    borderRadius: borderRadius.lg,
+    padding: `${spacing.sm} ${spacing.lg}`,
+    textTransform: 'none',
+    fontSize: typography.fontSize.base,
+    transition: transitions.base,
+    boxShadow: shadows.sm,
+    fontFamily: typography.fontFamily.display,
+    '&:hover': {
+      backgroundColor: colors.primary.dark,
+      boxShadow: shadows.md,
+      transform: 'translateY(-1px)',
+    },
+  },
   textField: {
     width: '100%',
     '& .MuiOutlinedInput-root': {

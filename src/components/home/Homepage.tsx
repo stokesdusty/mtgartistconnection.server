@@ -10,6 +10,7 @@ import {
   Checkbox,
   FormGroup,
   FormControlLabel,
+  Button,
 } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
@@ -19,6 +20,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
 import { homepageStyles } from "../../styles/homepage-styles";
+import { useNavigate } from "react-router-dom";
+import ShuffleIcon from "@mui/icons-material/Shuffle";
 
 interface Artist {
   name: string;
@@ -36,6 +39,7 @@ const Homepage = () => {
   const [locationFilter, setLocationFilter] = useState("");
   const [mountainMageFilter, setMountainMageFilter] = useState(false);
   const [marksSigServiceFilter, setMarksSigServiceFilter] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserSearch(event.target.value);
@@ -51,6 +55,14 @@ const Homepage = () => {
 
   const handleMarksSigServiceChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMarksSigServiceFilter(event.target.checked);
+  };
+
+  const handleRandomArtist = () => {
+    if (data?.artists && data.artists.length > 0) {
+      const randomIndex = Math.floor(Math.random() * data.artists.length);
+      const randomArtist = data.artists[randomIndex];
+      navigate(`/artist/${randomArtist.name}`);
+    }
   };
 
   const locations = useMemo(() => {
@@ -199,19 +211,29 @@ const Homepage = () => {
 
         <Box sx={homepageStyles.filtersSection}>
           <Box sx={homepageStyles.filtersGrid}>
-            <TextField
-              sx={homepageStyles.textField}
-              value={userSearch}
-              placeholder="Search for an artist"
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
+            <Box sx={homepageStyles.searchContainer}>
+              <TextField
+                sx={homepageStyles.textField}
+                value={userSearch}
+                placeholder="Search for an artist"
+                onChange={handleSearchChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleRandomArtist}
+                startIcon={<ShuffleIcon />}
+                sx={homepageStyles.randomButton}
+              >
+                Random Artist
+              </Button>
+            </Box>
 
             <FormControl sx={homepageStyles.locationSelect}>
               <InputLabel id="location-select-label">Filter by Location</InputLabel>
