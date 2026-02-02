@@ -325,24 +325,28 @@ const Artist = () => {
                   <Typography variant="h5">
                     Website/Social Media Links
                   </Typography>
-                  <Box sx={artistStyles.socialMedia}>
-                    {socialMediaLinks.map(
-                      (link, index) =>
-                        link.url && (
-                          <Link
-                            key={index}
-                            href={link.url}
-                            target="_blank"
-                            sx={artistStyles.socialIcon}
-                          >
-                            <link.icon
-                              size={20}
-                              color={link.color}
-                            />
-                          </Link>
-                        )
-                    )}
-                  </Box>
+                  {socialMediaLinks.some(link => link.url) ? (
+                    <Box sx={artistStyles.socialMedia}>
+                      {socialMediaLinks.map(
+                        (link, index) =>
+                          link.url && (
+                            <Link
+                              key={index}
+                              href={link.url}
+                              target="_blank"
+                              sx={artistStyles.socialIcon}
+                            >
+                              <link.icon
+                                size={20}
+                                color={link.color}
+                              />
+                            </Link>
+                          )
+                      )}
+                    </Box>
+                  ) : (
+                    <Typography>Unknown</Typography>
+                  )}
                 </Box>
 
                 <Box sx={artistStyles.infoRow}>

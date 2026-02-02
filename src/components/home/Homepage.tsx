@@ -127,6 +127,9 @@ const Homepage = () => {
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserSearch(event.target.value);
+    if (letterFilter) {
+      setLetterFilter("");
+    }
   };
 
   const handleLocationChange = (event: SelectChangeEvent) => {
@@ -147,6 +150,7 @@ const Homepage = () => {
 
   const handleLetterFilter = (letter: string) => {
     setLetterFilter(prev => prev === letter ? "" : letter);
+    setUserSearch("");
   };
 
   const handleRandomArtist = () => {
