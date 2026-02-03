@@ -74,12 +74,14 @@ export const ADD_SIGNINGEVENT = gql`
         $city:String!,
         $startDate:String!,
         $endDate:String!,
+        $url:String,
         ){
             signingEvent(
                 name: $name,
                 city: $city,
                 startDate: $startDate,
                 endDate: $endDate,
+                url: $url,
             ){
                 name
         }

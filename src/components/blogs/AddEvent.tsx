@@ -17,6 +17,7 @@ import {
       const [ addSigningEvent ] = useMutation(ADD_SIGNINGEVENT);
       const [ name, setName] = useState<string>("");
       const [ city, setCity] = useState<string>("");
+      const [ url, setUrl] = useState<string>("");
       const [ startDateValue, setStartDateValue] = useState<any>();
       const [ endDateValue, setEndDateValue] = useState<any>();
   
@@ -123,14 +124,15 @@ import {
   
       const onSubmit = async () => {
           try {
-              console.log(name, city, startDateValue, endDateValue);
+              console.log(name, city, url, startDateValue, endDateValue);
               console.log('test');
               const start = startDateValue?.toString();
               const end = endDateValue?.toString();
               await addSigningEvent({
                   variables: {
-                      name, 
+                      name,
                       city,
+                      url: url || null,
                       startDate: start,
                       endDate: end,
                   },
@@ -181,7 +183,7 @@ import {
                           </Box>
                           
                           <Box sx={styles.fieldSection}>
-                              <TextField 
+                              <TextField
                                   fullWidth
                                   label="City"
                                   value={city}
@@ -192,7 +194,20 @@ import {
                                   placeholder="Enter the city where the event takes place"
                               />
                           </Box>
-  
+
+                          <Box sx={styles.fieldSection}>
+                              <TextField
+                                  fullWidth
+                                  label="Event URL (Optional)"
+                                  value={url}
+                                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                      setUrl(event.target.value);
+                                  }}
+                                  sx={styles.textField}
+                                  placeholder="Enter the event website URL (optional)"
+                              />
+                          </Box>
+
                           <Typography sx={styles.sectionHeader} variant="h4">
                               Event Dates
                           </Typography>

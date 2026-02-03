@@ -38,9 +38,23 @@ const ArtistEventCard = ({ event }: { event: any }) => {
 
   return (
     <Box sx={artistStyles.eventCard}>
-      <Typography variant="h6" sx={artistStyles.eventName}>
-        {event.name}
-      </Typography>
+      {event.url ? (
+        <Link
+          href={event.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          underline="hover"
+          sx={{ textDecoration: 'none' }}
+        >
+          <Typography variant="h6" sx={artistStyles.eventName}>
+            {event.name}
+          </Typography>
+        </Link>
+      ) : (
+        <Typography variant="h6" sx={artistStyles.eventName}>
+          {event.name}
+        </Typography>
+      )}
       <Box sx={artistStyles.eventDetails}>
         <Box sx={artistStyles.eventDetail}>
           <CalendarToday fontSize="small" sx={{ color: '#2d4a36' }} />

@@ -46,9 +46,23 @@ import {
     return (
       <Paper sx={contentPageStyles.eventCard} elevation={0} key={SigningEventProps.props.name}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center', marginBottom: 1.5, textAlign: 'center' }}>
-          <Typography variant="h3" sx={contentPageStyles.eventTitle}>
-            {SigningEventProps.props.name}
-          </Typography>
+          {SigningEventProps.props.url ? (
+            <Link
+              href={SigningEventProps.props.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ textDecoration: 'none' }}
+            >
+              <Typography variant="h3" sx={contentPageStyles.eventTitle}>
+                {SigningEventProps.props.name}
+              </Typography>
+            </Link>
+          ) : (
+            <Typography variant="h3" sx={contentPageStyles.eventTitle}>
+              {SigningEventProps.props.name}
+            </Typography>
+          )}
 
           <Box sx={contentPageStyles.infoRow}>
             <Box sx={contentPageStyles.infoItem}>
