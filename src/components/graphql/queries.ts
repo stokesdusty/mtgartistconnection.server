@@ -47,6 +47,7 @@ export const GET_SIGNINGEVENTS = gql`
             city
             startDate
             endDate
+            url
         }
     }
 `;
@@ -67,6 +68,7 @@ export const GET_EVENTS_BY_ARTIST = gql`
             city
             startDate
             endDate
+            url
         }
     }
 `;
