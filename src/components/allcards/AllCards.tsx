@@ -119,12 +119,12 @@ const AllCards = () => {
           .toLowerCase()
           .normalize("NFD") // Decompose combined characters
           .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
-          .replace(/\./g, "") // Remove periods
+          .replace(/\./g, " ") // Replace periods with spaces (handles "D. J." → "D J")
           .replace(/-/g, " ") // Replace hyphens with spaces
           .replace(/"/g, "") // Remove quotation marks
           .replace(/[()]/g, "") // Remove parentheses
           .replace(/'/g, " ") // Replace apostrophes with spaces
-          .replace(/\s+/g, " ") // Collapse multiple spaces
+          .replace(/\s+/g, "") // Remove ALL spaces to ensure consistent matching
           .trim();
       };
 
