@@ -35,6 +35,7 @@ export const GET_ARTIST_BY_NAME = gql`
             location
             bluesky
             omalink
+            inprnt
         }
     }
 `;

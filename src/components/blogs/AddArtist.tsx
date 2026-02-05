@@ -36,6 +36,7 @@ import {
       signing: string;
       markssignatureservice: string;
       bluesky: string;
+      inprnt: string;
   }
   
   const AddArtist = () => {
@@ -151,14 +152,14 @@ import {
       };
   
       const onSubmit = async({
-          name, 
+          name,
           email,
           filename,
           facebook,
           instagram,
           patreon,
           twitter,
-          youtube, 
+          youtube,
           artstation,
           mountainmage,
           url,
@@ -168,12 +169,13 @@ import {
           haveSignature,
           signing,
           markssignatureservice,
-          bluesky,    
+          bluesky,
+          inprnt,
       }: Inputs) => {
               try {
                   await addArtist({
                       variables: {
-                          name, 
+                          name,
                           email,
                           filename,
                           facebook,
@@ -190,10 +192,11 @@ import {
                           haveSignature: signature,
                           signing: isSigning,
                           markssignatureservice: marks,
-                          bluesky, 
+                          bluesky,
+                          inprnt,
                       },
                   });
-                  
+
                   // Reset form fields after successful submission
                   reset();
                   setSignature("false");
@@ -348,7 +351,7 @@ import {
                           </Box>
                           
                           <Box sx={styles.fieldSection}>
-                              <TextField 
+                              <TextField
                                   fullWidth
                                   margin="normal"
                                   label="Bluesky"
@@ -356,7 +359,17 @@ import {
                                   sx={styles.textField}
                               />
                           </Box>
-  
+
+                          <Box sx={styles.fieldSection}>
+                              <TextField
+                                  fullWidth
+                                  margin="normal"
+                                  label="INPRNT Link"
+                                  {...register("inprnt")}
+                                  sx={styles.textField}
+                              />
+                          </Box>
+
                           <Typography sx={styles.sectionHeader} variant="h4">
                               Signing Information
                           </Typography>

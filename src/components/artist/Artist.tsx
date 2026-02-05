@@ -308,6 +308,35 @@ const Artist = () => {
                 <img src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/OMALogo.png" alt="Original Magic Art logo" className="oma-logo" />
               </Link>
             )}
+            {artistByName.inprnt && (
+              <Link
+                href={artistByName.inprnt}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="none"
+                sx={artistStyles.omaLink}
+                onClick={() => {
+                  if ((window as any).gtag) {
+                    (window as any).gtag("event", "inprnt_link_click", {
+                      event_category: "artist_page",
+                      event_label: artistByName.name,
+                      artist_name: artistByName.name,
+                    });
+                  }
+                }}
+              >
+                <Typography component="span">Buy prints at</Typography>
+                <Box component="span" sx={{
+                  fontWeight: 'bold',
+                  fontSize: '1.1em',
+                  letterSpacing: '0.05em',
+                  color: '#000',
+                  fontFamily: 'Arial, sans-serif'
+                }}>
+                  INPRNT
+                </Box>
+              </Link>
+            )}
             <Link
               href={`https://www.ebay.com/sch/i.html?_nkw=${artistByName.name.split(" ").join("+")}+signed+cards+mtg&_sacat=0&_from=R40&_trksid=p2334524.m570.l1313&_odkw=${artistByName.name.split(" ").join("+")}+signed+cards&_osacat=0&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339140903&customid=&toolid=10001&mkevt=1&utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=ebay_artist_search`}
               target="_blank"

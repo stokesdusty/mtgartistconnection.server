@@ -28,7 +28,7 @@ export const ADD_ARTIST = gql`
         $facebook:String,
         $haveSignature:String,
         $instagram:String,
-        $patreon:String, 
+        $patreon:String,
         $signing:String,
         $signingComment:String,
         $twitter:String,
@@ -40,7 +40,8 @@ export const ADD_ARTIST = gql`
         $artstation:String,
         $location:String,
         $bluesky:String,
-        $omalink:String
+        $omalink:String,
+        $inprnt:String
         ){
             addArtist(
                 name: $name,
@@ -61,7 +62,8 @@ export const ADD_ARTIST = gql`
                 artstation: $artstation,
                 location: $location,
                 bluesky: $bluesky,
-                omalink: $omalink
+                omalink: $omalink,
+                inprnt: $inprnt
             ){
                 name
         }
