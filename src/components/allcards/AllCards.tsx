@@ -124,6 +124,7 @@ const AllCards = () => {
           .replace(/"/g, "") // Remove quotation marks
           .replace(/[()]/g, "") // Remove parentheses
           .replace(/'/g, " ") // Replace apostrophes with spaces
+          .replace(/,/g, "") // Remove commas (handles "Beard, Jr." → "Beard Jr")
           .replace(/\s+/g, "") // Remove ALL spaces to ensure consistent matching
           .trim();
       };
