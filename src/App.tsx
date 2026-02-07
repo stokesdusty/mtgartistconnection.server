@@ -23,6 +23,9 @@ import TermsOfService from "./components/home/TermsOfService";
 import ContactPage from "./components/home/Contact";
 import ArtistCardAnalysis from "./components/artist/ArtistCardBreakdown";
 import { LoadingProvider } from "./LoadingContext";
+import { CartProvider } from "./CartContext";
+import CartButton from "./components/cart/CartButton";
+import { FEATURE_FLAGS } from "./featureFlags";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.isLoggedIn);
@@ -39,33 +42,36 @@ function App() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <LoadingProvider>
-        <div >
-          <header>
-            <Header />
-          </header>
-          <main>
-            <Routes>
-              <Route path="/" element={<Homepage />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/signingservices" element={<SigningServices />} />
-              <Route path="/add" element={<AddArtist />} />
-              <Route path="/addevent" element={<AddEvent />} />
-              <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
-              <Route path="/artist/:name" element={<Artist />} />
-              <Route path="/allcards/:name" element={<AllCards />} />
-              <Route path="/markscalendar" element={<MarksCalendar />} />
-              <Route path="/randomflavortext" element={<RandomFlavorText />} />
-              <Route path="/privacypolicy" element={<PrivacyPolicy />} />
-              <Route path="/termsofservice" element={<TermsOfService />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />
-            </Routes>
-          </main>
-          <footer>
-            <Footer />
-          </footer>
-        </div>
+        <CartProvider>
+          <div>
+            <header>
+              <Header />
+            </header>
+            <main>
+              <Routes>
+                <Route path="/" element={<Homepage />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/signingservices" element={<SigningServices />} />
+                <Route path="/add" element={<AddArtist />} />
+                <Route path="/addevent" element={<AddEvent />} />
+                <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
+                <Route path="/artist/:name" element={<Artist />} />
+                <Route path="/allcards/:name" element={<AllCards />} />
+                <Route path="/markscalendar" element={<MarksCalendar />} />
+                <Route path="/randomflavortext" element={<RandomFlavorText />} />
+                <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+                <Route path="/termsofservice" element={<TermsOfService />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />
+              </Routes>
+            </main>
+            <footer>
+              <Footer />
+            </footer>
+            {FEATURE_FLAGS.SHOPPING_CART && <CartButton />}
+          </div>
+        </CartProvider>
       </LoadingProvider>
     </LocalizationProvider>
   );

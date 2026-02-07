@@ -264,10 +264,11 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   scrollToTop: {
     position: 'fixed',
     bottom: spacing.xl,
-    right: spacing.xl,
+    right: '96px', // Positioned left of cart button
     backgroundColor: colors.primary.main,
     color: colors.neutral.white,
     boxShadow: shadows.lg,
+    zIndex: 999,
     '&:hover': {
       backgroundColor: colors.primary.dark,
     },

@@ -36,7 +36,11 @@ const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
 
 const Header = () => {
   const location = useLocation();
-  const [value, setValue] = useState<string>(location.pathname);
+  const validPaths = navItems.map(item => item.to);
+  const getTabValue = (pathname: string): string | false => {
+    return validPaths.includes(pathname) ? pathname : false;
+  };
+  const [value, setValue] = useState<string | false>(getTabValue(location.pathname));
   const navigate = useNavigate();
   const theme = useTheme();
   const isBelowLarge = useMediaQuery(theme.breakpoints.down("lg"));
@@ -51,7 +55,7 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: string | false) => {
     setValue(newValue);
   };
 
@@ -61,7 +65,7 @@ const Header = () => {
   };
 
   useEffect(() => {
-    setValue(location.pathname);
+    setValue(getTabValue(location.pathname));
   }, [location.pathname]);
 
   const renderMenuItems = () => {

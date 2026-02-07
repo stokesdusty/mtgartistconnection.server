@@ -16,16 +16,24 @@ import {
   Container,
   Paper,
   Button,
+  IconButton,
+  Fab,
 } from "@mui/material";
-import { GET_ARTIST_BY_NAME } from "../graphql/queries";
-import { useQuery } from "@apollo/client";
+import { Add, Remove, KeyboardArrowUp } from "@mui/icons-material";
+import { GET_ARTIST_BY_NAME, GET_CARD_PRICES } from "../graphql/queries";
+import { useQuery, useLazyQuery } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
+import { useCart } from "../../CartContext";
+import { FEATURE_FLAGS } from "../../featureFlags";
 
 interface Card {
   related_uris: any;
   id: string;
+  name?: string;
   artist?: string;
   scryfall_uri?: string;
+  set?: string;
+  collector_number?: string;
   image_uris?: {
     border_crop: string;
   };
@@ -53,12 +61,53 @@ interface CardsAndTotal {
   totalCards: number;
 }
 
+interface CardPrice {
+  id: string;
+  name: string;
+  set_code: string;
+  number: string;
+  price_cents: number | null;
+  price_cents_foil: number | null;
+  url: string;
+}
+
 const AllCards = () => {
   const { name: artist } = useParams<{ name?: string }>();
   const navigate = useNavigate();
   const [showDupes, setShowDupes] = useState<boolean>(false);
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [includeDigital, setIncludeDigital] = useState<boolean>(false);
+  const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+
+  const cart = useCart();
+  const { addToCart, removeFromCart, getCartQuantity } = cart;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > window.innerHeight);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const [fetchCardPrices] = useLazyQuery(GET_CARD_PRICES, {
+    onCompleted: (data) => {
+      if (data?.cardPricesByCards) {
+        const priceMap = new Map<string, CardPrice>();
+        data.cardPricesByCards.forEach((price: CardPrice) => {
+          // Key by set_code (lowercase) + number to match with scryfall data
+          const key = `${price.set_code.toLowerCase()}-${price.number}`;
+          priceMap.set(key, price);
+        });
+        setCardPrices(priceMap);
+      }
+    },
+  });
 
   useEffect(() => {
     if (!artist) {
@@ -95,11 +144,11 @@ const AllCards = () => {
       try {
         const response = await axios.get<ScryfallResponse>(url);
         const newCards = [...allCards, ...response.data.data];
-        
+
         if (response.data.has_more && response.data.next_page) {
           return await fetchAllCards(response.data.next_page, newCards);
         }
-        
+
         return newCards;
       } catch (error) {
         console.error("Error fetching cards:", error);
@@ -154,36 +203,153 @@ const AllCards = () => {
     return { cards: cardData.data, totalCards: cardData.total_cards };
   }, [cardData]);
 
+  // Fetch card prices when cards are loaded (only if shopping cart feature is enabled)
+  useEffect(() => {
+    if (!FEATURE_FLAGS.SHOPPING_CART) return;
+
+    if (cards.length > 0) {
+      const cardLookups = cards
+        .filter(card => card.set && card.collector_number)
+        .map(card => ({
+          set_code: card.set!.toUpperCase(),
+          number: card.collector_number!,
+        }));
+
+      if (cardLookups.length > 0) {
+        fetchCardPrices({ variables: { cards: cardLookups } });
+      }
+    }
+  }, [cards, fetchCardPrices]);
+
+  const formatPrice = (cents: number | null): string => {
+    if (cents === null || cents === undefined) return '-';
+    return `$${(cents / 100).toFixed(2)}`;
+  };
+
+  const getCardPrice = (card: Card): CardPrice | undefined => {
+    if (!card.set || !card.collector_number) return undefined;
+    const key = `${card.set.toLowerCase()}-${card.collector_number}`;
+    return cardPrices.get(key);
+  };
+
+  const getCartKey = (card: Card): string => {
+    return `${card.set}-${card.collector_number}`;
+  };
+
+  const handleAddToCart = (card: Card, price: CardPrice) => {
+    addToCart({
+      id: card.id,
+      name: price.name,
+      set: card.set || '',
+      collector_number: card.collector_number || '',
+      price_cents: price.price_cents,
+      artist: card.artist,
+    });
+  };
+
+  const handleRemoveFromCart = (card: Card) => {
+    const key = getCartKey(card);
+    removeFromCart(key);
+  };
+
   const getImage = (card: Card) => {
+    const price = FEATURE_FLAGS.SHOPPING_CART ? getCardPrice(card) : undefined;
+    const cartKey = getCartKey(card);
+    const quantity = FEATURE_FLAGS.SHOPPING_CART ? getCartQuantity(cartKey) : 0;
+
+    const priceAndCartRow = FEATURE_FLAGS.SHOPPING_CART && price && (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <IconButton
+          size="small"
+          onClick={() => handleRemoveFromCart(card)}
+          disabled={quantity === 0}
+          sx={{ p: 0.25 }}
+        >
+          <Remove sx={{ fontSize: '0.875rem' }} />
+        </IconButton>
+        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', minWidth: '1rem', textAlign: 'center' }}>
+          {quantity > 0 ? quantity : ''}
+        </Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {formatPrice(price.price_cents)} / {formatPrice(price.price_cents_foil)} foil
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={() => handleAddToCart(card, price)}
+          sx={{ p: 0.25 }}
+        >
+          <Add sx={{ fontSize: '0.875rem' }} />
+        </IconButton>
+      </Box>
+    );
+
     if (card.image_uris) {
       return (
-        <Link
-          href={card?.scryfall_uri}
-          target="_blank"
-          key={card.id}
-        >
-          <Box
-            component="img"
-            alt={card.artist || "Card"}
-            src={card.image_uris.border_crop}
-            sx={allCardsStyles.cardImage}
-          />
-        </Link>
+        <Box key={card.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Link
+            href={card?.scryfall_uri}
+            target="_blank"
+          >
+            <Box
+              component="img"
+              alt={card.artist || "Card"}
+              src={card.image_uris.border_crop}
+              sx={allCardsStyles.cardImage}
+            />
+          </Link>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 0.5, gap: 0.25 }}>
+            <Link
+              href={`http://www.manapool.com/card/${card.set}/${card.collector_number}`}
+              target="_blank"
+              sx={{
+                fontSize: '0.75rem',
+                color: 'text.secondary',
+                textDecoration: 'none',
+                '&:hover': {
+                  color: '#2d4a36',
+                  textDecoration: 'none',
+                },
+              }}
+            >
+              View on Manapool
+            </Link>
+            {priceAndCartRow}
+          </Box>
+        </Box>
       );
     } else if (card.card_faces) {
       return (
-        <Link
-          href={card?.scryfall_uri}
-          target="_blank"
-          key={card.id}
-        >
-          <Box
-            component="img"
-            alt={card.artist || "Card"}
-            src={card.card_faces[0]?.image_uris?.normal}
-            sx={allCardsStyles.cardImage}
-          />
-        </Link>
+        <Box key={card.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Link
+            href={card?.scryfall_uri}
+            target="_blank"
+          >
+            <Box
+              component="img"
+              alt={card.artist || "Card"}
+              src={card.card_faces[0]?.image_uris?.normal}
+              sx={allCardsStyles.cardImage}
+            />
+          </Link>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 0.5, gap: 0.25 }}>
+            <Link
+              href={`http://www.manapool.com/card/${card.set}/${card.collector_number}`}
+              target="_blank"
+              sx={{
+                fontSize: '0.75rem',
+                color: 'text.secondary',
+                textDecoration: 'none',
+                '&:hover': {
+                  color: '#2d4a36',
+                  textDecoration: 'none',
+                },
+              }}
+            >
+              View on Manapool
+            </Link>
+            {priceAndCartRow}
+          </Box>
+        </Box>
       );
     }
     return null;
@@ -307,6 +473,25 @@ const AllCards = () => {
           )}
         </Paper>
       </Container>
+
+      {/* Scroll to Top Button - positioned left of cart button (56px FAB + 24px gap + 24px right margin = 104px) */}
+      {showScrollTop && (
+        <Fab
+          color="primary"
+          onClick={scrollToTop}
+          size="medium"
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 96,
+            bgcolor: '#2d4a36',
+            '&:hover': { bgcolor: '#1e3425' },
+            zIndex: 999,
+          }}
+        >
+          <KeyboardArrowUp />
+        </Fab>
+      )}
     </Box>
   );
 };

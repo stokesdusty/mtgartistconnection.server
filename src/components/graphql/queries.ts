@@ -73,3 +73,17 @@ export const GET_EVENTS_BY_ARTIST = gql`
         }
     }
 `;
+
+export const GET_CARD_PRICES = gql`
+    query cardPricesByCards($cards: [CardLookupInput!]!) {
+        cardPricesByCards(cards: $cards) {
+            id
+            name
+            set_code
+            number
+            price_cents
+            price_cents_foil
+            url
+        }
+    }
+`;
