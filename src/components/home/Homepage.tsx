@@ -33,6 +33,7 @@ interface Artist {
   doesSigning?: boolean;
   markssignatureservice?: string;
   mountainmage?: string;
+  artistProofs?: string;
 }
 
 // Component to fetch artists for a single event
@@ -60,6 +61,7 @@ const Homepage = () => {
   const [mountainMageFilter, setMountainMageFilter] = useState(false);
   const [marksSigServiceFilter, setMarksSigServiceFilter] = useState(false);
   const [hasUpcomingEventFilter, setHasUpcomingEventFilter] = useState(false);
+  const [sellsApsFilter, setSellsApsFilter] = useState(false);
   const [artistsWithEvents, setArtistsWithEvents] = useState<Set<string>>(new Set());
   const [letterFilter, setLetterFilter] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -148,6 +150,10 @@ const Homepage = () => {
     setHasUpcomingEventFilter(event.target.checked);
   };
 
+  const handleSellsApsChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSellsApsFilter(event.target.checked);
+  };
+
   const handleLetterFilter = (letter: string) => {
     setLetterFilter(prev => prev === letter ? "" : letter);
     setUserSearch("");
@@ -234,6 +240,13 @@ const Homepage = () => {
       );
     }
 
+    // Sells APs on Website Filter
+    if (sellsApsFilter) {
+      filteredArtists = filteredArtists.filter(
+        (artist: Artist) => artist.artistProofs === "yes" || artist.artistProofs === "true"
+      );
+    }
+
     // Letter Filter
     if (letterFilter) {
       // Normalize to NFD so accented characters (é, ó, etc.) decompose to base letter + combining mark
@@ -275,6 +288,7 @@ const Homepage = () => {
     mountainMageFilter,
     marksSigServiceFilter,
     hasUpcomingEventFilter,
+    sellsApsFilter,
     artistsWithEvents,
     letterFilter,
   ]);
@@ -435,6 +449,17 @@ const Homepage = () => {
                   }
                   label="Has Upcoming Event"
                 />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={sellsApsFilter}
+                      onChange={handleSellsApsChange}
+                      name="sellsAps"
+                      sx={homepageStyles.checkbox}
+                    />
+                  }
+                  label="Sells APs on Website"
+                />
               </FormGroup>
             </Box>
           </Box>
@@ -463,7 +488,8 @@ const Homepage = () => {
             locationFilter !== "" ||
             mountainMageFilter ||
             marksSigServiceFilter ||
-            hasUpcomingEventFilter) && filteredData.length === 0 ? (
+            hasUpcomingEventFilter ||
+            sellsApsFilter) && filteredData.length === 0 ? (
             <Typography sx={homepageStyles.noResults}>
               No artists found matching your search.
             </Typography>

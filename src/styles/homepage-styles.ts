@@ -85,7 +85,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   },
   filtersGrid: {
     display: 'grid',
-    gridTemplateColumns: { xs: '1fr', md: '2fr 1.5fr 1.5fr' },
+    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
     gap: spacing.lg,
     alignItems: 'start',
   },

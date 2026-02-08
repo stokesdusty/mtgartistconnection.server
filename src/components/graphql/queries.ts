@@ -9,6 +9,7 @@ export const GET_ARTISTS_FOR_HOMEPAGE = gql`
             signing
             markssignatureservice
             mountainmage
+            artistProofs
         }
     }
 `;

@@ -34,6 +34,7 @@ interface Card {
   scryfall_uri?: string;
   set?: string;
   collector_number?: string;
+  released_at?: string;
   image_uris?: {
     border_crop: string;
   };
@@ -79,6 +80,7 @@ const AllCards = () => {
   const [includeDigital, setIncludeDigital] = useState<boolean>(false);
   const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
+  const [sortByNewest, setSortByNewest] = useState<boolean>(false);
 
   const cart = useCart();
   const { addToCart, removeFromCart, getCartQuantity } = cart;
@@ -200,8 +202,16 @@ const AllCards = () => {
     if (!cardData) {
       return { cards: [], totalCards: 0 };
     }
-    return { cards: cardData.data, totalCards: cardData.total_cards };
-  }, [cardData]);
+    let sortedCards = [...cardData.data];
+    if (sortByNewest) {
+      sortedCards.sort((a, b) => {
+        const dateA = a.released_at || '';
+        const dateB = b.released_at || '';
+        return dateB.localeCompare(dateA);
+      });
+    }
+    return { cards: sortedCards, totalCards: cardData.total_cards };
+  }, [cardData, sortByNewest]);
 
   // Fetch card prices when cards are loaded (only if shopping cart feature is enabled)
   useEffect(() => {
@@ -418,6 +428,18 @@ const AllCards = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={sortByNewest}
+                    onChange={() => setSortByNewest(!sortByNewest)}
+                    sx={allCardsStyles.checkbox}
+                    disabled={!cardData}
+                  />
+                }
+                label="Sort by Release (Newest)"
+                sx={allCardsStyles.checkboxLabel}
+              />
               <FormControlLabel
                 control={
                   <Checkbox
