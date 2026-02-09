@@ -27,16 +27,44 @@ const Calendar = () => {
   };
 
   const locations = useMemo(() => {
-    if (!data?.signingEvent) return [];
+    if (!data?.signingEvent) return { US: [], Other: [] };
 
-    const locationSet = new Set<string>();
-    data.signingEvent.forEach((event: any) => {
+    const today = new Date();
+    const upcomingEvents = data.signingEvent.filter((event: any) => {
+      const endDate = new Date(event.endDate);
+      return endDate >= today;
+    });
+
+    const usStates = [
+      'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+      'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+      'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
+      'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+      'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+      'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+      'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
+      'Wisconsin', 'Wyoming'
+    ];
+
+    const usLocations = new Set<string>();
+    const otherLocations = new Set<string>();
+
+    upcomingEvents.forEach((event: any) => {
       if (event.city) {
-        locationSet.add(event.city);
+        // Check if it's a US location
+        const parts = event.city.split(',').map((s: string) => s.trim());
+        if (parts.length === 2 && parts[1] === 'US' && usStates.includes(parts[0])) {
+          usLocations.add(parts[0]); // Just the state name
+        } else {
+          otherLocations.add(event.city); // Full city name for international
+        }
       }
     });
 
-    return Array.from(locationSet).sort();
+    return {
+      US: Array.from(usLocations).sort(),
+      Other: Array.from(otherLocations).sort()
+    };
   }, [data]);
 
   const filteredAndSortedEvents = useMemo(() => {
@@ -53,7 +81,17 @@ const Calendar = () => {
     // Apply location filter
     if (locationFilter) {
       filtered = filtered.filter((eventData: any) => {
-        return eventData.city === locationFilter;
+        if (!eventData.city) return false;
+
+        // Check if filtering by US state
+        const parts = eventData.city.split(',').map((s: string) => s.trim());
+        if (parts.length === 2 && parts[1] === 'US') {
+          // This is a US location - match by state name
+          return parts[0] === locationFilter;
+        } else {
+          // International location - match by full city string
+          return eventData.city === locationFilter;
+        }
       });
     }
 
@@ -122,7 +160,22 @@ const Calendar = () => {
                 <MenuItem value="">
                   <em>All Locations</em>
                 </MenuItem>
-                {locations.map((location) => (
+                {locations.US.length > 0 && (
+                  <MenuItem disabled value="us-header">
+                    <em>US States</em>
+                  </MenuItem>
+                )}
+                {locations.US.map((location) => (
+                  <MenuItem key={location} value={location}>
+                    {location}
+                  </MenuItem>
+                ))}
+                {locations.Other.length > 0 && (
+                  <MenuItem disabled value="other-header">
+                    <em>Other Locations</em>
+                  </MenuItem>
+                )}
+                {locations.Other.map((location) => (
                   <MenuItem key={location} value={location}>
                     {location}
                   </MenuItem>
