@@ -10,10 +10,14 @@ import {
   useMediaQuery,
   useTheme,
   IconButton,
+  Button,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from '@mui/icons-material/Menu';
 import { headerStyles } from '../../styles/header-styles';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/store';
+import { logout } from '../../store/auth-slice';
 
 interface NavItem {
   label: string;
@@ -25,7 +29,6 @@ const navItems: NavItem[] = [
   { label: "Card Signing Services", to: "/signingservices" },
   { label: "Signing Events", to: "/calendar" },
   { label: "Random Flavor Text", to: "/randomflavortext" },
-  { label: "Contact", to: "/contact" },
 ];
 
 const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
@@ -36,12 +39,16 @@ const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const user = useSelector((state: RootState) => state.auth.user);
+
   const validPaths = navItems.map(item => item.to);
   const getTabValue = (pathname: string): string | false => {
     return validPaths.includes(pathname) ? pathname : false;
   };
   const [value, setValue] = useState<string | false>(getTabValue(location.pathname));
-  const navigate = useNavigate();
   const theme = useTheme();
   const isBelowLarge = useMediaQuery(theme.breakpoints.down("lg"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -61,6 +68,17 @@ const Header = () => {
 
   const handleMenuItemClick = (to: string) => {
     navigate(to);
+    handleClose();
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+    handleClose();
+  };
+
+  const handleLogin = () => {
+    navigate('/auth');
     handleClose();
   };
 
@@ -110,14 +128,43 @@ const Header = () => {
         </Box>
         <Box sx={headerStyles.tabContainer}>
           {!isBelowLarge ? (
-            <Tabs
-              value={value}
-              onChange={handleTabChange}
-              sx={headerStyles.tabs}
-              textColor="inherit"
-            >
-              {renderTabs()}
-            </Tabs>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Tabs
+                value={value}
+                onChange={handleTabChange}
+                sx={headerStyles.tabs}
+                textColor="inherit"
+              >
+                {renderTabs()}
+              </Tabs>
+              {isLoggedIn ? (
+                <Button
+                  onClick={handleLogout}
+                  sx={{
+                    color: 'white',
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                  }}
+                >
+                  Logout {user?.name && `(${user.name})`}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleLogin}
+                  sx={{
+                    color: 'white',
+                    textTransform: 'none',
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                  }}
+                >
+                  Login
+                </Button>
+              )}
+            </Box>
           ) : (
             <>
               <IconButton
@@ -142,6 +189,21 @@ const Header = () => {
                 sx={headerStyles.menu}
               >
                 {renderMenuItems()}
+                {isLoggedIn ? (
+                  <MenuItem
+                    onClick={handleLogout}
+                    sx={headerStyles.menuItem}
+                  >
+                    Logout {user?.name && `(${user.name})`}
+                  </MenuItem>
+                ) : (
+                  <MenuItem
+                    onClick={handleLogin}
+                    sx={headerStyles.menuItem}
+                  >
+                    Login
+                  </MenuItem>
+                )}
               </Menu>
             </>
           )}

@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(git checkout:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(cat:*)",
+      "Bash(git -C \"/Users/dprime/Documents/GitHub/mtgartistconnection.webservice\" log --oneline -10)",
+      "Bash(git rm:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch:*)",
+      "Bash(node -e:*)"
     ]
   }
 }

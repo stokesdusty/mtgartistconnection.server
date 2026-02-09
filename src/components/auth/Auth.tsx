@@ -29,6 +29,12 @@ interface UserData {
     id: string;
     email: string;
     name: string;
+    role: string;
+}
+
+interface AuthResponse {
+    token: string;
+    user: UserData;
 }
 
 const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -172,11 +178,10 @@ const Auth = () => {
         }
     }, [success]);
 
-    const onResponseReceived = (data: UserData) => {
-        localStorage.setItem("userData", JSON.stringify(data));
-        dispatch(login());
+    const onResponseReceived = (authResponse: AuthResponse) => {
+        dispatch(login({ token: authResponse.token, user: authResponse.user }));
         setSuccess(true);
-        return navigate("/blogs");
+        return navigate("/");
     };
 
     const onSubmit = async (inputData: Inputs) => {
@@ -192,8 +197,8 @@ const Auth = () => {
                       variables: { email, password },
                   });
             if (response.data) {
-                const userData = isSignup ? response.data.signup as UserData : response.data.login as UserData;
-                onResponseReceived(userData);
+                const authResponse = isSignup ? response.data.signup as AuthResponse : response.data.login as AuthResponse;
+                onResponseReceived(authResponse);
             }
         } catch (err: any) {
             setError(err.message || "An unexpected error occurred.");

@@ -28,15 +28,14 @@ import CartButton from "./components/cart/CartButton";
 import { FEATURE_FLAGS } from "./featureFlags";
 
 function App() {
-  const isLoggedIn = useSelector((state: RootState) => state.isLoggedIn);
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const dispatch = useDispatch();
   useEffect(() => {
-    const storedData = localStorage.getItem("userData");
-    if (storedData) {
-      const data = JSON.parse(storedData);
-      if (data && !isLoggedIn) {
-        dispatch(login());
-      }
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (storedToken && storedUser && !isLoggedIn) {
+      const user = JSON.parse(storedUser);
+      dispatch(login({ token: storedToken, user }));
     }
   }, [dispatch, isLoggedIn]);
   return (
