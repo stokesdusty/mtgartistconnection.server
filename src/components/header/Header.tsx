@@ -141,15 +141,16 @@ const Header = () => {
                 <Button
                   onClick={handleLogout}
                   sx={{
-                    color: 'text.secondary',
+                    color: '#2d4a36',
                     textTransform: 'none',
                     fontSize: { xs: '0.875rem', md: '1rem' },
-                    fontWeight: 500,
+                    fontWeight: 600,
                     padding: { xs: '6px 12px', md: '8px 16px' },
                     borderRadius: '8px',
+                    backgroundColor: '#fafafa',
                     '&:hover': {
-                      backgroundColor: 'neutral.50',
-                      color: 'primary.main'
+                      backgroundColor: '#f5f5f5',
+                      color: '#1a2d21'
                     }
                   }}
                 >
@@ -159,15 +160,16 @@ const Header = () => {
                 <Button
                   onClick={handleLogin}
                   sx={{
-                    color: 'text.secondary',
+                    color: '#2d4a36',
                     textTransform: 'none',
                     fontSize: { xs: '0.875rem', md: '1rem' },
-                    fontWeight: 500,
+                    fontWeight: 600,
                     padding: { xs: '6px 12px', md: '8px 16px' },
                     borderRadius: '8px',
+                    backgroundColor: '#fafafa',
                     '&:hover': {
-                      backgroundColor: 'neutral.50',
-                      color: 'primary.main'
+                      backgroundColor: '#f5f5f5',
+                      color: '#1a2d21'
                     }
                   }}
                 >
