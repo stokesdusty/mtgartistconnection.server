@@ -193,6 +193,13 @@ const Footer = () => {
               <Link href="https://bsky.app/profile/mtgartistconnect.bsky.social" target="_blank" rel="noopener noreferrer" sx={footerStyles.iconLink}>
                 <FaBluesky size={20} />
               </Link>
+              <Link href="https://www.manapool.com?ref=mtgartistconnection" target="_blank" rel="noopener noreferrer" sx={footerStyles.iconLink}>
+                <img
+                  src="/MP_Badges_partner_light.svg"
+                  alt="Manapool Partner"
+                  style={{ height: '20px', width: 'auto' }}
+                />
+              </Link>
             </Box>
             <Typography sx={{
               fontSize: '0.75rem',
@@ -205,15 +212,6 @@ const Footer = () => {
               MTG Artist Connection is a participant in affiliate programs with eBay, Original Magic Art, and Manapool.
               When you purchase through these links, you support this site at no additional cost to you.
             </Typography>
-            <Box sx={footerStyles.badgeContainer}>
-              <Link href="https://www.manapool.com?ref=mtgartistconnection" target="_blank" rel="noopener noreferrer">
-                <img
-                  src="/MP_Badges_partner_light.svg"
-                  alt="Manapool Partner"
-                  style={{ height: '40px', width: 'auto' }}
-                />
-              </Link>
-            </Box>
           </Box>
         </Container>
       </Box>

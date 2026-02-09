@@ -53,13 +53,9 @@ const AffiliateDisclosure = () => {
               affiliate code to help support the site when you purchase original MTG artwork.
             </li>
             <li>
-              <strong>Manapool:</strong> Card price links and shopping cart functionality use
+              <strong>Manapool:</strong> Card price links use
               our Manapool affiliate code. We earn a small commission when you purchase cards
               through these links.
-            </li>
-            <li>
-              <strong>INPRNT:</strong> Links to artist print shops on INPRNT include our
-              affiliate code to support the site when you purchase prints.
             </li>
           </Box>
 
@@ -70,7 +66,7 @@ const AffiliateDisclosure = () => {
           <Typography sx={contentPageStyles.body}>
             Affiliate commissions help cover the costs of running MTG Artist Connection,
             including hosting, domain registration, and ongoing development. These earnings
-            allow us to keep the site free, ad-light, and regularly updated with new features
+            allow us to keep the site free ad-light, and regularly updated with new features
             and artist information.
           </Typography>
 
