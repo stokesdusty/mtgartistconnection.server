@@ -1,6 +1,7 @@
-import { useQuery } from "@apollo/client";
-import { useParams } from "react-router-dom";
-import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID } from "../graphql/queries";
+import { useQuery, useMutation } from "@apollo/client";
+import { useParams, useNavigate } from "react-router-dom";
+import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_CURRENT_USER } from "../graphql/queries";
+import { FOLLOW_ARTIST, UNFOLLOW_ARTIST } from "../graphql/mutations";
 import {
   Box,
   Link,
@@ -8,7 +9,8 @@ import {
   CircularProgress,
   Container,
   Paper,
-  Chip,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { TbWorldWww } from "react-icons/tb";
 import {
@@ -20,10 +22,12 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 import { artistStyles } from "../../styles/artist-styles";
-import { CalendarToday, LocationOn } from '@mui/icons-material';
+import { CalendarToday, LocationOn, Notifications, NotificationsNone } from '@mui/icons-material';
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface ArtistSocialLink {
   label: string;
@@ -84,7 +88,8 @@ const EventAttendanceChecker = ({ event, artistName, onAttendanceChecked }: { ev
       );
       onAttendanceChecked(isAttending);
     }
-  }, [loading, data, artistName, onAttendanceChecked]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, data, artistName]);
 
   return null;
 };
@@ -106,6 +111,14 @@ const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: str
   // Filter events where artist is attending
   const artistEvents = upcomingEvents.filter(event => attendanceMap[event.id] === true);
 
+  // Create stable callbacks for each event
+  const eventCallbacks = React.useMemo(() => {
+    return upcomingEvents.reduce((acc, event) => {
+      acc[event.id] = (isAttending: boolean) => handleAttendanceChecked(event.id, isAttending);
+      return acc;
+    }, {} as { [key: string]: (isAttending: boolean) => void });
+  }, [upcomingEvents, handleAttendanceChecked]);
+
   // Don't show section if still checking or no events
   if (checkedCount < upcomingEvents.length || artistEvents.length === 0) {
     return (
@@ -115,7 +128,7 @@ const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: str
             key={event.id}
             event={event}
             artistName={artistName}
-            onAttendanceChecked={(isAttending) => handleAttendanceChecked(event.id, isAttending)}
+            onAttendanceChecked={eventCallbacks[event.id]}
           />
         ))}
       </>
@@ -129,7 +142,7 @@ const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: str
           key={event.id}
           event={event}
           artistName={artistName}
-          onAttendanceChecked={(isAttending) => handleAttendanceChecked(event.id, isAttending)}
+          onAttendanceChecked={eventCallbacks[event.id]}
         />
       ))}
       <Box sx={artistStyles.infoRow}>
@@ -146,6 +159,10 @@ const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: str
 
 const Artist = () => {
   const { name } = useParams<{ name: string }>();
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     if (name) document.title = `MtG Artist Connection - ${name}`;
@@ -160,6 +177,20 @@ const Artist = () => {
   );
 
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
+
+  const { data: userData } = useQuery(GET_CURRENT_USER, {
+    skip: !isLoggedIn,
+  });
+
+  const [followArtist] = useMutation(FOLLOW_ARTIST);
+  const [unfollowArtist] = useMutation(UNFOLLOW_ARTIST);
+
+  // Check if user is following this artist
+  useEffect(() => {
+    if (userData?.me?.followedArtists && name) {
+      setIsFollowing(userData.me.followedArtists.includes(name));
+    }
+  }, [userData, name]);
 
   // Filter upcoming events where this artist is attending - must be before early returns
   const upcomingEvents = useMemo(() => {
@@ -264,6 +295,32 @@ const Artist = () => {
       ? `https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${artistByName.filename}.jpg`
       : `https://mtgartistconnection.s3.us-west-1.amazonaws.com/emptycardframe.jpg`;
 
+  const handleFollowToggle = async () => {
+    if (!name) return;
+
+    // If not logged in, redirect to auth page
+    if (!isLoggedIn) {
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      if (isFollowing) {
+        const { data } = await unfollowArtist({ variables: { artistName: name } });
+        if (data?.unfollowArtist?.success) {
+          setIsFollowing(false);
+        }
+      } else {
+        const { data } = await followArtist({ variables: { artistName: name } });
+        if (data?.followArtist?.success) {
+          setIsFollowing(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    }
+  };
+
   return (
     <Box sx={artistStyles.container}>
       <Container maxWidth="lg">
@@ -275,9 +332,47 @@ const Artist = () => {
             />
           </Box>
 
-          <Typography variant="h2" sx={artistStyles.artistName}>
-            {artistByName.name}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+            <Typography variant="h2" sx={artistStyles.artistName}>
+              {artistByName.name}
+            </Typography>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isLoggedIn && isFollowing}
+                  onChange={handleFollowToggle}
+                  icon={<NotificationsNone />}
+                  checkedIcon={<Notifications />}
+                  sx={{
+                    color: '#757575',
+                    '&.Mui-checked': {
+                      color: '#2d4a36',
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography sx={{
+                  fontSize: '0.875rem',
+                  color: '#616161',
+                  fontWeight: 500,
+                }}>
+                  {!isLoggedIn
+                    ? 'Sign in to follow'
+                    : isFollowing
+                      ? 'Following'
+                      : 'Follow for updates'}
+                </Typography>
+              }
+              sx={{
+                m: 0,
+                '& .MuiFormControlLabel-label': {
+                  userSelect: 'none',
+                },
+              }}
+            />
+          </Box>
 
           <Box sx={artistStyles.buttonContainer}>
             <Link

@@ -11,9 +11,18 @@ import {
   useTheme,
   IconButton,
   Button,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from '@mui/icons-material/Menu';
+import LogoutIcon from '@mui/icons-material/Logout';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { headerStyles } from '../../styles/header-styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -45,14 +54,18 @@ const Header = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const validPaths = navItems.map(item => item.to);
-  const getTabValue = (pathname: string): string | false => {
-    return validPaths.includes(pathname) ? pathname : false;
-  };
-  const [value, setValue] = useState<string | false>(getTabValue(location.pathname));
+
+  const [value, setValue] = useState<string | false>(() =>
+    validPaths.includes(location.pathname)
+      ? location.pathname
+      : false
+  );
+
   const theme = useTheme();
   const isBelowLarge = useMediaQuery(theme.breakpoints.down("lg"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -75,6 +88,7 @@ const Header = () => {
     dispatch(logout());
     navigate('/');
     handleClose();
+    setDrawerOpen(false);
   };
 
   const handleLogin = () => {
@@ -82,9 +96,29 @@ const Header = () => {
     handleClose();
   };
 
+  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event.type === 'keydown' &&
+      ((event as React.KeyboardEvent).key === 'Tab' ||
+        (event as React.KeyboardEvent).key === 'Shift')
+    ) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
+
+  const handleSettingsClick = () => {
+    setDrawerOpen(false);
+    navigate('/settings');
+  };
+
   useEffect(() => {
-    setValue(getTabValue(location.pathname));
-  }, [location.pathname]);
+    setValue(
+      validPaths.includes(location.pathname)
+        ? location.pathname
+        : false
+    );
+  }, [location.pathname, validPaths]);
 
   const renderMenuItems = () => {
     return navItems.map((item) => (
@@ -139,7 +173,7 @@ const Header = () => {
               </Tabs>
               {isLoggedIn ? (
                 <Button
-                  onClick={handleLogout}
+                  onClick={toggleDrawer(true)}
                   sx={{
                     color: '#2d4a36',
                     textTransform: 'none',
@@ -154,7 +188,7 @@ const Header = () => {
                     }
                   }}
                 >
-                  Logout {user?.name && `(${user.name})`}
+                  {user?.email}
                 </Button>
               ) : (
                 <Button
@@ -203,10 +237,13 @@ const Header = () => {
                 {renderMenuItems()}
                 {isLoggedIn ? (
                   <MenuItem
-                    onClick={handleLogout}
+                    onClick={(e) => {
+                      handleClose();
+                      toggleDrawer(true)(e);
+                    }}
                     sx={headerStyles.menuItem}
                   >
-                    Logout {user?.name && `(${user.name})`}
+                    {user?.email}
                   </MenuItem>
                 ) : (
                   <MenuItem
@@ -221,6 +258,121 @@ const Header = () => {
           )}
         </Box>
       </Toolbar>
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+        PaperProps={{
+          sx: {
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          }
+        }}
+      >
+        <Box
+          sx={{ width: 280 }}
+          role="presentation"
+        >
+          <Box sx={{
+            p: 3,
+            backgroundColor: '#2d4a36',
+            color: '#ffffff',
+            borderBottom: '1px solid #1a2d21',
+          }}>
+            <Box sx={{
+              fontWeight: 600,
+              mb: 0.5,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              opacity: 0.8,
+            }}>
+              Account
+            </Box>
+            <Box sx={{
+              fontSize: '0.875rem',
+              fontWeight: 500,
+            }}>
+              {user?.email}
+            </Box>
+          </Box>
+          <List sx={{ p: 1 }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={handleSettingsClick}
+                sx={{
+                  borderRadius: '8px',
+                  mb: 0.5,
+                  transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    backgroundColor: '#fafafa',
+                    '& .MuiListItemIcon-root': {
+                      color: '#2d4a36',
+                    },
+                    '& .MuiListItemText-primary': {
+                      color: '#2d4a36',
+                    }
+                  }
+                }}
+              >
+                <ListItemIcon>
+                  <SettingsIcon sx={{
+                    color: '#757575',
+                    transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Settings"
+                  primaryTypographyProps={{
+                    sx: {
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: '#212121',
+                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    }
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+            <Divider sx={{ my: 1 }} />
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={handleLogout}
+                sx={{
+                  borderRadius: '8px',
+                  transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    backgroundColor: '#fafafa',
+                    '& .MuiListItemIcon-root': {
+                      color: '#e74c3c',
+                    },
+                    '& .MuiListItemText-primary': {
+                      color: '#e74c3c',
+                    }
+                  }
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutIcon sx={{
+                    color: '#757575',
+                    transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Sign Out"
+                  primaryTypographyProps={{
+                    sx: {
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: '#212121',
+                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    }
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
     </AppBar>
   );
 };

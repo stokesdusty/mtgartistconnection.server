@@ -111,3 +111,47 @@ export const ADD_ARTISTTOEVENT = gql`
         }
     }
 `;
+
+export const UPDATE_PASSWORD = gql`
+    mutation updatePassword($currentPassword:String!, $newPassword:String!){
+        updatePassword(currentPassword: $currentPassword, newPassword: $newPassword){
+            success
+            message
+        }
+    }
+`;
+
+export const UPDATE_EMAIL_PREFERENCES = gql`
+    mutation updateEmailPreferences(
+        $siteUpdates:Boolean!,
+        $artistUpdates:Boolean!,
+        $localSigningEvents:Boolean!
+    ){
+        updateEmailPreferences(
+            siteUpdates: $siteUpdates,
+            artistUpdates: $artistUpdates,
+            localSigningEvents: $localSigningEvents
+        ){
+            success
+            message
+        }
+    }
+`;
+
+export const FOLLOW_ARTIST = gql`
+    mutation followArtist($artistName:String!){
+        followArtist(artistName: $artistName){
+            success
+            message
+        }
+    }
+`;
+
+export const UNFOLLOW_ARTIST = gql`
+    mutation unfollowArtist($artistName:String!){
+        unfollowArtist(artistName: $artistName){
+            success
+            message
+        }
+    }
+`;

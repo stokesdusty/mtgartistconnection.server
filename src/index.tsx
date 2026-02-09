@@ -3,7 +3,8 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom";
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from "@apollo/client";
+import { setContext } from '@apollo/client/link/context';
 import { Provider } from 'react-redux';
 import store from './store/store';
 
@@ -11,8 +12,24 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+const httpLink = createHttpLink({
+  uri: "https://mtgartistconnectionwebservice-production.up.railway.app/graphql",
+});
+
+const authLink = setContext((_, { headers }) => {
+  // Get the authentication token from local storage if it exists
+  const token = localStorage.getItem('token');
+  // Return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    }
+  }
+});
+
 const client = new ApolloClient({
-  uri: "https://mtgartistconnectionwebservice-production.up.railway.app/graphql", 
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache()
 });
 

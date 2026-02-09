@@ -18,7 +18,7 @@ import {
   import { ADD_ARTISTTOEVENT } from "../graphql/mutations";
   
   const AddArtistToEvent = () => {
-      const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
+      const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
   
       const {data: eventData, error: eventDataError, loading: eventDataLoading} = useQuery(GET_SIGNINGEVENTS);
       const {data: artistData, error: artistDataError, loading: artistDataLoading}= useQuery(GET_ARTISTS_FOR_HOMEPAGE);

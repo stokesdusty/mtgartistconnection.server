@@ -6,18 +6,68 @@ import {
     LinearProgress,
     Chip,
     Collapse,
+    Button,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    ListItemText,
   } from "@mui/material";
   import { GET_ARTISTSBYEVENTID } from "../graphql/queries";
   import { useQuery } from "@apollo/client";
-  import { CalendarToday, LocationOn, PeopleAlt, ExpandMore } from '@mui/icons-material';
+  import { CalendarToday, LocationOn, PeopleAlt, ExpandMore, Event, GetApp } from '@mui/icons-material';
   import { useState } from "react";
   import { contentPageStyles } from "../../styles/content-page-styles";
+  import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
   
   const SigningEvent = (SigningEventProps: any) => {
     const [artistsExpanded, setArtistsExpanded] = useState(true);
+    const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<null | HTMLElement>(null);
     const startDateFormatted = new Date(SigningEventProps.props.startDate).toLocaleDateString();
     const endDateFormatted = new Date(SigningEventProps.props.endDate).toLocaleDateString();
     const eventId = SigningEventProps.props.id;
+
+    const handleCalendarMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+      setCalendarMenuAnchor(event.currentTarget);
+    };
+
+    const handleCalendarMenuClose = () => {
+      setCalendarMenuAnchor(null);
+    };
+
+    const handleDownloadICal = () => {
+      downloadICalFile({
+        name: SigningEventProps.props.name,
+        startDate: SigningEventProps.props.startDate,
+        endDate: SigningEventProps.props.endDate,
+        city: SigningEventProps.props.city,
+        url: SigningEventProps.props.url,
+      });
+      handleCalendarMenuClose();
+    };
+
+    const handleAddToGoogle = () => {
+      const googleUrl = generateGoogleCalendarUrl({
+        name: SigningEventProps.props.name,
+        startDate: SigningEventProps.props.startDate,
+        endDate: SigningEventProps.props.endDate,
+        city: SigningEventProps.props.city,
+        url: SigningEventProps.props.url,
+      });
+      window.open(googleUrl, '_blank');
+      handleCalendarMenuClose();
+    };
+
+    const handleAddToOutlook = () => {
+      const outlookUrl = generateOutlookCalendarUrl({
+        name: SigningEventProps.props.name,
+        startDate: SigningEventProps.props.startDate,
+        endDate: SigningEventProps.props.endDate,
+        city: SigningEventProps.props.city,
+        url: SigningEventProps.props.url,
+      });
+      window.open(outlookUrl, '_blank');
+      handleCalendarMenuClose();
+    };
     
     const { data: artistData, error, loading } = useQuery(GET_ARTISTSBYEVENTID, {
       variables: {
@@ -64,7 +114,13 @@ import {
             </Typography>
           )}
 
-          <Box sx={contentPageStyles.infoRow}>
+          <Box sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 2,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
             <Box sx={contentPageStyles.infoItem}>
               <CalendarToday fontSize="small" />
               <Typography>
@@ -76,8 +132,55 @@ import {
               <LocationOn fontSize="small" />
               <Typography>{SigningEventProps.props.city}</Typography>
             </Box>
+
+            <Button
+              onClick={handleCalendarMenuOpen}
+              startIcon={<Event />}
+              sx={{
+                color: '#2d4a36',
+                textTransform: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#fafafa',
+                }
+              }}
+            >
+              Add to Calendar
+            </Button>
           </Box>
         </Box>
+
+        <Menu
+          anchorEl={calendarMenuAnchor}
+          open={Boolean(calendarMenuAnchor)}
+          onClose={handleCalendarMenuClose}
+          PaperProps={{
+            sx: {
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            }
+          }}
+        >
+          <MenuItem onClick={handleAddToGoogle} sx={{ fontSize: '0.875rem', py: 1.5 }}>
+            <ListItemIcon>
+              <Event fontSize="small" sx={{ color: '#2d4a36' }} />
+            </ListItemIcon>
+            <ListItemText>Google Calendar</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={handleAddToOutlook} sx={{ fontSize: '0.875rem', py: 1.5 }}>
+            <ListItemIcon>
+              <Event fontSize="small" sx={{ color: '#2d4a36' }} />
+            </ListItemIcon>
+            <ListItemText>Outlook Calendar</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={handleDownloadICal} sx={{ fontSize: '0.875rem', py: 1.5 }}>
+            <ListItemIcon>
+              <GetApp fontSize="small" sx={{ color: '#2d4a36' }} />
+            </ListItemIcon>
+            <ListItemText>Apple/Other (.ics)</ListItemText>
+          </MenuItem>
+        </Menu>
 
         <Box sx={contentPageStyles.artistsContainer}>
           <Box

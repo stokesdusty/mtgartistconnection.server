@@ -66,7 +66,7 @@ const ArtistCardAnalysis = () => {
     const { setIsLoading } = useLoading(); // Get the setIsLoading function from the context
     const [error, setError] = useState<string | null>(null);
     const [cardsWithDupes, setCardsWithDupes] = useState<Card[]>([]);
-    const [hasTriedBothQueries, setHasTriedBothQueries] = useState(false);
+    const [, setHasTriedBothQueries] = useState(false);
 
     const navigate = useNavigate();
     useEffect(() => {

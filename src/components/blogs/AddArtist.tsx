@@ -40,7 +40,7 @@ import {
   }
   
   const AddArtist = () => {
-      const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
+      const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
       const {
           register,
           handleSubmit,

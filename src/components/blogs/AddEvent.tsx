@@ -13,7 +13,7 @@ import {
   import { useState } from "react";
   
   const AddEvent = () => {
-      const isLoggedIn = useSelector((state: any) => state.isLoggedIn );
+      const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
       const [ addSigningEvent ] = useMutation(ADD_SIGNINGEVENT);
       const [ name, setName] = useState<string>("");
       const [ city, setCity] = useState<string>("");

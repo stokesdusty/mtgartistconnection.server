@@ -16,14 +16,12 @@ import {
   Container,
   Paper,
   Button,
-  IconButton,
   Fab,
 } from "@mui/material";
-import { Add, Remove, KeyboardArrowUp } from "@mui/icons-material";
+import { KeyboardArrowUp } from "@mui/icons-material";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES } from "../graphql/queries";
 import { useQuery, useLazyQuery } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
-import { useCart } from "../../CartContext";
 
 interface Card {
   related_uris: any;
@@ -86,9 +84,6 @@ const AllCards = () => {
   const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   const [sortByNewest, setSortByNewest] = useState<boolean>(false);
-
-  const cart = useCart();
-  const { addToCart, removeFromCart, getCartQuantity } = cart;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -245,27 +240,6 @@ const AllCards = () => {
     if (!card.set || !card.collector_number) return undefined;
     const key = `${card.set.toLowerCase()}-${card.collector_number}`;
     return cardPrices.get(key);
-  };
-
-  const getCartKey = (card: Card): string => {
-    return `${card.set}-${card.collector_number}`;
-  };
-
-  const handleAddToCart = (card: Card, price: CardPrice) => {
-    const finalPrice = price.price_cents_nm || price.price_cents_lp_plus || price.price_cents;
-    addToCart({
-      id: card.id,
-      name: price.name,
-      set: card.set || '',
-      collector_number: card.collector_number || '',
-      price_cents: finalPrice,
-      artist: card.artist,
-    });
-  };
-
-  const handleRemoveFromCart = (card: Card) => {
-    const key = getCartKey(card);
-    removeFromCart(key);
   };
 
   const getImage = (card: Card) => {

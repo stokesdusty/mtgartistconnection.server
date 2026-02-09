@@ -90,3 +90,20 @@ export const GET_CARD_PRICES = gql`
         }
     }
 `;
+
+export const GET_CURRENT_USER = gql`
+    query {
+        me {
+            id
+            name
+            email
+            role
+            emailPreferences {
+                siteUpdates
+                artistUpdates
+                localSigningEvents
+            }
+            followedArtists
+        }
+    }
+`;
