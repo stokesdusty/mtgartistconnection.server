@@ -4,14 +4,12 @@ import {
     TextField,
     Typography,
     Container,
-    Paper,
     Alert,
     CircularProgress,
-    FormControl,
-    FormHelperText,
+    Tabs,
+    Tab,
 } from "@mui/material";
-import { useState, useEffect } from "react";
-import { ImBlogger } from "react-icons/im";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { USER_LOGIN, USER_SIGNUP } from "../graphql/mutations";
@@ -42,24 +40,24 @@ const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0
 const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [isSignup, setIsSignup] = useState(false);
+    const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [success, setSuccess] = useState<boolean>(false);
     const [loginMutation] = useMutation(USER_LOGIN);
     const [signupMutation] = useMutation(USER_SIGNUP);
-    
+
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
+        reset,
     } = useForm<Inputs>({
-        defaultValues: { email: "", password: "" },
+        defaultValues: { name: "", email: "", password: "" },
     });
 
     const styles = {
         container: {
-            backgroundColor: "#507A60",
+            backgroundColor: "#fafafa",
             minHeight: "100vh",
             padding: { xs: 2, md: 4 },
             display: "flex",
@@ -67,121 +65,103 @@ const Auth = () => {
             justifyContent: "center",
         },
         contentWrapper: {
-            maxWidth: 600,
+            maxWidth: 500,
             width: "100%",
-            padding: { xs: 3, md: 4 },
             backgroundColor: "#fff",
-            borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+            borderRadius: "12px",
+            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+            border: "1px solid #eeeeee",
+            overflow: "hidden",
         },
-        logoSection: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 3,
-            gap: 2,
+        header: {
+            padding: { xs: 3, md: 4 },
+            paddingBottom: 2,
         },
-        logoIcon: {
-            borderRadius: "50%",
-            padding: "10px",
-            background: "#507A60",
-            color: "white",
+        title: {
+            color: "#212121",
+            fontWeight: 600,
+            fontSize: { xs: "1.5rem", md: "1.875rem" },
+            textAlign: "center",
+            marginBottom: 1,
         },
-        pageTitle: {
-            color: "#507A60",
-            fontWeight: 700,
-            fontSize: { xs: "2rem", md: "2.5rem" },
-            marginBottom: 3,
+        subtitle: {
+            color: "#757575",
+            fontSize: "0.875rem",
             textAlign: "center",
         },
-        sectionHeader: {
-            color: "#507A60",
-            fontWeight: 600,
-            fontSize: "1.5rem",
-            marginBottom: 2,
-            marginTop: 3,
-            paddingBottom: 1,
-            borderBottom: "2px solid #507A60",
+        tabs: {
+            borderBottom: "1px solid #eeeeee",
+            "& .MuiTabs-indicator": {
+                backgroundColor: "#2d4a36",
+                height: 2,
+            },
+        },
+        tab: {
+            textTransform: "none",
+            fontWeight: 500,
+            fontSize: "1rem",
+            color: "#757575",
+            "&.Mui-selected": {
+                color: "#2d4a36",
+                fontWeight: 600,
+            },
         },
         form: {
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
+            padding: { xs: 3, md: 4 },
         },
-        formControl: {
+        textField: {
+            marginBottom: 2,
             "& .MuiOutlinedInput-root": {
                 borderRadius: "8px",
                 "&:hover fieldset": {
-                    borderColor: "#507A60",
+                    borderColor: "#2d4a36",
                 },
                 "&.Mui-focused fieldset": {
-                    borderColor: "#507A60",
+                    borderColor: "#2d4a36",
                 },
             },
             "& .MuiInputLabel-root": {
                 "&.Mui-focused": {
-                    color: "#507A60",
+                    color: "#2d4a36",
                 },
             },
         },
         submitButton: {
-            backgroundColor: "#507A60",
+            backgroundColor: "#2d4a36",
             color: "white",
-            marginTop: 3,
-            padding: "12px 24px",
-            fontSize: "1.1rem",
-            fontWeight: 600,
-            borderRadius: "8px",
-            "&:hover": {
-                backgroundColor: "#3c5c48",
-            },
-        },
-        switchButton: {
-            backgroundColor: "transparent",
-            color: "#507A60",
-            border: "2px solid #507A60",
             marginTop: 2,
-            padding: "10px 24px",
+            padding: "12px",
             fontSize: "1rem",
             fontWeight: 600,
             borderRadius: "8px",
+            textTransform: "none",
             "&:hover": {
-                backgroundColor: "#507A60",
-                color: "white",
+                backgroundColor: "#1a2d21",
+            },
+            "&:disabled": {
+                backgroundColor: "#bdbdbd",
             },
         },
-        fieldSection: {
+        errorAlert: {
             marginBottom: 2,
-        },
-        errorMessage: {
-            marginBottom: 2,
-        },
-        successMessage: {
-            marginBottom: 2,
-        },
-        helperText: {
-            color: "#666",
-            fontSize: "0.875rem",
-            marginTop: 1,
+            borderRadius: "8px",
         },
         loadingContainer: {
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
             padding: 2,
         },
     };
 
-    useEffect(() => {
-        if (success) {
-            setTimeout(() => setSuccess(false), 3000);
-        }
-    }, [success]);
+    const handleTabChange = (_: React.SyntheticEvent, newValue: 'login' | 'signup') => {
+        setActiveTab(newValue);
+        setError(null);
+        reset();
+    };
 
     const onResponseReceived = (authResponse: AuthResponse) => {
         dispatch(login({ token: authResponse.token, user: authResponse.user }));
-        setSuccess(true);
-        return navigate("/");
+        navigate("/");
     };
 
     const onSubmit = async (inputData: Inputs) => {
@@ -189,7 +169,7 @@ const Auth = () => {
         setError(null);
         try {
             const { name, email, password } = inputData;
-            const response = isSignup
+            const response = activeTab === 'signup'
                 ? await signupMutation({
                       variables: { name, email, password },
                   })
@@ -197,7 +177,9 @@ const Auth = () => {
                       variables: { email, password },
                   });
             if (response.data) {
-                const authResponse = isSignup ? response.data.signup as AuthResponse : response.data.login as AuthResponse;
+                const authResponse = activeTab === 'signup'
+                    ? response.data.signup as AuthResponse
+                    : response.data.login as AuthResponse;
                 onResponseReceived(authResponse);
             }
         } catch (err: any) {
@@ -207,128 +189,98 @@ const Auth = () => {
         }
     };
 
-    const switchAuthMode = () => {
-        setIsSignup(!isSignup);
-        setError(null);
-    };
-
     return (
         <Box sx={styles.container}>
             <Container maxWidth="sm">
-                <Paper elevation={0} sx={styles.contentWrapper}>
-                    <Box sx={styles.logoSection}>
-                        <ImBlogger
-                            size="30"
-                            style={styles.logoIcon}
-                        />
-                        <Typography variant="h6" sx={{ color: "#507A60", fontWeight: 600 }}>
-                            MtG Artist Connection
+                <Box sx={styles.contentWrapper}>
+                    <Box sx={styles.header}>
+                        <Typography variant="h4" sx={styles.title}>
+                            Welcome to MTG Artist Connection
+                        </Typography>
+                        <Typography sx={styles.subtitle}>
+                            {activeTab === 'login'
+                                ? 'Sign in to your account to continue'
+                                : 'Create an account to get started'}
                         </Typography>
                     </Box>
-                    
-                    <Typography variant="h2" sx={styles.pageTitle}>
-                        {isSignup ? "Sign Up" : "Login"}
-                    </Typography>
-                    
-                    {error && (
-                        <Alert severity="error" sx={styles.errorMessage}>
-                            {error}
-                        </Alert>
-                    )}
-                    
-                    {success && (
-                        <Alert severity="success" sx={styles.successMessage}>
-                            Successfully logged in!
-                        </Alert>
-                    )}
-                    
+
+                    <Tabs
+                        value={activeTab}
+                        onChange={handleTabChange}
+                        sx={styles.tabs}
+                        centered
+                    >
+                        <Tab label="Login" value="login" sx={styles.tab} />
+                        <Tab label="Sign Up" value="signup" sx={styles.tab} />
+                    </Tabs>
+
                     <Box sx={styles.form}>
-                        <Typography sx={styles.sectionHeader} variant="h4">
-                            {isSignup ? "Account Information" : "Login Credentials"}
-                        </Typography>
-                        
+                        {error && (
+                            <Alert severity="error" sx={styles.errorAlert}>
+                                {error}
+                            </Alert>
+                        )}
+
                         <form onSubmit={handleSubmit(onSubmit)}>
-                            {isSignup && (
-                                <Box sx={styles.fieldSection}>
-                                    <FormControl fullWidth sx={styles.formControl}>
-                                        <TextField
-                                            label="Name"
-                                            fullWidth
-                                            {...register("name", { required: true })}
-                                            disabled={isSubmitting}
-                                        />
-                                        <FormHelperText sx={styles.helperText}>
-                                            Enter your full name
-                                        </FormHelperText>
-                                    </FormControl>
-                                </Box>
+                            {activeTab === 'signup' && (
+                                <TextField
+                                    label="Name"
+                                    fullWidth
+                                    error={Boolean(errors.name)}
+                                    helperText={errors.name ? "Name is required" : ""}
+                                    {...register("name", { required: activeTab === 'signup' })}
+                                    disabled={isSubmitting || isLoading}
+                                    sx={styles.textField}
+                                />
                             )}
-                            
-                            <Box sx={styles.fieldSection}>
-                                <FormControl fullWidth sx={styles.formControl}>
-                                    <TextField
-                                        label="Email"
-                                        fullWidth
-                                        error={Boolean(errors.email)}
-                                        helperText={errors.email ? "Invalid Email" : ""}
-                                        {...register("email", {
-                                            required: true,
-                                            validate: (val: string) => emailRegex.test(val),
-                                        })}
-                                        disabled={isSubmitting}
-                                    />
-                                    <FormHelperText sx={styles.helperText}>
-                                        Enter your email address
-                                    </FormHelperText>
-                                </FormControl>
-                            </Box>
-                            
-                            <Box sx={styles.fieldSection}>
-                                <FormControl fullWidth sx={styles.formControl}>
-                                    <TextField
-                                        label="Password"
-                                        type="password"
-                                        fullWidth
-                                        error={Boolean(errors.password)}
-                                        helperText={
-                                            errors.password ? "Password must be at least 6 characters" : ""
-                                        }
-                                        {...register("password", { required: true, minLength: 6 })}
-                                        disabled={isSubmitting}
-                                    />
-                                    <FormHelperText sx={styles.helperText}>
-                                        {isSignup ? "Create a password (minimum 6 characters)" : "Enter your password"}
-                                    </FormHelperText>
-                                </FormControl>
-                            </Box>
-                            
+
+                            <TextField
+                                label="Email"
+                                type="email"
+                                fullWidth
+                                error={Boolean(errors.email)}
+                                helperText={errors.email ? "Valid email is required" : ""}
+                                {...register("email", {
+                                    required: true,
+                                    validate: (val: string) => emailRegex.test(val),
+                                })}
+                                disabled={isSubmitting || isLoading}
+                                sx={styles.textField}
+                            />
+
+                            <TextField
+                                label="Password"
+                                type="password"
+                                fullWidth
+                                error={Boolean(errors.password)}
+                                helperText={
+                                    errors.password
+                                        ? "Password must be at least 6 characters"
+                                        : ""
+                                }
+                                {...register("password", { required: true, minLength: 6 })}
+                                disabled={isSubmitting || isLoading}
+                                sx={styles.textField}
+                            />
+
                             {isLoading ? (
                                 <Box sx={styles.loadingContainer}>
-                                    <CircularProgress sx={{ color: "#507A60" }} />
+                                    <CircularProgress sx={{ color: "#2d4a36" }} />
                                 </Box>
                             ) : (
                                 <Button
                                     type="submit"
                                     variant="contained"
-                                    sx={styles.submitButton}
                                     fullWidth
                                     disabled={isSubmitting}
+                                    sx={styles.submitButton}
                                 >
-                                    {isSignup ? "Create Account" : "Sign In"}
+                                    {activeTab === 'signup' ? 'Create Account' : 'Sign In'}
                                 </Button>
                             )}
-                            
-                            <Button
-                                onClick={switchAuthMode}
-                                sx={styles.switchButton}
-                                fullWidth
-                                disabled={isSubmitting}
-                            >
-                                Switch To {isSignup ? "Login" : "Sign Up"}
-                            </Button>
                         </form>
                     </Box>
-                </Paper>
+                </Box>
             </Container>
         </Box>
     );
