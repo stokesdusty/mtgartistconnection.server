@@ -16,6 +16,7 @@ interface CardData {
   id: string;
   name: string;
   flavor_text: string;
+  artist: string;
   image_uris?: {
     art_crop: string;
   };
@@ -82,6 +83,19 @@ const RandomFlavorText = () => {
               <Paper elevation={0} sx={contentPageStyles.flavorCardContainer}>
                 <Typography variant="h3" sx={contentPageStyles.cardName}>
                   {cardData.name}
+                </Typography>
+
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontStyle: 'italic',
+                    color: 'text.secondary',
+                    mb: 0,
+                    mt: 0,
+                    textAlign: 'center'
+                  }}
+                >
+                  Art by {cardData.artist}
                 </Typography>
 
                 <Box sx={contentPageStyles.imageContainer}>

@@ -82,6 +82,8 @@ export const GET_CARD_PRICES = gql`
             name
             set_code
             number
+            price_cents_nm
+            price_cents_lp_plus
             price_cents
             price_cents_foil
             url

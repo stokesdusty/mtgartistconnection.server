@@ -300,7 +300,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: spacing.xl,
+    gap: spacing.md,
     transition: transitions.base,
     '&:hover': {
       boxShadow: shadows.md,
@@ -312,7 +312,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize.xl, md: typography.fontSize['2xl'] },
     textAlign: 'center',
     fontFamily: typography.fontFamily.display,
-    marginBottom: spacing.sm,
+    marginBottom: 0,
   },
   imageContainer: {
     position: 'relative',

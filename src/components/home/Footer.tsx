@@ -193,6 +193,15 @@ const Footer = () => {
                 <FaBluesky size={20} />
               </Link>
             </Box>
+            <Box sx={footerStyles.badgeContainer}>
+              <Link href="https://www.manapool.com?ref=mtgartistconnection" target="_blank" rel="noopener noreferrer">
+                <img
+                  src="/MP_Badges_partner_light.svg"
+                  alt="Manapool Partner"
+                  style={{ height: '40px', width: 'auto' }}
+                />
+              </Link>
+            </Box>
           </Box>
         </Container>
       </Box>

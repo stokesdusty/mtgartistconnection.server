@@ -24,7 +24,6 @@ import { GET_ARTIST_BY_NAME, GET_CARD_PRICES } from "../graphql/queries";
 import { useQuery, useLazyQuery } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
 import { useCart } from "../../CartContext";
-import { FEATURE_FLAGS } from "../../featureFlags";
 
 interface Card {
   related_uris: any;
@@ -35,6 +34,10 @@ interface Card {
   set?: string;
   collector_number?: string;
   released_at?: string;
+  tcgplayer_id?: number;
+  prices?: {
+    usd?: string | null;
+  };
   image_uris?: {
     border_crop: string;
   };
@@ -67,6 +70,8 @@ interface CardPrice {
   name: string;
   set_code: string;
   number: string;
+  price_cents_nm: number | null;
+  price_cents_lp_plus: number | null;
   price_cents: number | null;
   price_cents_foil: number | null;
   url: string;
@@ -108,6 +113,9 @@ const AllCards = () => {
         });
         setCardPrices(priceMap);
       }
+    },
+    onError: (error) => {
+      console.error('Error fetching card prices:', error);
     },
   });
 
@@ -213,10 +221,7 @@ const AllCards = () => {
     return { cards: sortedCards, totalCards: cardData.total_cards };
   }, [cardData, sortByNewest]);
 
-  // Fetch card prices when cards are loaded (only if shopping cart feature is enabled)
   useEffect(() => {
-    if (!FEATURE_FLAGS.SHOPPING_CART) return;
-
     if (cards.length > 0) {
       const cardLookups = cards
         .filter(card => card.set && card.collector_number)
@@ -247,12 +252,13 @@ const AllCards = () => {
   };
 
   const handleAddToCart = (card: Card, price: CardPrice) => {
+    const finalPrice = price.price_cents_nm || price.price_cents_lp_plus || price.price_cents;
     addToCart({
       id: card.id,
       name: price.name,
       set: card.set || '',
       collector_number: card.collector_number || '',
-      price_cents: price.price_cents,
+      price_cents: finalPrice,
       artist: card.artist,
     });
   };
@@ -263,34 +269,89 @@ const AllCards = () => {
   };
 
   const getImage = (card: Card) => {
-    const price = FEATURE_FLAGS.SHOPPING_CART ? getCardPrice(card) : undefined;
-    const cartKey = getCartKey(card);
-    const quantity = FEATURE_FLAGS.SHOPPING_CART ? getCartQuantity(cartKey) : 0;
+    const price = getCardPrice(card);
 
-    const priceAndCartRow = FEATURE_FLAGS.SHOPPING_CART && price && (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <IconButton
-          size="small"
-          onClick={() => handleRemoveFromCart(card)}
-          disabled={quantity === 0}
-          sx={{ p: 0.25 }}
-        >
-          <Remove sx={{ fontSize: '0.875rem' }} />
-        </IconButton>
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', minWidth: '1rem', textAlign: 'center' }}>
-          {quantity > 0 ? quantity : ''}
+    if (card.name === '_____ ' || card.name?.includes('_____')) {
+      console.log('Card:', card.name, 'Set:', card.set, 'Number:', card.collector_number);
+      console.log('Price object:', price);
+    }
+
+    // Convert card name to URL slug (lowercase, replace spaces/special chars with hyphens)
+    // Keep apostrophes, replace other special chars with hyphens
+    const cardSlug = card.name
+      ? card.name
+          .toLowerCase()
+          .replace(/[^a-z0-9']+/g, '-')
+          .replace(/^-+|-+$/g, '')
+      : '';
+
+    // Fallback chain for price: NM -> LP -> generic -> no price (just link)
+    const manapoolPrice = price?.price_cents_nm || price?.price_cents_lp_plus || price?.price_cents;
+
+    const priceDisplay = cardSlug && (
+      <Link
+        href={`https://manapool.com/card/${card.set}/${card.collector_number}/${cardSlug}?ref=mtgartistconnection`}
+        target="_blank"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          textDecoration: 'none',
+          mt: 0.5,
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'background-color 0.2s',
+          '&:hover': {
+            backgroundColor: 'rgba(45, 74, 54, 0.1)',
+          },
+        }}
+      >
+        {manapoolPrice && (
+          <Typography sx={{ fontSize: '0.75rem', color: 'text.primary', fontWeight: 600 }}>
+            {formatPrice(manapoolPrice)}
+          </Typography>
+        )}
+        <img
+          src="/manapool-icon.ico"
+          alt="Manapool"
+          style={{ height: '16px', width: '16px' }}
+        />
+      </Link>
+    );
+
+    const tcgplayerDisplay = card.tcgplayer_id && card.prices?.usd && (
+      <Link
+        href={`https://tcgplayer.com/product/${card.tcgplayer_id}?partner=mtgartistconnection&utm_campaign=affiliate&utm_medium=mtgartistconnection&utm_source=mtgartistconnection`}
+        target="_blank"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          textDecoration: 'none',
+          mt: 0.5,
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'background-color 0.2s',
+          '&:hover': {
+            backgroundColor: 'rgba(45, 74, 54, 0.1)',
+          },
+        }}
+      >
+        <Typography sx={{ fontSize: '0.75rem', color: 'text.primary', fontWeight: 600 }}>
+          ${card.prices.usd}
         </Typography>
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-          {formatPrice(price.price_cents)} / {formatPrice(price.price_cents_foil)} foil
-        </Typography>
-        <IconButton
-          size="small"
-          onClick={() => handleAddToCart(card, price)}
-          sx={{ p: 0.25 }}
-        >
-          <Add sx={{ fontSize: '0.875rem' }} />
-        </IconButton>
-      </Box>
+        <Box
+          component="img"
+          src="/tcgplayer.png"
+          alt="TCGPlayer"
+          sx={{
+            height: '16px',
+            width: '32px',
+            objectFit: 'cover',
+            objectPosition: 'left center',
+          }}
+        />
+      </Link>
     );
 
     if (card.image_uris) {
@@ -307,23 +368,9 @@ const AllCards = () => {
               sx={allCardsStyles.cardImage}
             />
           </Link>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 0.5, gap: 0.25 }}>
-            <Link
-              href={`http://www.manapool.com/card/${card.set}/${card.collector_number}`}
-              target="_blank"
-              sx={{
-                fontSize: '0.75rem',
-                color: 'text.secondary',
-                textDecoration: 'none',
-                '&:hover': {
-                  color: '#2d4a36',
-                  textDecoration: 'none',
-                },
-              }}
-            >
-              View on Manapool
-            </Link>
-            {priceAndCartRow}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {priceDisplay}
+            {tcgplayerDisplay}
           </Box>
         </Box>
       );
@@ -341,23 +388,9 @@ const AllCards = () => {
               sx={allCardsStyles.cardImage}
             />
           </Link>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 0.5, gap: 0.25 }}>
-            <Link
-              href={`http://www.manapool.com/card/${card.set}/${card.collector_number}`}
-              target="_blank"
-              sx={{
-                fontSize: '0.75rem',
-                color: 'text.secondary',
-                textDecoration: 'none',
-                '&:hover': {
-                  color: '#2d4a36',
-                  textDecoration: 'none',
-                },
-              }}
-            >
-              View on Manapool
-            </Link>
-            {priceAndCartRow}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {priceDisplay}
+            {tcgplayerDisplay}
           </Box>
         </Box>
       );

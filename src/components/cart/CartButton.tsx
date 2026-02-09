@@ -57,7 +57,7 @@ const CartButton = () => {
       `${item.quantity} ${item.name} [${item.set.toUpperCase()}] ${item.collector_number}`
     ).join('\n');
     const base64 = btoa(formattedContents);
-    window.open(`https://manapool.com/add-deck?deck=${base64}`, '_blank');
+    window.open(`https://manapool.com/add-deck?deck=${base64}&ref=mtgartistconnection`, '_blank');
   };
 
   const totalItems = getTotalCartItems();
