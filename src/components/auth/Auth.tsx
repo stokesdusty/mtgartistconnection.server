@@ -215,6 +215,47 @@ const Auth = () => {
                     </Tabs>
 
                     <Box sx={styles.form}>
+                        {activeTab === 'signup' && (
+                            <Box sx={{
+                                backgroundColor: '#fafafa',
+                                padding: 2,
+                                borderRadius: '8px',
+                                marginBottom: 3,
+                                border: '1px solid #eeeeee',
+                            }}>
+                                <Typography sx={{
+                                    fontSize: '0.875rem',
+                                    color: '#212121',
+                                    lineHeight: 1.6,
+                                    marginBottom: 1.5,
+                                }}>
+                                    Create an account to receive optional email updates about:
+                                </Typography>
+                                <Box component="ul" sx={{
+                                    margin: 0,
+                                    paddingLeft: 2.5,
+                                    '& li': {
+                                        fontSize: '0.875rem',
+                                        color: '#616161',
+                                        lineHeight: 1.6,
+                                        marginBottom: 0.5,
+                                    }
+                                }}>
+                                    <li>Your favorite artists (when they have new work or events)</li>
+                                    <li>Signing events happening near you</li>
+                                    <li>Site updates and new features</li>
+                                </Box>
+                                <Typography sx={{
+                                    fontSize: '0.8rem',
+                                    color: '#757575',
+                                    marginTop: 1.5,
+                                    fontStyle: 'italic',
+                                }}>
+                                    All notifications are opt-in. We will never sell your data or share your email address with anyone.
+                                </Typography>
+                            </Box>
+                        )}
+
                         {error && (
                             <Alert severity="error" sx={styles.errorAlert}>
                                 {error}
