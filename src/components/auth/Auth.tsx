@@ -241,7 +241,7 @@ const Auth = () => {
                                         marginBottom: 0.5,
                                     }
                                 }}>
-                                    <li>Your favorite artists (when they have new work or events)</li>
+                                    <li>Your favorite artists (when they have new events or information added)</li>
                                     <li>Signing events happening near you</li>
                                     <li>Site updates and new features</li>
                                 </Box>

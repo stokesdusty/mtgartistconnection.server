@@ -21,6 +21,7 @@ import { RootState } from "./store/store";
 import PrivacyPolicy from "./components/home/PrivacyPolicy";
 import TermsOfService from "./components/home/TermsOfService";
 import ContactPage from "./components/home/Contact";
+import AffiliateDisclosure from "./components/home/AffiliateDisclosure";
 import ArtistCardAnalysis from "./components/artist/ArtistCardBreakdown";
 import { LoadingProvider } from "./LoadingContext";
 import { CartProvider } from "./CartContext";
@@ -61,6 +62,7 @@ function App() {
                 <Route path="/randomflavortext" element={<RandomFlavorText />} />
                 <Route path="/privacypolicy" element={<PrivacyPolicy />} />
                 <Route path="/termsofservice" element={<TermsOfService />} />
+                <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />
               </Routes>
