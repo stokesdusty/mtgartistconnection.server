@@ -141,11 +141,16 @@ const Header = () => {
                 <Button
                   onClick={handleLogout}
                   sx={{
-                    color: 'white',
+                    color: 'text.secondary',
                     textTransform: 'none',
-                    fontSize: '1rem',
+                    fontSize: { xs: '0.875rem', md: '1rem' },
                     fontWeight: 500,
-                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                    padding: { xs: '6px 12px', md: '8px 16px' },
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: 'neutral.50',
+                      color: 'primary.main'
+                    }
                   }}
                 >
                   Logout {user?.name && `(${user.name})`}
@@ -154,11 +159,16 @@ const Header = () => {
                 <Button
                   onClick={handleLogin}
                   sx={{
-                    color: 'white',
+                    color: 'text.secondary',
                     textTransform: 'none',
-                    fontSize: '1rem',
+                    fontSize: { xs: '0.875rem', md: '1rem' },
                     fontWeight: 500,
-                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' }
+                    padding: { xs: '6px 12px', md: '8px 16px' },
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: 'neutral.50',
+                      color: 'primary.main'
+                    }
                   }}
                 >
                   Login
