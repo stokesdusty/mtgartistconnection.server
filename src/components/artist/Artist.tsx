@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@apollo/client";
 import { useParams, useNavigate } from "react-router-dom";
 import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_CURRENT_USER } from "../graphql/queries";
-import { FOLLOW_ARTIST, UNFOLLOW_ARTIST } from "../graphql/mutations";
+import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
 import {
   Box,
   Link,
@@ -11,6 +11,7 @@ import {
   Paper,
   FormControlLabel,
   Checkbox,
+  Button,
 } from "@mui/material";
 import { TbWorldWww } from "react-icons/tb";
 import {
@@ -25,7 +26,7 @@ import { FaBluesky } from "react-icons/fa6";
 import React, { useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 import { artistStyles } from "../../styles/artist-styles";
-import { CalendarToday, LocationOn, Notifications, NotificationsNone } from '@mui/icons-material';
+import { CalendarToday, LocationOn, Notifications, NotificationsNone, Edit } from '@mui/icons-material';
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
@@ -184,6 +185,7 @@ const Artist = () => {
 
   const [followArtist] = useMutation(FOLLOW_ARTIST);
   const [unfollowArtist] = useMutation(UNFOLLOW_ARTIST);
+  const [updateEmailPreferences] = useMutation(UPDATE_EMAIL_PREFERENCES);
 
   // Check if user is following this artist
   useEffect(() => {
@@ -314,6 +316,22 @@ const Artist = () => {
         const { data } = await followArtist({ variables: { artistName: name } });
         if (data?.followArtist?.success) {
           setIsFollowing(true);
+
+          // If user has artist updates turned off, enable it when they follow an artist
+          if (userData?.me?.emailPreferences?.artistUpdates === false) {
+            try {
+              await updateEmailPreferences({
+                variables: {
+                  siteUpdates: userData.me.emailPreferences.siteUpdates || false,
+                  artistUpdates: true, // Enable artist updates
+                  localSigningEvents: userData.me.emailPreferences.localSigningEvents || false,
+                },
+              });
+            } catch (prefError) {
+              console.error("Error updating email preferences:", prefError);
+              // Don't block the follow action if preference update fails
+            }
+          }
         }
       }
     } catch (error) {
@@ -337,41 +355,61 @@ const Artist = () => {
               {artistByName.name}
             </Typography>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={isLoggedIn && isFollowing}
-                  onChange={handleFollowToggle}
-                  icon={<NotificationsNone />}
-                  checkedIcon={<Notifications />}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {userData?.me?.role === 'admin' && (
+                <Button
+                  variant="outlined"
+                  startIcon={<Edit />}
+                  onClick={() => navigate(`/editartist/${artistByName.id}`)}
                   sx={{
-                    color: '#757575',
-                    '&.Mui-checked': {
-                      color: '#2d4a36',
+                    color: '#2d4a36',
+                    borderColor: '#2d4a36',
+                    '&:hover': {
+                      borderColor: '#1a2e20',
+                      backgroundColor: 'rgba(45, 74, 54, 0.04)',
                     },
                   }}
-                />
-              }
-              label={
-                <Typography sx={{
-                  fontSize: '0.875rem',
-                  color: '#616161',
-                  fontWeight: 500,
-                }}>
-                  {!isLoggedIn
-                    ? 'Sign in to follow'
-                    : isFollowing
-                      ? 'Following'
-                      : 'Follow for updates'}
-                </Typography>
-              }
-              sx={{
-                m: 0,
-                '& .MuiFormControlLabel-label': {
-                  userSelect: 'none',
-                },
+                >
+                  Edit Artist
+                </Button>
+              )}
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isLoggedIn && isFollowing}
+                    onChange={handleFollowToggle}
+                    icon={<NotificationsNone />}
+                    checkedIcon={<Notifications />}
+                    sx={{
+                      color: '#757575',
+                      '&.Mui-checked': {
+                        color: '#2d4a36',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography sx={{
+                    fontSize: '0.875rem',
+                    color: '#616161',
+                    fontWeight: 500,
+                  }}>
+                    {!isLoggedIn
+                      ? 'Sign in to follow'
+                      : isFollowing
+                        ? 'Following'
+                        : 'Follow for updates'}
+                  </Typography>
+                }
+                sx={{
+                  m: 0,
+                  '& .MuiFormControlLabel-label': {
+                    userSelect: 'none',
+                  },
               }}
             />
+            </Box>
           </Box>
 
           <Box sx={artistStyles.buttonContainer}>

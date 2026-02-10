@@ -155,3 +155,74 @@ export const UNFOLLOW_ARTIST = gql`
         }
     }
 `;
+
+export const MONITOR_STATE = gql`
+  mutation MonitorState($state: String!) {
+    monitorState(state: $state) {
+      success
+      message
+    }
+  }
+`;
+
+export const UNMONITOR_STATE = gql`
+  mutation UnmonitorState($state: String!) {
+    unmonitorState(state: $state) {
+      success
+      message
+    }
+  }
+`;
+
+export const UPDATE_ARTIST_BULK = gql`
+    mutation updateArtistBulk(
+        $id: ID!,
+        $name: String,
+        $email: String,
+        $artistProofs: String,
+        $facebook: String,
+        $instagram: String,
+        $twitter: String,
+        $patreon: String,
+        $youtube: String,
+        $artstation: String,
+        $bluesky: String,
+        $signing: String,
+        $signingComment: String,
+        $haveSignature: String,
+        $url: String,
+        $location: String,
+        $filename: String,
+        $mountainmage: String,
+        $markssignatureservice: String,
+        $omalink: String,
+        $inprnt: String,
+    ) {
+        updateArtistBulk(
+            id: $id,
+            name: $name,
+            email: $email,
+            artistProofs: $artistProofs,
+            facebook: $facebook,
+            instagram: $instagram,
+            twitter: $twitter,
+            patreon: $patreon,
+            youtube: $youtube,
+            artstation: $artstation,
+            bluesky: $bluesky,
+            signing: $signing,
+            signingComment: $signingComment,
+            haveSignature: $haveSignature,
+            url: $url,
+            location: $location,
+            filename: $filename,
+            mountainmage: $mountainmage,
+            markssignatureservice: $markssignatureservice,
+            omalink: $omalink,
+            inprnt: $inprnt,
+        ) {
+            id
+            name
+        }
+    }
+`;

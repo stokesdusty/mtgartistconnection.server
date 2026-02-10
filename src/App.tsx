@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { login } from "./store/auth-slice";
 import AddArtist from "./components/blogs/AddArtist";
+import EditArtist from "./components/blogs/EditArtist";
 import Calendar from "./components/calendar/Calendar";
 import SigningServices from "./components/signingservices/SigningServices";
 import Auth from "./components/auth/Auth";
@@ -25,6 +26,7 @@ import AffiliateDisclosure from "./components/home/AffiliateDisclosure";
 import ArtistCardAnalysis from "./components/artist/ArtistCardBreakdown";
 import { LoadingProvider } from "./LoadingContext";
 import Settings from "./components/settings/Settings";
+import Following from "./components/settings/Following";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -51,6 +53,7 @@ function App() {
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/signingservices" element={<SigningServices />} />
               <Route path="/add" element={<AddArtist />} />
+              <Route path="/editartist/:artistId" element={<EditArtist />} />
               <Route path="/addevent" element={<AddEvent />} />
               <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
               <Route path="/artist/:name" element={<Artist />} />
@@ -63,6 +66,7 @@ function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/following" element={<Following />} />
             </Routes>
           </main>
           <footer>

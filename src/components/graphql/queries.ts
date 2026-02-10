@@ -17,6 +17,7 @@ export const GET_ARTISTS_FOR_HOMEPAGE = gql`
 export const GET_ARTIST_BY_NAME = gql`
     query artistByName($name:String!){
         artistByName(name:$name){
+            id
             name
             email
             artistProofs
@@ -104,6 +105,35 @@ export const GET_CURRENT_USER = gql`
                 localSigningEvents
             }
             followedArtists
+            monitoredStates
+        }
+    }
+`;
+
+export const GET_ARTIST_BY_ID = gql`
+    query artistById($id: ID!) {
+        artistById(id: $id) {
+            id
+            name
+            email
+            artistProofs
+            facebook
+            instagram
+            twitter
+            patreon
+            youtube
+            artstation
+            bluesky
+            signing
+            signingComment
+            haveSignature
+            url
+            location
+            filename
+            mountainmage
+            markssignatureservice
+            omalink
+            inprnt
         }
     }
 `;

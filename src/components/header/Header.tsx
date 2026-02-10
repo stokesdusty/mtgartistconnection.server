@@ -23,6 +23,7 @@ import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { headerStyles } from '../../styles/header-styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -112,6 +113,11 @@ const Header = () => {
     navigate('/settings');
   };
 
+  const handleFollowingClick = () => {
+    setDrawerOpen(false);
+    navigate('/following');
+  };
+
   useEffect(() => {
     setValue(
       validPaths.includes(location.pathname)
@@ -188,7 +194,7 @@ const Header = () => {
                     }
                   }}
                 >
-                  {user?.email}
+                  Account
                 </Button>
               ) : (
                 <Button
@@ -296,6 +302,43 @@ const Header = () => {
             </Box>
           </Box>
           <List sx={{ p: 1 }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={handleFollowingClick}
+                sx={{
+                  borderRadius: '8px',
+                  mb: 0.5,
+                  transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    backgroundColor: '#fafafa',
+                    '& .MuiListItemIcon-root': {
+                      color: '#2d4a36',
+                    },
+                    '& .MuiListItemText-primary': {
+                      color: '#2d4a36',
+                    }
+                  }
+                }}
+              >
+                <ListItemIcon>
+                  <FavoriteIcon sx={{
+                    color: '#757575',
+                    transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Following"
+                  primaryTypographyProps={{
+                    sx: {
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: '#212121',
+                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    }
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
             <ListItem disablePadding>
               <ListItemButton
                 onClick={handleSettingsClick}
