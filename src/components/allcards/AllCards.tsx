@@ -307,6 +307,15 @@ const AllCards = () => {
       <Link
         href={`https://manapool.com/card/${card.set}/${card.collector_number}/${cardSlug}?ref=mtgartistconnection`}
         target="_blank"
+        onClick={() => {
+          if ((window as any).gtag) {
+            (window as any).gtag("event", "manapool_price_click", {
+              event_category: "affiliate_links",
+              event_label: card.name,
+              card_set: card.set,
+            });
+          }
+        }}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -338,6 +347,15 @@ const AllCards = () => {
       <Link
         href={`https://tcgplayer.com/product/${card.tcgplayer_id}?partner=mtgartistconnection&utm_campaign=affiliate&utm_medium=mtgartistconnection&utm_source=mtgartistconnection`}
         target="_blank"
+        onClick={() => {
+          if ((window as any).gtag) {
+            (window as any).gtag("event", "tcgplayer_price_click", {
+              event_category: "affiliate_links",
+              event_label: card.name,
+              card_set: card.set,
+            });
+          }
+        }}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -378,6 +396,15 @@ const AllCards = () => {
       <Link
         href={ckUrl}
         target="_blank"
+        onClick={() => {
+          if ((window as any).gtag) {
+            (window as any).gtag("event", "cardkingdom_price_click", {
+              event_category: "affiliate_links",
+              event_label: card.name,
+              card_set: card.set,
+            });
+          }
+        }}
         sx={{
           display: 'flex',
           alignItems: 'center',

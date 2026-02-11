@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import {
   AppBar,
   Box,
@@ -54,7 +54,7 @@ const Header = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const validPaths = navItems.map(item => item.to);
+  const validPaths = useMemo(() => navItems.map(item => item.to), []);
 
   const [value, setValue] = useState<string | false>(() =>
     validPaths.includes(location.pathname)
