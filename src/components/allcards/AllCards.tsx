@@ -19,7 +19,7 @@ import {
   Fab,
 } from "@mui/material";
 import { KeyboardArrowUp } from "@mui/icons-material";
-import { GET_ARTIST_BY_NAME, GET_CARD_PRICES } from "../graphql/queries";
+import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES } from "../graphql/queries";
 import { useQuery, useLazyQuery } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
 
@@ -30,6 +30,7 @@ interface Card {
   artist?: string;
   scryfall_uri?: string;
   set?: string;
+  set_name?: string;
   collector_number?: string;
   released_at?: string;
   tcgplayer_id?: number;
@@ -75,6 +76,16 @@ interface CardPrice {
   url: string;
 }
 
+interface CardKingdomPrice {
+  id: string;
+  name: string;
+  edition: string;
+  condition: string;
+  foil: boolean;
+  price: number;
+  url: string;
+}
+
 const AllCards = () => {
   const { name: artist } = useParams<{ name?: string }>();
   const navigate = useNavigate();
@@ -82,6 +93,7 @@ const AllCards = () => {
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [includeDigital, setIncludeDigital] = useState<boolean>(false);
   const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
+  const [cardKingdomPrices, setCardKingdomPrices] = useState<Map<string, CardKingdomPrice>>(new Map());
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   const [sortByNewest, setSortByNewest] = useState<boolean>(false);
 
@@ -111,6 +123,27 @@ const AllCards = () => {
     },
     onError: (error) => {
       console.error('Error fetching card prices:', error);
+    },
+  });
+
+  const [fetchCardKingdomPrices] = useLazyQuery(GET_CARDKINGDOM_PRICES, {
+    onCompleted: (data) => {
+      if (data?.cardKingdomPricesByNames) {
+        const ckPriceMap = new Map<string, CardKingdomPrice>();
+        data.cardKingdomPricesByNames.forEach((price: CardKingdomPrice) => {
+          // Store by edition-name key for better matching (e.g., "Alpha-Black Lotus")
+          const key = `${price.edition?.toLowerCase()}-${price.name.toLowerCase()}`;
+          ckPriceMap.set(key, price);
+          // Also store by name only as fallback
+          if (!ckPriceMap.has(price.name.toLowerCase())) {
+            ckPriceMap.set(price.name.toLowerCase(), price);
+          }
+        });
+        setCardKingdomPrices(ckPriceMap);
+      }
+    },
+    onError: (error) => {
+      console.error('Error fetching CardKingdom prices:', error);
     },
   });
 
@@ -228,8 +261,14 @@ const AllCards = () => {
       if (cardLookups.length > 0) {
         fetchCardPrices({ variables: { cards: cardLookups } });
       }
+
+      // Fetch CardKingdom prices for all unique card names in a single batch query
+      const uniqueNames = Array.from(new Set(cards.map(card => card.name).filter(Boolean)));
+      if (uniqueNames.length > 0) {
+        fetchCardKingdomPrices({ variables: { names: uniqueNames } });
+      }
     }
-  }, [cards, fetchCardPrices]);
+  }, [cards, fetchCardPrices, fetchCardKingdomPrices]);
 
   const formatPrice = (cents: number | null): string => {
     if (cents === null || cents === undefined) return '-';
@@ -240,6 +279,20 @@ const AllCards = () => {
     if (!card.set || !card.collector_number) return undefined;
     const key = `${card.set.toLowerCase()}-${card.collector_number}`;
     return cardPrices.get(key);
+  };
+
+  const getCardKingdomPrice = (card: Card): CardKingdomPrice | undefined => {
+    if (!card.name) return undefined;
+
+    // Try to match by set_name + card name first for better accuracy
+    if (card.set_name) {
+      const editionKey = `${card.set_name.toLowerCase()}-${card.name.toLowerCase()}`;
+      const exactMatch = cardKingdomPrices.get(editionKey);
+      if (exactMatch) return exactMatch;
+    }
+
+    // Fall back to card name only
+    return cardKingdomPrices.get(card.name.toLowerCase());
   };
 
   const getImage = (card: Card) => {
@@ -328,6 +381,45 @@ const AllCards = () => {
       </Link>
     );
 
+    const ckPrice = getCardKingdomPrice(card);
+    const ckUrl = ckPrice?.url
+      ? `${ckPrice.url}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`
+      : `https://www.cardkingdom.com/mtg/${card.name?.toLowerCase().replace(/\s+/g, '-')}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`;
+
+    const cardKingdomDisplay = ckPrice && (
+      <Link
+        href={ckUrl}
+        target="_blank"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          textDecoration: 'none',
+          mt: 0.5,
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'background-color 0.2s',
+          '&:hover': {
+            backgroundColor: 'rgba(45, 74, 54, 0.1)',
+          },
+        }}
+      >
+        <Typography sx={{ fontSize: '0.75rem', color: 'text.primary', fontWeight: 600 }}>
+          {formatPrice(ckPrice.price)}
+        </Typography>
+        <Box
+          component="img"
+          src="/cardkingdom.jpg"
+          alt="Card Kingdom"
+          sx={{
+            height: '16px',
+            width: '16px',
+            objectFit: 'contain',
+          }}
+        />
+      </Link>
+    );
+
     if (card.image_uris) {
       return (
         <Box key={card.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -345,6 +437,7 @@ const AllCards = () => {
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             {priceDisplay}
             {tcgplayerDisplay}
+            {cardKingdomDisplay}
           </Box>
         </Box>
       );
@@ -365,6 +458,7 @@ const AllCards = () => {
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
             {priceDisplay}
             {tcgplayerDisplay}
+            {cardKingdomDisplay}
           </Box>
         </Box>
       );

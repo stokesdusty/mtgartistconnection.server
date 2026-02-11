@@ -57,6 +57,16 @@ const AffiliateDisclosure = () => {
               our Manapool affiliate code. We earn a small commission when you purchase cards
               through these links.
             </li>
+            <li>
+              <strong>Card Kingdom:</strong> Card price links use
+              our Card Kingdom affiliate code. We earn a small commission when you purchase cards
+              through these links.
+            </li>
+            <li>
+              <strong>TCGPlayer:</strong> Card price links use
+              our TCGPlayer affiliate code. We earn a small commission when you purchase cards
+              through these links.
+            </li>
           </Box>
 
           <Typography variant="h5" sx={contentPageStyles.sectionTitle}>

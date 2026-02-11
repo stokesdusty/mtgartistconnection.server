@@ -92,6 +92,20 @@ export const GET_CARD_PRICES = gql`
     }
 `;
 
+export const GET_CARDKINGDOM_PRICES = gql`
+    query cardKingdomPricesByNames($names: [String!]!) {
+        cardKingdomPricesByNames(names: $names) {
+            id
+            name
+            edition
+            condition
+            foil
+            price
+            url
+        }
+    }
+`;
+
 export const GET_CURRENT_USER = gql`
     query {
         me {
