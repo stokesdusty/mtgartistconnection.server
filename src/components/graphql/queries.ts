@@ -102,6 +102,22 @@ export const GET_CARDKINGDOM_PRICES = gql`
             foil
             price
             url
+            scryfallId
+        }
+    }
+`;
+
+export const GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS = gql`
+    query cardKingdomPricesByScryfallIds($scryfallIds: [String!]!) {
+        cardKingdomPricesByScryfallIds(scryfallIds: $scryfallIds) {
+            id
+            name
+            edition
+            condition
+            foil
+            price
+            url
+            scryfallId
         }
     }
 `;

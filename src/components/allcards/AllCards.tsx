@@ -19,7 +19,7 @@ import {
   Fab,
 } from "@mui/material";
 import { KeyboardArrowUp } from "@mui/icons-material";
-import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES } from "../graphql/queries";
+import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS } from "../graphql/queries";
 import { useQuery, useLazyQuery } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
 
@@ -84,6 +84,7 @@ interface CardKingdomPrice {
   foil: boolean;
   price: number;
   url: string;
+  scryfallId: string;
 }
 
 const AllCards = () => {
@@ -126,18 +127,13 @@ const AllCards = () => {
     },
   });
 
-  const [fetchCardKingdomPrices] = useLazyQuery(GET_CARDKINGDOM_PRICES, {
+  const [fetchCardKingdomPrices] = useLazyQuery(GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, {
     onCompleted: (data) => {
-      if (data?.cardKingdomPricesByNames) {
+      if (data?.cardKingdomPricesByScryfallIds) {
         const ckPriceMap = new Map<string, CardKingdomPrice>();
-        data.cardKingdomPricesByNames.forEach((price: CardKingdomPrice) => {
-          // Store by edition-name key for better matching (e.g., "Alpha-Black Lotus")
-          const key = `${price.edition?.toLowerCase()}-${price.name.toLowerCase()}`;
-          ckPriceMap.set(key, price);
-          // Also store by name only as fallback
-          if (!ckPriceMap.has(price.name.toLowerCase())) {
-            ckPriceMap.set(price.name.toLowerCase(), price);
-          }
+        data.cardKingdomPricesByScryfallIds.forEach((price: CardKingdomPrice) => {
+          // Store by scryfallId for exact matching
+          ckPriceMap.set(price.scryfallId, price);
         });
         setCardKingdomPrices(ckPriceMap);
       }
@@ -262,10 +258,10 @@ const AllCards = () => {
         fetchCardPrices({ variables: { cards: cardLookups } });
       }
 
-      // Fetch CardKingdom prices for all unique card names in a single batch query
-      const uniqueNames = Array.from(new Set(cards.map(card => card.name).filter(Boolean)));
-      if (uniqueNames.length > 0) {
-        fetchCardKingdomPrices({ variables: { names: uniqueNames } });
+      // Fetch CardKingdom prices for all unique scryfall IDs in a single batch query
+      const uniqueScryfallIds = Array.from(new Set(cards.map(card => card.id).filter(Boolean)));
+      if (uniqueScryfallIds.length > 0) {
+        fetchCardKingdomPrices({ variables: { scryfallIds: uniqueScryfallIds } });
       }
     }
   }, [cards, fetchCardPrices, fetchCardKingdomPrices]);
@@ -282,17 +278,9 @@ const AllCards = () => {
   };
 
   const getCardKingdomPrice = (card: Card): CardKingdomPrice | undefined => {
-    if (!card.name) return undefined;
-
-    // Try to match by set_name + card name first for better accuracy
-    if (card.set_name) {
-      const editionKey = `${card.set_name.toLowerCase()}-${card.name.toLowerCase()}`;
-      const exactMatch = cardKingdomPrices.get(editionKey);
-      if (exactMatch) return exactMatch;
-    }
-
-    // Fall back to card name only
-    return cardKingdomPrices.get(card.name.toLowerCase());
+    if (!card.id) return undefined;
+    // Match by scryfallId for exact accuracy
+    return cardKingdomPrices.get(card.id);
   };
 
   const getImage = (card: Card) => {
