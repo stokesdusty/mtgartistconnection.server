@@ -207,7 +207,7 @@ import {
             <Box sx={contentPageStyles.artistsGrid}>
               {artistData?.mapArtistToEventByEventId && artistData.mapArtistToEventByEventId.length > 0 ? (
                 artistData.mapArtistToEventByEventId.map((artist: any) => {
-                  const artistLink = "/artist/" + artist.artistName;
+                  const artistLink = "/allcards/" + artist.artistName;
                   return (
                     <Chip
                       key={artist.artistName}

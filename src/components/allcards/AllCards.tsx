@@ -538,6 +538,16 @@ const AllCards = () => {
             All {artist} Cards
           </Typography>
 
+          <Link
+            href={`/artist/${artist}`}
+            underline="none"
+            sx={{ display: 'inline-block', mb: 2 }}
+          >
+            <Button sx={allCardsStyles.expandButton}>
+              View Artist Details
+            </Button>
+          </Link>
+
           <Box sx={allCardsStyles.controlsSection}>
             <Typography sx={allCardsStyles.cardCount}>
               {totalCards} {totalCards === 1 ? 'card' : 'cards'} found
