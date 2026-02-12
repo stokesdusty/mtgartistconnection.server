@@ -51,6 +51,7 @@ function App() {
               <Route path="/" element={<Homepage />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/calendar" element={<Calendar />} />
+              <Route path="/calendar/:eventId" element={<Calendar />} />
               <Route path="/signingservices" element={<SigningServices />} />
               <Route path="/add" element={<AddArtist />} />
               <Route path="/editartist/:artistId" element={<EditArtist />} />

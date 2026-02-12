@@ -11,20 +11,35 @@ import {
     MenuItem,
     ListItemIcon,
     ListItemText,
+    IconButton,
+    Snackbar,
   } from "@mui/material";
   import { GET_ARTISTSBYEVENTID } from "../graphql/queries";
   import { useQuery } from "@apollo/client";
-  import { CalendarToday, LocationOn, PeopleAlt, ExpandMore, Event, GetApp } from '@mui/icons-material';
+  import { CalendarToday, LocationOn, PeopleAlt, ExpandMore, Event, GetApp, Share } from '@mui/icons-material';
   import { useState } from "react";
   import { contentPageStyles } from "../../styles/content-page-styles";
   import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
   
-  const SigningEvent = (SigningEventProps: any) => {
+  interface SigningEventComponentProps {
+    props: any;
+    isHighlighted?: boolean;
+  }
+
+  const SigningEvent = ({ props, isHighlighted }: SigningEventComponentProps) => {
     const [artistsExpanded, setArtistsExpanded] = useState(true);
     const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<null | HTMLElement>(null);
-    const startDateFormatted = new Date(SigningEventProps.props.startDate).toLocaleDateString();
-    const endDateFormatted = new Date(SigningEventProps.props.endDate).toLocaleDateString();
-    const eventId = SigningEventProps.props.id;
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const startDateFormatted = new Date(props.startDate).toLocaleDateString();
+    const endDateFormatted = new Date(props.endDate).toLocaleDateString();
+    const eventId = props.id;
+
+    const handleShareClick = () => {
+      const url = `${window.location.origin}/calendar/${eventId}`;
+      navigator.clipboard.writeText(url).then(() => {
+        setSnackbarOpen(true);
+      });
+    };
 
     const handleCalendarMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
       setCalendarMenuAnchor(event.currentTarget);
@@ -36,22 +51,22 @@ import {
 
     const handleDownloadICal = () => {
       downloadICalFile({
-        name: SigningEventProps.props.name,
-        startDate: SigningEventProps.props.startDate,
-        endDate: SigningEventProps.props.endDate,
-        city: SigningEventProps.props.city,
-        url: SigningEventProps.props.url,
+        name: props.name,
+        startDate: props.startDate,
+        endDate: props.endDate,
+        city: props.city,
+        url: props.url,
       });
       handleCalendarMenuClose();
     };
 
     const handleAddToGoogle = () => {
       const googleUrl = generateGoogleCalendarUrl({
-        name: SigningEventProps.props.name,
-        startDate: SigningEventProps.props.startDate,
-        endDate: SigningEventProps.props.endDate,
-        city: SigningEventProps.props.city,
-        url: SigningEventProps.props.url,
+        name: props.name,
+        startDate: props.startDate,
+        endDate: props.endDate,
+        city: props.city,
+        url: props.url,
       });
       window.open(googleUrl, '_blank');
       handleCalendarMenuClose();
@@ -59,11 +74,11 @@ import {
 
     const handleAddToOutlook = () => {
       const outlookUrl = generateOutlookCalendarUrl({
-        name: SigningEventProps.props.name,
-        startDate: SigningEventProps.props.startDate,
-        endDate: SigningEventProps.props.endDate,
-        city: SigningEventProps.props.city,
-        url: SigningEventProps.props.url,
+        name: props.name,
+        startDate: props.startDate,
+        endDate: props.endDate,
+        city: props.city,
+        url: props.url,
       });
       window.open(outlookUrl, '_blank');
       handleCalendarMenuClose();
@@ -94,23 +109,33 @@ import {
       );
   
     return (
-      <Paper sx={contentPageStyles.eventCard} elevation={0} key={SigningEventProps.props.name}>
+      <Paper
+        sx={{
+          ...contentPageStyles.eventCard,
+          ...(isHighlighted && {
+            boxShadow: '0 0 0 2px #2d4a36',
+            backgroundColor: '#fafafa',
+          }),
+        }}
+        elevation={0}
+        key={props.name}
+      >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center', marginBottom: 1.5, textAlign: 'center' }}>
-          {SigningEventProps.props.url ? (
+          {props.url ? (
             <Link
-              href={SigningEventProps.props.url}
+              href={props.url}
               target="_blank"
               rel="noopener noreferrer"
               underline="hover"
               sx={{ textDecoration: 'none' }}
             >
               <Typography variant="h3" sx={contentPageStyles.eventTitle}>
-                {SigningEventProps.props.name}
+                {props.name}
               </Typography>
             </Link>
           ) : (
             <Typography variant="h3" sx={contentPageStyles.eventTitle}>
-              {SigningEventProps.props.name}
+              {props.name}
             </Typography>
           )}
 
@@ -130,7 +155,7 @@ import {
 
             <Box sx={contentPageStyles.infoItem}>
               <LocationOn fontSize="small" />
-              <Typography>{SigningEventProps.props.city}</Typography>
+              <Typography>{props.city}</Typography>
             </Box>
 
             <Button
@@ -148,8 +173,31 @@ import {
             >
               Add to Calendar
             </Button>
+
+            <IconButton
+              onClick={handleShareClick}
+              size="small"
+              sx={{
+                color: '#757575',
+                '&:hover': {
+                  backgroundColor: '#fafafa',
+                  color: '#2d4a36',
+                }
+              }}
+              title="Copy link to event"
+            >
+              <Share fontSize="small" />
+            </IconButton>
           </Box>
         </Box>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={2000}
+          onClose={() => setSnackbarOpen(false)}
+          message="Link copied to clipboard"
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
 
         <Menu
           anchorEl={calendarMenuAnchor}

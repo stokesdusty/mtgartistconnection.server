@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Container,
@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { GET_SIGNINGEVENTS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
+import { useParams } from "react-router-dom";
 import SigningEvent from "./SigningEvent";
 import { contentPageStyles } from "../../styles/content-page-styles";
 
@@ -34,8 +35,27 @@ const stateCodeToName: { [key: string]: string } = {
 const Calendar = () => {
   document.title = "MtG Artist Connection - Events Calendar";
 
+  const { eventId } = useParams<{ eventId?: string }>();
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [locationFilter, setLocationFilter] = useState("");
+  const eventRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const hasScrolled = useRef(false);
+
+  useEffect(() => {
+    if (eventId && data?.signingEvent && !hasScrolled.current) {
+      // Longer delay to allow SigningEvent components to load their artist data and expand
+      const timeoutId = setTimeout(() => {
+        const element = eventRefs.current[eventId];
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const scrollTop = window.pageYOffset + rect.top - (window.innerHeight / 2) + (rect.height / 2);
+          window.scrollTo({ top: scrollTop, behavior: 'smooth' });
+          hasScrolled.current = true;
+        }
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [eventId, data]);
 
   const handleLocationChange = (event: SelectChangeEvent) => {
     setLocationFilter(event.target.value);
@@ -203,7 +223,12 @@ const Calendar = () => {
           <Box sx={contentPageStyles.eventsContainer}>
             {filteredAndSortedEvents.length > 0 ? (
               filteredAndSortedEvents.map((eventData: any) => (
-                <SigningEvent props={eventData} key={eventData.id} />
+                <div
+                  key={eventData.id}
+                  ref={(el) => { eventRefs.current[eventData.id] = el; }}
+                >
+                  <SigningEvent props={eventData} isHighlighted={eventId === eventData.id} />
+                </div>
               ))
             ) : (
               <Typography sx={contentPageStyles.noEventsMessage}>
