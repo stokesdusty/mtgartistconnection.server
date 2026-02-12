@@ -9,8 +9,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Fab
 } from "@mui/material";
+import { KeyboardArrowUp } from "@mui/icons-material";
 import { GET_SIGNINGEVENTS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
@@ -38,8 +40,21 @@ const Calendar = () => {
   const { eventId } = useParams<{ eventId?: string }>();
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [locationFilter, setLocationFilter] = useState("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const eventRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const hasScrolled = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > window.innerHeight);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   useEffect(() => {
     if (eventId && data?.signingEvent && !hasScrolled.current) {
@@ -47,9 +62,13 @@ const Calendar = () => {
       const timeoutId = setTimeout(() => {
         const element = eventRefs.current[eventId];
         if (element) {
+          // Account for sticky header (approximately 64-80px depending on screen size)
+          const header = document.querySelector('header');
+          const headerHeight = header?.getBoundingClientRect().height || 70;
           const rect = element.getBoundingClientRect();
-          const scrollTop = window.pageYOffset + rect.top - (window.innerHeight / 2) + (rect.height / 2);
-          window.scrollTo({ top: scrollTop, behavior: 'smooth' });
+          const availableHeight = window.innerHeight - headerHeight;
+          const scrollTop = window.pageYOffset + rect.top - headerHeight - (availableHeight / 2) + (rect.height / 2);
+          window.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
           hasScrolled.current = true;
         }
       }, 500);
@@ -107,12 +126,20 @@ const Calendar = () => {
     const today = new Date();
     let filtered = data.signingEvent.filter((eventData: any) => {
       const endDate = new Date(eventData.endDate);
+      // Always include the linked event, even if it's in the past
+      if (eventId && eventData.id === eventId) {
+        return true;
+      }
       return endDate >= today;
     });
 
-    // Apply location filter
+    // Apply location filter (but always include the linked event)
     if (locationFilter) {
       filtered = filtered.filter((eventData: any) => {
+        // Always include the linked event regardless of filter
+        if (eventId && eventData.id === eventId) {
+          return true;
+        }
         if (!eventData.city) return false;
 
         const parts = eventData.city.split(',').map((s: string) => s.trim());
@@ -240,6 +267,24 @@ const Calendar = () => {
           </Box>
         </Paper>
       </Container>
+
+      {showScrollTop && (
+        <Fab
+          color="primary"
+          onClick={scrollToTop}
+          size="medium"
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            bgcolor: '#2d4a36',
+            '&:hover': { bgcolor: '#1e3425' },
+            zIndex: 999,
+          }}
+        >
+          <KeyboardArrowUp />
+        </Fab>
+      )}
     </Box>
   );
 };
