@@ -23,10 +23,9 @@ import {
   
   interface SigningEventComponentProps {
     props: any;
-    isHighlighted?: boolean;
   }
 
-  const SigningEvent = ({ props, isHighlighted }: SigningEventComponentProps) => {
+  const SigningEvent = ({ props }: SigningEventComponentProps) => {
     const [artistsExpanded, setArtistsExpanded] = useState(true);
     const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<null | HTMLElement>(null);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -110,13 +109,7 @@ import {
   
     return (
       <Paper
-        sx={{
-          ...contentPageStyles.eventCard,
-          ...(isHighlighted && {
-            boxShadow: '0 0 0 2px #2d4a36',
-            backgroundColor: '#fafafa',
-          }),
-        }}
+        sx={contentPageStyles.eventCard}
         elevation={0}
         key={props.name}
       >

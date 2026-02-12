@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Container,
@@ -15,7 +15,6 @@ import {
 import { KeyboardArrowUp } from "@mui/icons-material";
 import { GET_SIGNINGEVENTS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
-import { useParams } from "react-router-dom";
 import SigningEvent from "./SigningEvent";
 import { contentPageStyles } from "../../styles/content-page-styles";
 
@@ -37,12 +36,9 @@ const stateCodeToName: { [key: string]: string } = {
 const Calendar = () => {
   document.title = "MtG Artist Connection - Events Calendar";
 
-  const { eventId } = useParams<{ eventId?: string }>();
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [locationFilter, setLocationFilter] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const eventRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const hasScrolled = useRef(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,26 +51,6 @@ const Calendar = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  useEffect(() => {
-    if (eventId && data?.signingEvent && !hasScrolled.current) {
-      // Longer delay to allow SigningEvent components to load their artist data and expand
-      const timeoutId = setTimeout(() => {
-        const element = eventRefs.current[eventId];
-        if (element) {
-          // Account for sticky header (approximately 64-80px depending on screen size)
-          const header = document.querySelector('header');
-          const headerHeight = header?.getBoundingClientRect().height || 70;
-          const rect = element.getBoundingClientRect();
-          const availableHeight = window.innerHeight - headerHeight;
-          const scrollTop = window.pageYOffset + rect.top - headerHeight - (availableHeight / 2) + (rect.height / 2);
-          window.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
-          hasScrolled.current = true;
-        }
-      }, 500);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [eventId, data]);
 
   const handleLocationChange = (event: SelectChangeEvent) => {
     setLocationFilter(event.target.value);
@@ -126,20 +102,12 @@ const Calendar = () => {
     const today = new Date();
     let filtered = data.signingEvent.filter((eventData: any) => {
       const endDate = new Date(eventData.endDate);
-      // Always include the linked event, even if it's in the past
-      if (eventId && eventData.id === eventId) {
-        return true;
-      }
       return endDate >= today;
     });
 
-    // Apply location filter (but always include the linked event)
+    // Apply location filter
     if (locationFilter) {
       filtered = filtered.filter((eventData: any) => {
-        // Always include the linked event regardless of filter
-        if (eventId && eventData.id === eventId) {
-          return true;
-        }
         if (!eventData.city) return false;
 
         const parts = eventData.city.split(',').map((s: string) => s.trim());
@@ -250,12 +218,7 @@ const Calendar = () => {
           <Box sx={contentPageStyles.eventsContainer}>
             {filteredAndSortedEvents.length > 0 ? (
               filteredAndSortedEvents.map((eventData: any) => (
-                <div
-                  key={eventData.id}
-                  ref={(el) => { eventRefs.current[eventData.id] = el; }}
-                >
-                  <SigningEvent props={eventData} isHighlighted={eventId === eventData.id} />
-                </div>
+                <SigningEvent key={eventData.id} props={eventData} />
               ))
             ) : (
               <Typography sx={contentPageStyles.noEventsMessage}>

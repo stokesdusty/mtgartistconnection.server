@@ -8,6 +8,7 @@ import { login } from "./store/auth-slice";
 import AddArtist from "./components/blogs/AddArtist";
 import EditArtist from "./components/blogs/EditArtist";
 import Calendar from "./components/calendar/Calendar";
+import EventDetail from "./components/calendar/EventDetail";
 import SigningServices from "./components/signingservices/SigningServices";
 import Auth from "./components/auth/Auth";
 import Artist from "./components/artist/Artist";
@@ -51,7 +52,7 @@ function App() {
               <Route path="/" element={<Homepage />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/calendar" element={<Calendar />} />
-              <Route path="/calendar/:eventId" element={<Calendar />} />
+              <Route path="/calendar/:eventId" element={<EventDetail />} />
               <Route path="/signingservices" element={<SigningServices />} />
               <Route path="/add" element={<AddArtist />} />
               <Route path="/editartist/:artistId" element={<EditArtist />} />
