@@ -40,7 +40,7 @@ export const artistGridStyles: Styles = {
   text: {
     textAlign: 'center',
     fontWeight: typography.fontWeight.medium,
-    fontSize: typography.fontSize.sm,
+    fontSize: { xs: typography.fontSize.xs, sm: typography.fontSize.sm },
     color: colors.text.primary,
     transition: transitions.fast,
     fontFamily: typography.fontFamily.display,

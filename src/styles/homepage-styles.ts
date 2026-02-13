@@ -232,13 +232,13 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   artistsGrid: {
     display: 'grid',
     gridTemplateColumns: {
-      xs: '1fr',
+      xs: 'repeat(2, 1fr)',
       sm: 'repeat(2, 1fr)',
       md: 'repeat(3, 1fr)',
       lg: 'repeat(4, 1fr)',
       xl: 'repeat(5, 1fr)'
     },
-    gap: { xs: spacing.lg, md: spacing.xl },
+    gap: { xs: spacing.sm, sm: spacing.md, md: spacing.xl },
     marginTop: spacing.xl,
   },
   loadingContainer: {
