@@ -321,8 +321,7 @@ const AllCards = () => {
           alignItems: 'center',
           gap: 0.5,
           textDecoration: 'none',
-          mt: 0.5,
-          padding: '4px 8px',
+          padding: '2px 4px',
           borderRadius: '4px',
           transition: 'background-color 0.2s',
           '&:hover': {
@@ -331,7 +330,7 @@ const AllCards = () => {
         }}
       >
         {manapoolPrice && (
-          <Typography sx={{ fontSize: '0.75rem', color: 'text.primary', fontWeight: 600 }}>
+          <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
             {formatPrice(manapoolPrice)}
           </Typography>
         )}
@@ -345,7 +344,7 @@ const AllCards = () => {
 
     const tcgplayerDisplay = card.tcgplayer_id && card.prices?.usd && (
       <Link
-        href={`https://tcgplayer.com/product/${card.tcgplayer_id}?partner=mtgartistconnection&utm_campaign=affiliate&utm_medium=mtgartistconnection&utm_source=mtgartistconnection`}
+        href={`https://partner.tcgplayer.com/JkbQGE?u=https://www.tcgplayer.com/product/${card.tcgplayer_id}`}
         target="_blank"
         onClick={() => {
           if ((window as any).gtag) {
@@ -361,8 +360,7 @@ const AllCards = () => {
           alignItems: 'center',
           gap: 0.5,
           textDecoration: 'none',
-          mt: 0.5,
-          padding: '4px 8px',
+          padding: '2px 4px',
           borderRadius: '4px',
           transition: 'background-color 0.2s',
           '&:hover': {
@@ -370,7 +368,7 @@ const AllCards = () => {
           },
         }}
       >
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.primary', fontWeight: 600 }}>
+        <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
           ${card.prices.usd}
         </Typography>
         <Box
@@ -410,8 +408,7 @@ const AllCards = () => {
           alignItems: 'center',
           gap: 0.5,
           textDecoration: 'none',
-          mt: 0.5,
-          padding: '4px 8px',
+          padding: '2px 4px',
           borderRadius: '4px',
           transition: 'background-color 0.2s',
           '&:hover': {
@@ -419,7 +416,7 @@ const AllCards = () => {
           },
         }}
       >
-        <Typography sx={{ fontSize: '0.75rem', color: 'text.primary', fontWeight: 600 }}>
+        <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
           {formatPrice(ckPrice.price)}
         </Typography>
         <Box
