@@ -4,20 +4,17 @@ import {
     Link,
     Paper,
     LinearProgress,
-    Chip,
-    Collapse,
     Button,
     Menu,
     MenuItem,
     ListItemIcon,
     ListItemText,
     IconButton,
-    Snackbar,
   } from "@mui/material";
-  import { GET_ARTISTSBYEVENTID } from "../graphql/queries";
+  import { GET_ARTISTSBYEVENTID, GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
   import { useQuery } from "@apollo/client";
-  import { CalendarToday, LocationOn, PeopleAlt, ExpandMore, Event, GetApp, Share } from '@mui/icons-material';
-  import { useState } from "react";
+  import { CalendarToday, LocationOn, PeopleAlt, Event, GetApp, Share, ExpandMore } from '@mui/icons-material';
+  import { useMemo, useState } from "react";
   import { contentPageStyles } from "../../styles/content-page-styles";
   import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
   
@@ -25,19 +22,49 @@ import {
     props: any;
   }
 
+  const COLLAPSED_EVENTS_KEY = 'mtgac_collapsed_events';
+
+  const getCollapsedEvents = (): string[] => {
+    try {
+      const stored = localStorage.getItem(COLLAPSED_EVENTS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const setCollapsedEvents = (eventIds: string[]) => {
+    try {
+      localStorage.setItem(COLLAPSED_EVENTS_KEY, JSON.stringify(eventIds));
+    } catch {
+      // Silently fail if localStorage is unavailable
+    }
+  };
+
   const SigningEvent = ({ props }: SigningEventComponentProps) => {
-    const [artistsExpanded, setArtistsExpanded] = useState(true);
     const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<null | HTMLElement>(null);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const eventId = props.id;
+    const [isCollapsed, setIsCollapsed] = useState(() => getCollapsedEvents().includes(eventId));
     const startDateFormatted = new Date(props.startDate).toLocaleDateString();
     const endDateFormatted = new Date(props.endDate).toLocaleDateString();
-    const eventId = props.id;
+
+    const toggleCollapsed = () => {
+      setIsCollapsed((prev) => {
+        const collapsed = getCollapsedEvents();
+        if (prev) {
+          // Expanding - remove from collapsed list
+          setCollapsedEvents(collapsed.filter((id) => id !== eventId));
+        } else {
+          // Collapsing - add to collapsed list
+          setCollapsedEvents([...collapsed, eventId]);
+        }
+        return !prev;
+      });
+    };
 
     const handleShareClick = () => {
       const url = `${window.location.origin}/calendar/${eventId}`;
-      navigator.clipboard.writeText(url).then(() => {
-        setSnackbarOpen(true);
-      });
+      window.open(url, '_blank');
     };
 
     const handleCalendarMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -82,12 +109,29 @@ import {
       window.open(outlookUrl, '_blank');
       handleCalendarMenuClose();
     };
-    
+
     const { data: artistData, error, loading } = useQuery(GET_ARTISTSBYEVENTID, {
       variables: {
         eventId
       }
     });
+
+    const { data: allArtistsData } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
+
+    // Map artist names to their full data (including filename for images)
+    const artistsWithImages = useMemo(() => {
+      if (!artistData?.mapArtistToEventByEventId || !allArtistsData?.artists) return [];
+
+      return artistData.mapArtistToEventByEventId.map((eventArtist: any) => {
+        const fullArtist = allArtistsData.artists.find(
+          (a: any) => a.name === eventArtist.artistName
+        );
+        return {
+          name: eventArtist.artistName,
+          filename: fullArtist?.filename || null,
+        };
+      });
+    }, [artistData, allArtistsData]);
 
     if (loading)
       return (
@@ -184,14 +228,6 @@ import {
           </Box>
         </Box>
 
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={2000}
-          onClose={() => setSnackbarOpen(false)}
-          message="Link copied to clipboard"
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        />
-
         <Menu
           anchorEl={calendarMenuAnchor}
           open={Boolean(calendarMenuAnchor)}
@@ -225,8 +261,11 @@ import {
 
         <Box sx={contentPageStyles.artistsContainer}>
           <Box
-            sx={contentPageStyles.artistsHeader}
-            onClick={() => setArtistsExpanded(!artistsExpanded)}
+            sx={{
+              ...contentPageStyles.artistsHeader,
+              cursor: 'pointer',
+            }}
+            onClick={toggleCollapsed}
           >
             <Box sx={contentPageStyles.artistsHeaderLeft}>
               <PeopleAlt fontSize="small" />
@@ -238,35 +277,96 @@ import {
             </Box>
             <ExpandMore
               sx={{
-                ...contentPageStyles.expandIcon,
-                transform: artistsExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                color: '#757575',
+                transition: 'transform 0.2s',
+                transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
               }}
             />
           </Box>
 
-          <Collapse in={artistsExpanded} timeout="auto" unmountOnExit>
-            <Box sx={contentPageStyles.artistsGrid}>
-              {artistData?.mapArtistToEventByEventId && artistData.mapArtistToEventByEventId.length > 0 ? (
-                artistData.mapArtistToEventByEventId.map((artist: any) => {
-                  const artistLink = "/allcards/" + artist.artistName;
-                  return (
-                    <Chip
-                      key={artist.artistName}
-                      label={artist.artistName}
-                      component={Link}
-                      href={artistLink}
-                      clickable
-                      sx={contentPageStyles.artistChip}
-                    />
-                  );
-                })
+          {!isCollapsed && (
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: 'repeat(3, 1fr)',
+                sm: 'repeat(4, 1fr)',
+                md: 'repeat(6, 1fr)',
+              },
+              gap: 1.5,
+              mt: 1,
+            }}>
+              {artistsWithImages.length > 0 ? (
+                artistsWithImages.map((artist: { name: string; filename: string | null }) => (
+                  <Link
+                    key={artist.name}
+                    href={`/allcards/${artist.name}`}
+                    sx={{
+                      textDecoration: 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      transition: 'transform 0.2s',
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        borderRadius: '6px',
+                        overflow: 'hidden',
+                        backgroundColor: '#f5f5f5',
+                        mb: 0.5,
+                      }}
+                    >
+                      {artist.filename ? (
+                        <img
+                          src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${artist.filename}.jpg`}
+                          alt={artist.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#e0e0e0',
+                          }}
+                        >
+                          <PeopleAlt sx={{ fontSize: 24, color: '#9e9e9e' }} />
+                        </Box>
+                      )}
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: '0.7rem',
+                        fontWeight: 500,
+                        color: '#212121',
+                        textAlign: 'center',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {artist.name}
+                    </Typography>
+                  </Link>
+                ))
               ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.85rem", gridColumn: '1 / -1' }}>
                   No artists confirmed yet
                 </Typography>
               )}
             </Box>
-          </Collapse>
+          )}
         </Box>
       </Paper>
     );

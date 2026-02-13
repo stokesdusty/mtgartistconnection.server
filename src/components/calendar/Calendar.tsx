@@ -10,13 +10,15 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
-  Fab
+  Fab,
+  Button
 } from "@mui/material";
 import { KeyboardArrowUp } from "@mui/icons-material";
-import { GET_SIGNINGEVENTS } from "../graphql/queries";
+import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import SigningEvent from "./SigningEvent";
 import { contentPageStyles } from "../../styles/content-page-styles";
+import { useApolloClient } from "@apollo/client";
 
 // Map of state codes to full state names
 const stateCodeToName: { [key: string]: string } = {
@@ -36,9 +38,12 @@ const stateCodeToName: { [key: string]: string } = {
 const Calendar = () => {
   document.title = "MtG Artist Connection - Events Calendar";
 
+  const client = useApolloClient();
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [locationFilter, setLocationFilter] = useState("");
+  const [artistFilter, setArtistFilter] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [eventArtistsMap, setEventArtistsMap] = useState<{ [eventId: string]: string[] }>({});
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,6 +53,43 @@ const Calendar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Fetch artists for all upcoming events
+  useEffect(() => {
+    const fetchArtistsForEvents = async () => {
+      if (!data?.signingEvent) return;
+
+      const today = new Date();
+      const upcomingEvents = data.signingEvent.filter((event: any) => {
+        const endDate = new Date(event.endDate);
+        return endDate >= today;
+      });
+
+      const artistsMap: { [eventId: string]: string[] } = {};
+
+      await Promise.all(
+        upcomingEvents.map(async (event: any) => {
+          try {
+            const result = await client.query({
+              query: GET_ARTISTSBYEVENTID,
+              variables: { eventId: event.id },
+            });
+            if (result.data?.mapArtistToEventByEventId) {
+              artistsMap[event.id] = result.data.mapArtistToEventByEventId.map(
+                (a: any) => a.artistName
+              );
+            }
+          } catch (err) {
+            // Silently handle errors for individual event artist fetches
+          }
+        })
+      );
+
+      setEventArtistsMap(artistsMap);
+    };
+
+    fetchArtistsForEvents();
+  }, [data, client]);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -55,6 +97,24 @@ const Calendar = () => {
   const handleLocationChange = (event: SelectChangeEvent) => {
     setLocationFilter(event.target.value);
   };
+
+  const handleArtistChange = (event: SelectChangeEvent) => {
+    setArtistFilter(event.target.value);
+  };
+
+  const handleClearFilters = () => {
+    setLocationFilter("");
+    setArtistFilter("");
+  };
+
+  // Get unique artists from all upcoming events
+  const uniqueArtists = useMemo(() => {
+    const allArtists = new Set<string>();
+    Object.values(eventArtistsMap).forEach((artists) => {
+      artists.forEach((artist) => allArtists.add(artist));
+    });
+    return Array.from(allArtists).sort();
+  }, [eventArtistsMap]);
 
   const locations = useMemo(() => {
     if (!data?.signingEvent) return { US: [], Other: [] };
@@ -126,11 +186,19 @@ const Calendar = () => {
       });
     }
 
+    // Apply artist filter
+    if (artistFilter) {
+      filtered = filtered.filter((eventData: any) => {
+        const eventArtists = eventArtistsMap[eventData.id] || [];
+        return eventArtists.includes(artistFilter);
+      });
+    }
+
     return filtered.sort(
       (a: any, b: any) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     );
-  }, [data, locationFilter]);
+  }, [data, locationFilter, artistFilter, eventArtistsMap]);
 
   if (loading)
     return (
@@ -166,7 +234,7 @@ const Calendar = () => {
             Events Calendar
           </Typography>
 
-          <Box sx={{ marginBottom: 3 }}>
+          <Box sx={{ marginBottom: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <FormControl sx={{ minWidth: 250 }}>
               <InputLabel id="location-select-label">Filter by Location</InputLabel>
               <Select
@@ -213,6 +281,57 @@ const Calendar = () => {
                 ))}
               </Select>
             </FormControl>
+
+            <FormControl sx={{ minWidth: 250 }}>
+              <InputLabel id="artist-select-label">Filter by Artist</InputLabel>
+              <Select
+                labelId="artist-select-label"
+                id="artist-select"
+                value={artistFilter}
+                label="Filter by Artist"
+                onChange={handleArtistChange}
+                sx={{
+                  borderRadius: '8px',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#eeeeee',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#2d4a36',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#2d4a36',
+                  },
+                }}
+              >
+                <MenuItem value="">
+                  <em>All Artists</em>
+                </MenuItem>
+                {uniqueArtists.map((artist) => (
+                  <MenuItem key={artist} value={artist}>
+                    {artist}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {(locationFilter || artistFilter) && (
+              <Button
+                onClick={handleClearFilters}
+                variant="outlined"
+                sx={{
+                  borderColor: '#2d4a36',
+                  color: '#2d4a36',
+                  textTransform: 'none',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    borderColor: '#1e3425',
+                    backgroundColor: 'rgba(45, 74, 54, 0.04)',
+                  },
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
           </Box>
 
           <Box sx={contentPageStyles.eventsContainer}>
@@ -222,8 +341,8 @@ const Calendar = () => {
               ))
             ) : (
               <Typography sx={contentPageStyles.noEventsMessage}>
-                {locationFilter
-                  ? `No upcoming events in ${locationFilter}. Try a different location or clear the filter.`
+                {locationFilter || artistFilter
+                  ? `No upcoming events${artistFilter ? ` with ${artistFilter}` : ''}${locationFilter ? ` in ${locationFilter}` : ''}. Try different filters or clear them.`
                   : 'No upcoming events scheduled at this time. Check back soon!'}
               </Typography>
             )}
