@@ -4,6 +4,7 @@ export const GET_ARTISTS_FOR_HOMEPAGE = gql`
     {
         artists{
             name
+            alternate_names
             filename
             location
             signing
@@ -19,6 +20,7 @@ export const GET_ARTIST_BY_NAME = gql`
         artistByName(name:$name){
             id
             name
+            alternate_names
             email
             artistProofs
             facebook

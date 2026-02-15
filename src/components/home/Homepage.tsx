@@ -28,6 +28,7 @@ import Fade from "@mui/material/Fade";
 
 interface Artist {
   name: string;
+  alternate_names?: string;
   filename: string;
   location?: string;
   doesSigning?: boolean;
@@ -271,7 +272,7 @@ const Homepage = () => {
     if (userSearch.length >= 2) {
       const searchTerm = userSearch.toLowerCase().replace(/\s/g, "");
       filteredArtists = filteredArtists.filter((artist: Artist) => {
-        const artistInfo = `${artist.name}${artist.filename}${
+        const artistInfo = `${artist.name}${artist.alternate_names || ""}${artist.filename}${
           artist.location || ""
         }`
           .toLowerCase()

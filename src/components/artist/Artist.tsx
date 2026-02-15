@@ -353,6 +353,19 @@ const Artist = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
             <Typography variant="h2" sx={artistStyles.artistName}>
               {artistByName.name}
+              {artistByName.alternate_names && (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: '0.5em',
+                    fontWeight: 400,
+                    color: '#757575',
+                    ml: 1,
+                  }}
+                >
+                  ({artistByName.alternate_names})
+                </Typography>
+              )}
             </Typography>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

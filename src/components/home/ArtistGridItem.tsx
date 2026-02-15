@@ -16,6 +16,19 @@ const ArtistGridItem = (ArtistGridProps: any) => {
           </Box>
           <Typography sx={artistGridStyles.text} className="artist-name">
             {ArtistGridProps.artistData.name}
+            {ArtistGridProps.artistData.alternate_names && (
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: '0.75em',
+                  fontWeight: 400,
+                  color: '#757575',
+                  ml: 0.5,
+                }}
+              >
+                ({ArtistGridProps.artistData.alternate_names})
+              </Typography>
+            )}
           </Typography>
         </Link>
       </Box>
