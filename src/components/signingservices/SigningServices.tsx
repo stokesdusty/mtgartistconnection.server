@@ -18,6 +18,7 @@ interface Service {
   description: string;
   website?: string;
   facebookGroup: string;
+  upcomingSignings?: string;
 }
 
 const services: Service[] = [
@@ -30,6 +31,8 @@ const services: Service[] = [
       "Probably the most well known of the signing services, Mark's Artist Signature Signing Service operates out of a Facebook group. With 6.4k members, and plenty of happy customers posting in the group daily, he is a trusted resource. Often seen with artists at MtG related events, Mark offers signing for a big list of artists, as well as artist proofs, prints, playmats, and even original artwork.",
     facebookGroup:
       "https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share",
+    upcomingSignings:
+      "https://docs.google.com/spreadsheets/d/10_KH9fDQjElcnk4AmYnkY3siuKBLz4jbhb_wtvKiHAc/edit?gid=1645026839#gid=1645026839",
   },
   {
     name: "MountainMage MTG Signature Service",
@@ -41,6 +44,8 @@ const services: Service[] = [
     website: "https://mountainmagesigs.com/",
     facebookGroup:
       "https://www.facebook.com/groups/313741109039074",
+    upcomingSignings:
+      "https://docs.google.com/document/d/1Z695_k0Cvc458BsM540keBfV2B0Han-JKQIZC6DaCfY/edit?tab=t.0#heading=h.y24dm6r3wrdr",
   },
 ];
 
@@ -114,6 +119,19 @@ const SigningServices = () => {
                     rel="noopener noreferrer"
                   >
                     website
+                  </Link>
+                </>
+              )}
+              {service.upcomingSignings && (
+                <>
+                  . View their{" "}
+                  <Link
+                    sx={contentPageStyles.link}
+                    href={service.upcomingSignings}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    upcoming signings
                   </Link>
                 </>
               )}.
