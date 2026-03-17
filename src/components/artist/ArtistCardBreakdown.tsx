@@ -88,7 +88,8 @@ const ArtistCardAnalysis = () => {
     const scryfallQuery = useMemo(() => {
         if (!formattedArtistName) return { withPaper: "", withoutPaper: "" };
         const baseQuery = "artist%3A";
-        const formattedQuery = `${baseQuery}"${formattedArtistName}"`;
+        const encodedArtistName = encodeURIComponent(formattedArtistName);
+        const formattedQuery = `${baseQuery}"${encodedArtistName}"`;
         return {
             withPaper: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28${formattedQuery}%29`,
             withoutPaper: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28${formattedQuery}%29`

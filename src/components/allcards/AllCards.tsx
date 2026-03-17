@@ -165,7 +165,8 @@ const AllCards = () => {
   const scryfallQuery = useMemo(() => {
     if (!artist) return null;
     const baseQuery = "artist%3A";
-    const formattedQuery = `${baseQuery}"${formattedArtistName}"`;
+    const encodedArtistName = encodeURIComponent(formattedArtistName);
+    const formattedQuery = `${baseQuery}"${encodedArtistName}"`;
     const gameFilter = includeDigital ? "" : "%28game%3Apaper%29+";
     return {
       withDuplicates: `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=${gameFilter}%28${formattedQuery}%29`,
