@@ -33,6 +33,7 @@ const Settings = () => {
     siteUpdates: false,
     artistUpdates: false,
     localSigningEvents: false,
+    newArtistNotifications: false,
   });
   const [preferencesSuccess, setPreferencesSuccess] = useState("");
 
@@ -50,6 +51,7 @@ const Settings = () => {
         siteUpdates: userData.me.emailPreferences.siteUpdates || false,
         artistUpdates: userData.me.emailPreferences.artistUpdates || false,
         localSigningEvents: userData.me.emailPreferences.localSigningEvents || false,
+        newArtistNotifications: userData.me.emailPreferences.newArtistNotifications || false,
       });
     }
   }, [userData]);
@@ -191,6 +193,7 @@ const Settings = () => {
           siteUpdates: emailPreferences.siteUpdates,
           artistUpdates: emailPreferences.artistUpdates,
           localSigningEvents: emailPreferences.localSigningEvents,
+          newArtistNotifications: emailPreferences.newArtistNotifications,
         },
       });
 
@@ -390,6 +393,30 @@ const Settings = () => {
                   />
                 }
                 label="Receive local signing event notifications"
+                sx={{
+                  mb: 1,
+                  "& .MuiFormControlLabel-label": {
+                    fontSize: "0.875rem",
+                    color: "#212121",
+                  },
+                }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={emailPreferences.newArtistNotifications}
+                    onChange={() => handlePreferenceChange("newArtistNotifications")}
+                    sx={{
+                      "& .MuiSwitch-switchBase.Mui-checked": {
+                        color: "#2d4a36",
+                      },
+                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                        backgroundColor: "#2d4a36",
+                      },
+                    }}
+                  />
+                }
+                label="Receive new artist notifications"
                 sx={{
                   "& .MuiFormControlLabel-label": {
                     fontSize: "0.875rem",

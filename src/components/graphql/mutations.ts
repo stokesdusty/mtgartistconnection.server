@@ -125,12 +125,14 @@ export const UPDATE_EMAIL_PREFERENCES = gql`
     mutation updateEmailPreferences(
         $siteUpdates:Boolean!,
         $artistUpdates:Boolean!,
-        $localSigningEvents:Boolean!
+        $localSigningEvents:Boolean!,
+        $newArtistNotifications:Boolean!
     ){
         updateEmailPreferences(
             siteUpdates: $siteUpdates,
             artistUpdates: $artistUpdates,
-            localSigningEvents: $localSigningEvents
+            localSigningEvents: $localSigningEvents,
+            newArtistNotifications: $newArtistNotifications
         ){
             success
             message

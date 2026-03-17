@@ -135,6 +135,7 @@ export const GET_CURRENT_USER = gql`
                 siteUpdates
                 artistUpdates
                 localSigningEvents
+                newArtistNotifications
             }
             followedArtists
             monitoredStates

@@ -325,6 +325,7 @@ const Artist = () => {
                   siteUpdates: userData.me.emailPreferences.siteUpdates || false,
                   artistUpdates: true, // Enable artist updates
                   localSigningEvents: userData.me.emailPreferences.localSigningEvents || false,
+                  newArtistNotifications: userData.me.emailPreferences.newArtistNotifications || false,
                 },
               });
             } catch (prefError) {
