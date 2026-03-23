@@ -45,7 +45,29 @@ import {
           register,
           handleSubmit,
           reset,
-      } = useForm<Inputs>();
+      } = useForm<Inputs>({
+          defaultValues: {
+              name: "",
+              email: "",
+              filename: "",
+              facebook: "",
+              instagram: "",
+              patreon: "",
+              twitter: "",
+              youtube: "",
+              artstation: "",
+              mountainmage: "",
+              url: "",
+              location: "",
+              signingComment: "",
+              artistProofs: "",
+              haveSignature: "",
+              signing: "",
+              markssignatureservice: "",
+              bluesky: "",
+              inprnt: "",
+          },
+      });
       const [ addArtist ] = useMutation(ADD_ARTIST);
       const [signature, setSignature] = useState("false");
       const [artistProof, setArtistProof] = useState("false");
