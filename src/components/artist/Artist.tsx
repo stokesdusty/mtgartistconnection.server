@@ -569,6 +569,11 @@ const Artist = () => {
                     {capitalizeFirstLetter(artistByName.signing) ||
                       "Unknown"}
                   </Typography>
+                  {(!artistByName.signing || artistByName.signing === "false" || artistByName.signing === "unknown" || artistByName.signing === "no") && (
+                    <Typography sx={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#757575', mt: 0.5 }}>
+                      * Note: we are in the process of updating current signing data for all artists. For now, until we confirm that they will accept signing and how, they will be marked as false.
+                    </Typography>
+                  )}
                 </Box>
 
                 <Box sx={artistStyles.infoRow}>
