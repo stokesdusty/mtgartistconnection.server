@@ -336,10 +336,6 @@ const Homepage = () => {
 
       <Box sx={homepageStyles.wrapper}>
         <Box sx={homepageStyles.headerSection}>
-          <Typography variant="h1" sx={homepageStyles.headerText}>
-            MTG Artist Connection
-          </Typography>
-
           <Typography variant="h6" sx={homepageStyles.description}>
             Your go-to hub for discovering Magic: The Gathering artists
           </Typography>
@@ -359,11 +355,12 @@ const Homepage = () => {
           </Box>
         </Box>
 
-        <Box sx={homepageStyles.filtersSection}>
-          <Box sx={homepageStyles.filtersGrid}>
+        <Box sx={{ ...homepageStyles.filtersSection, py: 1.5 }}>
+          <Box sx={{ ...homepageStyles.filtersGrid, gap: 2 }}>
             <Box sx={homepageStyles.searchContainer}>
               <TextField
-                sx={homepageStyles.textField}
+                size="small"
+                sx={{ ...homepageStyles.textField, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
                 value={userSearch}
                 placeholder="Search for an artist"
                 onChange={handleSearchChange}
@@ -376,16 +373,17 @@ const Homepage = () => {
                 }}
               />
               <Button
+                size="small"
                 variant="contained"
                 onClick={handleRandomArtist}
                 startIcon={<ShuffleIcon />}
-                sx={homepageStyles.randomButton}
+                sx={{ ...homepageStyles.randomButton, fontSize: '0.8125rem' }}
               >
                 Random Artist
               </Button>
             </Box>
 
-            <FormControl sx={homepageStyles.locationSelect}>
+            <FormControl size="small" sx={{ ...homepageStyles.locationSelect, '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
               <InputLabel id="location-select-label">Filter by Location</InputLabel>
               <Select
                 labelId="location-select-label"
@@ -393,6 +391,7 @@ const Homepage = () => {
                 value={locationFilter}
                 label="Filter by Location"
                 onChange={handleLocationChange}
+                sx={{ fontSize: '0.875rem' }}
               >
                 <MenuItem value="">All Locations</MenuItem>
                 <MenuItem value="US">
@@ -415,48 +414,56 @@ const Homepage = () => {
             </FormControl>
 
             <Box sx={homepageStyles.checkboxContainer}>
-              <Typography sx={homepageStyles.signingAgentLabel}>Filters</Typography>
-              <FormGroup sx={homepageStyles.checkboxesContainer}>
+              <Typography sx={{ ...homepageStyles.signingAgentLabel, fontSize: '0.875rem', mb: 0.5 }}>Filters</Typography>
+              <FormGroup sx={{ ...homepageStyles.checkboxesContainer, gap: 0 }}>
                 <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
                   control={
                     <Checkbox
+                      size="small"
                       checked={marksSigServiceFilter}
                       onChange={handleMarksSigServiceChange}
                       name="marksSigService"
-                      sx={homepageStyles.checkbox}
+                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
                     />
                   }
                   label="Marks Signature Service"
                 />
                 <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
                   control={
                     <Checkbox
+                      size="small"
                       checked={mountainMageFilter}
                       onChange={handleMountainMageChange}
                       name="mountainMage"
-                      sx={homepageStyles.checkbox}
+                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
                     />
                   }
                   label="Mountain Mage Signing Service"
                 />
                 <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
                   control={
                     <Checkbox
+                      size="small"
                       checked={hasUpcomingEventFilter}
                       onChange={handleHasUpcomingEventChange}
                       name="hasUpcomingEvent"
-                      sx={homepageStyles.checkbox}
+                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
                     />
                   }
                   label="Has Upcoming Event"
                 />
                 <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
                   control={
                     <Checkbox
+                      size="small"
                       checked={sellsApsFilter}
                       onChange={handleSellsApsChange}
                       name="sellsAps"
-                      sx={homepageStyles.checkbox}
+                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
                     />
                   }
                   label="Sells APs on Website"

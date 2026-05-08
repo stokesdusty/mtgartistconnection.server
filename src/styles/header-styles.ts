@@ -8,6 +8,7 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
     boxShadow: shadows.sm,
     borderRadius: 0,
     position: 'sticky',
+    height: '59px',
   },
   toolbar: {
     display: 'flex',
