@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@apollo/client";
 import { useParams, useNavigate } from "react-router-dom";
-import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_CURRENT_USER } from "../graphql/queries";
+import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CURRENT_USER } from "../graphql/queries";
 import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
 import {
   Box,
@@ -77,85 +77,42 @@ const ArtistEventCard = ({ event }: { event: any }) => {
   );
 };
 
-// Individual event checker component
-const EventAttendanceChecker = ({ event, artistName, onAttendanceChecked }: { event: any; artistName: string; onAttendanceChecked: (isAttending: boolean) => void }) => {
-  const { data, loading } = useQuery(GET_ARTISTSBYEVENTID, {
-    variables: { eventId: event.id }
+// Helper component to check and display events for an artist using batched query
+const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: string; upcomingEvents: any[] }) => {
+  const eventIds = useMemo(() => upcomingEvents.map(e => e.id), [upcomingEvents]);
+
+  const { data, loading } = useQuery(GET_ARTISTS_BY_EVENT_IDS, {
+    variables: { eventIds },
+    skip: eventIds.length === 0,
   });
 
-  React.useEffect(() => {
-    if (!loading && data) {
-      const isAttending = data?.mapArtistToEventByEventId?.some(
-        (artist: any) => artist.artistName === artistName
-      );
-      onAttendanceChecked(isAttending);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, data, artistName]);
-
-  return null;
-};
-
-// Helper component to check and display events for an artist
-const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: string; upcomingEvents: any[] }) => {
-  const [attendanceMap, setAttendanceMap] = React.useState<{ [key: string]: boolean }>({});
-  const [checkedCount, setCheckedCount] = React.useState(0);
-
-  const handleAttendanceChecked = React.useCallback((eventId: string, isAttending: boolean) => {
-    setAttendanceMap(prev => {
-      if (prev[eventId] === undefined) {
-        setCheckedCount(c => c + 1);
-      }
-      return { ...prev, [eventId]: isAttending };
-    });
-  }, []);
+  // Build a set of event IDs this artist is attending
+  const artistEventIds = useMemo(() => {
+    if (!data?.artistsByEventIds) return new Set<string>();
+    return new Set(
+      data.artistsByEventIds
+        .filter((a: any) => a.artistName === artistName)
+        .map((a: any) => a.eventId)
+    );
+  }, [data, artistName]);
 
   // Filter events where artist is attending
-  const artistEvents = upcomingEvents.filter(event => attendanceMap[event.id] === true);
+  const artistEvents = upcomingEvents.filter(event => artistEventIds.has(event.id));
 
-  // Create stable callbacks for each event
-  const eventCallbacks = React.useMemo(() => {
-    return upcomingEvents.reduce((acc, event) => {
-      acc[event.id] = (isAttending: boolean) => handleAttendanceChecked(event.id, isAttending);
-      return acc;
-    }, {} as { [key: string]: (isAttending: boolean) => void });
-  }, [upcomingEvents, handleAttendanceChecked]);
-
-  // Don't show section if still checking or no events
-  if (checkedCount < upcomingEvents.length || artistEvents.length === 0) {
-    return (
-      <>
-        {upcomingEvents.map(event => (
-          <EventAttendanceChecker
-            key={event.id}
-            event={event}
-            artistName={artistName}
-            onAttendanceChecked={eventCallbacks[event.id]}
-          />
-        ))}
-      </>
-    );
+  // Don't show section if still loading or no events
+  if (loading || artistEvents.length === 0) {
+    return null;
   }
 
   return (
-    <>
-      {upcomingEvents.map(event => (
-        <EventAttendanceChecker
-          key={event.id}
-          event={event}
-          artistName={artistName}
-          onAttendanceChecked={eventCallbacks[event.id]}
-        />
-      ))}
-      <Box sx={artistStyles.infoRow}>
-        <Typography variant="h5">Upcoming Events</Typography>
-        <Box sx={artistStyles.eventsListContainer}>
-          {artistEvents.map((event: any) => (
-            <ArtistEventCard key={event.id} event={event} />
-          ))}
-        </Box>
+    <Box sx={artistStyles.infoRow}>
+      <Typography variant="h5">Upcoming Events</Typography>
+      <Box sx={artistStyles.eventsListContainer}>
+        {artistEvents.map((event: any) => (
+          <ArtistEventCard key={event.id} event={event} />
+        ))}
       </Box>
-    </>
+    </Box>
   );
 };
 

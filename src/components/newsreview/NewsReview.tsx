@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -23,6 +24,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import PublishIcon from '@mui/icons-material/Publish';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import AddIcon from '@mui/icons-material/Add';
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { UPDATE_NEWS_REVIEW, DELETE_NEWS_REVIEW } from '../graphql/mutations';
 
@@ -42,6 +44,7 @@ interface NewsReview {
 }
 
 const NewsReview: React.FC = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<'unreviewed' | 'reviewed' | 'published'>('unreviewed');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<NewsReview | null>(null);
@@ -270,7 +273,16 @@ const NewsReview: React.FC = () => {
                   Review and publish AI-generated news articles
                 </Typography>
               </Box>
-              <ButtonGroup variant="outlined" size="small">
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/submitarticle')}
+                  sx={styles.button}
+                >
+                  Submit Article
+                </Button>
+                <ButtonGroup variant="outlined" size="small">
                 <Button
                   variant={filter === 'unreviewed' ? 'contained' : 'outlined'}
                   onClick={() => setFilter('unreviewed')}
@@ -296,6 +308,7 @@ const NewsReview: React.FC = () => {
                   <Chip label={filter === 'published' ? articles.length : '...'} size="small" sx={{ ml: 1, height: 20, fontSize: '0.75rem' }} />
                 </Button>
               </ButtonGroup>
+              </Box>
             </Box>
           </Box>
 

@@ -9,6 +9,7 @@ import AddArtist from "./components/blogs/AddArtist";
 import EditArtist from "./components/blogs/EditArtist";
 import AdminPostReview from "./components/socialpostreview/AdminPostReview";
 import NewsReview from "./components/newsreview/NewsReview";
+import ManualArticleSubmit from "./components/newsreview/ManualArticleSubmit";
 import News from "./components/news/News";
 import NewsArticle from "./components/news/NewsArticle";
 import ArtistNews from "./components/news/ArtistNews";
@@ -62,6 +63,7 @@ function App() {
               <Route path="/add" element={<AddArtist />} />
               <Route path="/reviewsocial" element={<AdminPostReview />} />
               <Route path="/reviewnews" element={<NewsReview />} />
+              <Route path="/submitarticle" element={<ManualArticleSubmit />} />
               <Route path="/news" element={<News />} />
               <Route path="/news/artist/:artistName" element={<ArtistNews />} />
               <Route path="/news/:articleId" element={<NewsArticle />} />

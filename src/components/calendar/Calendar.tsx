@@ -14,11 +14,10 @@ import {
   Button
 } from "@mui/material";
 import { KeyboardArrowUp } from "@mui/icons-material";
-import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID } from "../graphql/queries";
+import { GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import SigningEvent from "./SigningEvent";
 import { contentPageStyles } from "../../styles/content-page-styles";
-import { useApolloClient } from "@apollo/client";
 
 // Map of state codes to full state names
 const stateCodeToName: { [key: string]: string } = {
@@ -38,12 +37,10 @@ const stateCodeToName: { [key: string]: string } = {
 const Calendar = () => {
   document.title = "MtG Artist Connection - Events Calendar";
 
-  const client = useApolloClient();
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [locationFilter, setLocationFilter] = useState("");
   const [artistFilter, setArtistFilter] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [eventArtistsMap, setEventArtistsMap] = useState<{ [eventId: string]: string[] }>({});
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,42 +50,33 @@ const Calendar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch artists for all upcoming events
-  useEffect(() => {
-    const fetchArtistsForEvents = async () => {
-      if (!data?.signingEvent) return;
+  // Get upcoming event IDs for batched query
+  const upcomingEventIds = useMemo(() => {
+    if (!data?.signingEvent) return [];
+    const today = new Date();
+    return data.signingEvent
+      .filter((event: any) => new Date(event.endDate) >= today)
+      .map((event: any) => event.id);
+  }, [data]);
 
-      const today = new Date();
-      const upcomingEvents = data.signingEvent.filter((event: any) => {
-        const endDate = new Date(event.endDate);
-        return endDate >= today;
-      });
+  // Single batched query to fetch all artists for upcoming events
+  const { data: eventArtistsData } = useQuery(GET_ARTISTS_BY_EVENT_IDS, {
+    variables: { eventIds: upcomingEventIds },
+    skip: upcomingEventIds.length === 0,
+  });
 
-      const artistsMap: { [eventId: string]: string[] } = {};
-
-      await Promise.all(
-        upcomingEvents.map(async (event: any) => {
-          try {
-            const result = await client.query({
-              query: GET_ARTISTSBYEVENTID,
-              variables: { eventId: event.id },
-            });
-            if (result.data?.mapArtistToEventByEventId) {
-              artistsMap[event.id] = result.data.mapArtistToEventByEventId.map(
-                (a: any) => a.artistName
-              );
-            }
-          } catch (err) {
-            // Silently handle errors for individual event artist fetches
-          }
-        })
-      );
-
-      setEventArtistsMap(artistsMap);
-    };
-
-    fetchArtistsForEvents();
-  }, [data, client]);
+  // Build map of eventId -> artist names from batched query result
+  const eventArtistsMap = useMemo(() => {
+    if (!eventArtistsData?.artistsByEventIds) return {};
+    const map: { [eventId: string]: string[] } = {};
+    eventArtistsData.artistsByEventIds.forEach((a: any) => {
+      if (!map[a.eventId]) {
+        map[a.eventId] = [];
+      }
+      map[a.eventId].push(a.artistName);
+    });
+    return map;
+  }, [eventArtistsData]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

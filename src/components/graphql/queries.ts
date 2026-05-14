@@ -65,6 +65,15 @@ export const GET_ARTISTSBYEVENTID = gql`
     }
 `;
 
+export const GET_ARTISTS_BY_EVENT_IDS = gql`
+    query artistsByEventIds($eventIds: [String!]!) {
+        artistsByEventIds(eventIds: $eventIds) {
+            eventId
+            artistName
+        }
+    }
+`;
+
 export const GET_EVENTS_BY_ARTIST = gql`
     query getEventsByArtist($artistName: String!) {
         signingEvent {
