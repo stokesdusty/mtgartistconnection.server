@@ -170,3 +170,77 @@ export const GET_ARTIST_BY_ID = gql`
         }
     }
 `;
+
+export const GET_ARTIST_POSTS = gql`
+    query artistPosts($isReviewed: Boolean, $limit: Int) {
+        artistPosts(isReviewed: $isReviewed, limit: $limit) {
+            id
+            artistId
+            artistName
+            platform
+            externalPostId
+            content
+            postUrl
+            postDate
+            fetchedAt
+            isReviewed
+        }
+    }
+`;
+
+export const GET_NEWS_REVIEWS = gql`
+    query newsReviews($isReviewed: Boolean, $isPublished: Boolean, $limit: Int) {
+        newsReviews(isReviewed: $isReviewed, isPublished: $isPublished, limit: $limit) {
+            id
+            artistPostId
+            artistId
+            artistName
+            title
+            content
+            summary
+            sourcePostUrl
+            generatedAt
+            isReviewed
+            isPublished
+            publishedAt
+        }
+    }
+`;
+
+export const GET_NEWS_REVIEW = gql`
+    query newsReview($id: ID!) {
+        newsReview(id: $id) {
+            id
+            artistPostId
+            artistId
+            artistName
+            title
+            content
+            summary
+            sourcePostUrl
+            generatedAt
+            isReviewed
+            isPublished
+            publishedAt
+        }
+    }
+`;
+
+export const GET_NEWS_REVIEWS_BY_ARTIST = gql`
+    query newsReviewsByArtist($artistName: String!, $limit: Int) {
+        newsReviewsByArtist(artistName: $artistName, limit: $limit) {
+            id
+            artistPostId
+            artistId
+            artistName
+            title
+            content
+            summary
+            sourcePostUrl
+            generatedAt
+            isReviewed
+            isPublished
+            publishedAt
+        }
+    }
+`;

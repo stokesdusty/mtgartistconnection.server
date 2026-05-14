@@ -36,6 +36,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Home", to: "/" },
+  { label: "News", to: "/news" },
   { label: "Card Signing Services", to: "/signingservices" },
   { label: "Signing Events Calendar", to: "/calendar" },
   { label: "Random Flavor Text", to: "/randomflavortext" },

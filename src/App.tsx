@@ -7,6 +7,11 @@ import { useEffect } from "react";
 import { login } from "./store/auth-slice";
 import AddArtist from "./components/blogs/AddArtist";
 import EditArtist from "./components/blogs/EditArtist";
+import AdminPostReview from "./components/socialpostreview/AdminPostReview";
+import NewsReview from "./components/newsreview/NewsReview";
+import News from "./components/news/News";
+import NewsArticle from "./components/news/NewsArticle";
+import ArtistNews from "./components/news/ArtistNews";
 import Calendar from "./components/calendar/Calendar";
 import EventDetail from "./components/calendar/EventDetail";
 import SigningServices from "./components/signingservices/SigningServices";
@@ -55,6 +60,11 @@ function App() {
               <Route path="/calendar/:eventId" element={<EventDetail />} />
               <Route path="/signingservices" element={<SigningServices />} />
               <Route path="/add" element={<AddArtist />} />
+              <Route path="/reviewsocial" element={<AdminPostReview />} />
+              <Route path="/reviewnews" element={<NewsReview />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/news/artist/:artistName" element={<ArtistNews />} />
+              <Route path="/news/:articleId" element={<NewsArticle />} />
               <Route path="/editartist/:artistId" element={<EditArtist />} />
               <Route path="/addevent" element={<AddEvent />} />
               <Route path="/addartisttoevent" element={<AddArtistToEvent />} />

@@ -228,3 +228,81 @@ export const UPDATE_ARTIST_BULK = gql`
         }
     }
 `;
+
+export const UPDATE_ARTIST_POST = gql`
+    mutation updateArtistPost($id: ID!, $isReviewed: Boolean!) {
+        updateArtistPost(id: $id, isReviewed: $isReviewed) {
+            success
+            message
+        }
+    }
+`;
+
+export const DELETE_ARTIST_POST = gql`
+    mutation deleteArtistPost($id: ID!) {
+        deleteArtistPost(id: $id) {
+            success
+            message
+        }
+    }
+`;
+
+export const DELETE_REVIEWED_ARTIST_POSTS = gql`
+    mutation deleteReviewedArtistPosts {
+        deleteReviewedArtistPosts {
+            success
+            message
+        }
+    }
+`;
+
+export const GENERATE_NEWS_ARTICLE = gql`
+    mutation generateNewsArticle($artistPostId: ID!) {
+        generateNewsArticle(artistPostId: $artistPostId) {
+            id
+            artistPostId
+            artistId
+            artistName
+            title
+            content
+            summary
+            sourcePostUrl
+            generatedAt
+            isReviewed
+            isPublished
+            publishedAt
+        }
+    }
+`;
+
+export const UPDATE_NEWS_REVIEW = gql`
+    mutation updateNewsReview(
+        $id: ID!,
+        $title: String,
+        $content: String,
+        $summary: String,
+        $isReviewed: Boolean,
+        $isPublished: Boolean
+    ) {
+        updateNewsReview(
+            id: $id,
+            title: $title,
+            content: $content,
+            summary: $summary,
+            isReviewed: $isReviewed,
+            isPublished: $isPublished
+        ) {
+            success
+            message
+        }
+    }
+`;
+
+export const DELETE_NEWS_REVIEW = gql`
+    mutation deleteNewsReview($id: ID!) {
+        deleteNewsReview(id: $id) {
+            success
+            message
+        }
+    }
+`;

@@ -29,6 +29,7 @@ import { artistStyles } from "../../styles/artist-styles";
 import { CalendarToday, LocationOn, Notifications, NotificationsNone, Edit } from '@mui/icons-material';
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import ArtistNewsSection from './ArtistNewsSection';
 
 interface ArtistSocialLink {
   label: string;
@@ -628,8 +629,8 @@ const Artist = () => {
                   />
                 )}
               </Box>
-
               <Box sx={artistStyles.signatureSection}>
+                <ArtistNewsSection artistName={artistByName.name} />
                 <Typography sx={artistStyles.sectionHeader} variant="h4">
                   Example Signature
                 </Typography>

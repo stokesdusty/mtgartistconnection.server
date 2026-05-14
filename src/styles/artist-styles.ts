@@ -116,6 +116,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     },
   },
   artistPage: {
+    backgroundColor: '#fff',
     width: '100%',
   },
   infoSection: {
@@ -189,7 +190,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     },
   },
   signatureSection: {
-    backgroundColor: colors.neutral[50],
+    backgroundColor: colors.neutral.white,
     borderRadius: borderRadius.lg,
     padding: spacing.xl,
     border: `1px solid ${colors.neutral[200]}`,
