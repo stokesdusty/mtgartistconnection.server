@@ -10,7 +10,10 @@ import {
   Container,
   Paper,
   Button,
+  Chip,
+  Tooltip,
 } from "@mui/material";
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { TbWorldWww } from "react-icons/tb";
 import {
   FaArtstation,
@@ -501,16 +504,42 @@ const Artist = () => {
                 </Box>
 
                 <Box sx={artistStyles.infoRow}>
-                  <Typography variant="h5">Currently Signing?</Typography>
-                  <Typography>
-                    {capitalizeFirstLetter(artistByName.signing) ||
-                      "Unknown"}
-                  </Typography>
-                  {(!artistByName.signing || artistByName.signing === "false" || artistByName.signing === "unknown" || artistByName.signing === "no") && (
-                    <Typography sx={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#757575', mt: 0.5 }}>
-                      * Note: we are in the process of updating current signing data for all artists. For now, until we confirm that they will accept signing and how, they will be marked as false.
-                    </Typography>
-                  )}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="h5" sx={{ lineHeight: 1 }}>Currently Signing?</Typography>
+                    <Tooltip
+                      title="Signing status is being verified for all artists. Unconfirmed statuses may change as we gather more information."
+                      arrow
+                      placement="top"
+                    >
+                      <HelpOutlineIcon
+                        sx={{
+                          fontSize: '0.9rem',
+                          color: '#757575',
+                          cursor: 'help',
+                          verticalAlign: 'middle',
+                          marginBottom: '5px',
+                        }}
+                      />
+                    </Tooltip>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {(!artistByName.signing || artistByName.signing === "false" || artistByName.signing === "unknown" || artistByName.signing === "no") ? (
+                      <Chip
+                        label="Not confirmed"
+                        size="small"
+                        sx={{
+                          backgroundColor: 'rgba(117, 117, 117, 0.12)',
+                          color: '#757575',
+                          fontSize: '0.8rem',
+                          fontWeight: 500,
+                        }}
+                      />
+                    ) : (
+                      <Typography>
+                        {capitalizeFirstLetter(artistByName.signing)}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
 
                 <Box sx={artistStyles.infoRow}>

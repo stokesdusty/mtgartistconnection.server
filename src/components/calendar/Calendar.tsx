@@ -12,7 +12,8 @@ import {
   SelectChangeEvent,
   Fab,
   Button,
-  ListSubheader
+  ListSubheader,
+  Chip
 } from "@mui/material";
 import { KeyboardArrowUp } from "@mui/icons-material";
 import { GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
@@ -35,12 +36,15 @@ const stateCodeToName: { [key: string]: string } = {
   'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
 };
 
+type DateRangeFilter = 'all' | 'this-week' | 'this-month' | 'next-3-months';
+
 const Calendar = () => {
   document.title = "MtG Artist Connection - Events Calendar";
 
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [locationFilter, setLocationFilter] = useState("");
   const [artistFilter, setArtistFilter] = useState("");
+  const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>('all');
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
@@ -94,6 +98,41 @@ const Calendar = () => {
   const handleClearFilters = () => {
     setLocationFilter("");
     setArtistFilter("");
+    setDateRangeFilter('all');
+  };
+
+  const handleDateRangeChange = (range: DateRangeFilter) => {
+    setDateRangeFilter(range);
+  };
+
+  // Calculate date range boundaries
+  const getDateRangeBounds = (range: DateRangeFilter): { start: Date; end: Date | null } => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    switch (range) {
+      case 'this-week': {
+        const endOfWeek = new Date(today);
+        const daysUntilSunday = 7 - today.getDay();
+        endOfWeek.setDate(today.getDate() + daysUntilSunday);
+        endOfWeek.setHours(23, 59, 59, 999);
+        return { start: today, end: endOfWeek };
+      }
+      case 'this-month': {
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
+        return { start: today, end: endOfMonth };
+      }
+      case 'next-3-months': {
+        const threeMonthsOut = new Date(today);
+        threeMonthsOut.setMonth(today.getMonth() + 3);
+        threeMonthsOut.setHours(23, 59, 59, 999);
+        return { start: today, end: threeMonthsOut };
+      }
+      case 'all':
+      default:
+        return { start: today, end: null };
+    }
   };
 
   // Get unique artists from all upcoming events
@@ -154,6 +193,18 @@ const Calendar = () => {
       return endDate >= today;
     });
 
+    // Apply date range filter
+    if (dateRangeFilter !== 'all') {
+      const { start, end } = getDateRangeBounds(dateRangeFilter);
+      filtered = filtered.filter((eventData: any) => {
+        const startDate = new Date(eventData.startDate);
+        // Event starts within the range OR event is ongoing (started before, ends after)
+        const endDate = new Date(eventData.endDate);
+        return (startDate >= start && (!end || startDate <= end)) ||
+               (startDate <= start && endDate >= start);
+      });
+    }
+
     // Apply location filter
     if (locationFilter) {
       filtered = filtered.filter((eventData: any) => {
@@ -191,7 +242,7 @@ const Calendar = () => {
       (a: any, b: any) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     );
-  }, [data, locationFilter, artistFilter, eventArtistsMap]);
+  }, [data, locationFilter, artistFilter, dateRangeFilter, eventArtistsMap]);
 
   if (loading)
     return (
@@ -226,6 +277,32 @@ const Calendar = () => {
           <Typography variant="h1" sx={contentPageStyles.pageTitle}>
             Events Calendar
           </Typography>
+
+          {/* Date range chip group */}
+          <Box sx={{ marginBottom: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {[
+              { value: 'this-week' as DateRangeFilter, label: 'This week' },
+              { value: 'this-month' as DateRangeFilter, label: 'This month' },
+              { value: 'next-3-months' as DateRangeFilter, label: 'Next 3 months' },
+              { value: 'all' as DateRangeFilter, label: 'All upcoming' },
+            ].map((option) => (
+              <Chip
+                key={option.value}
+                label={option.label}
+                onClick={() => handleDateRangeChange(option.value)}
+                variant={dateRangeFilter === option.value ? 'filled' : 'outlined'}
+                sx={{
+                  backgroundColor: dateRangeFilter === option.value ? '#2d4a36' : 'transparent',
+                  color: dateRangeFilter === option.value ? '#fff' : '#2d4a36',
+                  borderColor: '#2d4a36',
+                  fontWeight: dateRangeFilter === option.value ? 600 : 400,
+                  '&:hover': {
+                    backgroundColor: dateRangeFilter === option.value ? '#1e3425' : 'rgba(45, 74, 54, 0.08)',
+                  },
+                }}
+              />
+            ))}
+          </Box>
 
           <Box sx={{ marginBottom: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <FormControl sx={{ minWidth: 250 }}>
@@ -310,7 +387,7 @@ const Calendar = () => {
               </Select>
             </FormControl>
 
-            {(locationFilter || artistFilter) && (
+            {(locationFilter || artistFilter || dateRangeFilter !== 'all') && (
               <Button
                 onClick={handleClearFilters}
                 variant="outlined"
@@ -337,8 +414,8 @@ const Calendar = () => {
               ))
             ) : (
               <Typography sx={contentPageStyles.noEventsMessage}>
-                {locationFilter || artistFilter
-                  ? `No upcoming events${artistFilter ? ` with ${artistFilter}` : ''}${locationFilter ? ` in ${locationFilter}` : ''}. Try different filters or clear them.`
+                {locationFilter || artistFilter || dateRangeFilter !== 'all'
+                  ? `No upcoming events${dateRangeFilter !== 'all' ? ` ${dateRangeFilter.replace('-', ' ')}` : ''}${artistFilter ? ` with ${artistFilter}` : ''}${locationFilter ? ` in ${locationFilter}` : ''}. Try different filters or clear them.`
                   : 'No upcoming events scheduled at this time. Check back soon!'}
               </Typography>
             )}
