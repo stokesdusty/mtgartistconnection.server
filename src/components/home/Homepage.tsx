@@ -12,6 +12,7 @@ import {
   FormControlLabel,
   Button,
   Chip,
+  ListSubheader,
 } from "@mui/material";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import { useQuery } from "@apollo/client";
@@ -39,12 +40,21 @@ interface Artist {
   artistProofs?: string;
 }
 
+const INTRO_SEEN_KEY = 'mtgac-intro-seen';
+
 const Homepage = () => {
   document.title = "MtG Artist Connection";
   const { data, error, loading } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
   const [searchParams, setSearchParams] = useSearchParams();
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showIntro] = useState(() => {
+    const seen = localStorage.getItem(INTRO_SEEN_KEY) === 'true';
+    if (!seen) {
+      localStorage.setItem(INTRO_SEEN_KEY, 'true');
+    }
+    return !seen;
+  });
   const navigate = useNavigate();
 
   // Read filter state from URL params
@@ -204,7 +214,7 @@ const Homepage = () => {
       });
     }
     if (locationFilter) {
-      const locationLabel = locationFilter === 'US' ? 'US States' : locationFilter.split(',')[0];
+      const locationLabel = locationFilter === 'US' ? 'Anywhere in the US' : locationFilter.split(',')[0];
       chips.push({
         key: 'location',
         label: `Location: ${locationLabel}`,
@@ -409,22 +419,26 @@ const Homepage = () => {
     <Box sx={homepageStyles.container}>
       <Box sx={homepageStyles.wrapper}>
         <Box sx={homepageStyles.headerSection}>
-          <Typography variant="h6" sx={homepageStyles.description}>
-            Your go-to hub for discovering Magic: The Gathering artists
-          </Typography>
+          {showIntro && (
+            <>
+              <Typography variant="h6" sx={homepageStyles.description}>
+                Your go-to hub for discovering Magic: The Gathering artists
+              </Typography>
 
-          <Typography variant="body1" sx={homepageStyles.descriptionList}>
-            <b>Artist Profiles</b> – Find official sites, social media pages, and portfolios for hundreds of MTG artists.
-          </Typography>
-          <Typography variant="body1" sx={homepageStyles.descriptionList}>
-            <b>Where to Buy</b> – Easily locate artist stores for playmats, prints, tokens, and signed cards.
-          </Typography>
-          <Typography variant="body1" sx={homepageStyles.descriptionList}>
-            <b>Upcoming Events</b> – See which conventions, signings, or streams your favorite artists will be attending.
-          </Typography>
+              <Typography variant="body1" sx={homepageStyles.descriptionList}>
+                <b>Artist Profiles</b> – Find official sites, social media pages, and portfolios for hundreds of MTG artists.
+              </Typography>
+              <Typography variant="body1" sx={homepageStyles.descriptionList}>
+                <b>Where to Buy</b> – Easily locate artist stores for playmats, prints, tokens, and signed cards.
+              </Typography>
+              <Typography variant="body1" sx={homepageStyles.descriptionList}>
+                <b>Upcoming Events</b> – See which conventions, signings, or streams your favorite artists will be attending.
+              </Typography>
+            </>
+          )}
 
           <Box component="span" sx={homepageStyles.count}>
-            {data.artists.length} artists and counting
+            Catalogging {data.artists.length} artists and counting
           </Box>
         </Box>
 
@@ -467,22 +481,29 @@ const Homepage = () => {
                 sx={{ fontSize: '0.875rem' }}
               >
                 <MenuItem value="">All Locations</MenuItem>
-                <MenuItem value="US">
-                  <em>US States</em>
-                </MenuItem>
-                {locations.US.map((location) => (
-                  <MenuItem key={location} value={location}>
-                    {location.split(',')[0]}
-                  </MenuItem>
-                ))}
-                 <MenuItem value="Other" disabled>
-                  <em>Other Locations</em>
-                </MenuItem>
-                {locations.Other.map((location) => (
-                  <MenuItem key={location} value={location}>
-                    {location}
-                  </MenuItem>
-                ))}
+                {locations.US.length > 0 && [
+                  <ListSubheader key="us-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '32px' }}>
+                    US States
+                  </ListSubheader>,
+                  <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
+                    Anywhere in the US
+                  </MenuItem>,
+                  ...locations.US.map((location) => (
+                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
+                      {location.split(',')[0]}
+                    </MenuItem>
+                  ))
+                ]}
+                {locations.Other.length > 0 && [
+                  <ListSubheader key="other-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '32px' }}>
+                    Other Locations
+                  </ListSubheader>,
+                  ...locations.Other.map((location) => (
+                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
+                      {location}
+                    </MenuItem>
+                  ))
+                ]}
               </Select>
             </FormControl>
 

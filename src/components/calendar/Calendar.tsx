@@ -11,7 +11,8 @@ import {
   MenuItem,
   SelectChangeEvent,
   Fab,
-  Button
+  Button,
+  ListSubheader
 } from "@mui/material";
 import { KeyboardArrowUp } from "@mui/icons-material";
 import { GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
@@ -163,8 +164,12 @@ const Calendar = () => {
         if (parts.length === 2) {
           const stateCode = parts[1].toUpperCase();
 
-          // Check if this is a US state and matches the filter
+          // Check if this is a US state
           if (stateCodeToName[stateCode]) {
+            // "US" means any US state
+            if (locationFilter === 'US') {
+              return true;
+            }
             return stateCodeToName[stateCode] === locationFilter;
           }
         }
@@ -247,26 +252,29 @@ const Calendar = () => {
                 <MenuItem value="">
                   <em>All Locations</em>
                 </MenuItem>
-                {locations.US.length > 0 && (
-                  <MenuItem disabled value="us-header">
-                    <em>US States</em>
-                  </MenuItem>
-                )}
-                {locations.US.map((location) => (
-                  <MenuItem key={location} value={location}>
-                    {location}
-                  </MenuItem>
-                ))}
-                {locations.Other.length > 0 && (
-                  <MenuItem disabled value="other-header">
-                    <em>Other Locations</em>
-                  </MenuItem>
-                )}
-                {locations.Other.map((location) => (
-                  <MenuItem key={location} value={location}>
-                    {location}
-                  </MenuItem>
-                ))}
+                {locations.US.length > 0 && [
+                  <ListSubheader key="us-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '36px' }}>
+                    US States
+                  </ListSubheader>,
+                  <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
+                    Anywhere in the US
+                  </MenuItem>,
+                  ...locations.US.map((location) => (
+                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
+                      {location}
+                    </MenuItem>
+                  ))
+                ]}
+                {locations.Other.length > 0 && [
+                  <ListSubheader key="other-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '36px' }}>
+                    Other Locations
+                  </ListSubheader>,
+                  ...locations.Other.map((location) => (
+                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
+                      {location}
+                    </MenuItem>
+                  ))
+                ]}
               </Select>
             </FormControl>
 
