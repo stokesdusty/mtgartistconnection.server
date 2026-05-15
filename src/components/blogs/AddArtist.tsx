@@ -16,6 +16,8 @@ import {
   import { ADD_ARTIST } from "../graphql/mutations";
   import { useSelector } from "react-redux";
   import { useState } from "react";
+import { RootState } from "../../store/store";
+import { Navigate } from "react-router-dom";
   
   type Inputs = {
       name: string;
@@ -41,6 +43,9 @@ import {
   
   const AddArtist = () => {
       const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
+      const user = useSelector((state: RootState) => state.auth.user);
+      const isAdmin = user?.role === 'admin';
+
       const {
           register,
           handleSubmit,
@@ -229,21 +234,11 @@ import {
                   console.log(err.message);
               }
       };
-  
-      if (!isLoggedIn) {
-          return (
-              <Box sx={styles.container}>
-                  <Container maxWidth="md">
-                      <Paper elevation={0} sx={styles.contentWrapper}>
-                          <Typography sx={styles.errorMessage}>
-                              Error: You must be logged in to add an artist
-                          </Typography>
-                      </Paper>
-                  </Container>
-              </Box>
-          );
+
+      if (!isLoggedIn || !isAdmin) {
+        return <Navigate to="/" replace />;
       }
-  
+    
       return (
           <Box sx={styles.container}>
               <Container maxWidth="md">

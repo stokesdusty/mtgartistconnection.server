@@ -204,10 +204,13 @@ export const GET_NEWS_REVIEWS = gql`
             artistPostId
             artistId
             artistName
+            artistIds
+            artistNames
             title
             content
             summary
             sourcePostUrl
+            imageUrl
             generatedAt
             isReviewed
             isPublished
@@ -223,10 +226,13 @@ export const GET_NEWS_REVIEW = gql`
             artistPostId
             artistId
             artistName
+            artistIds
+            artistNames
             title
             content
             summary
             sourcePostUrl
+            imageUrl
             generatedAt
             isReviewed
             isPublished
@@ -242,10 +248,13 @@ export const GET_NEWS_REVIEWS_BY_ARTIST = gql`
             artistPostId
             artistId
             artistName
+            artistIds
+            artistNames
             title
             content
             summary
             sourcePostUrl
+            imageUrl
             generatedAt
             isReviewed
             isPublished

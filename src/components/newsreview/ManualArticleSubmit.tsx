@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -11,11 +11,14 @@ import {
   Alert,
   CircularProgress,
   Paper,
+  Chip,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { GET_ARTISTS_FOR_HOMEPAGE } from '../graphql/queries';
-import { GENERATE_MANUAL_NEWS_ARTICLE } from '../graphql/mutations';
+import { GENERATE_MANUAL_NEWS_ARTICLE, UPLOAD_NEWS_IMAGE } from '../graphql/mutations';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 
@@ -28,28 +31,95 @@ const ManualArticleSubmit: React.FC = () => {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === 'admin';
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]);
   const [content, setContent] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const { data: artistsData, loading: artistsLoading } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
   const [generateArticle, { loading: generating }] = useMutation(GENERATE_MANUAL_NEWS_ARTICLE);
+  const [uploadNewsImage] = useMutation(UPLOAD_NEWS_IMAGE);
 
   const artists: Artist[] = artistsData?.artists || [];
   const sortedArtists = [...artists].sort((a, b) => a.name.localeCompare(b.name));
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image must be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setError(null);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return null;
+
+    setUploading(true);
+    try {
+      // Convert file to base64
+      const base64Data = await fileToBase64(imageFile);
+
+      // Upload via GraphQL mutation (server-side upload to S3)
+      const { data } = await uploadNewsImage({
+        variables: {
+          base64Data,
+          filename: imageFile.name,
+          contentType: imageFile.type,
+        },
+      });
+
+      if (!data?.uploadNewsImage?.imageUrl) {
+        throw new Error('Failed to upload image');
+      }
+
+      return data.uploadNewsImage.imageUrl;
+    } catch (err: any) {
+      throw new Error(`Image upload failed: ${err.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
-    if (!selectedArtist) {
-      setError('Please select an artist');
-      return;
-    }
 
     if (!content.trim()) {
       setError('Please enter content for the article');
@@ -57,19 +127,29 @@ const ManualArticleSubmit: React.FC = () => {
     }
 
     try {
+      // Upload image first if one is selected
+      let finalImageUrl = imageUrl;
+      if (imageFile) {
+        finalImageUrl = await uploadImage() || '';
+      }
+
       const result = await generateArticle({
         variables: {
-          artistName: selectedArtist.name,
+          artistNames: selectedArtists.map(a => a.name),
           content: content.trim(),
           sourceUrl: sourceUrl.trim() || null,
+          imageUrl: finalImageUrl || null,
         },
       });
 
       if (result.data?.generateManualNewsArticle) {
         setSuccess(`Article "${result.data.generateManualNewsArticle.title}" created successfully! Redirecting to review...`);
-        setSelectedArtist(null);
+        setSelectedArtists([]);
         setContent('');
         setSourceUrl('');
+        setImageUrl('');
+        setImageFile(null);
+        setImagePreview(null);
 
         // Redirect to news review page after a short delay
         setTimeout(() => {
@@ -184,16 +264,17 @@ const ManualArticleSubmit: React.FC = () => {
 
           <Box component="form" onSubmit={handleSubmit} sx={styles.form}>
             <Autocomplete
+              multiple
               options={sortedArtists}
               getOptionLabel={(option) => option.name}
-              value={selectedArtist}
-              onChange={(_, newValue) => setSelectedArtist(newValue)}
+              value={selectedArtists}
+              onChange={(_, newValue) => setSelectedArtists(newValue)}
               loading={artistsLoading}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Select Artist"
-                  required
+                  label="Select Artists (Optional)"
+                  placeholder={selectedArtists.length === 0 ? "Search artists..." : ""}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -203,6 +284,7 @@ const ManualArticleSubmit: React.FC = () => {
                       </>
                     ),
                   }}
+                  helperText="Select one or more artists, or leave empty for general news"
                 />
               )}
               renderOption={(props, option) => (
@@ -220,6 +302,25 @@ const ManualArticleSubmit: React.FC = () => {
                   </Box>
                 </li>
               )}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    {...getTagProps({ index })}
+                    key={option.name}
+                    label={option.name}
+                    sx={{
+                      backgroundColor: '#2d4a36',
+                      color: '#fff',
+                      '& .MuiChip-deleteIcon': {
+                        color: 'rgba(255,255,255,0.7)',
+                        '&:hover': {
+                          color: '#fff',
+                        },
+                      },
+                    }}
+                  />
+                ))
+              }
             />
 
             <TextField
@@ -241,15 +342,82 @@ const ManualArticleSubmit: React.FC = () => {
               helperText="Link to the original source if available (social media post, website, etc.)"
             />
 
+            {/* Image Upload Section */}
+            <Box>
+              <Typography sx={{ mb: 1, fontWeight: 600, color: '#424242' }}>
+                Article Image (Optional)
+              </Typography>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                id="image-upload"
+              />
+              {!imagePreview ? (
+                <label htmlFor="image-upload">
+                  <Button
+                    variant="outlined"
+                    component="span"
+                    startIcon={<CloudUploadIcon />}
+                    sx={{
+                      borderColor: '#2d4a36',
+                      color: '#2d4a36',
+                      '&:hover': {
+                        borderColor: '#1a2d21',
+                        backgroundColor: 'rgba(45, 74, 54, 0.04)',
+                      },
+                    }}
+                  >
+                    Upload Image
+                  </Button>
+                </label>
+              ) : (
+                <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: 200,
+                      borderRadius: 8,
+                      border: '1px solid #e0e0e0',
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleRemoveImage}
+                    startIcon={<DeleteIcon />}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      backgroundColor: 'rgba(0,0,0,0.6)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                      },
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Box>
+              )}
+              <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#757575' }}>
+                Supported formats: JPG, PNG, GIF. Max size: 5MB
+              </Typography>
+            </Box>
+
             <Button
               type="submit"
               variant="contained"
               size="large"
-              disabled={generating || !selectedArtist || !content.trim()}
-              endIcon={generating ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+              disabled={generating || uploading || !content.trim()}
+              endIcon={(generating || uploading) ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
               sx={styles.submitButton}
             >
-              {generating ? 'Generating Article...' : 'Generate Article'}
+              {uploading ? 'Uploading Image...' : generating ? 'Generating Article...' : 'Generate Article'}
             </Button>
           </Box>
         </Paper>

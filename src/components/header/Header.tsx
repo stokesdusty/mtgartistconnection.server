@@ -37,8 +37,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Home", to: "/" },
   { label: "News", to: "/news" },
-  { label: "Card Signing Services", to: "/signingservices" },
-  { label: "Signing Events Calendar", to: "/calendar" },
+  { label: "Services", to: "/signingservices" },
+  { label: "Events", to: "/calendar" },
   { label: "Random Flavor Text", to: "/randomflavortext" },
 ];
 
@@ -54,6 +54,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const user = useSelector((state: RootState) => state.auth.user);
+  const isAdmin = user?.role === 'admin';
 
   const validPaths = useMemo(() => navItems.map(item => item.to), []);
 
@@ -117,6 +118,29 @@ const Header = () => {
   const handleFollowingClick = () => {
     setDrawerOpen(false);
     navigate('/following');
+  };
+
+  useEffect(() => {
+    setValue(
+      validPaths.includes(location.pathname)
+        ? location.pathname
+        : false
+    );
+  }, [location.pathname, validPaths]);
+
+  const handleAddArtistClick = () => {
+    setDrawerOpen(false);
+    navigate('/add');
+  };
+
+  const handleReviewSocialsClick = () => {
+    setDrawerOpen(false);
+    navigate('/reviewsocial');
+  };
+
+  const handleReviewNewsClick = () => {
+    setDrawerOpen(false);
+    navigate('/reviewnews');
   };
 
   useEffect(() => {
@@ -195,7 +219,7 @@ const Header = () => {
                     }
                   }}
                 >
-                  Account
+                  {user?.email?.split('@')[0]}
                 </Button>
               ) : (
                 <Button
@@ -377,6 +401,121 @@ const Header = () => {
                 />
               </ListItemButton>
             </ListItem>
+            {isLoggedIn && isAdmin && 
+             <>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={handleAddArtistClick}
+                    sx={{
+                      borderRadius: '8px',
+                      mb: 0.5,
+                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        backgroundColor: '#fafafa',
+                        '& .MuiListItemIcon-root': {
+                          color: '#2d4a36',
+                        },
+                        '& .MuiListItemText-primary': {
+                          color: '#2d4a36',
+                        }
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      <SettingsIcon sx={{
+                        color: '#757575',
+                        transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Add Artist"
+                      primaryTypographyProps={{
+                        sx: {
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: '#212121',
+                          transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                        }
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={handleReviewSocialsClick}
+                    sx={{
+                      borderRadius: '8px',
+                      mb: 0.5,
+                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        backgroundColor: '#fafafa',
+                        '& .MuiListItemIcon-root': {
+                          color: '#2d4a36',
+                        },
+                        '& .MuiListItemText-primary': {
+                          color: '#2d4a36',
+                        }
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      <SettingsIcon sx={{
+                        color: '#757575',
+                        transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Review Socials"
+                      primaryTypographyProps={{
+                        sx: {
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: '#212121',
+                          transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                        }
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={handleReviewNewsClick}
+                    sx={{
+                      borderRadius: '8px',
+                      mb: 0.5,
+                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        backgroundColor: '#fafafa',
+                        '& .MuiListItemIcon-root': {
+                          color: '#2d4a36',
+                        },
+                        '& .MuiListItemText-primary': {
+                          color: '#2d4a36',
+                        }
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      <SettingsIcon sx={{
+                        color: '#757575',
+                        transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Review News"
+                      primaryTypographyProps={{
+                        sx: {
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: '#212121',
+                          transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                        }
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </>
+            }
             <Divider sx={{ my: 1 }} />
             <ListItem disablePadding>
               <ListItemButton

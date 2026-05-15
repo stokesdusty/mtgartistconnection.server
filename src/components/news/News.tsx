@@ -31,10 +31,13 @@ interface NewsArticle {
   artistPostId: string;
   artistId: string;
   artistName: string;
+  artistIds?: string[];
+  artistNames?: string[];
   title: string;
   content: string;
   summary: string;
   sourcePostUrl: string;
+  imageUrl?: string;
   generatedAt: string;
   isReviewed: boolean;
   isPublished: boolean;
@@ -58,18 +61,36 @@ const News: React.FC = () => {
 
   const articles: NewsArticle[] = data?.newsReviews || [];
 
+  // Helper to get all artist names from an article (handles both legacy and new format)
+  const getArticleArtistNames = (article: NewsArticle): string[] => {
+    if (article.artistNames && article.artistNames.length > 0) {
+      return article.artistNames;
+    }
+    if (article.artistName) {
+      return [article.artistName];
+    }
+    return [];
+  };
+
   // Get unique artist names for the dropdown
   const uniqueArtists = useMemo(() => {
-    const artists = articles.map(a => a.artistName);
-    return Array.from(new Set(artists)).sort();
+    const allArtists: string[] = [];
+    articles.forEach(a => {
+      const names = getArticleArtistNames(a);
+      allArtists.push(...names);
+    });
+    return Array.from(new Set(allArtists)).filter(Boolean).sort();
   }, [articles]);
 
   // Filter articles based on selected filters
   const filteredArticles = useMemo(() => {
     return articles.filter(article => {
-      // Artist filter
-      if (artistFilter && article.artistName !== artistFilter) {
-        return false;
+      // Artist filter - check if the filtered artist is in the article's artists
+      if (artistFilter) {
+        const articleArtists = getArticleArtistNames(article);
+        if (!articleArtists.includes(artistFilter)) {
+          return false;
+        }
       }
 
       // Date filter
@@ -263,51 +284,87 @@ const News: React.FC = () => {
           </Paper>
         ) : (
           <Box>
-            {filteredArticles.map((article) => (
-              <Card
-                key={article.id}
-                sx={newsStyles.articleCard}
-                onClick={(e) => handleArticleClick(article.id, e)}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box sx={newsStyles.titleContainer}>
-                    <Avatar
-                      src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${getArtistImageFilename(article.artistName)}.jpg`}
-                      alt={article.artistName}
-                      variant="rounded"
-                      sx={newsStyles.artistAvatar}
-                    />
-                    <Typography variant="h5" sx={newsStyles.articleTitle}>
-                      {article.title}
-                    </Typography>
-                  </Box>
+            {filteredArticles.map((article) => {
+              const artistNames = getArticleArtistNames(article);
+              const primaryArtist = artistNames[0] || '';
 
-                  <Box sx={newsStyles.metaInfo}>
-                    <Chip
-                      icon={<PersonIcon sx={{ color: `${colors.primary.contrast} !important` }} />}
-                      label={article.artistName}
-                      onClick={(e) => handleArtistClick(article.artistName, e)}
-                      sx={newsStyles.artistChip}
-                      size="small"
+              return (
+                <Card
+                  key={article.id}
+                  sx={newsStyles.articleCard}
+                  onClick={(e) => handleArticleClick(article.id, e)}
+                >
+                  {article.imageUrl && (
+                    <Box
+                      component="img"
+                      src={article.imageUrl}
+                      alt={article.title}
+                      sx={{
+                        width: '100%',
+                        height: 200,
+                        objectFit: 'cover',
+                        borderTopLeftRadius: '12px',
+                        borderTopRightRadius: '12px',
+                      }}
                     />
-                    <Box sx={newsStyles.dateText}>
-                      <CalendarTodayIcon sx={{ fontSize: '0.9rem' }} />
-                      <Typography component="span" sx={{ fontSize: '0.85rem' }}>
-                        {formatDate(article.publishedAt || article.generatedAt) || 'Recently published'}
+                  )}
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={newsStyles.titleContainer}>
+                      {primaryArtist && (
+                        <Avatar
+                          src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${getArtistImageFilename(primaryArtist)}.jpg`}
+                          alt={primaryArtist}
+                          variant="rounded"
+                          sx={newsStyles.artistAvatar}
+                        />
+                      )}
+                      <Typography variant="h5" sx={newsStyles.articleTitle}>
+                        {article.title}
                       </Typography>
                     </Box>
-                  </Box>
 
-                  <Typography sx={newsStyles.summary}>
-                    {article.summary}
-                  </Typography>
+                    <Box sx={newsStyles.metaInfo}>
+                      {artistNames.length > 0 ? (
+                        artistNames.map((name) => (
+                          <Chip
+                            key={name}
+                            icon={<PersonIcon sx={{ color: `${colors.primary.contrast} !important` }} />}
+                            label={name}
+                            onClick={(e) => handleArtistClick(name, e)}
+                            sx={newsStyles.artistChip}
+                            size="small"
+                          />
+                        ))
+                      ) : (
+                        <Chip
+                          label="General News"
+                          sx={{
+                            backgroundColor: colors.neutral[600],
+                            color: colors.neutral.white,
+                            fontWeight: 600,
+                          }}
+                          size="small"
+                        />
+                      )}
+                      <Box sx={newsStyles.dateText}>
+                        <CalendarTodayIcon sx={{ fontSize: '0.9rem' }} />
+                        <Typography component="span" sx={{ fontSize: '0.85rem' }}>
+                          {formatDate(article.publishedAt || article.generatedAt) || 'Recently published'}
+                        </Typography>
+                      </Box>
+                    </Box>
 
-                  <Box sx={newsStyles.readMore}>
-                    Read more <ArrowForwardIcon sx={{ fontSize: '1rem' }} />
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
+                    <Typography sx={newsStyles.summary}>
+                      {article.summary}
+                    </Typography>
+
+                    <Box sx={newsStyles.readMore}>
+                      Read more <ArrowForwardIcon sx={{ fontSize: '1rem' }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </Box>
         )}
       </Container>

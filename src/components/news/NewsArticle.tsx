@@ -28,10 +28,13 @@ interface NewsArticleData {
   artistPostId: string;
   artistId: string;
   artistName: string;
+  artistIds?: string[];
+  artistNames?: string[];
   title: string;
   content: string;
   summary: string;
   sourcePostUrl: string;
+  imageUrl?: string;
   generatedAt: string;
   isReviewed: boolean;
   isPublished: boolean;
@@ -253,6 +256,14 @@ const NewsArticle: React.FC = () => {
     );
   }
 
+  // Get all artist names (handles both legacy and new format)
+  const artistNames = article.artistNames && article.artistNames.length > 0
+    ? article.artistNames
+    : article.artistName
+      ? [article.artistName]
+      : [];
+  const primaryArtist = artistNames[0] || '';
+
   return (
     <Box sx={styles.container}>
       <Container maxWidth="md">
@@ -265,26 +276,56 @@ const NewsArticle: React.FC = () => {
         </Box>
 
         <Card sx={styles.articleCard}>
+          {article.imageUrl && (
+            <Box
+              component="img"
+              src={article.imageUrl}
+              alt={article.title}
+              sx={{
+                width: '100%',
+                maxHeight: 400,
+                objectFit: 'cover',
+                borderTopLeftRadius: '12px',
+                borderTopRightRadius: '12px',
+              }}
+            />
+          )}
           <CardContent sx={{ p: 4 }}>
             <Box sx={styles.titleContainer}>
-              <Avatar
-                src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${getArtistImageFilename(article.artistName)}.jpg`}
-                alt={article.artistName}
-                variant="rounded"
-                sx={styles.artistAvatar}
-              />
+              {primaryArtist && (
+                <Avatar
+                  src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${getArtistImageFilename(primaryArtist)}.jpg`}
+                  alt={primaryArtist}
+                  variant="rounded"
+                  sx={styles.artistAvatar}
+                />
+              )}
               <Typography variant="h4" sx={styles.articleTitle}>
                 {article.title}
               </Typography>
             </Box>
 
             <Box sx={styles.metaInfo}>
-              <Chip
-                icon={<PersonIcon sx={{ color: '#ffffff !important' }} />}
-                label={article.artistName}
-                onClick={() => handleArtistClick(article.artistName)}
-                sx={styles.artistChip}
-              />
+              {artistNames.length > 0 ? (
+                artistNames.map((name) => (
+                  <Chip
+                    key={name}
+                    icon={<PersonIcon sx={{ color: '#ffffff !important' }} />}
+                    label={name}
+                    onClick={() => handleArtistClick(name)}
+                    sx={styles.artistChip}
+                  />
+                ))
+              ) : (
+                <Chip
+                  label="General News"
+                  sx={{
+                    backgroundColor: '#757575',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                  }}
+                />
+              )}
               <Box sx={styles.dateText}>
                 <CalendarTodayIcon sx={{ fontSize: '1rem' }} />
                 <Typography component="span" sx={{ fontSize: '0.9rem' }}>
@@ -304,7 +345,7 @@ const NewsArticle: React.FC = () => {
             </Typography>
           </CardContent>
 
-          { article.sourcePostUrl !== '' && 
+          { article.sourcePostUrl !== '' &&
             <>
             <CardActions sx={{ px: 4, pb: 3 }}>
               <Button

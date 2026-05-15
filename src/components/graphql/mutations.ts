@@ -308,20 +308,32 @@ export const DELETE_NEWS_REVIEW = gql`
 `;
 
 export const GENERATE_MANUAL_NEWS_ARTICLE = gql`
-    mutation generateManualNewsArticle($artistName: String!, $content: String!, $sourceUrl: String) {
-        generateManualNewsArticle(artistName: $artistName, content: $content, sourceUrl: $sourceUrl) {
+    mutation generateManualNewsArticle($artistNames: [String], $content: String!, $sourceUrl: String, $imageUrl: String) {
+        generateManualNewsArticle(artistNames: $artistNames, content: $content, sourceUrl: $sourceUrl, imageUrl: $imageUrl) {
             id
             artistPostId
             artistId
             artistName
+            artistIds
+            artistNames
             title
             content
             summary
             sourcePostUrl
+            imageUrl
             generatedAt
             isReviewed
             isPublished
             publishedAt
+        }
+    }
+`;
+
+export const UPLOAD_NEWS_IMAGE = gql`
+    mutation uploadNewsImage($base64Data: String!, $filename: String!, $contentType: String!) {
+        uploadNewsImage(base64Data: $base64Data, filename: $filename, contentType: $contentType) {
+            imageUrl
+            key
         }
     }
 `;
