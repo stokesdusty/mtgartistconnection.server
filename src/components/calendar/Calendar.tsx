@@ -278,30 +278,80 @@ const Calendar = () => {
             Events Calendar
           </Typography>
 
-          {/* Date range chip group */}
-          <Box sx={{ marginBottom: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {[
-              { value: 'this-week' as DateRangeFilter, label: 'This week' },
-              { value: 'this-month' as DateRangeFilter, label: 'This month' },
-              { value: 'next-3-months' as DateRangeFilter, label: 'Next 3 months' },
-              { value: 'all' as DateRangeFilter, label: 'All upcoming' },
-            ].map((option) => (
-              <Chip
-                key={option.value}
-                label={option.label}
-                onClick={() => handleDateRangeChange(option.value)}
-                variant={dateRangeFilter === option.value ? 'filled' : 'outlined'}
-                sx={{
-                  backgroundColor: dateRangeFilter === option.value ? '#2d4a36' : 'transparent',
-                  color: dateRangeFilter === option.value ? '#fff' : '#2d4a36',
-                  borderColor: '#2d4a36',
-                  fontWeight: dateRangeFilter === option.value ? 600 : 400,
-                  '&:hover': {
-                    backgroundColor: dateRangeFilter === option.value ? '#1e3425' : 'rgba(45, 74, 54, 0.08)',
-                  },
-                }}
-              />
-            ))}
+          {/* Date range filter row */}
+          <Box
+            sx={{
+              marginBottom: 2,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 1.5, sm: 1 },
+              alignItems: { xs: 'stretch', sm: 'center' },
+            }}
+          >
+            {/* Chip group */}
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1,
+                flexWrap: 'wrap',
+                justifyContent: { xs: 'center', sm: 'flex-start' },
+              }}
+            >
+              {[
+                { value: 'this-week' as DateRangeFilter, label: 'This week' },
+                { value: 'this-month' as DateRangeFilter, label: 'This month' },
+                { value: 'next-3-months' as DateRangeFilter, label: 'Next 3 months' },
+                { value: 'all' as DateRangeFilter, label: 'All upcoming' },
+              ].map((option) => (
+                <Chip
+                  key={option.value}
+                  label={option.label}
+                  onClick={() => handleDateRangeChange(option.value)}
+                  variant={dateRangeFilter === option.value ? 'filled' : 'outlined'}
+                  sx={{
+                    backgroundColor: dateRangeFilter === option.value ? '#2d4a36' : 'transparent',
+                    color: dateRangeFilter === option.value ? '#fff' : '#2d4a36',
+                    borderColor: '#2d4a36',
+                    fontWeight: dateRangeFilter === option.value ? 600 : 400,
+                    fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                    height: { xs: 32, sm: 32 },
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: dateRangeFilter === option.value ? '#1e3425' : 'rgba(45, 74, 54, 0.08)',
+                      transform: 'translateY(-1px)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    },
+                  }}
+                />
+              ))}
+            </Box>
+
+            {/* Event count badge */}
+            <Box
+              component="span"
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f0f9f4',
+                color: '#2d4a36',
+                border: '1px solid #2d4a36',
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                fontWeight: 600,
+                padding: { xs: '6px 14px', sm: '6px 16px' },
+                borderRadius: '9999px',
+                marginLeft: { xs: 0, sm: 'auto' },
+                alignSelf: { xs: 'center', sm: 'center' },
+                whiteSpace: 'nowrap',
+                fontFamily: '"Lora", serif',
+              }}
+            >
+              {filteredAndSortedEvents.length === upcomingEventIds.length
+                ? `${upcomingEventIds.length} events`
+                : `Showing ${filteredAndSortedEvents.length} of ${upcomingEventIds.length}`}
+            </Box>
           </Box>
 
           <Box sx={{ marginBottom: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
