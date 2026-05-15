@@ -438,7 +438,7 @@ const Homepage = () => {
           )}
 
           <Box component="span" sx={homepageStyles.count}>
-            Catalogging {data.artists.length} artists and counting
+            Proudly indexing {data.artists.length} artists and counting
           </Box>
         </Box>
 
