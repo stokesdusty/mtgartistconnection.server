@@ -42,6 +42,10 @@ const NewsArticle: React.FC = () => {
   const navigate = useNavigate();
   const { articleId } = useParams<{ articleId: string }>();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [articleId]);
+
   const { loading, error, data } = useQuery(GET_NEWS_REVIEW, {
     variables: { id: articleId },
     fetchPolicy: 'network-only',
@@ -300,19 +304,23 @@ const NewsArticle: React.FC = () => {
             </Typography>
           </CardContent>
 
-          <CardActions sx={{ px: 4, pb: 3 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              href={article.sourcePostUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              endIcon={<OpenInNewIcon />}
-              sx={styles.sourceButton}
-            >
-              View Original Post
-            </Button>
+          { article.sourcePostUrl !== '' && 
+            <>
+            <CardActions sx={{ px: 4, pb: 3 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                href={article.sourcePostUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<OpenInNewIcon />}
+                sx={styles.sourceButton}
+              >
+                View Original Post
+              </Button>
           </CardActions>
+          </>
+          }
         </Card>
       </Container>
     </Box>

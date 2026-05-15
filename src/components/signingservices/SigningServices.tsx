@@ -6,7 +6,17 @@ import {
   Paper,
   Divider,
   Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEffect } from "react";
 import { contentPageStyles } from "../../styles/content-page-styles";
 
@@ -150,32 +160,103 @@ const SigningServices = () => {
             Card Signing Services
           </Typography>
 
-          <Box mb={4}>
-            {introParagraphs.map((paragraph, index) => (
-              <Typography key={index} sx={contentPageStyles.paragraph}>
-                {paragraph}
+          {/* Quick Comparison Table */}
+          <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: '1px solid', borderColor: 'divider' }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: 'action.hover' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Service</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}># of Artists</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Cost Per Signature</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Services Offered</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Links</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {services.map((service) => (
+                  <TableRow key={service.name}>
+                    <TableCell sx={{ fontWeight: 'medium' }}>{service.name}</TableCell>
+                    <TableCell>{service.artistCount}</TableCell>
+                    <TableCell>{service.costPerSignature}</TableCell>
+                    <TableCell>{service.servicesOffered}</TableCell>
+                    <TableCell>
+                      <Link
+                        sx={contentPageStyles.link}
+                        href={service.facebookGroup}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Facebook
+                      </Link>
+                      {service.website && (
+                        <>
+                          {" | "}
+                          <Link
+                            sx={contentPageStyles.link}
+                            href={service.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Website
+                          </Link>
+                        </>
+                      )}
+                      {service.upcomingSignings && (
+                        <>
+                          {" | "}
+                          <Link
+                            sx={contentPageStyles.link}
+                            href={service.upcomingSignings}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Schedule
+                          </Link>
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Collapsible How It Works Section */}
+          <Accordion
+            elevation={0}
+            sx={{
+              mb: 4,
+              border: '1px solid',
+              borderColor: 'divider',
+              '&:before': { display: 'none' },
+            }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h2" sx={{ ...contentPageStyles.sectionTitle, mb: 0 }}>
+                How Do Signing Services Work?
               </Typography>
-            ))}
-          </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box>
+                {introParagraphs.map((paragraph, index) => (
+                  <Typography key={`intro-${index}`} sx={contentPageStyles.paragraph}>
+                    {paragraph}
+                  </Typography>
+                ))}
+                <Divider sx={{ ...contentPageStyles.divider, my: 2 }} />
+                {howItWorksParagraphs.map((paragraph, index) => (
+                  <Typography key={`how-${index}`} sx={contentPageStyles.paragraph}>
+                    {paragraph}
+                  </Typography>
+                ))}
+              </Box>
+            </AccordionDetails>
+          </Accordion>
 
           <Divider sx={contentPageStyles.divider} />
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            How Do These Services Work?
-          </Typography>
-
-          <Box mb={4}>
-            {howItWorksParagraphs.map((paragraph, index) => (
-              <Typography key={index} sx={contentPageStyles.paragraph}>
-                {paragraph}
-              </Typography>
-            ))}
-          </Box>
-
-          <Divider sx={contentPageStyles.divider} />
-
-          <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            Available Services
+            Service Details
           </Typography>
 
           <Grid container spacing={3}>
