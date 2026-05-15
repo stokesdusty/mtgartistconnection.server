@@ -9,8 +9,6 @@ import {
   CircularProgress,
   Container,
   Paper,
-  FormControlLabel,
-  Checkbox,
   Button,
 } from "@mui/material";
 import { TbWorldWww } from "react-icons/tb";
@@ -26,10 +24,12 @@ import { FaBluesky } from "react-icons/fa6";
 import React, { useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 import { artistStyles } from "../../styles/artist-styles";
-import { CalendarToday, LocationOn, Notifications, NotificationsNone, Edit } from '@mui/icons-material';
+import { CalendarToday, LocationOn, NotificationsActive, PersonAdd, Edit } from '@mui/icons-material';
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ArtistNewsSection from './ArtistNewsSection';
+import ExternalLinkCard from './ExternalLinkCard';
+import { Style, CollectionsBookmark } from '@mui/icons-material';
 
 interface ArtistSocialLink {
   label: string;
@@ -346,59 +346,56 @@ const Artist = () => {
                 </Button>
               )}
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isLoggedIn && isFollowing}
-                    onChange={handleFollowToggle}
-                    icon={<NotificationsNone />}
-                    checkedIcon={<Notifications />}
-                    sx={{
-                      color: '#757575',
-                      '&.Mui-checked': {
-                        color: '#2d4a36',
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography sx={{
-                    fontSize: '0.875rem',
-                    color: '#616161',
-                    fontWeight: 500,
-                  }}>
-                    {!isLoggedIn
-                      ? 'Sign in to follow'
-                      : isFollowing
-                        ? 'Following'
-                        : 'Follow for updates'}
-                  </Typography>
-                }
+              <Button
+                variant={isFollowing ? 'contained' : 'outlined'}
+                size="small"
+                onClick={handleFollowToggle}
+                startIcon={isFollowing ? <NotificationsActive /> : <PersonAdd />}
                 sx={{
-                  m: 0,
-                  '& .MuiFormControlLabel-label': {
-                    userSelect: 'none',
-                  },
-              }}
-            />
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.875rem',
+                  borderRadius: '6px',
+                  ...(isFollowing
+                    ? {
+                        backgroundColor: '#2d4a36',
+                        color: '#fff',
+                        '&:hover': {
+                          backgroundColor: '#1a2e20',
+                        },
+                      }
+                    : {
+                        borderColor: '#2d4a36',
+                        color: '#2d4a36',
+                        '&:hover': {
+                          borderColor: '#1a2e20',
+                          backgroundColor: 'rgba(45, 74, 54, 0.04)',
+                        },
+                      }),
+                }}
+              >
+                {!isLoggedIn
+                  ? 'Sign in to follow'
+                  : isFollowing
+                    ? 'Following'
+                    : 'Follow'}
+              </Button>
             </Box>
           </Box>
 
           <Box sx={artistStyles.buttonContainer}>
-            <Link
+            <ExternalLinkCard
               href={`/allcards/${artistByName.name}`}
-              underline="none"
-              sx={artistStyles.viewCardsLink}
-            >
-              View all {artistByName.name} cards →
-            </Link>
+              label={`View all ${artistByName.name} cards`}
+              logo={<CollectionsBookmark sx={{ fontSize: 20 }} />}
+              variant="primary"
+            />
             {artistByName.omalink && (
-              <Link
+              <ExternalLinkCard
                 href={artistByName.omalink}
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="none"
-                sx={artistStyles.omaLink}
+                label="Buy prints & playmats"
+                logo={<img src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/OMALogo.png" alt="Original Magic Art" style={{ height: 20 }} />}
+                external
                 onClick={() => {
                   if ((window as any).gtag) {
                     (window as any).gtag("event", "oma_link_click", {
@@ -408,18 +405,14 @@ const Artist = () => {
                     });
                   }
                 }}
-              >
-                <Typography component="span">Buy prints & playmats at</Typography>
-                <img src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/OMALogo.png" alt="Original Magic Art logo" className="oma-logo" />
-              </Link>
+              />
             )}
             {artistByName.inprnt && (
-              <Link
+              <ExternalLinkCard
                 href={artistByName.inprnt}
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="none"
-                sx={artistStyles.omaLink}
+                label="Buy prints"
+                logo={<Box component="span" sx={{ fontWeight: 700, fontSize: 14, letterSpacing: '0.05em', fontFamily: 'Arial, sans-serif' }}>INPRNT</Box>}
+                external
                 onClick={() => {
                   if ((window as any).gtag) {
                     (window as any).gtag("event", "inprnt_link_click", {
@@ -429,25 +422,13 @@ const Artist = () => {
                     });
                   }
                 }}
-              >
-                <Typography component="span">Buy prints at</Typography>
-                <Box component="span" sx={{
-                  fontWeight: 'bold',
-                  fontSize: '1.1em',
-                  letterSpacing: '0.05em',
-                  color: '#000',
-                  fontFamily: 'Arial, sans-serif'
-                }}>
-                  INPRNT
-                </Box>
-              </Link>
+              />
             )}
-            <Link
+            <ExternalLinkCard
               href={`https://www.ebay.com/sch/i.html?_nkw=${artistByName.name.split(" ").join("+")}+signed+cards+mtg&_sacat=0&_from=R40&_trksid=p2334524.m570.l1313&_odkw=${artistByName.name.split(" ").join("+")}+signed+cards&_osacat=0&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339140903&customid=&toolid=10001&mkevt=1&utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=ebay_artist_search`}
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="none"
-              sx={artistStyles.ebayLink}
+              label={`Search for signed ${artistByName.name} cards`}
+              logo={<img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/EBay_logo.svg" alt="eBay" style={{ height: 18 }} />}
+              external
               onClick={() => {
                 if ((window as any).gtag) {
                   (window as any).gtag("event", "ebay_link_click", {
@@ -457,9 +438,7 @@ const Artist = () => {
                   });
                 }
               }}
-            >
-              Search <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/EBay_logo.svg" alt="eBay" style={{ height: '20px', verticalAlign: 'middle', margin: '0 4px' }} /> for signed {artistByName.name} cards
-            </Link>
+            />
           </Box>
 
           <Box sx={artistStyles.artistPage}>
