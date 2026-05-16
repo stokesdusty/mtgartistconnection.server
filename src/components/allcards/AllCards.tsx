@@ -19,7 +19,7 @@ import {
   Button,
   Fab,
 } from "@mui/material";
-import { KeyboardArrowUp } from "@mui/icons-material";
+import { ArrowUp } from "@phosphor-icons/react";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS } from "../graphql/queries";
 import { useQuery, useLazyQuery } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
@@ -636,7 +636,7 @@ const AllCards = () => {
             zIndex: 999,
           }}
         >
-          <KeyboardArrowUp />
+          <ArrowUp size={24} />
         </Fab>
       )}
     </Box>

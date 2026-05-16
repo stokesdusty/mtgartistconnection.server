@@ -16,7 +16,7 @@ import {
   Chip
 } from "@mui/material";
 import { EventCardSkeleton } from "../shared/Skeletons";
-import { KeyboardArrowUp } from "@mui/icons-material";
+import { ArrowUp } from "@phosphor-icons/react";
 import { GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import SigningEvent from "./SigningEvent";
@@ -424,7 +424,7 @@ const Calendar = () => {
           size="medium"
           sx={calendarStyles.scrollToTopFab}
         >
-          <KeyboardArrowUp />
+          <ArrowUp size={24} />
         </Fab>
       )}
     </Box>

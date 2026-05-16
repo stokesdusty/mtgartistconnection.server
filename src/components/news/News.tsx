@@ -18,10 +18,7 @@ import {
   Button,
 } from '@mui/material';
 import { NewsCardSkeleton } from '../shared/Skeletons';
-import PersonIcon from '@mui/icons-material/Person';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ClearIcon from '@mui/icons-material/Clear';
+import { User, CalendarBlank, ArrowRight, X } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { newsStyles, getDateChipStyles } from '../../styles/news-styles';
 import { colors } from '../../styles/design-tokens';
@@ -245,7 +242,7 @@ const News: React.FC = () => {
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<ClearIcon />}
+                startIcon={<X size={16} />}
                 onClick={clearFilters}
                 sx={newsStyles.clearButton}
               >
@@ -278,7 +275,7 @@ const News: React.FC = () => {
             </Typography>
             <Button
               variant="outlined"
-              startIcon={<ClearIcon />}
+              startIcon={<X size={16} />}
               onClick={clearFilters}
               sx={newsStyles.clearButton}
             >
@@ -317,7 +314,7 @@ const News: React.FC = () => {
                         artistNames.map((name) => (
                           <Chip
                             key={name}
-                            icon={<PersonIcon sx={{ color: `${colors.primary.contrast} !important` }} />}
+                            icon={<User size={14} weight="duotone" color={colors.primary.contrast} />}
                             label={name}
                             onClick={(e) => handleArtistClick(name, e)}
                             sx={newsStyles.artistChip}
@@ -336,7 +333,7 @@ const News: React.FC = () => {
                         />
                       )}
                       <Box sx={newsStyles.dateText}>
-                        <CalendarTodayIcon sx={{ fontSize: '0.9rem' }} />
+                        <CalendarBlank size={15} weight="duotone" />
                         <Typography component="span" sx={{ fontSize: '0.85rem' }}>
                           {formatDate(article.publishedAt || article.generatedAt) || 'Recently published'}
                         </Typography>
@@ -348,7 +345,7 @@ const News: React.FC = () => {
                     </Typography>
 
                     <Box sx={newsStyles.readMore}>
-                      Read more <ArrowForwardIcon sx={{ fontSize: '1rem' }} />
+                      Read more <ArrowRight size={16} style={{ marginLeft: 4 }} />
                     </Box>
                   </CardContent>
                 </Card>

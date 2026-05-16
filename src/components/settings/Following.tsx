@@ -13,7 +13,7 @@ import {
   Chip,
   Alert,
 } from "@mui/material";
-import { Close, Add } from "@mui/icons-material";
+import { X, Plus } from "@phosphor-icons/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -244,7 +244,7 @@ const Following = () => {
                           }}
                           aria-label={`Unfollow ${artistName}`}
                         >
-                          <Close fontSize="small" />
+                          <X size={18} />
                         </IconButton>
                       </Box>
                     ))}
@@ -374,7 +374,7 @@ const Following = () => {
                     },
                   }}
                 >
-                  <Add />
+                  <Plus size={24} />
                 </IconButton>
               </Box>
 
@@ -385,7 +385,7 @@ const Following = () => {
                       key={state}
                       label={state}
                       onDelete={() => handleRemoveState(state)}
-                      deleteIcon={<Close />}
+                      deleteIcon={<X size={18} />}
                       sx={{
                         backgroundColor: '#f0f9f4',
                         border: '1px solid #2d4a36',

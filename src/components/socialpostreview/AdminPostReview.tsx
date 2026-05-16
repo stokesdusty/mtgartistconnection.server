@@ -13,10 +13,7 @@ import {
   Tooltip,
   ButtonGroup,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import ArticleIcon from '@mui/icons-material/Article';
+import { Trash, CheckCircle, ArrowSquareOut, Article } from "@phosphor-icons/react";
 import { GET_ARTIST_POSTS } from '../graphql/queries';
 import { UPDATE_ARTIST_POST, DELETE_ARTIST_POST, DELETE_REVIEWED_ARTIST_POSTS, GENERATE_NEWS_ARTICLE } from '../graphql/mutations';
 
@@ -287,7 +284,7 @@ const AdminPostReview: React.FC = () => {
                     color="error"
                     size="small"
                     onClick={handleDeleteAllReviewed}
-                    startIcon={<DeleteIcon />}
+                    startIcon={<Trash size={16} />}
                     sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
                   >
                     Delete All Reviewed
@@ -368,7 +365,7 @@ const AdminPostReview: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           size="small"
-                          endIcon={<OpenInNewIcon />}
+                          endIcon={<ArrowSquareOut size={16} />}
                           sx={{
                             textTransform: 'none',
                             color: '#2d4a36',
@@ -387,7 +384,7 @@ const AdminPostReview: React.FC = () => {
                           variant="outlined"
                           size="small"
                           onClick={() => handleGenerateArticle(post.id)}
-                          startIcon={generatingArticle === post.id ? <CircularProgress size={16} /> : <ArticleIcon />}
+                          startIcon={generatingArticle === post.id ? <CircularProgress size={16} /> : <Article size={16} weight="duotone" />}
                           disabled={generatingArticle === post.id}
                           sx={{
                             ...styles.outlineButton,
@@ -403,7 +400,7 @@ const AdminPostReview: React.FC = () => {
                             variant="contained"
                             size="small"
                             onClick={() => handleReview(post.id)}
-                            startIcon={<CheckCircleIcon />}
+                            startIcon={<CheckCircle size={16} weight="duotone" />}
                             sx={{
                               ...styles.button,
                               backgroundColor: '#27ae60',
@@ -427,7 +424,7 @@ const AdminPostReview: React.FC = () => {
                             },
                           }}
                         >
-                          <DeleteIcon />
+                          <Trash size={20} />
                         </IconButton>
                       </Tooltip>
                     </Box>

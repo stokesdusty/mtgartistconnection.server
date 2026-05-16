@@ -12,6 +12,7 @@
     "@mui/icons-material": "^5.18.0",
     "@mui/material": "^5.16.14",
     "@mui/x-date-pickers": "^7.27.3",
+    "@phosphor-icons/react": "^2.1.10",
     "@reduxjs/toolkit": "^1.9.5",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -48,8 +49,12 @@
     ],
     "overrides": [
       {
-        "files": ["src/**/*.{ts,tsx}"],
-        "excludedFiles": ["src/styles/design-tokens.ts"],
+        "files": [
+          "src/**/*.{ts,tsx}"
+        ],
+        "excludedFiles": [
+          "src/styles/design-tokens.ts"
+        ],
         "rules": {
           "no-restricted-syntax": [
             "warn",

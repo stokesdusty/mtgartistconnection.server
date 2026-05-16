@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
-import { CalendarToday, LocationOn, PeopleAlt, Event, GetApp, ArrowBack } from '@mui/icons-material';
+import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ArrowLeft } from "@phosphor-icons/react";
+import { colors } from "../../styles/design-tokens";
 import { useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams, useNavigate } from "react-router-dom";
@@ -128,7 +129,7 @@ const EventDetail = () => {
               {eventError ? `Error loading event: ${eventError.message}` : 'Event not found'}
             </Typography>
             <Button
-              startIcon={<ArrowBack />}
+              startIcon={<ArrowLeft size={18} />}
               onClick={() => navigate('/calendar')}
               sx={{ mt: 2, color: '#2d4a36' }}
             >
@@ -175,20 +176,20 @@ const EventDetail = () => {
               mt: 3,
             }}>
               <Box sx={contentPageStyles.infoItem}>
-                <CalendarToday fontSize="small" />
+                <CalendarBlank size={18} weight="duotone" />
                 <Typography>
                   {startDateFormatted}{startDateFormatted !== endDateFormatted && ` - ${endDateFormatted}`}
                 </Typography>
               </Box>
 
               <Box sx={contentPageStyles.infoItem}>
-                <LocationOn fontSize="small" />
+                <MapPin size={18} weight="duotone" />
                 <Typography>{event.city}</Typography>
               </Box>
 
               <Button
                 onClick={handleCalendarMenuOpen}
-                startIcon={<Event />}
+                startIcon={<Calendar size={18} weight="duotone" />}
                 sx={{
                   color: '#2d4a36',
                   textTransform: 'none',
@@ -217,26 +218,26 @@ const EventDetail = () => {
           >
             <MenuItem onClick={handleAddToGoogle} sx={{ fontSize: '0.875rem', py: 1.5 }}>
               <ListItemIcon>
-                <Event fontSize="small" sx={{ color: '#2d4a36' }} />
+                <Calendar size={18} weight="duotone" color={colors.primary.main} />
               </ListItemIcon>
               <ListItemText>Google Calendar</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleAddToOutlook} sx={{ fontSize: '0.875rem', py: 1.5 }}>
               <ListItemIcon>
-                <Event fontSize="small" sx={{ color: '#2d4a36' }} />
+                <Calendar size={18} weight="duotone" color={colors.primary.main} />
               </ListItemIcon>
               <ListItemText>Outlook Calendar</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleDownloadICal} sx={{ fontSize: '0.875rem', py: 1.5 }}>
               <ListItemIcon>
-                <GetApp fontSize="small" sx={{ color: '#2d4a36' }} />
+                <DownloadSimple size={18} color={colors.primary.main} />
               </ListItemIcon>
               <ListItemText>Apple/Other (.ics)</ListItemText>
             </MenuItem>
           </Menu>
 
           <Button
-            startIcon={<ArrowBack />}
+            startIcon={<ArrowLeft size={18} />}
             onClick={() => navigate('/calendar')}
             sx={{
               mb: 3,
@@ -253,7 +254,7 @@ const EventDetail = () => {
 
           <Box sx={contentPageStyles.artistsContainer}>
             <Box sx={{ ...contentPageStyles.artistsHeaderLeft, mb: 2 }}>
-              <PeopleAlt fontSize="small" />
+              <UsersThree size={18} weight="duotone" />
               <Typography variant="subtitle1" sx={contentPageStyles.artistsHeaderText}>
                 Artists
                 {artistsWithImages.length > 0 && ` (${artistsWithImages.length})`}
@@ -323,7 +324,7 @@ const EventDetail = () => {
                               backgroundColor: '#e0e0e0',
                             }}
                           >
-                            <PeopleAlt sx={{ fontSize: 40, color: '#9e9e9e' }} />
+                            <UsersThree size={40} weight="duotone" color={colors.neutral[500]} />
                           </Box>
                         )}
                       </Box>

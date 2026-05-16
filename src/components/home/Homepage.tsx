@@ -14,20 +14,18 @@ import {
   ListSubheader,
 } from "@mui/material";
 import { ArtistGridSkeleton } from "../shared/Skeletons";
-import ClearAllIcon from "@mui/icons-material/ClearAll";
+import { Eraser, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react";
 import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
 import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import SearchIcon from "@mui/icons-material/Search";
+
 import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
 import { homepageStyles } from "../../styles/homepage-styles";
 import { colors } from "../../styles/design-tokens";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ShuffleIcon from "@mui/icons-material/Shuffle";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
 
@@ -438,7 +436,7 @@ const Homepage = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon />
+                      <MagnifyingGlass size={20} />
                     </InputAdornment>
                   ),
                 }}
@@ -447,7 +445,7 @@ const Homepage = () => {
                 size="small"
                 variant="contained"
                 onClick={handleRandomArtist}
-                startIcon={<ShuffleIcon />}
+                startIcon={<Shuffle size={20} />}
                 sx={{ ...homepageStyles.randomButton, fontSize: '0.8125rem' }}
               >
                 Random Artist
@@ -587,7 +585,7 @@ const Homepage = () => {
           {hasActiveFilters && activeFilterChips.length > 1 && (
             <Button
               size="small"
-              startIcon={<ClearAllIcon />}
+              startIcon={<Eraser size={16} />}
               onClick={handleClearAllFilters}
               sx={homepageStyles.clearAllButton}
             >
@@ -622,7 +620,7 @@ const Homepage = () => {
           onClick={scrollToTop}
           sx={homepageStyles.scrollToTop}
         >
-          <KeyboardArrowUpIcon />
+          <ArrowUp size={24} />
         </Fab>
       </Fade>
     </Box>

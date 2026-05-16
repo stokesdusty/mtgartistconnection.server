@@ -9,7 +9,7 @@ import {
   Container,
   Paper,
 } from "@mui/material";
-import AutorenewIcon from '@mui/icons-material/Autorenew';
+import { ArrowsCounterClockwise } from "@phosphor-icons/react";
 import axios from "axios";
 import { contentPageStyles } from "../../styles/content-page-styles";
 
@@ -133,7 +133,7 @@ const RandomFlavorText = () => {
               <Button
                 variant="contained"
                 startIcon={
-                  isLoading ? <CircularProgress size={24} color="inherit" /> : <AutorenewIcon />
+                  isLoading ? <CircularProgress size={24} color="inherit" /> : <ArrowsCounterClockwise size={24} />
                 }
                 sx={contentPageStyles.reloadButton}
                 onClick={handleReload}

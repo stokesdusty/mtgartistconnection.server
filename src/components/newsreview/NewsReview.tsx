@@ -19,12 +19,7 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import EditIcon from '@mui/icons-material/Edit';
-import PublishIcon from '@mui/icons-material/Publish';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import AddIcon from '@mui/icons-material/Add';
+import { Trash, CheckCircle, PencilSimple, UploadSimple, ArrowSquareOut, Plus } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { UPDATE_NEWS_REVIEW, DELETE_NEWS_REVIEW } from '../graphql/mutations';
 
@@ -276,7 +271,7 @@ const NewsReview: React.FC = () => {
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                 <Button
                   variant="contained"
-                  startIcon={<AddIcon />}
+                  startIcon={<Plus size={18} />}
                   onClick={() => navigate('/submitarticle')}
                   sx={styles.button}
                 >
@@ -346,7 +341,7 @@ const NewsReview: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           size="small"
-                          endIcon={<OpenInNewIcon />}
+                          endIcon={<ArrowSquareOut size={16} />}
                           sx={{ textTransform: 'none', color: '#2d4a36', fontWeight: 600, fontSize: '0.875rem' }}
                         >
                           View Source Post
@@ -360,7 +355,7 @@ const NewsReview: React.FC = () => {
                           variant="outlined"
                           size="small"
                           onClick={() => handleEdit(article)}
-                          startIcon={<EditIcon />}
+                          startIcon={<PencilSimple size={16} />}
                           sx={styles.outlineButton}
                         >
                           Edit
@@ -373,7 +368,7 @@ const NewsReview: React.FC = () => {
                             variant="contained"
                             size="small"
                             onClick={() => handleMarkReviewed(article.id)}
-                            startIcon={<CheckCircleIcon />}
+                            startIcon={<CheckCircle size={16} weight="duotone" />}
                             sx={{ ...styles.button, backgroundColor: '#27ae60', '&:hover': { backgroundColor: '#1e8449' } }}
                           >
                             Mark Reviewed
@@ -387,7 +382,7 @@ const NewsReview: React.FC = () => {
                             variant="contained"
                             size="small"
                             onClick={() => handlePublish(article.id)}
-                            startIcon={<PublishIcon />}
+                            startIcon={<UploadSimple size={16} />}
                             sx={{ ...styles.button, backgroundColor: '#3498db', '&:hover': { backgroundColor: '#2980b9' } }}
                           >
                             Publish
@@ -397,7 +392,7 @@ const NewsReview: React.FC = () => {
 
                       <Tooltip title="Delete article">
                         <IconButton onClick={() => handleDelete(article.id)} size="small" sx={{ color: '#e74c3c', '&:hover': { backgroundColor: 'rgba(231, 76, 60, 0.08)' } }}>
-                          <DeleteIcon />
+                          <Trash size={20} />
                         </IconButton>
                       </Tooltip>
                     </Box>

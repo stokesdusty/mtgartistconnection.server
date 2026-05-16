@@ -13,9 +13,10 @@ import {
   } from "@mui/material";
   import { GET_ARTISTSBYEVENTID, GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
   import { useQuery } from "@apollo/client";
-  import { CalendarToday, LocationOn, PeopleAlt, Event, GetApp, Share, ExpandMore } from '@mui/icons-material';
+  import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ShareNetwork, CaretDown } from "@phosphor-icons/react";
   import { useMemo, useState } from "react";
   import { contentPageStyles } from "../../styles/content-page-styles";
+  import { colors } from "../../styles/design-tokens";
   import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
   
   interface SigningEventComponentProps {
@@ -184,20 +185,20 @@ import {
             justifyContent: 'center',
           }}>
             <Box sx={contentPageStyles.infoItem}>
-              <CalendarToday fontSize="small" />
+              <CalendarBlank size={18} weight="duotone" />
               <Typography>
                 {startDateFormatted}{startDateFormatted !== endDateFormatted && ` - ${endDateFormatted}`}
               </Typography>
             </Box>
 
             <Box sx={contentPageStyles.infoItem}>
-              <LocationOn fontSize="small" />
+              <MapPin size={18} weight="duotone" />
               <Typography>{props.city}</Typography>
             </Box>
 
             <Button
               onClick={handleCalendarMenuOpen}
-              startIcon={<Event />}
+              startIcon={<Calendar size={18} weight="duotone" />}
               sx={{
                 color: '#2d4a36',
                 textTransform: 'none',
@@ -223,7 +224,7 @@ import {
               }}
               title="Copy link to event"
             >
-              <Share fontSize="small" />
+              <ShareNetwork size={18} />
             </IconButton>
           </Box>
         </Box>
@@ -241,19 +242,19 @@ import {
         >
           <MenuItem onClick={handleAddToGoogle} sx={{ fontSize: '0.875rem', py: 1.5 }}>
             <ListItemIcon>
-              <Event fontSize="small" sx={{ color: '#2d4a36' }} />
+              <Calendar size={18} weight="duotone" color={colors.primary.main} />
             </ListItemIcon>
             <ListItemText>Google Calendar</ListItemText>
           </MenuItem>
           <MenuItem onClick={handleAddToOutlook} sx={{ fontSize: '0.875rem', py: 1.5 }}>
             <ListItemIcon>
-              <Event fontSize="small" sx={{ color: '#2d4a36' }} />
+              <Calendar size={18} weight="duotone" color={colors.primary.main} />
             </ListItemIcon>
             <ListItemText>Outlook Calendar</ListItemText>
           </MenuItem>
           <MenuItem onClick={handleDownloadICal} sx={{ fontSize: '0.875rem', py: 1.5 }}>
             <ListItemIcon>
-              <GetApp fontSize="small" sx={{ color: '#2d4a36' }} />
+              <DownloadSimple size={18} color={colors.primary.main} />
             </ListItemIcon>
             <ListItemText>Apple/Other (.ics)</ListItemText>
           </MenuItem>
@@ -268,20 +269,16 @@ import {
             onClick={toggleCollapsed}
           >
             <Box sx={contentPageStyles.artistsHeaderLeft}>
-              <PeopleAlt fontSize="small" />
+              <UsersThree size={18} weight="duotone" />
               <Typography variant="subtitle1" sx={contentPageStyles.artistsHeaderText}>
                 Artists
                 {artistData?.mapArtistToEventByEventId &&
                   ` (${artistData.mapArtistToEventByEventId.length})`}
               </Typography>
             </Box>
-            <ExpandMore
-              sx={{
-                color: '#757575',
-                transition: 'transform 0.2s',
-                transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
-              }}
-            />
+            <Box component="span" sx={{ color: 'text.secondary', transition: 'transform 0.2s', transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)', display: 'inline-flex' }}>
+              <CaretDown size={18} />
+            </Box>
           </Box>
 
           {!isCollapsed && (
@@ -343,7 +340,7 @@ import {
                             backgroundColor: '#e0e0e0',
                           }}
                         >
-                          <PeopleAlt sx={{ fontSize: 24, color: '#9e9e9e' }} />
+                          <UsersThree size={24} weight="duotone" color={colors.neutral[500]} />
                         </Box>
                       )}
                     </Box>

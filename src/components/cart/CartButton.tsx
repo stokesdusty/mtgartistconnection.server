@@ -8,7 +8,7 @@ import {
   Popover,
   Fab,
 } from "@mui/material";
-import { ShoppingCart, Close } from "@mui/icons-material";
+import { ShoppingCart, X } from "@phosphor-icons/react";
 import { useCart, CartItem } from '../../CartContext';
 
 const formatPrice = (cents: number | null): string => {
@@ -82,7 +82,7 @@ const CartButton = () => {
         }}
       >
         <Badge badgeContent={totalItems} color="error">
-          <ShoppingCart />
+          <ShoppingCart size={24} weight="duotone" />
         </Badge>
       </Fab>
 
@@ -109,7 +109,7 @@ const CartButton = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
             <Typography variant="subtitle1" fontWeight="bold">Cart ({totalItems} items)</Typography>
             <IconButton onClick={() => setCartAnchorEl(null)} size="small">
-              <Close fontSize="small" />
+              <X size={18} />
             </IconButton>
           </Box>
 

@@ -13,10 +13,7 @@ import {
   CardContent,
   Avatar,
 } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { User, CalendarBlank, ArrowRight, ArrowLeft } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS_BY_ARTIST } from '../graphql/queries';
 
 interface NewsArticle {
@@ -222,7 +219,7 @@ const ArtistNews: React.FC = () => {
           onClick={() => navigate(`/artist/${encodeURIComponent(decodedArtistName)}`)}
           sx={styles.backButton}
         >
-          <ArrowBackIcon sx={{ fontSize: '1.2rem' }} />
+          <ArrowLeft size={20} />
           Back to {decodedArtistName}
         </Box>
 
@@ -267,14 +264,14 @@ const ArtistNews: React.FC = () => {
 
                   <Box sx={styles.metaInfo}>
                     <Chip
-                      icon={<PersonIcon sx={{ color: '#ffffff !important' }} />}
+                      icon={<User size={14} weight="duotone" color="#ffffff" />}
                       label={article.artistName}
                       onClick={(e) => handleArtistClick(article.artistName, e)}
                       sx={styles.artistChip}
                       size="small"
                     />
                     <Box sx={styles.dateText}>
-                      <CalendarTodayIcon sx={{ fontSize: '0.9rem' }} />
+                      <CalendarBlank size={15} weight="duotone" />
                       <Typography component="span" sx={{ fontSize: '0.85rem' }}>
                         {formatDate(article.publishedAt || article.generatedAt) || 'Recently published'}
                       </Typography>
@@ -286,7 +283,7 @@ const ArtistNews: React.FC = () => {
                   </Typography>
 
                   <Box sx={styles.readMore}>
-                    Read more <ArrowForwardIcon sx={{ fontSize: '1rem' }} />
+                    Read more <ArrowRight size={16} style={{ marginLeft: 4 }} />
                   </Box>
                 </CardContent>
               </Card>

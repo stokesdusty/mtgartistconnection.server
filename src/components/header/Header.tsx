@@ -20,10 +20,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import MenuIcon from '@mui/icons-material/Menu';
-import LogoutIcon from '@mui/icons-material/Logout';
-import SettingsIcon from '@mui/icons-material/Settings';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import { List as ListIcon, SignOut, GearSix, Heart } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { shadows } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
@@ -224,7 +221,7 @@ const Header = () => {
                 sx={headerStyles.menuButton}
                 edge="end"
               >
-                <MenuIcon />
+                <ListIcon size={24} />
               </IconButton>
               <Menu
                 id="basic-menu"
@@ -275,7 +272,7 @@ const Header = () => {
             <ListItem disablePadding>
               <ListItemButton onClick={handleFollowingClick} sx={headerStyles.drawerListItem}>
                 <ListItemIcon>
-                  <FavoriteIcon sx={headerStyles.drawerIcon} />
+                  <Heart size={20} weight="duotone" />
                 </ListItemIcon>
                 <ListItemText primary="Following" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>
@@ -283,7 +280,7 @@ const Header = () => {
             <ListItem disablePadding>
               <ListItemButton onClick={handleSettingsClick} sx={headerStyles.drawerListItem}>
                 <ListItemIcon>
-                  <SettingsIcon sx={headerStyles.drawerIcon} />
+                  <GearSix size={20} />
                 </ListItemIcon>
                 <ListItemText primary="Settings" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>
@@ -292,7 +289,7 @@ const Header = () => {
               <ListItem disablePadding>
                 <ListItemButton onClick={handleAddArtistClick} sx={headerStyles.drawerListItem}>
                   <ListItemIcon>
-                    <SettingsIcon sx={headerStyles.drawerIcon} />
+                    <GearSix size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Add Artist" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
                 </ListItemButton>
@@ -300,7 +297,7 @@ const Header = () => {
               <ListItem disablePadding>
                 <ListItemButton onClick={handleReviewSocialsClick} sx={headerStyles.drawerListItem}>
                   <ListItemIcon>
-                    <SettingsIcon sx={headerStyles.drawerIcon} />
+                    <GearSix size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Review Socials" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
                 </ListItemButton>
@@ -308,7 +305,7 @@ const Header = () => {
               <ListItem disablePadding>
                 <ListItemButton onClick={handleReviewNewsClick} sx={headerStyles.drawerListItem}>
                   <ListItemIcon>
-                    <SettingsIcon sx={headerStyles.drawerIcon} />
+                    <GearSix size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Review News" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
                 </ListItemButton>
@@ -318,7 +315,7 @@ const Header = () => {
             <ListItem disablePadding>
               <ListItemButton onClick={handleLogout} sx={headerStyles.drawerListItemLogout}>
                 <ListItemIcon>
-                  <LogoutIcon sx={headerStyles.drawerIcon} />
+                  <SignOut size={20} />
                 </ListItemIcon>
                 <ListItemText primary="Sign Out" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>

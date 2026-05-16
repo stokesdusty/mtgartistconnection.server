@@ -1,5 +1,5 @@
 import { Link, Box } from "@mui/material";
-import { ChevronRight } from "@mui/icons-material";
+import { CaretRight } from "@phosphor-icons/react";
 import { artistStyles } from "../../styles/artist-styles";
 
 interface ExternalLinkCardProps {
@@ -36,7 +36,7 @@ const ExternalLinkCard = ({
       <Box component="span" sx={{ flex: 1 }}>
         {label}
       </Box>
-      <ChevronRight sx={{ fontSize: 20, opacity: 0.6, flexShrink: 0 }} />
+      <CaretRight size={20} style={{ opacity: 0.6, flexShrink: 0 }} />
     </Link>
   );
 };

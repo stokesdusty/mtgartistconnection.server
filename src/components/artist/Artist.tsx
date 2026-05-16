@@ -15,7 +15,7 @@ import {
 import { ArtistPageSkeleton } from "../shared/Skeletons";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { colors } from "../../styles/design-tokens";
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { Question, CalendarBlank, MapPin, BellRinging, UserPlus, PencilSimple, Cards } from "@phosphor-icons/react";
 import { TbWorldWww } from "react-icons/tb";
 import {
   FaArtstation,
@@ -29,12 +29,11 @@ import { FaBluesky } from "react-icons/fa6";
 import React, { useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 import { artistStyles } from "../../styles/artist-styles";
-import { CalendarToday, LocationOn, NotificationsActive, PersonAdd, Edit } from '@mui/icons-material';
+
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ArtistNewsSection from './ArtistNewsSection';
 import ExternalLinkCard from './ExternalLinkCard';
-import { Style, CollectionsBookmark } from '@mui/icons-material';
 
 interface ArtistSocialLink {
   label: string;
@@ -70,13 +69,13 @@ const ArtistEventCard = ({ event }: { event: any }) => {
       )}
       <Box sx={artistStyles.eventDetails}>
         <Box sx={artistStyles.eventDetail}>
-          <CalendarToday fontSize="small" sx={{ color: 'primary.main' }} />
+          <CalendarBlank size={16} weight="duotone" color={colors.primary.main} />
           <Typography variant="body2">
             {startDateFormatted}{startDateFormatted !== endDateFormatted && ` - ${endDateFormatted}`}
           </Typography>
         </Box>
         <Box sx={artistStyles.eventDetail}>
-          <LocationOn fontSize="small" sx={{ color: 'primary.main' }} />
+          <MapPin size={16} weight="duotone" color={colors.primary.main} />
           <Typography variant="body2">{event.city}</Typography>
         </Box>
       </Box>
@@ -330,7 +329,7 @@ const Artist = () => {
               {userData?.me?.role === 'admin' && (
                 <Button
                   variant="outlined"
-                  startIcon={<Edit />}
+                  startIcon={<PencilSimple size={18} />}
                   onClick={() => navigate(`/editartist/${artistByName.id}`)}
                   sx={artistStyles.editButton}
                 >
@@ -342,7 +341,7 @@ const Artist = () => {
                 variant={isFollowing ? 'contained' : 'outlined'}
                 size="small"
                 onClick={handleFollowToggle}
-                startIcon={isFollowing ? <NotificationsActive /> : <PersonAdd />}
+                startIcon={isFollowing ? <BellRinging size={18} weight="duotone" /> : <UserPlus size={18} />}
                 sx={isFollowing ? artistStyles.followButtonActive : artistStyles.followButtonInactive}
               >
                 {!isLoggedIn
@@ -358,7 +357,7 @@ const Artist = () => {
             <ExternalLinkCard
               href={`/allcards/${artistByName.name}`}
               label={`View all ${artistByName.name} cards`}
-              logo={<CollectionsBookmark sx={{ fontSize: 20 }} />}
+              logo={<Cards size={20} weight="duotone" />}
               variant="primary"
             />
             {artistByName.omalink && (
@@ -479,14 +478,9 @@ const Artist = () => {
                       arrow
                       placement="top"
                     >
-                      <HelpOutlineIcon
-                        sx={{
-                          fontSize: '0.9rem',
-                          color: 'text.secondary',
-                          cursor: 'help',
-                          verticalAlign: 'middle',
-                          marginBottom: '5px',
-                        }}
+                      <Question
+                        size={16}
+                        style={{ cursor: 'help', verticalAlign: 'middle', marginBottom: '5px' }}
                       />
                     </Tooltip>
                   </Box>

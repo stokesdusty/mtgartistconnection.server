@@ -5,7 +5,7 @@ import {
     Paper,
     Link,
   } from "@mui/material";
-  import EmailIcon from '@mui/icons-material/Email';
+  import { Envelope } from "@phosphor-icons/react";
   import { FaBluesky } from "react-icons/fa6";
   import { contentPageStyles } from "../../styles/content-page-styles";
   import { usePageTitle } from "../../hooks/usePageTitle";
@@ -49,7 +49,7 @@ import {
               </Typography>
 
               <Box sx={contentPageStyles.contactMethod}>
-                <EmailIcon sx={contentPageStyles.contactIcon} />
+                <Envelope size={24} weight="duotone" />
                 <Link
                   href="mailto:mtgartistconnection@gmail.com"
                   sx={contentPageStyles.contactLink}

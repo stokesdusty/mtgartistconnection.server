@@ -6,10 +6,10 @@ import {
   Typography,
   Link,
 } from '@mui/material';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { CalendarBlank, ArrowRight } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { artistStyles } from '../../styles/artist-styles';
+import { colors } from '../../styles/design-tokens';
 
 interface NewsArticle {
   id: string;
@@ -94,7 +94,7 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
                   }}
                 >
                   {article.title}
-                  <ArrowForwardIcon sx={{ fontSize: '1rem', color: '#2d4a36', ml: 1 }} />
+                  <ArrowRight size={16} color={colors.primary.main} style={{ marginLeft: 4 }} />
                 </Typography>
 
                 {(article.publishedAt || article.generatedAt) && (
@@ -107,7 +107,7 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
                       color: '#757575',
                     }}
                   >
-                    <CalendarTodayIcon sx={{ fontSize: '0.8rem' }} />
+                    <CalendarBlank size={14} weight="duotone" />
                     <Typography sx={{ fontSize: '0.8rem' }}>
                       {formatDate(article.publishedAt || article.generatedAt)}
                     </Typography>
@@ -146,7 +146,7 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
                 },
               }}
             >
-              See all news for {artistName} <ArrowForwardIcon sx={{ fontSize: '1rem' }} />
+              See all news for {artistName} <ArrowRight size={16} style={{ marginLeft: 4 }} />
             </Link>
           </Box>
         </Box>

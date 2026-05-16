@@ -19,11 +19,7 @@ import {
   Modal,
   Backdrop,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { X, User, CalendarBlank, ArrowSquareOut, ArrowLeft } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEW } from '../graphql/queries';
 
 interface NewsArticleData {
@@ -244,7 +240,7 @@ const NewsArticle: React.FC = () => {
             onClick={() => navigate('/news')}
             sx={styles.backButton}
           >
-            <ArrowBackIcon sx={{ fontSize: '1.2rem' }} />
+            <ArrowLeft size={20} />
             Back to News
           </Box>
           <Alert severity="warning" sx={{ borderRadius: '12px', border: '1px solid #f39c12', backgroundColor: '#fffbf0' }}>
@@ -271,7 +267,7 @@ const NewsArticle: React.FC = () => {
           onClick={() => navigate('/news')}
           sx={styles.backButton}
         >
-          <ArrowBackIcon sx={{ fontSize: '1.2rem' }} />
+          <ArrowLeft size={20} />
           Back to News
         </Box>
 
@@ -296,7 +292,7 @@ const NewsArticle: React.FC = () => {
                 artistNames.map((name) => (
                   <Chip
                     key={name}
-                    icon={<PersonIcon sx={{ color: '#ffffff !important' }} />}
+                    icon={<User size={14} weight="duotone" color="#ffffff" />}
                     label={name}
                     onClick={() => handleArtistClick(name)}
                     sx={styles.artistChip}
@@ -313,7 +309,7 @@ const NewsArticle: React.FC = () => {
                 />
               )}
               <Box sx={styles.dateText}>
-                <CalendarTodayIcon sx={{ fontSize: '1rem' }} />
+                <CalendarBlank size={16} weight="duotone" />
                 <Typography component="span" sx={{ fontSize: '0.9rem' }}>
                   {formatDate(article.publishedAt || article.generatedAt) || 'Recently published'}
                 </Typography>
@@ -382,7 +378,7 @@ const NewsArticle: React.FC = () => {
                 href={article.sourcePostUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                endIcon={<OpenInNewIcon />}
+                endIcon={<ArrowSquareOut size={18} />}
                 sx={styles.sourceButton}
               >
                 View Original Post
@@ -426,7 +422,7 @@ const NewsArticle: React.FC = () => {
                 },
               }}
             >
-              <CloseIcon fontSize="large" />
+              <X size={32} />
             </IconButton>
             <Box
               component="img"

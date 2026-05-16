@@ -13,10 +13,7 @@ import {
   Paper,
   Chip,
 } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { PaperPlaneRight, ArrowLeft, CloudArrowUp, Trash } from "@phosphor-icons/react";
 import { GET_ARTISTS_FOR_HOMEPAGE } from '../graphql/queries';
 import { GENERATE_MANUAL_NEWS_ARTICLE, UPLOAD_NEWS_IMAGE } from '../graphql/mutations';
 import { useSelector } from 'react-redux';
@@ -236,7 +233,7 @@ const ManualArticleSubmit: React.FC = () => {
           onClick={() => navigate('/reviewnews')}
           sx={styles.backButton}
         >
-          <ArrowBackIcon sx={{ fontSize: '1.2rem' }} />
+          <ArrowLeft size={20} />
           Back to News Review
         </Box>
 
@@ -360,7 +357,7 @@ const ManualArticleSubmit: React.FC = () => {
                   <Button
                     variant="outlined"
                     component="span"
-                    startIcon={<CloudUploadIcon />}
+                    startIcon={<CloudArrowUp size={18} weight="duotone" />}
                     sx={{
                       borderColor: '#2d4a36',
                       color: '#2d4a36',
@@ -389,7 +386,7 @@ const ManualArticleSubmit: React.FC = () => {
                     variant="contained"
                     size="small"
                     onClick={handleRemoveImage}
-                    startIcon={<DeleteIcon />}
+                    startIcon={<Trash size={18} />}
                     sx={{
                       position: 'absolute',
                       top: 8,
@@ -414,7 +411,7 @@ const ManualArticleSubmit: React.FC = () => {
               variant="contained"
               size="large"
               disabled={generating || uploading || !content.trim()}
-              endIcon={(generating || uploading) ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+              endIcon={(generating || uploading) ? <CircularProgress size={20} color="inherit" /> : <PaperPlaneRight size={18} />}
               sx={styles.submitButton}
             >
               {uploading ? 'Uploading Image...' : generating ? 'Generating Article...' : 'Generate Article'}

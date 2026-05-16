@@ -16,7 +16,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { CaretDown } from "@phosphor-icons/react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { contentPageStyles } from "../../styles/content-page-styles";
 
@@ -229,7 +229,7 @@ const SigningServices = () => {
               '&:before': { display: 'none' },
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <AccordionSummary expandIcon={<CaretDown size={20} />}>
               <Typography variant="h2" sx={{ ...contentPageStyles.sectionTitle, mb: 0 }}>
                 How Do Signing Services Work?
               </Typography>

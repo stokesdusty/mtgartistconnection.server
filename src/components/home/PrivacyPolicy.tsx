@@ -1,6 +1,6 @@
 import { Box, Container, Typography, Breadcrumbs, Link, Paper } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { CaretRight } from "@phosphor-icons/react";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { colors, spacing } from "../../styles/design-tokens";
 import { usePageTitle } from "../../hooks/usePageTitle";
@@ -13,7 +13,7 @@ const PrivacyPolicy = () => {
       <Container maxWidth="lg">
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
           <Breadcrumbs
-            separator={<NavigateNextIcon fontSize="small" />}
+            separator={<CaretRight size={16} />}
             sx={{
               marginBottom: spacing.xl,
               '& a': {
