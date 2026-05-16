@@ -147,22 +147,6 @@ const EventDetail = () => {
     <Box sx={contentPageStyles.container}>
       <Container maxWidth="lg">
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
-          <Button
-            startIcon={<ArrowBack />}
-            onClick={() => navigate('/calendar')}
-            sx={{
-              mb: 3,
-              color: '#2d4a36',
-              textTransform: 'none',
-              fontWeight: 500,
-              '&:hover': {
-                backgroundColor: '#fafafa',
-              }
-            }}
-          >
-            Back to Calendar
-          </Button>
-
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             {event.url ? (
               <Link
@@ -250,6 +234,22 @@ const EventDetail = () => {
               <ListItemText>Apple/Other (.ics)</ListItemText>
             </MenuItem>
           </Menu>
+
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate('/calendar')}
+            sx={{
+              mb: 3,
+              color: '#2d4a36',
+              textTransform: 'none',
+              fontWeight: 500,
+              '&:hover': {
+                backgroundColor: '#fafafa',
+              }
+            }}
+          >
+            Back to Calendar
+          </Button>
 
           <Box sx={contentPageStyles.artistsContainer}>
             <Box sx={{ ...contentPageStyles.artistsHeaderLeft, mb: 2 }}>

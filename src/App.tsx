@@ -34,6 +34,7 @@ import ArtistCardAnalysis from "./components/artist/ArtistCardBreakdown";
 import { LoadingProvider } from "./LoadingContext";
 import Settings from "./components/settings/Settings";
 import Following from "./components/settings/Following";
+import ScrollToTop from "./components/shared/ScrollToTop";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -50,6 +51,7 @@ function App() {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <LoadingProvider>
         <div>
+          <ScrollToTop />
           <header>
             <Header />
           </header>

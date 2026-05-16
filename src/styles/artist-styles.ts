@@ -302,6 +302,12 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     borderRadius: borderRadius.md,
     padding: spacing.md,
     border: `1px solid ${colors.neutral[200]}`,
+    cursor: 'pointer',
+    transition: transitions.base,
+    '&:hover': {
+      borderColor: colors.primary.main,
+      boxShadow: shadows.sm,
+    },
   },
   eventName: {
     color: colors.text.primary,

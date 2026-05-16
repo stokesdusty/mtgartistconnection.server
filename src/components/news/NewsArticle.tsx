@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -48,10 +48,6 @@ const NewsArticle: React.FC = () => {
   const navigate = useNavigate();
   const { articleId } = useParams<{ articleId: string }>();
   const [imageModalOpen, setImageModalOpen] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [articleId]);
 
   const { loading, error, data } = useQuery(GET_NEWS_REVIEW, {
     variables: { id: articleId },

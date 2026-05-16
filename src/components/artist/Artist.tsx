@@ -44,11 +44,12 @@ interface ArtistSocialLink {
 }
 
 const ArtistEventCard = ({ event }: { event: any }) => {
+  const navigate = useNavigate();
   const startDateFormatted = new Date(event.startDate).toLocaleDateString();
   const endDateFormatted = new Date(event.endDate).toLocaleDateString();
 
   return (
-    <Box sx={artistStyles.eventCard}>
+    <Box sx={artistStyles.eventCard} onClick={() => navigate(`/calendar/${event.id}`)}>
       {event.url ? (
         <Link
           href={event.url}
@@ -56,6 +57,7 @@ const ArtistEventCard = ({ event }: { event: any }) => {
           rel="noopener noreferrer"
           underline="hover"
           sx={{ textDecoration: 'none' }}
+          onClick={(e) => e.stopPropagation()}
         >
           <Typography variant="h6" sx={artistStyles.eventName}>
             {event.name}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -38,10 +38,6 @@ const ArtistNews: React.FC = () => {
   const navigate = useNavigate();
   const { artistName } = useParams<{ artistName: string }>();
   const decodedArtistName = artistName ? decodeURIComponent(artistName) : '';
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   const { loading, error, data } = useQuery(GET_NEWS_REVIEWS_BY_ARTIST, {
     variables: { artistName: decodedArtistName, limit: 100 },
