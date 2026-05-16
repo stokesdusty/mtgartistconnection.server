@@ -19,6 +19,7 @@ import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
 import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
@@ -44,7 +45,7 @@ interface Artist {
 const INTRO_SEEN_KEY = 'mtgac-intro-seen';
 
 const Homepage = () => {
-  document.title = "MtG Artist Connection";
+  usePageTitle();
   const { data, error, loading } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -99,33 +100,6 @@ const Homepage = () => {
     if (!eventArtistsData?.artistsByEventIds) return new Set<string>();
     return new Set(eventArtistsData.artistsByEventIds.map((a: any) => a.artistName));
   }, [eventArtistsData]);
-
-  // Preload all artist images in the background so letter filtering is instant
-  useEffect(() => {
-    if (!data?.artists) return;
-
-    let cancelled = false;
-    const batchSize = 10;
-    const artists = data.artists;
-    let index = 0;
-
-    const preloadBatch = () => {
-      if (cancelled) return;
-      const end = Math.min(index + batchSize, artists.length);
-      for (let i = index; i < end; i++) {
-        const img = new Image();
-        img.src = `https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${artists[i].filename}.jpg`;
-      }
-      index = end;
-      if (index < artists.length) {
-        requestIdleCallback ? requestIdleCallback(preloadBatch) : setTimeout(preloadBatch, 100);
-      }
-    };
-
-    // Delay slightly so initial render isn't competing for bandwidth
-    const timer = setTimeout(preloadBatch, 2000);
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [data]);
 
   // Show scroll-to-top button when user scrolls below the fold
   useEffect(() => {
@@ -624,8 +598,8 @@ const Homepage = () => {
 
         <Box sx={homepageStyles.artistsGrid}>
           {filteredData.length > 0 ? (
-            filteredData.map((artist: Artist) => (
-              <ArtistGridItem artistData={artist} key={artist.name} />
+            filteredData.map((artist: Artist, index: number) => (
+              <ArtistGridItem artistData={artist} key={artist.name} eager={index < 8} />
             ))
           ) : (userSearch.length >= 2 ||
             locationFilter !== "" ||

@@ -17,7 +17,7 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useEffect } from "react";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import { contentPageStyles } from "../../styles/content-page-styles";
 
 interface Service {
@@ -71,9 +71,7 @@ const howItWorksParagraphs = [
 ];
 
 const SigningServices = () => {
-  useEffect(() => {
-    document.title = "MtG Artist Connection - Card Signing Services";
-  }, []);
+  usePageTitle("Card Signing Services");
 
   const ServiceStatItem = ({ label, value }: { label: string; value: string }) => {
     return (

@@ -8,9 +8,10 @@ import {
   import EmailIcon from '@mui/icons-material/Email';
   import { FaBluesky } from "react-icons/fa6";
   import { contentPageStyles } from "../../styles/content-page-styles";
-  
+  import { usePageTitle } from "../../hooks/usePageTitle";
+
   const ContactPage = () => {
-    document.title = "MtG Artist Connection - Contact Us";
+    usePageTitle("Contact Us");
 
     return (
       <Box sx={contentPageStyles.container}>

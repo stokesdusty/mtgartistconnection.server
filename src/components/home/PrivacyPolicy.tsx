@@ -3,9 +3,10 @@ import { Link as RouterLink } from "react-router-dom";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { colors, spacing } from "../../styles/design-tokens";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const PrivacyPolicy = () => {
-  document.title = "Privacy Policy | MtG Artist Connection";
+  usePageTitle("Privacy Policy");
 
   return (
     <Box sx={contentPageStyles.container}>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import {
   Box,
   Button,
@@ -23,7 +24,7 @@ interface CardData {
 }
 
 const RandomFlavorText = () => {
-  document.title = "MtG Artist Connection - Random Flavor Text";
+  usePageTitle("Random Flavor Text");
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

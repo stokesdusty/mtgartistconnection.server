@@ -3,9 +3,10 @@ import { Link as RouterLink } from "react-router-dom";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { colors, spacing } from "../../styles/design-tokens";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const TermsOfService = () => {
-  document.title = "Terms of Service | MtG Artist Connection";
+  usePageTitle("Terms of Service");
 
   return (
     <Box sx={contentPageStyles.container}>

@@ -1,6 +1,7 @@
 import { Box, CircularProgress, Typography, Container, Paper } from '@mui/material';
 import axios from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import { useParams } from 'react-router';
 import { useLoading } from '../../LoadingContext';
 import { useNavigate } from "react-router-dom";
@@ -75,11 +76,7 @@ const ArtistCardAnalysis = () => {
         }
     }, [artist, navigate]);
 
-    useEffect(() => {
-        if (artist) {
-            document.title = `MtG Artist Connection - ${artist} Card Breakdown`;
-        }
-    }, [artist]);
+    usePageTitle(artist ? `${artist} Card Breakdown` : undefined);
 
     const formattedArtistName = useMemo(() => {
         return artist?.split(" ").join(" ") || "";

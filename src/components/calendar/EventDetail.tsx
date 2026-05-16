@@ -15,6 +15,7 @@ import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTISTS_FOR_HOMEPAGE } fro
 import { useQuery } from "@apollo/client";
 import { CalendarToday, LocationOn, PeopleAlt, Event, GetApp, ArrowBack } from '@mui/icons-material';
 import { useMemo, useState } from "react";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams, useNavigate } from "react-router-dom";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
@@ -53,7 +54,7 @@ const EventDetail = () => {
     });
   }, [artistData, allArtistsData]);
 
-  document.title = event ? `MtG Artist Connection - ${event.name}` : "MtG Artist Connection - Event";
+  usePageTitle(event?.name ?? "Event");
 
   const handleCalendarMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
     setCalendarMenuAnchor(e.currentTarget);

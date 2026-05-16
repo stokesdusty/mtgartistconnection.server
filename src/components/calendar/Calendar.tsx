@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import {
   Box,
   Container,
@@ -40,7 +41,7 @@ const stateCodeToName: { [key: string]: string } = {
 type DateRangeFilter = 'all' | 'this-week' | 'this-month' | 'next-3-months';
 
 const Calendar = () => {
-  document.title = "MtG Artist Connection - Events Calendar";
+  usePageTitle("Events Calendar");
 
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [locationFilter, setLocationFilter] = useState("");

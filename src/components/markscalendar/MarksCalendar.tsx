@@ -1,9 +1,10 @@
 import { Link, Typography } from "@mui/material";
 import { Box } from "@mui/system"
 import { colors, spacing, typography } from "../../styles/design-tokens";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const MarksCalendar = () => {
-    document.title = 'MtG Artist Connection - Mark\'s Signing Service Calendar';
+    usePageTitle("Mark's Signing Service Calendar");
     return <Box sx={{ display: 'flex', flexDirection: 'column', margin: 'auto', justifyContent: 'center', paddingTop: '100px', alignItems: 'center', gap: 4, minHeight: '75vh' }}>
         <Typography variant="h2" fontFamily={"Work Sans"} fontWeight={600}>Mark's Signing Service Calendar</Typography>
             <Typography>Mark's Signature Signing Service usually does signing in batches, with a set date that he must receive the cards to be signed. Below, you will find Mark's upcoming signing dates along with prices for regular and shadow signatures. Each artist will link to their individual page on this site so you can view all of their cards. For more direct information on how to get your cards to Mark, as well as payment information, check out the Facebook Group <Link sx={{ textDecoration: 'none', fontWeight: typography.fontWeight.medium, color: colors.primary.main, fontSize: 20 }} href="https://www.facebook.com/groups/545759985597960">here.</Link></Typography>

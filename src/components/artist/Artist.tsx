@@ -13,6 +13,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { ArtistPageSkeleton } from "../shared/Skeletons";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { TbWorldWww } from "react-icons/tb";
 import {
@@ -126,9 +127,7 @@ const Artist = () => {
 
   const [isFollowing, setIsFollowing] = useState(false);
 
-  useEffect(() => {
-    if (name) document.title = `MtG Artist Connection - ${name}`;
-  }, [name]);
+  usePageTitle(name);
 
   const { data, error, loading } = useQuery(
     GET_ARTIST_BY_NAME,

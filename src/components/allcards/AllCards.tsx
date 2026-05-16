@@ -3,6 +3,7 @@ import {
   useState,
   useMemo,
 } from "react";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams } from "react-router";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -149,7 +150,7 @@ const AllCards = () => {
     }
   }, [artist, navigate]);
 
-  document.title = `MtG Artist Connection - All ${artist} Cards`;
+  usePageTitle(artist ? `All ${artist} Cards` : undefined);
 
   const { data: artistData, error, loading } = useQuery(GET_ARTIST_BY_NAME, {
     variables: {
