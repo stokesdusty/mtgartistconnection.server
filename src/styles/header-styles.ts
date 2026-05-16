@@ -65,7 +65,7 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
   menuButton: {
     color: colors.text.primary,
     padding: spacing.sm,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     border: `1px solid ${colors.neutral[200]}`,
     transition: transitions.base,
     '&:hover': {
@@ -76,7 +76,7 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
   menu: {
     '& .MuiPaper-root': {
       background: colors.neutral.white,
-      borderRadius: borderRadius.lg,
+      borderRadius: borderRadius.md,
       marginTop: spacing.sm,
       minWidth: 200,
       boxShadow: shadows.lg,
@@ -115,7 +115,7 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize.sm, md: typography.fontSize.base },
     fontWeight: typography.fontWeight.semibold,
     padding: { xs: '6px 12px', md: '8px 16px' },
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     backgroundColor: colors.neutral[50],
     '&:hover': {
       backgroundColor: colors.neutral[100],
@@ -141,7 +141,7 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
     fontWeight: typography.fontWeight.medium,
   },
   drawerListItem: {
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     mb: 0.5,
     transition: transitions.base,
     '&:hover': {

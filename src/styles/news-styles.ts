@@ -23,7 +23,7 @@ export const newsStyles = {
   },
   articleCard: {
     backgroundColor: colors.neutral.white,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md,
     boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
     border: `1px solid ${colors.neutral[200]}`,
     mb: 3,
@@ -105,7 +105,7 @@ export const newsStyles = {
     mb: 3,
     p: 2,
     backgroundColor: colors.neutral.white,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md,
     boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
     border: `1px solid ${colors.neutral[200]}`,
   },
@@ -147,7 +147,7 @@ export const newsStyles = {
   emptyState: {
     p: 6,
     textAlign: 'center',
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md,
   },
   emptyStateTitle: {
     color: colors.neutral[600],
@@ -170,7 +170,7 @@ export const newsStyles = {
     color: colors.neutral[700],
   },
   errorAlert: {
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md,
     border: `1px solid ${colors.accent.red}`,
     backgroundColor: colors.accent.redLight,
   },

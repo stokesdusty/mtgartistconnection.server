@@ -97,7 +97,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     backgroundColor: colors.primary.main,
     color: colors.neutral.white,
     fontWeight: typography.fontWeight.semibold,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.sm,
     padding: `${spacing.sm} ${spacing.lg}`,
     textTransform: 'none',
     fontSize: typography.fontSize.base,
@@ -113,7 +113,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   textField: {
     width: '100%',
     '& .MuiOutlinedInput-root': {
-      borderRadius: borderRadius.lg,
+      borderRadius: borderRadius.md,
       backgroundColor: colors.neutral.white,
       transition: transitions.base,
       '&:hover fieldset': {
@@ -133,7 +133,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   locationSelect: {
     width: '100%',
     '& .MuiOutlinedInput-root': {
-      borderRadius: borderRadius.lg,
+      borderRadius: borderRadius.md,
       backgroundColor: colors.neutral.white,
       transition: transitions.base,
       '&:hover .MuiOutlinedInput-notchedOutline': {
@@ -152,7 +152,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   },
   checkboxContainer: {
     backgroundColor: colors.neutral[50],
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md,
     padding: spacing.md,
     border: `1px solid ${colors.neutral[200]}`,
   },
@@ -255,7 +255,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     textAlign: 'center',
     padding: spacing.xl,
     backgroundColor: colors.neutral[50],
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md,
     border: `1px solid ${colors.accent.red}`,
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.medium,
