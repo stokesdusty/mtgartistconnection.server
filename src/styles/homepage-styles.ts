@@ -29,8 +29,8 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize['3xl'], md: typography.fontSize['4xl'], lg: typography.fontSize['5xl'] },
     marginBottom: { xs: spacing.xs, md: 0 },
     color: colors.text.primary,
-    fontFamily: typography.fontFamily.display,
-    letterSpacing: '-0.02em',
+    fontFamily: typography.fontFamily.heading,
+    letterSpacing: '-0.01em',
     lineHeight: typography.lineHeight.tight,
   },
   description: {
@@ -326,5 +326,16 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     backgroundColor: colors.neutral[100],
     fontWeight: typography.fontWeight.semibold,
     lineHeight: '32px',
+  },
+  filterChipAmber: {
+    backgroundColor: colors.accent.orange,
+    color: colors.neutral.white,
+    fontSize: typography.fontSize.xs,
+    height: '26px',
+    '& .MuiChip-deleteIcon': {
+      color: 'rgba(255,255,255,0.7)',
+      fontSize: '1rem',
+      '&:hover': { color: colors.neutral.white },
+    },
   },
 };

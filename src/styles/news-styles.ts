@@ -15,7 +15,7 @@ export const newsStyles = {
     fontWeight: typography.fontWeight.bold,
     color: colors.primary.main,
     mb: 1,
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
   },
   subtitle: {
     color: colors.neutral[700],
@@ -50,7 +50,7 @@ export const newsStyles = {
   articleTitle: {
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
     fontSize: typography.fontSize.xl,
     flex: 1,
   },

@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { ArtistPageSkeleton } from "../shared/Skeletons";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { colors } from "../../styles/design-tokens";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { TbWorldWww } from "react-icons/tb";
 import {
@@ -500,9 +501,17 @@ const Artist = () => {
                         }}
                       />
                     ) : (
-                      <Typography>
-                        {capitalizeFirstLetter(artistByName.signing)}
-                      </Typography>
+                      <Chip
+                        label={capitalizeFirstLetter(artistByName.signing)}
+                        size="small"
+                        sx={{
+                          backgroundColor: colors.accent.orangeLight,
+                          color: colors.accent.orangeDark,
+                          border: `1px solid ${colors.accent.orange}`,
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                        }}
+                      />
                     )}
                   </Box>
                 </Box>

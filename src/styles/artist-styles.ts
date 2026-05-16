@@ -36,9 +36,9 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize['3xl'], md: typography.fontSize['4xl'] },
     marginBottom: spacing.lg,
     textAlign: 'center',
-    letterSpacing: '-0.02em',
+    letterSpacing: '-0.01em',
     lineHeight: typography.lineHeight.tight,
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
   },
   buttonContainer: {
     display: 'flex',
@@ -181,8 +181,8 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     fontWeight: typography.fontWeight.bold,
     fontSize: { xs: typography.fontSize['xl'], md: typography.fontSize['2xl'] },
     marginBottom: spacing.md,
-    fontFamily: typography.fontFamily.display,
-    letterSpacing: '-0.01em',
+    fontFamily: typography.fontFamily.heading,
+    letterSpacing: '0em',
   },
   infoRow: {
     backgroundColor: colors.neutral[50],

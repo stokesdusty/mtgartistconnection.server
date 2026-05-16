@@ -2,11 +2,12 @@ import { Box } from "@mui/system";
 import { artistGridStyles, gridHtmlElementStyles } from "../../styles/artist-grid-styles";
 import { Link, Typography } from "@mui/material";
 
-const ArtistGridItem = ({ artistData, eager }: { artistData: any; eager?: boolean }) => {
+const ArtistGridItem = ({ artistData, eager, hasEvent }: { artistData: any; eager?: boolean; hasEvent?: boolean }) => {
     return (
       <Box sx={artistGridStyles.container}>
         <Link sx={artistGridStyles.link} href={`/artist/${artistData.name}`}>
           <Box sx={artistGridStyles.imageBox} className="artist-image-box">
+            {hasEvent && <Box sx={artistGridStyles.eventDot} />}
             <img
               alt={artistData.name}
               style={gridHtmlElementStyles.img}

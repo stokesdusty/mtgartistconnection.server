@@ -580,7 +580,7 @@ const Homepage = () => {
               label={chip.label}
               size="small"
               onDelete={chip.onDelete}
-              sx={homepageStyles.filterChip}
+              sx={chip.key === 'hasEvent' ? homepageStyles.filterChipAmber : homepageStyles.filterChip}
             />
           ))}
 
@@ -599,7 +599,7 @@ const Homepage = () => {
         <Box sx={homepageStyles.artistsGrid}>
           {filteredData.length > 0 ? (
             filteredData.map((artist: Artist, index: number) => (
-              <ArtistGridItem artistData={artist} key={artist.name} eager={index < 8} />
+              <ArtistGridItem artistData={artist} key={artist.name} eager={index < 8} hasEvent={artistsWithEvents.has(artist.name)} />
             ))
           ) : (userSearch.length >= 2 ||
             locationFilter !== "" ||

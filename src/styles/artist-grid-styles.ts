@@ -11,6 +11,7 @@ export const artistGridStyles: Styles = {
     transition: transitions.base,
   },
   imageBox: {
+    position: 'relative',
     width: '100%',
     aspectRatio: '1',
     overflow: 'hidden',
@@ -18,6 +19,17 @@ export const artistGridStyles: Styles = {
     backgroundColor: colors.neutral[100],
     border: `1px solid ${colors.neutral[200]}`,
     transition: transitions.base,
+  },
+  eventDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 10,
+    height: 10,
+    borderRadius: '50%',
+    backgroundColor: colors.accent.orange,
+    border: `2px solid ${colors.neutral.white}`,
+    zIndex: 1,
   },
   link: {
     textDecoration: 'none',

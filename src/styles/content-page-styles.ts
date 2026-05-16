@@ -23,9 +23,9 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize['3xl'], md: typography.fontSize['4xl'] },
     marginBottom: spacing.xxl,
     textAlign: 'center',
-    letterSpacing: '-0.02em',
+    letterSpacing: '-0.01em',
     lineHeight: typography.lineHeight.tight,
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
   },
   sectionTitle: {
     color: colors.text.primary,
@@ -33,7 +33,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize.xl, md: typography.fontSize['2xl'] },
     marginTop: spacing.xxl,
     marginBottom: spacing.lg,
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
   },
   paragraph: {
     color: colors.text.secondary,
@@ -111,7 +111,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize.xl, md: typography.fontSize['2xl'] },
     marginBottom: spacing.lg,
     textAlign: 'center',
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
   },
   serviceStats: {
     display: 'flex',
@@ -167,7 +167,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     color: colors.text.primary,
     fontWeight: typography.fontWeight.bold,
     fontSize: { xs: typography.fontSize.lg, md: typography.fontSize.xl },
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
   },
   infoRow: {
     display: 'flex',
@@ -311,7 +311,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     fontWeight: typography.fontWeight.bold,
     fontSize: { xs: typography.fontSize.xl, md: typography.fontSize['2xl'] },
     textAlign: 'center',
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
     marginBottom: 0,
   },
   imageContainer: {
@@ -404,7 +404,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     fontWeight: typography.fontWeight.bold,
     marginBottom: spacing.lg,
     fontSize: typography.fontSize.xl,
-    fontFamily: typography.fontFamily.display,
+    fontFamily: typography.fontFamily.heading,
   },
   contactMethod: {
     display: 'flex',

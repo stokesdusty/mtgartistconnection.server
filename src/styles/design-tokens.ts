@@ -13,44 +13,46 @@ export const colors = {
     contrast: '#ffffff',  // White text on dark green
   },
 
-  // Neutral Palette - Clean minimalist grays
+  // Neutral Palette - Warm paper-biased scale (~35° hue, 3-5% saturation)
   neutral: {
     white: '#ffffff',
-    50: '#fafafa',        // Lightest backgrounds
-    100: '#f5f5f5',       // Card backgrounds
-    200: '#eeeeee',       // Subtle borders
-    300: '#e0e0e0',       // Dividers
-    400: '#bdbdbd',       // Disabled states
-    500: '#9e9e9e',       // Secondary text
-    600: '#757575',       // Primary text light
-    700: '#616161',       // Primary text
-    800: '#424242',       // Dark text
-    900: '#212121',       // Darkest text/backgrounds
+    50: '#faf9f7',        // Warm paper white
+    100: '#f5f3f0',       // Warm card backgrounds
+    200: '#ebe8e3',       // Warm subtle borders
+    300: '#dedad4',       // Warm dividers
+    400: '#b9b4ae',       // Warm disabled states
+    500: '#9c9690',       // Warm hint text
+    600: '#736d67',       // Warm secondary text  (4.93:1 on white)
+    700: '#5f5a54',       // Warm primary text light (6.73:1 on white)
+    800: '#3e3b38',       // Warm dark text
+    900: '#201e1b',       // Warm darkest          (16.9:1 on white)
     black: '#000000',
   },
 
   // Accent Colors - Minimal use
   accent: {
-    orange: '#e67e22',    // Warmer, more muted orange for CTAs
-    blue: '#3498db',      // Info states
-    red: '#e74c3c',       // Error states
-    redLight: '#fef5f5',  // Light red background for error states
-    green: '#27ae60',     // Success states
+    orange: '#c8731a',      // Burnt amber — collector-action moments (signing, live events)
+    orangeLight: '#fdf0e0', // Light amber tint for chip/badge backgrounds
+    orangeDark: '#9e5a12',  // Deep amber for hover states
+    blue: '#3498db',        // Info states
+    red: '#e74c3c',         // Error states
+    redLight: '#fef5f5',    // Light red background for error states
+    green: '#27ae60',       // Success states
   },
 
   // Background
   background: {
     default: '#ffffff',   // Main page background
-    paper: '#fafafa',     // Card/Paper background
-    dark: '#f5f5f5',      // Subtle section backgrounds
+    paper: '#faf9f7',     // Warm card/paper background
+    dark: '#f5f3f0',      // Warm subtle section backgrounds
   },
 
   // Text
   text: {
-    primary: '#212121',
-    secondary: '#757575',
-    disabled: '#bdbdbd',
-    hint: '#9e9e9e',
+    primary: '#201e1b',
+    secondary: '#736d67',
+    disabled: '#b9b4ae',
+    hint: '#9c9690',
   },
 };
 
@@ -86,6 +88,7 @@ export const typography = {
   fontFamily: {
     primary: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
     display: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    heading: '"Fraunces", Georgia, serif',
   },
   fontSize: {
     xs: '0.75rem',     // 12px
