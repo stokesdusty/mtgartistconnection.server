@@ -75,13 +75,12 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     },
   },
   filtersSection: {
-    backgroundColor: colors.neutral.white,
-    borderRadius: borderRadius.xl,
-    padding: { xs: spacing.lg, md: spacing.xl },
+    paddingTop: { xs: spacing.lg, md: spacing.xl },
+    paddingBottom: { xs: spacing.lg, md: spacing.xl },
     marginBottom: spacing.xl,
     marginTop: spacing.xl,
-    border: `1px solid ${colors.neutral[200]}`,
-    boxShadow: shadows.sm,
+    borderTop: `1px solid ${colors.neutral[200]}`,
+    borderBottom: `1px solid ${colors.neutral[200]}`,
   },
   filtersGrid: {
     display: 'grid',

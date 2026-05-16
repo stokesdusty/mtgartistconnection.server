@@ -7,7 +7,7 @@ import {
   Link,
   Typography,
   Container,
-  Paper,
+  Divider,
   Button,
   Chip,
   Tooltip,
@@ -173,9 +173,9 @@ const Artist = () => {
     return (
       <Box sx={artistStyles.container}>
         <Container maxWidth="lg">
-          <Paper elevation={0} sx={artistStyles.contentWrapper}>
+          <Box sx={artistStyles.contentWrapper}>
             <ArtistPageSkeleton />
-          </Paper>
+          </Box>
         </Container>
       </Box>
     );
@@ -306,7 +306,7 @@ const Artist = () => {
   return (
     <Box sx={artistStyles.container}>
       <Container maxWidth="lg">
-        <Paper elevation={0} sx={artistStyles.contentWrapper}>
+        <Box sx={artistStyles.contentWrapper}>
           <Box sx={artistStyles.bannerContainer}>
             <img
               src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`}
@@ -410,8 +410,8 @@ const Artist = () => {
             />
           </Box>
 
-          <Box sx={artistStyles.artistPage}>
-            <Box sx={artistStyles.infoSection}>
+          <Divider sx={artistStyles.sectionDivider} />
+          <Box sx={artistStyles.infoSection}>
               <Box sx={artistStyles.artistInfo}>
                 <Typography sx={artistStyles.sectionHeader} variant="h4">
                   Artist Info
@@ -452,7 +452,7 @@ const Artist = () => {
                       <Link
                         href={`mailto:${artistByName.email}`}
                         underline="hover"
-                        sx={{ color: "#2d4a36" }}
+                        sx={{ color: 'primary.main' }}
                       >
                         {artistByName.email}
                       </Link>
@@ -575,9 +575,8 @@ const Artist = () => {
                 </Typography>
                 <img src={signatureImage} alt={`${artistByName.name} signature example`} />
               </Box>
-            </Box>
           </Box>
-        </Paper>
+        </Box>
       </Container>
     </Box>
   );

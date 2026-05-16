@@ -13,9 +13,6 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: { xs: spacing.lg, md: spacing.xxl },
-    backgroundColor: colors.neutral.white,
-    borderRadius: borderRadius.xl,
-    boxShadow: shadows.sm,
   },
   pageTitle: {
     color: colors.text.primary,
