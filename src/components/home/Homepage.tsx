@@ -418,12 +418,12 @@ const Homepage = () => {
               <Typography variant="body1" sx={homepageStyles.descriptionList}>
                 <b>Upcoming Events</b> – See which conventions, signings, or streams your favorite artists will be attending.
               </Typography>
+
+              <Box component="span" sx={homepageStyles.count}>
+                Proudly indexing {data.artists.length} artists and counting
+              </Box>
             </>
           )}
-
-          <Box component="span" sx={homepageStyles.count}>
-            Proudly indexing {data.artists.length} artists and counting
-          </Box>
         </Box>
 
         <Box sx={{ ...homepageStyles.filtersSection, py: 1.5 }}>

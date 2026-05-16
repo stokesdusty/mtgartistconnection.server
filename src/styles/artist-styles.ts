@@ -3,7 +3,7 @@ import { colors, spacing, shadows, typography, transitions, borderRadius } from 
 
 export const artistStyles: Record<string, SxProps<Theme>> = {
   container: {
-    backgroundColor: colors.background.default,
+    backgroundColor: colors.background.dark,
     minHeight: '100vh',
     paddingTop: spacing.xl,
     paddingBottom: spacing.xxxl,
@@ -12,6 +12,9 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: { xs: spacing.lg, md: spacing.xxl },
+    backgroundColor: colors.neutral.white,
+    borderRadius: borderRadius.lg,
+    boxShadow: shadows.sm,
   },
   bannerContainer: {
     width: '100%',
