@@ -109,4 +109,64 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
       },
     },
   },
+  accountButton: {
+    color: colors.primary.main,
+    textTransform: 'none',
+    fontSize: { xs: typography.fontSize.sm, md: typography.fontSize.base },
+    fontWeight: typography.fontWeight.semibold,
+    padding: { xs: '6px 12px', md: '8px 16px' },
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.neutral[50],
+    '&:hover': {
+      backgroundColor: colors.neutral[100],
+      color: colors.primary.dark,
+    },
+  },
+  drawerHeader: {
+    p: 3,
+    backgroundColor: colors.primary.main,
+    color: colors.primary.contrast,
+    borderBottom: `1px solid ${colors.primary.dark}`,
+  },
+  drawerHeaderLabel: {
+    fontWeight: typography.fontWeight.semibold,
+    mb: 0.5,
+    fontSize: typography.fontSize.xs,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    opacity: 0.8,
+  },
+  drawerHeaderEmail: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+  },
+  drawerListItem: {
+    borderRadius: borderRadius.md,
+    mb: 0.5,
+    transition: transitions.base,
+    '&:hover': {
+      backgroundColor: colors.neutral[50],
+      '& .MuiListItemIcon-root': { color: colors.primary.main },
+      '& .MuiListItemText-primary': { color: colors.primary.main },
+    },
+  },
+  drawerListItemLogout: {
+    borderRadius: borderRadius.md,
+    transition: transitions.base,
+    '&:hover': {
+      backgroundColor: colors.neutral[50],
+      '& .MuiListItemIcon-root': { color: colors.accent.red },
+      '& .MuiListItemText-primary': { color: colors.accent.red },
+    },
+  },
+  drawerIcon: {
+    color: colors.text.secondary,
+    transition: transitions.base,
+  },
+  drawerItemText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    transition: transitions.base,
+  },
 };

@@ -158,7 +158,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     },
   },
   artistPage: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.neutral.white,
     width: '100%',
   },
   infoSection: {
@@ -333,6 +333,41 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     '& p': {
       color: colors.text.secondary,
       fontSize: typography.fontSize.sm,
+    },
+  },
+  alternateName: {
+    fontSize: '0.5em',
+    fontWeight: typography.fontWeight.normal,
+    color: colors.text.secondary,
+    ml: 1,
+  },
+  editButton: {
+    color: colors.primary.main,
+    borderColor: colors.primary.main,
+    '&:hover': {
+      borderColor: colors.primary.dark,
+      backgroundColor: 'rgba(45, 74, 54, 0.04)',
+    },
+  },
+  followButtonActive: {
+    textTransform: 'none',
+    fontWeight: typography.fontWeight.medium,
+    fontSize: typography.fontSize.sm,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.primary.main,
+    color: colors.primary.contrast,
+    '&:hover': { backgroundColor: colors.primary.dark },
+  },
+  followButtonInactive: {
+    textTransform: 'none',
+    fontWeight: typography.fontWeight.medium,
+    fontSize: typography.fontSize.sm,
+    borderRadius: borderRadius.sm,
+    borderColor: colors.primary.main,
+    color: colors.primary.main,
+    '&:hover': {
+      borderColor: colors.primary.dark,
+      backgroundColor: 'rgba(45, 74, 54, 0.04)',
     },
   },
 };

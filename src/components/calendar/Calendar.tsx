@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Container,
-  LinearProgress,
   Paper,
   Typography,
   FormControl,
@@ -15,11 +14,13 @@ import {
   ListSubheader,
   Chip
 } from "@mui/material";
+import { EventCardSkeleton } from "../shared/Skeletons";
 import { KeyboardArrowUp } from "@mui/icons-material";
 import { GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import SigningEvent from "./SigningEvent";
 import { contentPageStyles } from "../../styles/content-page-styles";
+import { calendarStyles } from "../../styles/calendar-styles";
 
 // Map of state codes to full state names
 const stateCodeToName: { [key: string]: string } = {
@@ -249,8 +250,11 @@ const Calendar = () => {
       <Box sx={contentPageStyles.container}>
         <Container maxWidth="lg">
           <Paper elevation={0} sx={contentPageStyles.wrapper}>
-            <Box sx={contentPageStyles.loadingContainer}>
-              <LinearProgress />
+            <Typography variant="h1" sx={contentPageStyles.pageTitle}>
+              Events Calendar
+            </Typography>
+            <Box sx={contentPageStyles.eventsContainer}>
+              <EventCardSkeleton count={5} />
             </Box>
           </Paper>
         </Container>
@@ -308,22 +312,7 @@ const Calendar = () => {
                   label={option.label}
                   onClick={() => handleDateRangeChange(option.value)}
                   variant={dateRangeFilter === option.value ? 'filled' : 'outlined'}
-                  sx={{
-                    backgroundColor: dateRangeFilter === option.value ? '#2d4a36' : 'transparent',
-                    color: dateRangeFilter === option.value ? '#fff' : '#2d4a36',
-                    borderColor: '#2d4a36',
-                    fontWeight: dateRangeFilter === option.value ? 600 : 400,
-                    fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                    height: { xs: 32, sm: 32 },
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      backgroundColor: dateRangeFilter === option.value ? '#1e3425' : 'rgba(45, 74, 54, 0.08)',
-                      transform: 'translateY(-1px)',
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                    },
-                  }}
+                  sx={dateRangeFilter === option.value ? calendarStyles.dateChipActive : calendarStyles.dateChipInactive}
                 />
               ))}
             </Box>
@@ -331,22 +320,7 @@ const Calendar = () => {
             {/* Event count badge */}
             <Box
               component="span"
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#f0f9f4',
-                color: '#2d4a36',
-                border: '1px solid #2d4a36',
-                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                fontWeight: 600,
-                padding: { xs: '6px 14px', sm: '6px 16px' },
-                borderRadius: '9999px',
-                marginLeft: { xs: 0, sm: 'auto' },
-                alignSelf: { xs: 'center', sm: 'center' },
-                whiteSpace: 'nowrap',
-                fontFamily: '"Lora", serif',
-              }}
+              sx={calendarStyles.eventCountBadge}
             >
               {filteredAndSortedEvents.length === upcomingEventIds.length
                 ? `${upcomingEventIds.length} events`
@@ -363,24 +337,13 @@ const Calendar = () => {
                 value={locationFilter}
                 label="Filter by Location"
                 onChange={handleLocationChange}
-                sx={{
-                  borderRadius: '8px',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#eeeeee',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#2d4a36',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#2d4a36',
-                  },
-                }}
+                sx={calendarStyles.filterSelect}
               >
                 <MenuItem value="">
                   <em>All Locations</em>
                 </MenuItem>
                 {locations.US.length > 0 && [
-                  <ListSubheader key="us-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '36px' }}>
+                  <ListSubheader key="us-header" sx={calendarStyles.listSubheader}>
                     US States
                   </ListSubheader>,
                   <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
@@ -393,7 +356,7 @@ const Calendar = () => {
                   ))
                 ]}
                 {locations.Other.length > 0 && [
-                  <ListSubheader key="other-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '36px' }}>
+                  <ListSubheader key="other-header" sx={calendarStyles.listSubheader}>
                     Other Locations
                   </ListSubheader>,
                   ...locations.Other.map((location) => (
@@ -413,18 +376,7 @@ const Calendar = () => {
                 value={artistFilter}
                 label="Filter by Artist"
                 onChange={handleArtistChange}
-                sx={{
-                  borderRadius: '8px',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#eeeeee',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#2d4a36',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#2d4a36',
-                  },
-                }}
+                sx={calendarStyles.filterSelect}
               >
                 <MenuItem value="">
                   <em>All Artists</em>
@@ -441,16 +393,7 @@ const Calendar = () => {
               <Button
                 onClick={handleClearFilters}
                 variant="outlined"
-                sx={{
-                  borderColor: '#2d4a36',
-                  color: '#2d4a36',
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  '&:hover': {
-                    borderColor: '#1e3425',
-                    backgroundColor: 'rgba(45, 74, 54, 0.04)',
-                  },
-                }}
+                sx={calendarStyles.clearFiltersButton}
               >
                 Clear Filters
               </Button>
@@ -478,14 +421,7 @@ const Calendar = () => {
           color="primary"
           onClick={scrollToTop}
           size="medium"
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            bgcolor: '#2d4a36',
-            '&:hover': { bgcolor: '#1e3425' },
-            zIndex: 999,
-          }}
+          sx={calendarStyles.scrollToTopFab}
         >
           <KeyboardArrowUp />
         </Fab>

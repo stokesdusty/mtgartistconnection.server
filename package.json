@@ -45,6 +45,21 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": ["src/**/*.{ts,tsx}"],
+        "excludedFiles": ["src/styles/design-tokens.ts"],
+        "rules": {
+          "no-restricted-syntax": [
+            "warn",
+            {
+              "selector": "Literal[value=/^#[0-9a-fA-F]{3,8}$/]",
+              "message": "Hardcoded hex color. Use a token from design-tokens.ts (e.g. colors.primary.main) instead."
+            }
+          ]
+        }
+      }
     ]
   },
   "browserslist": {

@@ -6,13 +6,13 @@ import {
   Box,
   Link,
   Typography,
-  CircularProgress,
   Container,
   Paper,
   Button,
   Chip,
   Tooltip,
 } from "@mui/material";
+import { ArtistPageSkeleton } from "../shared/Skeletons";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { TbWorldWww } from "react-icons/tb";
 import {
@@ -66,13 +66,13 @@ const ArtistEventCard = ({ event }: { event: any }) => {
       )}
       <Box sx={artistStyles.eventDetails}>
         <Box sx={artistStyles.eventDetail}>
-          <CalendarToday fontSize="small" sx={{ color: '#2d4a36' }} />
+          <CalendarToday fontSize="small" sx={{ color: 'primary.main' }} />
           <Typography variant="body2">
             {startDateFormatted}{startDateFormatted !== endDateFormatted && ` - ${endDateFormatted}`}
           </Typography>
         </Box>
         <Box sx={artistStyles.eventDetail}>
-          <LocationOn fontSize="small" sx={{ color: '#2d4a36' }} />
+          <LocationOn fontSize="small" sx={{ color: 'primary.main' }} />
           <Typography variant="body2">{event.city}</Typography>
         </Box>
       </Box>
@@ -172,9 +172,11 @@ const Artist = () => {
   if (loading)
     return (
       <Box sx={artistStyles.container}>
-        <Box sx={artistStyles.loadingContainer}>
-          <CircularProgress sx={artistStyles.loadingSpinner} />
-        </Box>
+        <Container maxWidth="lg">
+          <Paper elevation={0} sx={artistStyles.contentWrapper}>
+            <ArtistPageSkeleton />
+          </Paper>
+        </Container>
       </Box>
     );
   if (error)
@@ -316,15 +318,7 @@ const Artist = () => {
             <Typography variant="h2" sx={artistStyles.artistName}>
               {artistByName.name}
               {artistByName.alternate_names && (
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: '0.5em',
-                    fontWeight: 400,
-                    color: '#757575',
-                    ml: 1,
-                  }}
-                >
+                <Typography component="span" sx={artistStyles.alternateName}>
                   ({artistByName.alternate_names})
                 </Typography>
               )}
@@ -336,14 +330,7 @@ const Artist = () => {
                   variant="outlined"
                   startIcon={<Edit />}
                   onClick={() => navigate(`/editartist/${artistByName.id}`)}
-                  sx={{
-                    color: '#2d4a36',
-                    borderColor: '#2d4a36',
-                    '&:hover': {
-                      borderColor: '#1a2e20',
-                      backgroundColor: 'rgba(45, 74, 54, 0.04)',
-                    },
-                  }}
+                  sx={artistStyles.editButton}
                 >
                   Edit Artist
                 </Button>
@@ -354,28 +341,7 @@ const Artist = () => {
                 size="small"
                 onClick={handleFollowToggle}
                 startIcon={isFollowing ? <NotificationsActive /> : <PersonAdd />}
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  fontSize: '0.875rem',
-                  borderRadius: '6px',
-                  ...(isFollowing
-                    ? {
-                        backgroundColor: '#2d4a36',
-                        color: '#fff',
-                        '&:hover': {
-                          backgroundColor: '#1a2e20',
-                        },
-                      }
-                    : {
-                        borderColor: '#2d4a36',
-                        color: '#2d4a36',
-                        '&:hover': {
-                          borderColor: '#1a2e20',
-                          backgroundColor: 'rgba(45, 74, 54, 0.04)',
-                        },
-                      }),
-                }}
+                sx={isFollowing ? artistStyles.followButtonActive : artistStyles.followButtonInactive}
               >
                 {!isLoggedIn
                   ? 'Sign in to follow'
@@ -514,7 +480,7 @@ const Artist = () => {
                       <HelpOutlineIcon
                         sx={{
                           fontSize: '0.9rem',
-                          color: '#757575',
+                          color: 'text.secondary',
                           cursor: 'help',
                           verticalAlign: 'middle',
                           marginBottom: '5px',
@@ -529,7 +495,7 @@ const Artist = () => {
                         size="small"
                         sx={{
                           backgroundColor: 'rgba(117, 117, 117, 0.12)',
-                          color: '#757575',
+                          color: 'text.secondary',
                           fontSize: '0.8rem',
                           fontWeight: 500,
                         }}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -16,7 +16,10 @@ import {
   Avatar,
   Link,
   IconButton,
+  Modal,
+  Backdrop,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -44,6 +47,7 @@ interface NewsArticleData {
 const NewsArticle: React.FC = () => {
   const navigate = useNavigate();
   const { articleId } = useParams<{ articleId: string }>();
+  const [imageModalOpen, setImageModalOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -276,20 +280,6 @@ const NewsArticle: React.FC = () => {
         </Box>
 
         <Card sx={styles.articleCard}>
-          {article.imageUrl && (
-            <Box
-              component="img"
-              src={article.imageUrl}
-              alt={article.title}
-              sx={{
-                width: '100%',
-                maxHeight: 400,
-                objectFit: 'cover',
-                borderTopLeftRadius: '12px',
-                borderTopRightRadius: '12px',
-              }}
-            />
-          )}
           <CardContent sx={{ p: 4 }}>
             <Box sx={styles.titleContainer}>
               {primaryArtist && (
@@ -343,6 +333,48 @@ const NewsArticle: React.FC = () => {
             <Typography sx={styles.content}>
               {renderContentWithLinks(article.content)}
             </Typography>
+
+            {article.imageUrl && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Box
+                  onClick={() => setImageModalOpen(true)}
+                  sx={{
+                    cursor: 'pointer',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    border: '1px solid #e0e0e0',
+                    transition: 'all 200ms',
+                    '&:hover': {
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                      transform: 'scale(1.01)',
+                    },
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={article.imageUrl}
+                    alt={article.title}
+                    sx={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block',
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: 'block',
+                    textAlign: 'center',
+                    mt: 1,
+                    color: '#757575',
+                  }}
+                >
+                  Click image to view full size
+                </Typography>
+              </>
+            )}
           </CardContent>
 
           { article.sourcePostUrl !== '' &&
@@ -363,6 +395,58 @@ const NewsArticle: React.FC = () => {
           </>
           }
         </Card>
+
+        {/* Full-size image modal */}
+        <Modal
+          open={imageModalOpen}
+          onClose={() => setImageModalOpen(false)}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 300,
+            sx: { backgroundColor: 'rgba(0, 0, 0, 0.9)' },
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              maxWidth: '95vw',
+              maxHeight: '95vh',
+              outline: 'none',
+            }}
+          >
+            <IconButton
+              onClick={() => setImageModalOpen(false)}
+              sx={{
+                position: 'absolute',
+                top: -48,
+                right: 0,
+                color: '#ffffff',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              <CloseIcon fontSize="large" />
+            </IconButton>
+            <Box
+              component="img"
+              src={article.imageUrl}
+              alt={article.title}
+              onClick={() => setImageModalOpen(false)}
+              sx={{
+                maxWidth: '95vw',
+                maxHeight: '95vh',
+                objectFit: 'contain',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            />
+          </Box>
+        </Modal>
       </Container>
     </Box>
   );

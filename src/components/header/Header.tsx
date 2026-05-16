@@ -25,6 +25,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { headerStyles } from '../../styles/header-styles';
+import { shadows } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
 import { logout } from '../../store/auth-slice';
@@ -203,41 +204,11 @@ const Header = () => {
                 {renderTabs()}
               </Tabs>
               {isLoggedIn ? (
-                <Button
-                  onClick={toggleDrawer(true)}
-                  sx={{
-                    color: '#2d4a36',
-                    textTransform: 'none',
-                    fontSize: { xs: '0.875rem', md: '1rem' },
-                    fontWeight: 600,
-                    padding: { xs: '6px 12px', md: '8px 16px' },
-                    borderRadius: '8px',
-                    backgroundColor: '#fafafa',
-                    '&:hover': {
-                      backgroundColor: '#f5f5f5',
-                      color: '#1a2d21'
-                    }
-                  }}
-                >
+                <Button onClick={toggleDrawer(true)} sx={headerStyles.accountButton}>
                   {user?.email?.split('@')[0]}
                 </Button>
               ) : (
-                <Button
-                  onClick={handleLogin}
-                  sx={{
-                    color: '#2d4a36',
-                    textTransform: 'none',
-                    fontSize: { xs: '0.875rem', md: '1rem' },
-                    fontWeight: 600,
-                    padding: { xs: '6px 12px', md: '8px 16px' },
-                    borderRadius: '8px',
-                    backgroundColor: '#fafafa',
-                    '&:hover': {
-                      backgroundColor: '#f5f5f5',
-                      color: '#1a2d21'
-                    }
-                  }}
-                >
+                <Button onClick={handleLogin} sx={headerStyles.accountButton}>
                   Login
                 </Button>
               )}
@@ -293,264 +264,63 @@ const Header = () => {
         anchor="right"
         open={drawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{
-          sx: {
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          }
-        }}
+        PaperProps={{ sx: { boxShadow: shadows.lg } }}
       >
-        <Box
-          sx={{ width: 280 }}
-          role="presentation"
-        >
-          <Box sx={{
-            p: 3,
-            backgroundColor: '#2d4a36',
-            color: '#ffffff',
-            borderBottom: '1px solid #1a2d21',
-          }}>
-            <Box sx={{
-              fontWeight: 600,
-              mb: 0.5,
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              opacity: 0.8,
-            }}>
-              Account
-            </Box>
-            <Box sx={{
-              fontSize: '0.875rem',
-              fontWeight: 500,
-            }}>
-              {user?.email}
-            </Box>
+        <Box sx={{ width: 280 }} role="presentation">
+          <Box sx={headerStyles.drawerHeader}>
+            <Box sx={headerStyles.drawerHeaderLabel}>Account</Box>
+            <Box sx={headerStyles.drawerHeaderEmail}>{user?.email}</Box>
           </Box>
           <List sx={{ p: 1 }}>
             <ListItem disablePadding>
-              <ListItemButton
-                onClick={handleFollowingClick}
-                sx={{
-                  borderRadius: '8px',
-                  mb: 0.5,
-                  transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    backgroundColor: '#fafafa',
-                    '& .MuiListItemIcon-root': {
-                      color: '#2d4a36',
-                    },
-                    '& .MuiListItemText-primary': {
-                      color: '#2d4a36',
-                    }
-                  }
-                }}
-              >
+              <ListItemButton onClick={handleFollowingClick} sx={headerStyles.drawerListItem}>
                 <ListItemIcon>
-                  <FavoriteIcon sx={{
-                    color: '#757575',
-                    transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  }} />
+                  <FavoriteIcon sx={headerStyles.drawerIcon} />
                 </ListItemIcon>
-                <ListItemText
-                  primary="Following"
-                  primaryTypographyProps={{
-                    sx: {
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      color: '#212121',
-                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                    }
-                  }}
-                />
+                <ListItemText primary="Following" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton
-                onClick={handleSettingsClick}
-                sx={{
-                  borderRadius: '8px',
-                  mb: 0.5,
-                  transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    backgroundColor: '#fafafa',
-                    '& .MuiListItemIcon-root': {
-                      color: '#2d4a36',
-                    },
-                    '& .MuiListItemText-primary': {
-                      color: '#2d4a36',
-                    }
-                  }
-                }}
-              >
+              <ListItemButton onClick={handleSettingsClick} sx={headerStyles.drawerListItem}>
                 <ListItemIcon>
-                  <SettingsIcon sx={{
-                    color: '#757575',
-                    transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  }} />
+                  <SettingsIcon sx={headerStyles.drawerIcon} />
                 </ListItemIcon>
-                <ListItemText
-                  primary="Settings"
-                  primaryTypographyProps={{
-                    sx: {
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      color: '#212121',
-                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                    }
-                  }}
-                />
+                <ListItemText primary="Settings" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>
             </ListItem>
-            {isLoggedIn && isAdmin && 
-             <>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={handleAddArtistClick}
-                    sx={{
-                      borderRadius: '8px',
-                      mb: 0.5,
-                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        backgroundColor: '#fafafa',
-                        '& .MuiListItemIcon-root': {
-                          color: '#2d4a36',
-                        },
-                        '& .MuiListItemText-primary': {
-                          color: '#2d4a36',
-                        }
-                      }
-                    }}
-                  >
-                    <ListItemIcon>
-                      <SettingsIcon sx={{
-                        color: '#757575',
-                        transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                      }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Add Artist"
-                      primaryTypographyProps={{
-                        sx: {
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: '#212121',
-                          transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                        }
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={handleReviewSocialsClick}
-                    sx={{
-                      borderRadius: '8px',
-                      mb: 0.5,
-                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        backgroundColor: '#fafafa',
-                        '& .MuiListItemIcon-root': {
-                          color: '#2d4a36',
-                        },
-                        '& .MuiListItemText-primary': {
-                          color: '#2d4a36',
-                        }
-                      }
-                    }}
-                  >
-                    <ListItemIcon>
-                      <SettingsIcon sx={{
-                        color: '#757575',
-                        transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                      }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Review Socials"
-                      primaryTypographyProps={{
-                        sx: {
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: '#212121',
-                          transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                        }
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={handleReviewNewsClick}
-                    sx={{
-                      borderRadius: '8px',
-                      mb: 0.5,
-                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        backgroundColor: '#fafafa',
-                        '& .MuiListItemIcon-root': {
-                          color: '#2d4a36',
-                        },
-                        '& .MuiListItemText-primary': {
-                          color: '#2d4a36',
-                        }
-                      }
-                    }}
-                  >
-                    <ListItemIcon>
-                      <SettingsIcon sx={{
-                        color: '#757575',
-                        transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                      }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Review News"
-                      primaryTypographyProps={{
-                        sx: {
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: '#212121',
-                          transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                        }
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              </>
-            }
+            {isLoggedIn && isAdmin && <>
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleAddArtistClick} sx={headerStyles.drawerListItem}>
+                  <ListItemIcon>
+                    <SettingsIcon sx={headerStyles.drawerIcon} />
+                  </ListItemIcon>
+                  <ListItemText primary="Add Artist" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleReviewSocialsClick} sx={headerStyles.drawerListItem}>
+                  <ListItemIcon>
+                    <SettingsIcon sx={headerStyles.drawerIcon} />
+                  </ListItemIcon>
+                  <ListItemText primary="Review Socials" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleReviewNewsClick} sx={headerStyles.drawerListItem}>
+                  <ListItemIcon>
+                    <SettingsIcon sx={headerStyles.drawerIcon} />
+                  </ListItemIcon>
+                  <ListItemText primary="Review News" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                </ListItemButton>
+              </ListItem>
+            </>}
             <Divider sx={{ my: 1 }} />
             <ListItem disablePadding>
-              <ListItemButton
-                onClick={handleLogout}
-                sx={{
-                  borderRadius: '8px',
-                  transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    backgroundColor: '#fafafa',
-                    '& .MuiListItemIcon-root': {
-                      color: '#e74c3c',
-                    },
-                    '& .MuiListItemText-primary': {
-                      color: '#e74c3c',
-                    }
-                  }
-                }}
-              >
+              <ListItemButton onClick={handleLogout} sx={headerStyles.drawerListItemLogout}>
                 <ListItemIcon>
-                  <LogoutIcon sx={{
-                    color: '#757575',
-                    transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  }} />
+                  <LogoutIcon sx={headerStyles.drawerIcon} />
                 </ListItemIcon>
-                <ListItemText
-                  primary="Sign Out"
-                  primaryTypographyProps={{
-                    sx: {
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      color: '#212121',
-                      transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                    }
-                  }}
-                />
+                <ListItemText primary="Sign Out" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>
             </ListItem>
           </List>

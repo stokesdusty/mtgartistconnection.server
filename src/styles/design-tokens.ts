@@ -9,6 +9,7 @@ export const colors = {
     main: '#2d4a36',      // Dark forest green - main accent
     dark: '#1a2d21',      // Deeper green for hover states
     light: '#3c5c48',     // Slightly lighter for subtle variations
+    lighter: '#f0f9f4',   // Very light green tint for backgrounds
     contrast: '#ffffff',  // White text on dark green
   },
 
@@ -33,6 +34,7 @@ export const colors = {
     orange: '#e67e22',    // Warmer, more muted orange for CTAs
     blue: '#3498db',      // Info states
     red: '#e74c3c',       // Error states
+    redLight: '#fef5f5',  // Light red background for error states
     green: '#27ae60',     // Success states
   },
 

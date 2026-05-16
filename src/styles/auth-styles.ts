@@ -1,73 +1,123 @@
-import { Styles } from "./homepage-styles";
+import { SxProps, Theme } from '@mui/material';
+import { colors, typography, shadows, borderRadius, transitions } from './design-tokens';
 
-export const authStyles:Styles = {
-    container: {
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        paddingTop: "100px",
-        alignItems: "center",
-        margin: "auto",
+export const authStyles: Record<string, SxProps<Theme>> = {
+  container: {
+    backgroundColor: colors.neutral[50],
+    minHeight: '100vh',
+    padding: { xs: 2, md: 4 },
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentWrapper: {
+    maxWidth: 500,
+    width: '100%',
+    backgroundColor: colors.neutral.white,
+    borderRadius: borderRadius.lg,
+    boxShadow: shadows.sm,
+    border: `1px solid ${colors.neutral[200]}`,
+    overflow: 'hidden',
+  },
+  header: {
+    padding: { xs: 3, md: 4 },
+    paddingBottom: 2,
+  },
+  title: {
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.semibold,
+    fontSize: { xs: '1.5rem', md: typography.fontSize['3xl'] },
+    textAlign: 'center',
+    marginBottom: 1,
+  },
+  subtitle: {
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.sm,
+    textAlign: 'center',
+  },
+  tabs: {
+    borderBottom: `1px solid ${colors.neutral[200]}`,
+    '& .MuiTabs-indicator': {
+      backgroundColor: colors.primary.main,
+      height: 2,
     },
-    logoTitle: {
-        display: "flex", 
-        gap: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 1,
-        marginBottom: 1,
+  },
+  tab: {
+    textTransform: 'none',
+    fontWeight: typography.fontWeight.medium,
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+    '&.Mui-selected': {
+      color: colors.primary.main,
+      fontWeight: typography.fontWeight.semibold,
     },
-    logoText: {
-        fontFamily: "Work Sans",
-        fontSize: "30px",
-        textAlign: "center",
+  },
+  form: {
+    padding: { xs: 3, md: 4 },
+  },
+  textField: {
+    marginBottom: 2,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: borderRadius.md,
+      '&:hover fieldset': { borderColor: colors.primary.main },
+      '&.Mui-focused fieldset': { borderColor: colors.primary.main },
     },
-    formContainer: {
-        border: "1px solid #ccc",
-        borderRadius: 5,
-        padding: 5,
-        boxShadow: "5px 5px 10px #ccc",
-        display: "flex",
-        justifyContent: "center",
-        flexDirection: "column",
-        margin: "auto",
-        marginTop: 5, 
-        marginBottom: 5,
+    '& .MuiInputLabel-root': {
+      '&.Mui-focused': { color: colors.primary.main },
     },
-    form: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        padding: 4,
-        justifyContent: "center",
-        alignItems: "center",
-    }  as React.CSSProperties,
-    submitButton: {
-        fontFamily: "Work Sans",
-        marginTop: 1,
-        marginBottom: 1,
-        width: "200px",
-        borderRadius: 10,
-        bgcolor: "#273238",
-        marginLeft: "auto",
-        marginRight: "auto",
-        ":hover": {
-            color: "white",
-            bgcolor: "#159947",
-            boxShadow: "10px 10px 20px #ccc",
-        },
+  },
+  submitButton: {
+    backgroundColor: colors.primary.main,
+    color: colors.primary.contrast,
+    marginTop: 2,
+    padding: '12px',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    borderRadius: borderRadius.md,
+    textTransform: 'none',
+    transition: transitions.base,
+    '&:hover': { backgroundColor: colors.primary.dark },
+    '&:disabled': { backgroundColor: colors.neutral[400] },
+  },
+  errorAlert: {
+    marginBottom: 2,
+    borderRadius: borderRadius.md,
+  },
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: 2,
+  },
+  signupInfoBox: {
+    backgroundColor: colors.neutral[50],
+    padding: 2,
+    borderRadius: borderRadius.md,
+    marginBottom: 3,
+    border: `1px solid ${colors.neutral[200]}`,
+  },
+  signupInfoText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.primary,
+    lineHeight: 1.6,
+    marginBottom: 1.5,
+  },
+  signupInfoList: {
+    margin: 0,
+    paddingLeft: 2.5,
+    '& li': {
+      fontSize: typography.fontSize.sm,
+      color: colors.neutral[700],
+      lineHeight: 1.6,
+      marginBottom: 0.5,
     },
-    switchButton: {
-        background: "transparent",
-        color: "#273238",
-        ":hover": {
-            textDecoration: "underline",
-            textUnderlineOffset: "5px",
-        },
-    },
-    radioGroup: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-    },
+  },
+  signupInfoFootnote: {
+    fontSize: '0.8rem',
+    color: colors.text.secondary,
+    marginTop: 1.5,
+    fontStyle: 'italic',
+  },
+  spinner: {
+    color: colors.primary.main,
+  },
 };

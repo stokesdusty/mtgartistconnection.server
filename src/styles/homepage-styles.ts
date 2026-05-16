@@ -281,4 +281,50 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     fontWeight: typography.fontWeight.medium,
     gridColumn: '1 / -1',
   },
+  filterStrip: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 1,
+    py: 1.5,
+    px: 1,
+    borderRadius: borderRadius.md,
+    mb: 1,
+    marginTop: '20px',
+  },
+  filterStripActive: {
+    backgroundColor: colors.neutral[100],
+  },
+  filterStripCount: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.neutral[800],
+    mr: 1,
+  },
+  filterChip: {
+    backgroundColor: colors.primary.main,
+    color: colors.primary.contrast,
+    fontSize: typography.fontSize.xs,
+    height: '26px',
+    '& .MuiChip-deleteIcon': {
+      color: 'rgba(255,255,255,0.7)',
+      fontSize: '1rem',
+      '&:hover': { color: colors.primary.contrast },
+    },
+  },
+  clearAllButton: {
+    fontSize: typography.fontSize.xs,
+    textTransform: 'none',
+    color: colors.neutral[700],
+    ml: 1,
+    '&:hover': {
+      backgroundColor: 'rgba(0,0,0,0.04)',
+      color: colors.neutral[800],
+    },
+  },
+  listSubheader: {
+    backgroundColor: colors.neutral[100],
+    fontWeight: typography.fontWeight.semibold,
+    lineHeight: '32px',
+  },
 };

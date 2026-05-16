@@ -172,7 +172,7 @@ export const newsStyles = {
   errorAlert: {
     borderRadius: borderRadius.lg,
     border: `1px solid ${colors.accent.red}`,
-    backgroundColor: '#fef5f5',
+    backgroundColor: colors.accent.redLight,
   },
 };
 

@@ -2,7 +2,6 @@ import {
   Box,
   TextField,
   Typography,
-  CircularProgress,
   Select,
   MenuItem,
   FormControl,
@@ -14,6 +13,7 @@ import {
   Chip,
   ListSubheader,
 } from "@mui/material";
+import { ArtistGridSkeleton } from "../shared/Skeletons";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
@@ -23,6 +23,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
 import { homepageStyles } from "../../styles/homepage-styles";
+import { colors } from "../../styles/design-tokens";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -388,8 +389,17 @@ const Homepage = () => {
 
   if (loading)
     return (
-      <Box sx={homepageStyles.loadingContainer}>
-        <CircularProgress size={60} sx={homepageStyles.loadingSpinner} />
+      <Box sx={homepageStyles.container}>
+        <Box sx={homepageStyles.wrapper}>
+          <Box sx={homepageStyles.headerSection}>
+            <Box component="span" sx={homepageStyles.count}>
+              Loading artists...
+            </Box>
+          </Box>
+          <Box sx={homepageStyles.artistsGrid}>
+            <ArtistGridSkeleton count={10} />
+          </Box>
+        </Box>
       </Box>
     );
 
@@ -482,7 +492,7 @@ const Homepage = () => {
               >
                 <MenuItem value="">All Locations</MenuItem>
                 {locations.US.length > 0 && [
-                  <ListSubheader key="us-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '32px' }}>
+                  <ListSubheader key="us-header" sx={homepageStyles.listSubheader}>
                     US States
                   </ListSubheader>,
                   <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
@@ -495,7 +505,7 @@ const Homepage = () => {
                   ))
                 ]}
                 {locations.Other.length > 0 && [
-                  <ListSubheader key="other-header" sx={{ backgroundColor: '#f5f5f5', fontWeight: 600, lineHeight: '32px' }}>
+                  <ListSubheader key="other-header" sx={homepageStyles.listSubheader}>
                     Other Locations
                   </ListSubheader>,
                   ...locations.Other.map((location) => (
@@ -582,24 +592,8 @@ const Homepage = () => {
         </Box>
 
         {/* Filter Summary Strip */}
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 1,
-          py: 1.5,
-          px: 1,
-          backgroundColor: hasActiveFilters ? '#f5f5f5' : 'transparent',
-          borderRadius: '8px',
-          mb: 1,
-          marginTop: '20px'
-        }}>
-          <Typography sx={{
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            color: '#424242',
-            mr: 1,
-          }}>
+        <Box sx={{ ...homepageStyles.filterStrip as object, backgroundColor: hasActiveFilters ? colors.neutral[100] : 'transparent' }}>
+          <Typography sx={homepageStyles.filterStripCount}>
             {hasActiveFilters
               ? `Showing ${filteredData.length} of ${data.artists.length} artists`
               : `${data.artists.length} artists`
@@ -612,19 +606,7 @@ const Homepage = () => {
               label={chip.label}
               size="small"
               onDelete={chip.onDelete}
-              sx={{
-                backgroundColor: '#2d4a36',
-                color: '#ffffff',
-                fontSize: '0.75rem',
-                height: '26px',
-                '& .MuiChip-deleteIcon': {
-                  color: 'rgba(255,255,255,0.7)',
-                  fontSize: '1rem',
-                  '&:hover': {
-                    color: '#ffffff',
-                  },
-                },
-              }}
+              sx={homepageStyles.filterChip}
             />
           ))}
 
@@ -633,16 +615,7 @@ const Homepage = () => {
               size="small"
               startIcon={<ClearAllIcon />}
               onClick={handleClearAllFilters}
-              sx={{
-                fontSize: '0.75rem',
-                textTransform: 'none',
-                color: '#616161',
-                ml: 1,
-                '&:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.04)',
-                  color: '#424242',
-                },
-              }}
+              sx={homepageStyles.clearAllButton}
             >
               Clear all
             </Button>

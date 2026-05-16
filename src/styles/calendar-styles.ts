@@ -1,75 +1,89 @@
-import { Styles } from "./homepage-styles";
+import { SxProps, Theme } from '@mui/material';
+import { colors, typography, transitions, borderRadius } from './design-tokens';
 
-export const calendarStyles: Styles = {
-    container: {
-        display: "flex",
-        flexDirection: "column",
-        margin: "auto",
-        justifyContent: "center",
-        paddingTop: "100px",
-        alignItems: "center",
-        gap: 4,
-        minHeight: "75vh"
+export const calendarStyles: Record<string, SxProps<Theme>> = {
+  // Date filter chip styles
+  dateChipActive: {
+    backgroundColor: colors.primary.main,
+    color: colors.primary.contrast,
+    borderColor: colors.primary.main,
+    fontWeight: typography.fontWeight.semibold,
+    fontSize: { xs: '0.8125rem', sm: typography.fontSize.sm },
+    height: { xs: 32, sm: 32 },
+    transition: transitions.base,
+    '&:hover': {
+      backgroundColor: colors.primary.dark,
+      transform: 'translateY(-1px)',
     },
-    eventContainer: {
-        // border: "1px solid rgba(0,0,0,0.5)",
-        boxShadow: "5px 5px 20px #ccc",
-        width: "80%",
-        height: "auto",
-        borderRadius: 10,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 1,
-        padding: 2
+    '&:active': {
+      transform: 'translateY(0)',
     },
-    artistLink: {
-        textDecoration: "none",
-        fontWeight: "500",
-        color: "#159947",
-        fontSize: 20,
+  },
+  dateChipInactive: {
+    backgroundColor: 'transparent',
+    color: colors.primary.main,
+    borderColor: colors.primary.main,
+    fontWeight: typography.fontWeight.normal,
+    fontSize: { xs: '0.8125rem', sm: typography.fontSize.sm },
+    height: { xs: 32, sm: 32 },
+    transition: transitions.base,
+    '&:hover': {
+      backgroundColor: 'rgba(45, 74, 54, 0.08)',
+      transform: 'translateY(-1px)',
     },
-    groupingContainer: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        alignItems: "baseline",
-        width: "100%",
-        paddingBottom: 2,
+    '&:active': {
+      transform: 'translateY(0)',
     },
-    groupingContainerSmall: {
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        paddingBottom: 2,
+  },
+  eventCountBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary.lighter,
+    color: colors.primary.main,
+    border: `1px solid ${colors.primary.main}`,
+    fontSize: { xs: '0.8125rem', sm: typography.fontSize.sm },
+    fontWeight: typography.fontWeight.semibold,
+    padding: { xs: '6px 14px', sm: '6px 16px' },
+    borderRadius: borderRadius.full,
+    marginLeft: { xs: 0, sm: 'auto' },
+    alignSelf: { xs: 'center', sm: 'center' },
+    whiteSpace: 'nowrap',
+    fontFamily: typography.fontFamily.display,
+  },
+  filterSelect: {
+    borderRadius: borderRadius.md,
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: colors.neutral[200],
     },
-    signingEventsContainer: {
-        display: "flex",
-        flexDirection: "column",
-        margin: "auto",
-        justifyContent: "space-between",
-        paddingTop: "25px",
-        paddingBottom: "25px",
-        paddingLeft: "10px",
-        paddingRight: "10px",
-        alignItems: "center",
-        width: "75vw",
-        backgroundColor: "#507A60",
-        borderRadius: "10px",
-        marginBottom: "25px",
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: colors.primary.main,
     },
-    linksContainer: {
-        display: "flex",
-        flexDirection: "column",
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: colors.primary.main,
     },
-    link: {
-        textDecoration: "none",
-        fontSize: 24,
-        fontWeight: "500",
-        color: "#083d1c",
-        paddingBottom: "10px"
+  },
+  listSubheader: {
+    backgroundColor: colors.neutral[100],
+    fontWeight: typography.fontWeight.semibold,
+    lineHeight: '36px',
+  },
+  clearFiltersButton: {
+    borderColor: colors.primary.main,
+    color: colors.primary.main,
+    textTransform: 'none',
+    borderRadius: borderRadius.md,
+    '&:hover': {
+      borderColor: colors.primary.dark,
+      backgroundColor: 'rgba(45, 74, 54, 0.04)',
     },
+  },
+  scrollToTopFab: {
+    position: 'fixed',
+    bottom: 24,
+    right: 24,
+    bgcolor: colors.primary.main,
+    '&:hover': { bgcolor: colors.primary.dark },
+    zIndex: 999,
+  },
 };

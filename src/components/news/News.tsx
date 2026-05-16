@@ -6,7 +6,6 @@ import {
   Container,
   Paper,
   Typography,
-  CircularProgress,
   Alert,
   Chip,
   Card,
@@ -18,6 +17,7 @@ import {
   MenuItem,
   Button,
 } from '@mui/material';
+import { NewsCardSkeleton } from '../shared/Skeletons';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -163,12 +163,15 @@ const News: React.FC = () => {
     return (
       <Box sx={newsStyles.container}>
         <Container maxWidth="md">
-          <Box sx={newsStyles.loadingContainer}>
-            <Box sx={{ textAlign: 'center' }}>
-              <CircularProgress sx={newsStyles.loadingSpinner} size={48} />
-              <Typography sx={newsStyles.loadingText}>Loading news articles...</Typography>
-            </Box>
+          <Box sx={newsStyles.header}>
+            <Typography variant="h3" sx={newsStyles.title}>
+              MTG Artist News
+            </Typography>
+            <Typography sx={newsStyles.subtitle}>
+              Stay updated with the latest from your favorite Magic: The Gathering artists
+            </Typography>
           </Box>
+          <NewsCardSkeleton count={4} />
         </Container>
       </Box>
     );
@@ -294,20 +297,6 @@ const News: React.FC = () => {
                   sx={newsStyles.articleCard}
                   onClick={(e) => handleArticleClick(article.id, e)}
                 >
-                  {article.imageUrl && (
-                    <Box
-                      component="img"
-                      src={article.imageUrl}
-                      alt={article.title}
-                      sx={{
-                        width: '100%',
-                        height: 200,
-                        objectFit: 'cover',
-                        borderTopLeftRadius: '12px',
-                        borderTopRightRadius: '12px',
-                      }}
-                    />
-                  )}
                   <CardContent sx={{ p: 3 }}>
                     <Box sx={newsStyles.titleContainer}>
                       {primaryArtist && (
