@@ -61,6 +61,7 @@ const Calendar = () => {
   const upcomingEventIds = useMemo(() => {
     if (!data?.signingEvent) return [];
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     return data.signingEvent
       .filter((event: any) => new Date(event.endDate) >= today)
       .map((event: any) => event.id);
@@ -150,6 +151,7 @@ const Calendar = () => {
     if (!data?.signingEvent) return { US: [], Other: [] };
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const upcomingEvents = data.signingEvent.filter((event: any) => {
       const endDate = new Date(event.endDate);
       return endDate >= today;
@@ -190,6 +192,7 @@ const Calendar = () => {
     }
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     let filtered = data.signingEvent.filter((eventData: any) => {
       const endDate = new Date(eventData.endDate);
       return endDate >= today;

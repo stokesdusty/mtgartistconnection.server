@@ -82,6 +82,7 @@ const Homepage = () => {
     if (!eventsData?.signingEvent) return [];
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     return eventsData.signingEvent
       .filter((event: any) => new Date(event.endDate) >= today)
       .map((event: any) => event.id);

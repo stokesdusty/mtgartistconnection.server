@@ -161,6 +161,7 @@ const Artist = () => {
     if (!eventsData?.signingEvent) return [];
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     return eventsData.signingEvent.filter((event: any) => {
       const endDate = new Date(event.endDate);
       return endDate >= today;
