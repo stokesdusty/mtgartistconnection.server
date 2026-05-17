@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import {
   Box,
@@ -43,11 +44,21 @@ type DateRangeFilter = 'all' | 'this-week' | 'this-month' | 'next-3-months';
 const Calendar = () => {
   usePageTitle("Events Calendar");
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const locationFilter = searchParams.get('location') ?? '';
+  const artistFilter = searchParams.get('artist') ?? '';
+  const dateRangeFilter = (searchParams.get('range') as DateRangeFilter) ?? 'all';
+
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
-  const [locationFilter, setLocationFilter] = useState("");
-  const [artistFilter, setArtistFilter] = useState("");
-  const [dateRangeFilter, setDateRangeFilter] = useState<DateRangeFilter>('all');
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const updateFilter = (key: string, value: string) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (value) next.set(key, value); else next.delete(key);
+      return next;
+    }, { replace: true });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,21 +102,19 @@ const Calendar = () => {
   };
 
   const handleLocationChange = (event: SelectChangeEvent) => {
-    setLocationFilter(event.target.value);
+    updateFilter('location', event.target.value);
   };
 
   const handleArtistChange = (event: SelectChangeEvent) => {
-    setArtistFilter(event.target.value);
+    updateFilter('artist', event.target.value);
   };
 
   const handleClearFilters = () => {
-    setLocationFilter("");
-    setArtistFilter("");
-    setDateRangeFilter('all');
+    setSearchParams({}, { replace: true });
   };
 
   const handleDateRangeChange = (range: DateRangeFilter) => {
-    setDateRangeFilter(range);
+    updateFilter('range', range === 'all' ? '' : range);
   };
 
   // Calculate date range boundaries
@@ -147,8 +156,19 @@ const Calendar = () => {
     return Array.from(allArtists).sort();
   }, [eventArtistsMap]);
 
+  // Count events per artist across all upcoming events
+  const artistEventCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    Object.values(eventArtistsMap).forEach((artists) => {
+      artists.forEach((artist) => {
+        counts[artist] = (counts[artist] ?? 0) + 1;
+      });
+    });
+    return counts;
+  }, [eventArtistsMap]);
+
   const locations = useMemo(() => {
-    if (!data?.signingEvent) return { US: [], Other: [] };
+    if (!data?.signingEvent) return { US: [], Other: [], counts: {} as Record<string, number> };
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -159,30 +179,33 @@ const Calendar = () => {
 
     const usLocations = new Set<string>();
     const otherLocations = new Set<string>();
+    const counts: Record<string, number> = {};
 
     upcomingEvents.forEach((event: any) => {
       if (event.city) {
-        // Check if it's a US location (format: "City, StateCode")
         const parts = event.city.split(',').map((s: string) => s.trim());
-
         if (parts.length === 2) {
           const stateCode = parts[1].toUpperCase();
-
-          // Check if this is a US state code
           if (stateCodeToName[stateCode]) {
-            usLocations.add(stateCodeToName[stateCode]); // Add full state name
+            const stateName = stateCodeToName[stateCode];
+            usLocations.add(stateName);
+            counts[stateName] = (counts[stateName] ?? 0) + 1;
+            counts['US'] = (counts['US'] ?? 0) + 1;
           } else {
-            otherLocations.add(event.city); // International location
+            otherLocations.add(event.city);
+            counts[event.city] = (counts[event.city] ?? 0) + 1;
           }
         } else {
           otherLocations.add(event.city);
+          counts[event.city] = (counts[event.city] ?? 0) + 1;
         }
       }
     });
 
     return {
       US: Array.from(usLocations).sort(),
-      Other: Array.from(otherLocations).sort()
+      Other: Array.from(otherLocations).sort(),
+      counts,
     };
   }, [data]);
 
@@ -351,11 +374,11 @@ const Calendar = () => {
                     US States
                   </ListSubheader>,
                   <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
-                    Anywhere in the US
+                    Anywhere in the US ({locations.counts['US'] ?? 0})
                   </MenuItem>,
                   ...locations.US.map((location) => (
                     <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                      {location}
+                      {location} ({locations.counts[location] ?? 0})
                     </MenuItem>
                   ))
                 ]}
@@ -365,7 +388,7 @@ const Calendar = () => {
                   </ListSubheader>,
                   ...locations.Other.map((location) => (
                     <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                      {location}
+                      {location} ({locations.counts[location] ?? 0})
                     </MenuItem>
                   ))
                 ]}
@@ -387,7 +410,7 @@ const Calendar = () => {
                 </MenuItem>
                 {uniqueArtists.map((artist) => (
                   <MenuItem key={artist} value={artist}>
-                    {artist}
+                    {artist} ({artistEventCounts[artist] ?? 0})
                   </MenuItem>
                 ))}
               </Select>
