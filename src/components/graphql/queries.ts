@@ -241,6 +241,41 @@ export const GET_NEWS_REVIEW = gql`
     }
 `;
 
+export const GET_USER_CARD_COLLECTION = gql`
+    query userCardCollection($scryfallIds: [String!]!) {
+        userCardCollection(scryfallIds: $scryfallIds) {
+            id
+            scryfallId
+            cardName
+            set
+            collectorNumber
+            signedNonfoil
+            signedFoil
+            wishlistSigned
+            artistProof
+            artistProofFoil
+        }
+    }
+`;
+
+export const GET_MY_CARD_COLLECTION = gql`
+    query {
+        myCardCollection {
+            id
+            scryfallId
+            cardName
+            artistName
+            set
+            collectorNumber
+            signedNonfoil
+            signedFoil
+            wishlistSigned
+            artistProof
+            artistProofFoil
+        }
+    }
+`;
+
 export const GET_NEWS_REVIEWS_BY_ARTIST = gql`
     query newsReviewsByArtist($artistName: String!, $limit: Int) {
         newsReviewsByArtist(artistName: $artistName, limit: $limit) {

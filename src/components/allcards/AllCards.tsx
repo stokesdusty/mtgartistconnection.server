@@ -2,6 +2,8 @@ import {
   useEffect,
   useState,
   useMemo,
+  useCallback,
+  memo,
 } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams } from "react-router";
@@ -18,11 +20,15 @@ import {
   Paper,
   Button,
   Fab,
+  IconButton,
 } from "@mui/material";
-import { ArrowUp } from "@phosphor-icons/react";
-import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS } from "../graphql/queries";
-import { useQuery, useLazyQuery } from "@apollo/client";
+import { ArrowUp, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
+import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
+import { TOGGLE_CARD_COLLECTION_FIELD } from "../graphql/mutations";
+import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface Card {
   related_uris: any;
@@ -88,14 +94,229 @@ interface CardKingdomPrice {
   scryfallId: string;
 }
 
+interface CollectionItem {
+  id: string;
+  scryfallId: string;
+  cardName: string;
+  set: string;
+  collectorNumber: string;
+  signedNonfoil: boolean;
+  signedFoil: boolean;
+  wishlistSigned: boolean;
+  artistProof: boolean;
+  artistProofFoil: boolean;
+}
+
+const COLLECTION_FIELDS = [
+  { field: 'artistProof',    Icon: DeviceMobileCamera,  label: 'Artist Proof (nonfoil)', color: '#0891b2' },
+  { field: 'artistProofFoil',Icon: DeviceMobileSpeaker, label: 'Artist Proof (foil)',    color: '#d97706' },
+  { field: 'signedNonfoil',  Icon: PenNib,             label: 'Signed (nonfoil)',        color: '#7c3aed' },
+  { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           color: '#db2777' },
+  { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   color: '#dc2626' },
+] as const;
+
+// ─── CardItem ────────────────────────────────────────────────────────────────
+// Defined outside AllCards so React.memo works correctly and getCardPrice/
+// getCardKingdomPrice lookups don't cause unnecessary re-renders of the whole list.
+
+interface CardItemProps {
+  card: Card;
+  price: CardPrice | undefined;
+  ckPrice: CardKingdomPrice | undefined;
+  collectionItem: CollectionItem | undefined;
+  isLoggedIn: boolean;
+  onToggle: (card: Card, field: string) => void;
+}
+
+const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onToggle }: CardItemProps) => {
+  const formatPrice = (cents: number | null): string => {
+    if (cents === null || cents === undefined) return '-';
+    return `$${(cents / 100).toFixed(2)}`;
+  };
+
+  const cardSlug = card.name
+    ? card.name
+        .toLowerCase()
+        .replace(/[^a-z0-9']+/g, '-')
+        .replace(/^-+|-+$/g, '')
+    : '';
+
+  const manapoolPrice = price?.price_cents_nm || price?.price_cents_lp_plus || price?.price_cents;
+
+  const priceDisplay = cardSlug && (
+    <Link
+      href={`https://manapool.com/card/${card.set}/${card.collector_number}/${cardSlug}?ref=mtgartistconnection`}
+      target="_blank"
+      onClick={() => {
+        if ((window as any).gtag) {
+          (window as any).gtag("event", "manapool_price_click", {
+            event_category: "affiliate_links",
+            event_label: card.name,
+            card_set: card.set,
+          });
+        }
+      }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0.5,
+        textDecoration: 'none',
+        padding: '2px 4px',
+        borderRadius: '4px',
+        transition: 'background-color 0.2s',
+        '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
+      }}
+    >
+      {manapoolPrice && (
+        <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
+          {formatPrice(manapoolPrice)}
+        </Typography>
+      )}
+      <img src="/manapool-icon.ico" alt="Manapool" style={{ height: '16px', width: '16px' }} />
+    </Link>
+  );
+
+  const tcgplayerDisplay = card.tcgplayer_id && card.prices?.usd && (
+    <Link
+      href={`https://partner.tcgplayer.com/JkbQGE?u=https://www.tcgplayer.com/product/${card.tcgplayer_id}`}
+      target="_blank"
+      onClick={() => {
+        if ((window as any).gtag) {
+          (window as any).gtag("event", "tcgplayer_price_click", {
+            event_category: "affiliate_links",
+            event_label: card.name,
+            card_set: card.set,
+          });
+        }
+      }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0.5,
+        textDecoration: 'none',
+        padding: '2px 4px',
+        borderRadius: '4px',
+        transition: 'background-color 0.2s',
+        '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
+      }}
+    >
+      <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
+        ${card.prices.usd}
+      </Typography>
+      <Box
+        component="img"
+        src="/tcgplayer.png"
+        alt="TCGPlayer"
+        sx={{ height: '16px', width: '32px', objectFit: 'cover', objectPosition: 'left center' }}
+      />
+    </Link>
+  );
+
+  const ckUrl = ckPrice?.url
+    ? `${ckPrice.url}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`
+    : `https://www.cardkingdom.com/mtg/${card.name?.toLowerCase().replace(/\s+/g, '-')}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`;
+
+  const cardKingdomDisplay = ckPrice && (
+    <Link
+      href={ckUrl}
+      target="_blank"
+      onClick={() => {
+        if ((window as any).gtag) {
+          (window as any).gtag("event", "cardkingdom_price_click", {
+            event_category: "affiliate_links",
+            event_label: card.name,
+            card_set: card.set,
+          });
+        }
+      }}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0.5,
+        textDecoration: 'none',
+        padding: '2px 4px',
+        borderRadius: '4px',
+        transition: 'background-color 0.2s',
+        '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
+      }}
+    >
+      <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
+        {formatPrice(ckPrice.price)}
+      </Typography>
+      <Box
+        component="img"
+        src="/cardkingdom.jpg"
+        alt="Card Kingdom"
+        sx={{ height: '16px', width: '16px', objectFit: 'contain' }}
+      />
+    </Link>
+  );
+
+  // Use native title attribute instead of MUI Tooltip — zero JS overhead, no portals or event listeners per card.
+  const collectionControls = (
+    <Box sx={{ display: 'flex', gap: 0.25, justifyContent: 'center', mt: 0.5 }}>
+      {COLLECTION_FIELDS.map(({ field, Icon, label, color }) => {
+        const active = collectionItem ? (collectionItem as any)[field] : false;
+        const tooltip = isLoggedIn ? label : "Log in to track your collection";
+        return (
+          <span key={field} title={tooltip}>
+            <IconButton
+              size="small"
+              onClick={() => onToggle(card, field)}
+              sx={{
+                color: active ? color : 'text.disabled',
+                p: 0.5,
+                cursor: isLoggedIn ? 'pointer' : 'default',
+                '&:hover': { backgroundColor: isLoggedIn ? undefined : 'transparent' },
+              }}
+            >
+              <Icon size={18} weight={active ? 'fill' : 'regular'} />
+            </IconButton>
+          </span>
+        );
+      })}
+    </Box>
+  );
+
+  const imageSrc = card.image_uris?.border_crop ?? card.card_faces?.[0]?.image_uris?.normal;
+  if (!imageSrc) return null;
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Link href={card?.scryfall_uri} target="_blank">
+        <Box
+          component="img"
+          alt={card.artist || "Card"}
+          src={imageSrc}
+          sx={allCardsStyles.cardImage}
+        />
+      </Link>
+      {collectionControls}
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+        {priceDisplay}
+        {tcgplayerDisplay}
+        {cardKingdomDisplay}
+      </Box>
+    </Box>
+  );
+});
+
+// ─── AllCards ─────────────────────────────────────────────────────────────────
+
 const AllCards = () => {
   const { name: artist } = useParams<{ name?: string }>();
   const navigate = useNavigate();
-  const [showDupes, setShowDupes] = useState<boolean>(false);
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const [hideReprints, setHideReprints] = useState<boolean>(() => {
+    try { return localStorage.getItem('mtgac-hide-reprints') === 'true'; }
+    catch { return false; }
+  });
+  const [filterMode, setFilterMode] = useState<'all' | 'signed' | 'wishlisted' | 'artistProof'>('all');
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [includeDigital, setIncludeDigital] = useState<boolean>(false);
   const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
   const [cardKingdomPrices, setCardKingdomPrices] = useState<Map<string, CardKingdomPrice>>(new Map());
+  const [cardCollection, setCardCollection] = useState<Map<string, CollectionItem>>(new Map());
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   const [sortByNewest, setSortByNewest] = useState<boolean>(false);
 
@@ -116,7 +337,6 @@ const AllCards = () => {
       if (data?.cardPricesByCards) {
         const priceMap = new Map<string, CardPrice>();
         data.cardPricesByCards.forEach((price: CardPrice) => {
-          // Key by set_code (lowercase) + number to match with scryfall data
           const key = `${price.set_code.toLowerCase()}-${price.number}`;
           priceMap.set(key, price);
         });
@@ -133,7 +353,6 @@ const AllCards = () => {
       if (data?.cardKingdomPricesByScryfallIds) {
         const ckPriceMap = new Map<string, CardKingdomPrice>();
         data.cardKingdomPricesByScryfallIds.forEach((price: CardKingdomPrice) => {
-          // Store by scryfallId for exact matching
           ckPriceMap.set(price.scryfallId, price);
         });
         setCardKingdomPrices(ckPriceMap);
@@ -144,18 +363,41 @@ const AllCards = () => {
     },
   });
 
+  const [fetchUserCardCollection] = useLazyQuery(GET_USER_CARD_COLLECTION, {
+    onCompleted: (data) => {
+      if (data?.userCardCollection) {
+        const collectionMap = new Map<string, CollectionItem>();
+        data.userCardCollection.forEach((item: CollectionItem) => {
+          collectionMap.set(item.scryfallId, item);
+        });
+        setCardCollection(collectionMap);
+      }
+    },
+    onError: (error) => {
+      console.error('Error fetching card collection:', error);
+    },
+  });
+
+  const [toggleCardCollectionField] = useMutation(TOGGLE_CARD_COLLECTION_FIELD, {
+    onError: (error) => {
+      console.error('Error toggling card collection field:', error);
+    },
+  });
+
   useEffect(() => {
     if (!artist) {
       navigate("/");
     }
   }, [artist, navigate]);
 
+  useEffect(() => {
+    setFilterMode('all');
+  }, [artist]);
+
   usePageTitle(artist ? `All ${artist} Cards` : undefined);
 
   const { data: artistData, error, loading } = useQuery(GET_ARTIST_BY_NAME, {
-    variables: {
-      name: artist || "",
-    },
+    variables: { name: artist || "" },
     skip: !artist,
   });
 
@@ -180,57 +422,50 @@ const AllCards = () => {
       try {
         const response = await axios.get<ScryfallResponse>(url);
         const newCards = [...allCards, ...response.data.data];
-
         if (response.data.has_more && response.data.next_page) {
           return await fetchAllCards(response.data.next_page, newCards);
         }
-
         return newCards;
       } catch (error) {
         console.error("Error fetching cards:", error);
-        return allCards; // Return what we have so far
+        return allCards;
       }
     };
 
     const fetchData = async () => {
       if (!scryfallQuery) return;
 
-      const url = showDupes ? scryfallQuery.withDuplicates : scryfallQuery.withoutDuplicates;
+      const url = hideReprints ? scryfallQuery.withoutDuplicates : scryfallQuery.withDuplicates;
       const fetchedCards = await fetchAllCards(url);
 
-      // Normalize function to remove diacritics and special characters
       const normalize = (str: string) => {
         return str
           .toLowerCase()
-          .normalize("NFD") // Decompose combined characters
-          .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
-          .replace(/\./g, " ") // Replace periods with spaces (handles "D. J." → "D J")
-          .replace(/-/g, " ") // Replace hyphens with spaces
-          .replace(/"/g, "") // Remove quotation marks
-          .replace(/[()]/g, "") // Remove parentheses
-          .replace(/'/g, " ") // Replace apostrophes with spaces
-          .replace(/,/g, "") // Remove commas (handles "Beard, Jr." → "Beard Jr")
-          .replace(/\s+/g, "") // Remove ALL spaces to ensure consistent matching
+          .normalize("NFD")
+          .replace(/[̀-ͯ]/g, "")
+          .replace(/\./g, " ")
+          .replace(/-/g, " ")
+          .replace(/"/g, "")
+          .replace(/[()]/g, "")
+          .replace(/'/g, " ")
+          .replace(/,/g, "")
+          .replace(/\s+/g, "")
           .trim();
       };
 
-      // Filter for artist match (exact or as part of multiple artists)
       const normalizedArtist = normalize(artist || "");
       const filteredCards = fetchedCards.filter((card) => {
         const cardArtist = card.artist || "";
         const normalizedCardArtist = normalize(cardArtist);
-
-        // Match if exact match OR artist name appears in the string
-        // This handles cases like "Artist A & Artist B" or "Artist A, Artist B"
         return normalizedCardArtist === normalizedArtist ||
                normalizedCardArtist.split(/[&,]/).some(name => name.trim() === normalizedArtist);
       });
 
-    setCardData({ data: filteredCards, total_cards: filteredCards.length });
-  };
+      setCardData({ data: filteredCards, total_cards: filteredCards.length });
+    };
 
     fetchData();
-  }, [scryfallQuery, showDupes, includeDigital, artist]);
+  }, [scryfallQuery, hideReprints, includeDigital, artist]);
 
   const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
     if (!cardData) {
@@ -244,8 +479,27 @@ const AllCards = () => {
         return dateB.localeCompare(dateA);
       });
     }
-    return { cards: sortedCards, totalCards: cardData.total_cards };
+    return { cards: sortedCards, totalCards: sortedCards.length };
   }, [cardData, sortByNewest]);
+
+  const displayedCards = useMemo(() => {
+    if (filterMode === 'signed') {
+      return cards.filter(c => {
+        const col = cardCollection.get(c.id ?? '');
+        return col?.signedNonfoil || col?.signedFoil;
+      });
+    }
+    if (filterMode === 'wishlisted') {
+      return cards.filter(c => cardCollection.get(c.id ?? '')?.wishlistSigned);
+    }
+    if (filterMode === 'artistProof') {
+      return cards.filter(c => {
+        const col = cardCollection.get(c.id ?? '');
+        return col?.artistProof || col?.artistProofFoil;
+      });
+    }
+    return cards;
+  }, [cards, filterMode, cardCollection]);
 
   useEffect(() => {
     if (cards.length > 0) {
@@ -260,228 +514,71 @@ const AllCards = () => {
         fetchCardPrices({ variables: { cards: cardLookups } });
       }
 
-      // Fetch CardKingdom prices for all unique scryfall IDs in a single batch query
       const uniqueScryfallIds = Array.from(new Set(cards.map(card => card.id).filter(Boolean)));
       if (uniqueScryfallIds.length > 0) {
         fetchCardKingdomPrices({ variables: { scryfallIds: uniqueScryfallIds } });
+        if (isLoggedIn) {
+          fetchUserCardCollection({ variables: { scryfallIds: uniqueScryfallIds } });
+        }
       }
     }
-  }, [cards, fetchCardPrices, fetchCardKingdomPrices]);
+  }, [cards, fetchCardPrices, fetchCardKingdomPrices, fetchUserCardCollection, isLoggedIn]);
 
-  const formatPrice = (cents: number | null): string => {
-    if (cents === null || cents === undefined) return '-';
-    return `$${(cents / 100).toFixed(2)}`;
-  };
+  const signedCount = useMemo(
+    () => Array.from(cardCollection.values()).filter(item => item.signedNonfoil || item.signedFoil).length,
+    [cardCollection]
+  );
 
-  const getCardPrice = (card: Card): CardPrice | undefined => {
+  const wishlistCount = useMemo(
+    () => Array.from(cardCollection.values()).filter(item => item.wishlistSigned).length,
+    [cardCollection]
+  );
+
+  const artistProofCount = useMemo(
+    () => Array.from(cardCollection.values()).filter(item => item.artistProof || item.artistProofFoil).length,
+    [cardCollection]
+  );
+
+  const getCardPrice = useCallback((card: Card): CardPrice | undefined => {
     if (!card.set || !card.collector_number) return undefined;
     const key = `${card.set.toLowerCase()}-${card.collector_number}`;
     return cardPrices.get(key);
-  };
+  }, [cardPrices]);
 
-  const getCardKingdomPrice = (card: Card): CardKingdomPrice | undefined => {
+  const getCardKingdomPrice = useCallback((card: Card): CardKingdomPrice | undefined => {
     if (!card.id) return undefined;
-    // Match by scryfallId for exact accuracy
     return cardKingdomPrices.get(card.id);
-  };
+  }, [cardKingdomPrices]);
 
-  const getImage = (card: Card) => {
-    const price = getCardPrice(card);
-
-    if (card.name === '_____ ' || card.name?.includes('_____')) {
-      console.log('Card:', card.name, 'Set:', card.set, 'Number:', card.collector_number);
-      console.log('Price object:', price);
-    }
-
-    // Convert card name to URL slug (lowercase, replace spaces/special chars with hyphens)
-    // Keep apostrophes, replace other special chars with hyphens
-    const cardSlug = card.name
-      ? card.name
-          .toLowerCase()
-          .replace(/[^a-z0-9']+/g, '-')
-          .replace(/^-+|-+$/g, '')
-      : '';
-
-    // Fallback chain for price: NM -> LP -> generic -> no price (just link)
-    const manapoolPrice = price?.price_cents_nm || price?.price_cents_lp_plus || price?.price_cents;
-
-    const priceDisplay = cardSlug && (
-      <Link
-        href={`https://manapool.com/card/${card.set}/${card.collector_number}/${cardSlug}?ref=mtgartistconnection`}
-        target="_blank"
-        onClick={() => {
-          if ((window as any).gtag) {
-            (window as any).gtag("event", "manapool_price_click", {
-              event_category: "affiliate_links",
-              event_label: card.name,
-              card_set: card.set,
-            });
-          }
-        }}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          textDecoration: 'none',
-          padding: '2px 4px',
-          borderRadius: '4px',
-          transition: 'background-color 0.2s',
-          '&:hover': {
-            backgroundColor: 'rgba(45, 74, 54, 0.1)',
-          },
-        }}
-      >
-        {manapoolPrice && (
-          <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
-            {formatPrice(manapoolPrice)}
-          </Typography>
-        )}
-        <img
-          src="/manapool-icon.ico"
-          alt="Manapool"
-          style={{ height: '16px', width: '16px' }}
-        />
-      </Link>
-    );
-
-    const tcgplayerDisplay = card.tcgplayer_id && card.prices?.usd && (
-      <Link
-        href={`https://partner.tcgplayer.com/JkbQGE?u=https://www.tcgplayer.com/product/${card.tcgplayer_id}`}
-        target="_blank"
-        onClick={() => {
-          if ((window as any).gtag) {
-            (window as any).gtag("event", "tcgplayer_price_click", {
-              event_category: "affiliate_links",
-              event_label: card.name,
-              card_set: card.set,
-            });
-          }
-        }}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          textDecoration: 'none',
-          padding: '2px 4px',
-          borderRadius: '4px',
-          transition: 'background-color 0.2s',
-          '&:hover': {
-            backgroundColor: 'rgba(45, 74, 54, 0.1)',
-          },
-        }}
-      >
-        <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
-          ${card.prices.usd}
-        </Typography>
-        <Box
-          component="img"
-          src="/tcgplayer.png"
-          alt="TCGPlayer"
-          sx={{
-            height: '16px',
-            width: '32px',
-            objectFit: 'cover',
-            objectPosition: 'left center',
-          }}
-        />
-      </Link>
-    );
-
-    const ckPrice = getCardKingdomPrice(card);
-    const ckUrl = ckPrice?.url
-      ? `${ckPrice.url}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`
-      : `https://www.cardkingdom.com/mtg/${card.name?.toLowerCase().replace(/\s+/g, '-')}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`;
-
-    const cardKingdomDisplay = ckPrice && (
-      <Link
-        href={ckUrl}
-        target="_blank"
-        onClick={() => {
-          if ((window as any).gtag) {
-            (window as any).gtag("event", "cardkingdom_price_click", {
-              event_category: "affiliate_links",
-              event_label: card.name,
-              card_set: card.set,
-            });
-          }
-        }}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          textDecoration: 'none',
-          padding: '2px 4px',
-          borderRadius: '4px',
-          transition: 'background-color 0.2s',
-          '&:hover': {
-            backgroundColor: 'rgba(45, 74, 54, 0.1)',
-          },
-        }}
-      >
-        <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
-          {formatPrice(ckPrice.price)}
-        </Typography>
-        <Box
-          component="img"
-          src="/cardkingdom.jpg"
-          alt="Card Kingdom"
-          sx={{
-            height: '16px',
-            width: '16px',
-            objectFit: 'contain',
-          }}
-        />
-      </Link>
-    );
-
-    if (card.image_uris) {
-      return (
-        <Box key={card.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Link
-            href={card?.scryfall_uri}
-            target="_blank"
-          >
-            <Box
-              component="img"
-              alt={card.artist || "Card"}
-              src={card.image_uris.border_crop}
-              sx={allCardsStyles.cardImage}
-            />
-          </Link>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {priceDisplay}
-            {tcgplayerDisplay}
-            {cardKingdomDisplay}
-          </Box>
-        </Box>
-      );
-    } else if (card.card_faces) {
-      return (
-        <Box key={card.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Link
-            href={card?.scryfall_uri}
-            target="_blank"
-          >
-            <Box
-              component="img"
-              alt={card.artist || "Card"}
-              src={card.card_faces[0]?.image_uris?.normal}
-              sx={allCardsStyles.cardImage}
-            />
-          </Link>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {priceDisplay}
-            {tcgplayerDisplay}
-            {cardKingdomDisplay}
-          </Box>
-        </Box>
-      );
-    }
-    return null;
-  };
+  const handleCollectionToggle = useCallback((card: Card, field: string) => {
+    if (!isLoggedIn || !card.id || !card.name || !card.set || !card.collector_number) return;
+    toggleCardCollectionField({
+      variables: {
+        scryfallId: card.id,
+        cardName: card.name,
+        artistName: artist || "",
+        set: card.set,
+        collectorNumber: card.collector_number,
+        field,
+      },
+      onCompleted: (data) => {
+        if (data?.toggleCardCollectionField) {
+          setCardCollection(prev => {
+            const next = new Map(prev);
+            next.set(data.toggleCardCollectionField.scryfallId, data.toggleCardCollectionField);
+            return next;
+          });
+        }
+      },
+    });
+  }, [isLoggedIn, toggleCardCollectionField]);
 
   const handleCheck = () => {
-    setShowDupes(!showDupes);
+    setHideReprints(prev => {
+      const next = !prev;
+      try { localStorage.setItem('mtgac-hide-reprints', String(next)); } catch {}
+      return next;
+    });
   };
 
   const handleExpandSearch = () => {
@@ -548,9 +645,65 @@ const AllCards = () => {
           </Link>
 
           <Box sx={allCardsStyles.controlsSection}>
-            <Typography sx={allCardsStyles.cardCount}>
-              {totalCards} {totalCards === 1 ? 'card' : 'cards'} found
-            </Typography>
+            <Box>
+              <Typography sx={allCardsStyles.cardCount}>
+                {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'} found
+              </Typography>
+              {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
+                <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 0.5 }}>
+                  {signedCount > 0 && (
+                    <Box
+                      component="span"
+                      onClick={() => setFilterMode(f => f === 'signed' ? 'all' : 'signed')}
+                      sx={{
+                        cursor: 'pointer',
+                        textDecoration: filterMode === 'signed' ? 'underline' : 'none',
+                        fontWeight: filterMode === 'signed' ? 600 : 400,
+                      }}
+                    >
+                      {signedCount} signed
+                    </Box>
+                  )}
+                  {signedCount > 0 && wishlistCount > 0 && ' · '}
+                  {wishlistCount > 0 && (
+                    <Box
+                      component="span"
+                      onClick={() => setFilterMode(f => f === 'wishlisted' ? 'all' : 'wishlisted')}
+                      sx={{
+                        cursor: 'pointer',
+                        textDecoration: filterMode === 'wishlisted' ? 'underline' : 'none',
+                        fontWeight: filterMode === 'wishlisted' ? 600 : 400,
+                      }}
+                    >
+                      {wishlistCount} wishlisted
+                    </Box>
+                  )}
+                  {(signedCount > 0 || wishlistCount > 0) && artistProofCount > 0 && ' · '}
+                  {artistProofCount > 0 && (
+                    <Box
+                      component="span"
+                      onClick={() => setFilterMode(f => f === 'artistProof' ? 'all' : 'artistProof')}
+                      sx={{
+                        cursor: 'pointer',
+                        textDecoration: filterMode === 'artistProof' ? 'underline' : 'none',
+                        fontWeight: filterMode === 'artistProof' ? 600 : 400,
+                      }}
+                    >
+                      {artistProofCount} artist proof
+                    </Box>
+                  )}
+                  {filterMode !== 'all' && (
+                    <Box
+                      component="span"
+                      onClick={() => setFilterMode('all')}
+                      sx={{ cursor: 'pointer', fontSize: '0.75rem', ml: 1, opacity: 0.6, '&:hover': { opacity: 1 } }}
+                    >
+                      × clear filter
+                    </Box>
+                  )}
+                </Typography>
+              )}
+            </Box>
 
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
               <FormControlLabel
@@ -568,20 +721,17 @@ const AllCards = () => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={showDupes}
+                    checked={hideReprints}
                     onChange={handleCheck}
                     sx={allCardsStyles.checkbox}
                     disabled={!cardData}
                   />
                 }
-                label="Show All Printings"
+                label="Hide Reprints"
                 sx={allCardsStyles.checkboxLabel}
               />
 
-              <Link
-                href={`/artistcardbreakdown/${artist}`}
-                underline="none"
-              >
+              <Link href={`/artistcardbreakdown/${artist}`} underline="none">
                 <Button sx={allCardsStyles.expandButton}>
                   Card Statistics
                 </Button>
@@ -614,14 +764,25 @@ const AllCards = () => {
               </Typography>
             </Box>
           ) : (
-            <Box sx={allCardsStyles.cardsGrid}>
-              {cards.map((card) => getImage(card))}
-            </Box>
+            <>
+              <Box sx={allCardsStyles.cardsGrid}>
+                {displayedCards.map((card) => (
+                  <CardItem
+                    key={card.id}
+                    card={card}
+                    price={getCardPrice(card)}
+                    ckPrice={getCardKingdomPrice(card)}
+                    collectionItem={cardCollection.get(card.id)}
+                    isLoggedIn={isLoggedIn}
+                    onToggle={handleCollectionToggle}
+                  />
+                ))}
+              </Box>
+            </>
           )}
         </Paper>
       </Container>
 
-      {/* Scroll to Top Button - positioned left of cart button (56px FAB + 24px gap + 24px right margin = 104px) */}
       {showScrollTop && (
         <Fab
           color="primary"

@@ -10,7 +10,6 @@ import {
   Tab,
   Autocomplete,
   TextField,
-  Chip,
   Alert,
 } from "@mui/material";
 import { X, Plus } from "@phosphor-icons/react";
@@ -19,8 +18,8 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useMutation, useQuery } from "@apollo/client";
-import { UNFOLLOW_ARTIST, MONITOR_STATE, UNMONITOR_STATE } from "../graphql/mutations";
-import { GET_CURRENT_USER } from "../graphql/queries";
+import { UNFOLLOW_ARTIST, FOLLOW_ARTIST, MONITOR_STATE, UNMONITOR_STATE } from "../graphql/mutations";
+import { GET_CURRENT_USER, GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
 
 const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
@@ -41,12 +40,20 @@ const Following = () => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [stateSuccess, setStateSuccess] = useState("");
   const [stateError, setStateError] = useState("");
+  const [selectedFollowArtist, setSelectedFollowArtist] = useState<string | null>(null);
+  const [followSuccess, setFollowSuccess] = useState("");
+  const [followError, setFollowError] = useState("");
 
   const { data: userData, loading: userLoading, refetch } = useQuery(GET_CURRENT_USER, {
     skip: !isLoggedIn,
   });
 
+  const { data: allArtistsData } = useQuery(GET_ARTISTS_FOR_HOMEPAGE, {
+    skip: !isLoggedIn,
+  });
+
   const [unfollowArtist] = useMutation(UNFOLLOW_ARTIST);
+  const [followArtist] = useMutation(FOLLOW_ARTIST);
   const [monitorState] = useMutation(MONITOR_STATE);
   const [unmonitorState] = useMutation(UNMONITOR_STATE);
 
@@ -81,6 +88,27 @@ const Following = () => {
       await refetch();
     } catch (error: any) {
       console.error("Failed to unfollow artist:", error);
+    }
+  };
+
+  const handleFollowArtist = async () => {
+    if (!selectedFollowArtist) return;
+
+    setFollowError("");
+    setFollowSuccess("");
+
+    try {
+      const { data } = await followArtist({ variables: { artistName: selectedFollowArtist } });
+      if (data?.followArtist?.success) {
+        setFollowSuccess(`Now following ${selectedFollowArtist}`);
+        setSelectedFollowArtist(null);
+        await refetch();
+        setTimeout(() => setFollowSuccess(""), 3000);
+      } else {
+        setFollowError(data?.followArtist?.message || "Failed to follow artist");
+      }
+    } catch (error: any) {
+      setFollowError(error.message || "Failed to follow artist");
     }
   };
 
@@ -187,101 +215,142 @@ const Following = () => {
 
           {activeTab === 0 && (
             <Box sx={styles.section}>
-            <Typography sx={styles.sectionTitle}>
-              Followed Artists
-              {userData?.me?.followedArtists?.length > 0 && (
-                <Typography component="span" sx={{ ml: 1, fontSize: '0.875rem', fontWeight: 400, color: '#757575' }}>
-                  ({userData.me.followedArtists.length} total)
-                </Typography>
+              <Typography sx={styles.sectionTitle}>
+                Followed Artists
+                {userData?.me?.followedArtists?.length > 0 && (
+                  <Typography component="span" sx={{ ml: 1, fontSize: '0.875rem', fontWeight: 400, color: '#757575' }}>
+                    ({userData.me.followedArtists.length} total)
+                  </Typography>
+                )}
+              </Typography>
+
+              {followSuccess && (
+                <Alert severity="success" sx={{ mb: 2, borderRadius: '8px', border: '1px solid #27ae60', backgroundColor: '#f0f9f4' }}>
+                  {followSuccess}
+                </Alert>
               )}
-            </Typography>
+              {followError && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: '8px', border: '1px solid #e74c3c', backgroundColor: '#fef5f5' }}>
+                  {followError}
+                </Alert>
+              )}
 
-            {userData?.me?.followedArtists?.length > 0 ? (
-              <>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {userData.me.followedArtists
-                    .slice((artistsPage - 1) * artistsPerPage, artistsPage * artistsPerPage)
-                    .map((artistName: string) => (
-                      <Box
-                        key={artistName}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: 2,
-                          backgroundColor: '#f9f9f9',
-                          borderRadius: '8px',
-                          border: '1px solid #e0e0e0',
-                          transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-                          '&:hover': {
-                            backgroundColor: '#f0f0f0',
-                          },
-                        }}
-                      >
-                        <Typography
-                          component={RouterLink}
-                          to={`/artist/${artistName}`}
-                          sx={{
-                            textDecoration: 'none',
-                            color: '#2d4a36',
-                            fontWeight: 500,
-                            fontSize: '0.875rem',
-                            '&:hover': {
-                              textDecoration: 'underline',
-                            },
-                          }}
-                        >
-                          {artistName}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleUnfollow(artistName)}
-                          sx={{
-                            color: '#e74c3c',
-                            '&:hover': {
-                              backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                            },
-                          }}
-                          aria-label={`Unfollow ${artistName}`}
-                        >
-                          <X size={18} />
-                        </IconButton>
-                      </Box>
-                    ))}
-                </Box>
-
-                {userData.me.followedArtists.length > artistsPerPage && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                    <Pagination
-                      count={Math.ceil(userData.me.followedArtists.length / artistsPerPage)}
-                      page={artistsPage}
-                      onChange={(_, page) => setArtistsPage(page)}
-                      color="primary"
+              <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                <Autocomplete
+                  options={(allArtistsData?.artists ?? [])
+                    .map((a: { name: string }) => a.name)
+                    .filter((name: string) => !userData?.me?.followedArtists?.includes(name))
+                    .sort()}
+                  value={selectedFollowArtist}
+                  onChange={(_, newValue) => setSelectedFollowArtist(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Follow an artist"
+                      size="small"
                       sx={{
-                        '& .MuiPaginationItem-root': {
-                          '&.Mui-selected': {
-                            backgroundColor: '#2d4a36',
-                            '&:hover': {
-                              backgroundColor: '#1a2d21',
-                            },
-                          },
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2d4a36' },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2d4a36' },
                         },
+                        '& .MuiInputLabel-root.Mui-focused': { color: '#2d4a36' },
                       }}
                     />
+                  )}
+                  sx={{ flex: 1 }}
+                />
+                <IconButton
+                  onClick={handleFollowArtist}
+                  disabled={!selectedFollowArtist}
+                  sx={{
+                    backgroundColor: '#2d4a36',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    width: '40px',
+                    height: '40px',
+                    '&:hover': { backgroundColor: '#1a2d21' },
+                    '&:disabled': { backgroundColor: '#e0e0e0', color: '#9e9e9e' },
+                  }}
+                >
+                  <Plus size={20} />
+                </IconButton>
+              </Box>
+
+              {userData?.me?.followedArtists?.length > 0 ? (
+                <>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                    {userData.me.followedArtists
+                      .slice((artistsPage - 1) * artistsPerPage, artistsPage * artistsPerPage)
+                      .map((artistName: string) => (
+                        <Box
+                          key={artistName}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: '6px',
+                            transition: '150ms',
+                            '&:hover': { backgroundColor: '#f0f0f0' },
+                          }}
+                        >
+                          <Typography
+                            component={RouterLink}
+                            to={`/artist/${artistName}`}
+                            sx={{
+                              textDecoration: 'none',
+                              color: '#2d4a36',
+                              fontWeight: 500,
+                              fontSize: '0.8125rem',
+                              '&:hover': { textDecoration: 'underline' },
+                            }}
+                          >
+                            {artistName}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleUnfollow(artistName)}
+                            sx={{
+                              color: '#bdbdbd',
+                              padding: '2px',
+                              '&:hover': { color: '#e74c3c', backgroundColor: 'transparent' },
+                            }}
+                            aria-label={`Unfollow ${artistName}`}
+                          >
+                            <X size={14} />
+                          </IconButton>
+                        </Box>
+                      ))}
                   </Box>
-                )}
-              </>
-            ) : (
-              <Typography sx={{
-                color: '#757575',
-                fontSize: '0.875rem',
-                fontStyle: 'italic',
-                py: 2,
-              }}>
-                You are not following any artists yet. Visit an artist's page to follow them and receive updates.
-              </Typography>
-            )}
-          </Box>
+
+                  {userData.me.followedArtists.length > artistsPerPage && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                      <Pagination
+                        count={Math.ceil(userData.me.followedArtists.length / artistsPerPage)}
+                        page={artistsPage}
+                        onChange={(_, page) => setArtistsPage(page)}
+                        size="small"
+                        color="primary"
+                        sx={{
+                          '& .MuiPaginationItem-root': {
+                            '&.Mui-selected': {
+                              backgroundColor: '#2d4a36',
+                              '&:hover': { backgroundColor: '#1a2d21' },
+                            },
+                          },
+                        }}
+                      />
+                    </Box>
+                  )}
+                </>
+              ) : (
+                <Typography sx={{ color: '#757575', fontSize: '0.875rem', fontStyle: 'italic', py: 2 }}>
+                  You are not following any artists yet. Use the dropdown above to follow an artist.
+                </Typography>
+              )}
+            </Box>
           )}
 
           {activeTab === 1 && (
@@ -379,26 +448,37 @@ const Following = () => {
               </Box>
 
               {userData?.me?.monitoredStates?.length > 0 ? (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {userData.me.monitoredStates.map((state: string) => (
-                    <Chip
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                  {[...userData.me.monitoredStates].sort().map((state: string) => (
+                    <Box
                       key={state}
-                      label={state}
-                      onDelete={() => handleRemoveState(state)}
-                      deleteIcon={<X size={18} />}
                       sx={{
-                        backgroundColor: '#f0f9f4',
-                        border: '1px solid #2d4a36',
-                        color: '#2d4a36',
-                        fontWeight: 500,
-                        '& .MuiChip-deleteIcon': {
-                          color: '#2d4a36',
-                          '&:hover': {
-                            color: '#1a2d21',
-                          },
-                        },
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: '6px',
+                        transition: '150ms',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
-                    />
+                    >
+                      <Typography sx={{ color: '#2d4a36', fontWeight: 500, fontSize: '0.8125rem' }}>
+                        {state}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveState(state)}
+                        sx={{
+                          color: '#bdbdbd',
+                          padding: '2px',
+                          '&:hover': { color: '#e74c3c', backgroundColor: 'transparent' },
+                        }}
+                        aria-label={`Stop monitoring ${state}`}
+                      >
+                        <X size={14} />
+                      </IconButton>
+                    </Box>
                   ))}
                 </Box>
               ) : (

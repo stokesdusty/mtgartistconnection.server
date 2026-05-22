@@ -18,8 +18,10 @@ import {
 } from "@mui/material";
 import { EventCardSkeleton } from "../shared/Skeletons";
 import { ArrowUp } from "@phosphor-icons/react";
-import { GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
+import { GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_MY_CARD_COLLECTION } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 import SigningEvent from "./SigningEvent";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { calendarStyles } from "../../styles/calendar-styles";
@@ -48,6 +50,8 @@ const Calendar = () => {
   const locationFilter = searchParams.get('location') ?? '';
   const artistFilter = searchParams.get('artist') ?? '';
   const dateRangeFilter = (searchParams.get('range') as DateRangeFilter) ?? 'all';
+
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -84,6 +88,10 @@ const Calendar = () => {
     skip: upcomingEventIds.length === 0,
   });
 
+  const { data: myCollectionData } = useQuery(GET_MY_CARD_COLLECTION, {
+    skip: !isLoggedIn,
+  });
+
   // Build map of eventId -> artist names from batched query result
   const eventArtistsMap = useMemo(() => {
     if (!eventArtistsData?.artistsByEventIds) return {};
@@ -96,6 +104,28 @@ const Calendar = () => {
     });
     return map;
   }, [eventArtistsData]);
+
+  // Count wishlisted cards per artist name
+  const wishlistCountByArtist = useMemo(() => {
+    if (!myCollectionData?.myCardCollection) return {} as Record<string, number>;
+    const counts: Record<string, number> = {};
+    myCollectionData.myCardCollection.forEach((card: any) => {
+      if (card.wishlistSigned && card.artistName) {
+        counts[card.artistName] = (counts[card.artistName] ?? 0) + 1;
+      }
+    });
+    return counts;
+  }, [myCollectionData]);
+
+  // Sum wishlisted cards across all artists per event
+  const wishlistCountByEvent = useMemo(() => {
+    const counts: Record<string, number> = {};
+    Object.entries(eventArtistsMap).forEach(([eventId, artists]) => {
+      const total = artists.reduce((sum, name) => sum + (wishlistCountByArtist[name] ?? 0), 0);
+      if (total > 0) counts[eventId] = total;
+    });
+    return counts;
+  }, [eventArtistsMap, wishlistCountByArtist]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -430,7 +460,7 @@ const Calendar = () => {
           <Box sx={contentPageStyles.eventsContainer}>
             {filteredAndSortedEvents.length > 0 ? (
               filteredAndSortedEvents.map((eventData: any) => (
-                <SigningEvent key={eventData.id} props={eventData} />
+                <SigningEvent key={eventData.id} props={eventData} wishlistCount={wishlistCountByEvent[eventData.id] ?? 0} />
               ))
             ) : (
               <Typography sx={contentPageStyles.noEventsMessage}>

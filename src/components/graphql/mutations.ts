@@ -329,6 +329,34 @@ export const GENERATE_MANUAL_NEWS_ARTICLE = gql`
     }
 `;
 
+export const TOGGLE_CARD_COLLECTION_FIELD = gql`
+    mutation toggleCardCollectionField(
+        $scryfallId: String!,
+        $cardName: String!,
+        $artistName: String,
+        $set: String!,
+        $collectorNumber: String!,
+        $field: String!
+    ) {
+        toggleCardCollectionField(
+            scryfallId: $scryfallId,
+            cardName: $cardName,
+            artistName: $artistName,
+            set: $set,
+            collectorNumber: $collectorNumber,
+            field: $field
+        ) {
+            id
+            scryfallId
+            signedNonfoil
+            signedFoil
+            wishlistSigned
+            artistProof
+            artistProofFoil
+        }
+    }
+`;
+
 export const UPLOAD_NEWS_IMAGE = gql`
     mutation uploadNewsImage($base64Data: String!, $filename: String!, $contentType: String!) {
         uploadNewsImage(base64Data: $base64Data, filename: $filename, contentType: $contentType) {

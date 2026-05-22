@@ -1,6 +1,7 @@
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, useNavigate } from "react-router-dom";
-import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CURRENT_USER } from "../graphql/queries";
+import axios from "axios";
+import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CURRENT_USER, GET_USER_CARD_COLLECTION } from "../graphql/queries";
 import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
 import {
   Box,
@@ -128,6 +129,9 @@ const Artist = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
   const [isFollowing, setIsFollowing] = useState(false);
+  const [signedCount, setSignedCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [artistProofCount, setArtistProofCount] = useState(0);
 
   usePageTitle(name);
 
@@ -148,6 +152,50 @@ const Artist = () => {
   const [followArtist] = useMutation(FOLLOW_ARTIST);
   const [unfollowArtist] = useMutation(UNFOLLOW_ARTIST);
   const [updateEmailPreferences] = useMutation(UPDATE_EMAIL_PREFERENCES);
+
+  const [fetchUserCardCollection] = useLazyQuery(GET_USER_CARD_COLLECTION, {
+    onCompleted: (collectionData) => {
+      if (collectionData?.userCardCollection) {
+        const items = collectionData.userCardCollection;
+        setSignedCount(items.filter((i: any) => i.signedNonfoil || i.signedFoil).length);
+        setWishlistCount(items.filter((i: any) => i.wishlistSigned).length);
+        setArtistProofCount(items.filter((i: any) => i.artistProof || i.artistProofFoil).length);
+      }
+    },
+  });
+
+  useEffect(() => {
+    setSignedCount(0);
+    setWishlistCount(0);
+    setArtistProofCount(0);
+  }, [name]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !data?.artistByName?.name) return;
+
+    const artistName = data.artistByName.name;
+    const encodedName = encodeURIComponent("!" + artistName);
+    const baseUrl = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28artist%3A"${encodedName}"%29`;
+
+    const fetchAllIds = async (url: string, ids: string[] = []): Promise<string[]> => {
+      try {
+        const response = await axios.get(url);
+        const newIds = [...ids, ...response.data.data.map((c: any) => c.id).filter(Boolean)];
+        if (response.data.has_more && response.data.next_page) {
+          return fetchAllIds(response.data.next_page, newIds);
+        }
+        return newIds;
+      } catch {
+        return ids;
+      }
+    };
+
+    fetchAllIds(baseUrl).then(ids => {
+      if (ids.length > 0) {
+        fetchUserCardCollection({ variables: { scryfallIds: ids } });
+      }
+    });
+  }, [isLoggedIn, data?.artistByName?.name]);
 
   // Check if user is following this artist
   useEffect(() => {
@@ -322,6 +370,15 @@ const Artist = () => {
               {artistByName.alternate_names && (
                 <Typography component="span" sx={artistStyles.alternateName}>
                   ({artistByName.alternate_names})
+                </Typography>
+              )}
+              {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
+                <Typography component="span" sx={{ fontSize: '1rem', fontWeight: 400, color: 'text.secondary', ml: 1, fontFamily: 'inherit' }}>
+                  (You have {[
+                    signedCount > 0 && `${signedCount} signed`,
+                    wishlistCount > 0 && `${wishlistCount} wishlisted`,
+                    artistProofCount > 0 && `${artistProofCount} artist proof`,
+                  ].filter(Boolean).join(', ')})
                 </Typography>
               )}
             </Typography>

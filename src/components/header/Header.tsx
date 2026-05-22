@@ -20,7 +20,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { shadows } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
@@ -111,6 +111,11 @@ const Header = () => {
   const handleSettingsClick = () => {
     setDrawerOpen(false);
     navigate('/settings');
+  };
+
+  const handleYourCardsClick = () => {
+    setDrawerOpen(false);
+    navigate('/yourcards');
   };
 
   const handleFollowingClick = () => {
@@ -269,6 +274,14 @@ const Header = () => {
             <Box sx={headerStyles.drawerHeaderEmail}>{user?.email}</Box>
           </Box>
           <List sx={{ p: 1 }}>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleYourCardsClick} sx={headerStyles.drawerListItem}>
+                <ListItemIcon>
+                  <Cards size={20} weight="duotone" />
+                </ListItemIcon>
+                <ListItemText primary="Your Cards" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+              </ListItemButton>
+            </ListItem>
             <ListItem disablePadding>
               <ListItemButton onClick={handleFollowingClick} sx={headerStyles.drawerListItem}>
                 <ListItemIcon>

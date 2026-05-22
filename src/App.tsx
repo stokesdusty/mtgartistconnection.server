@@ -34,6 +34,7 @@ import ArtistCardAnalysis from "./components/artist/ArtistCardBreakdown";
 import { LoadingProvider } from "./LoadingContext";
 import Settings from "./components/settings/Settings";
 import Following from "./components/settings/Following";
+import YourCards from "./components/settings/YourCards";
 import ScrollToTop from "./components/shared/ScrollToTop";
 
 function App() {
@@ -82,6 +83,7 @@ function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/yourcards" element={<YourCards />} />
               <Route path="/following" element={<Following />} />
             </Routes>
           </main>

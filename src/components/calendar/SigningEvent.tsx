@@ -21,6 +21,7 @@ import {
   
   interface SigningEventComponentProps {
     props: any;
+    wishlistCount?: number;
   }
 
   const COLLAPSED_EVENTS_KEY = 'mtgac_collapsed_events';
@@ -42,7 +43,7 @@ import {
     }
   };
 
-  const SigningEvent = ({ props }: SigningEventComponentProps) => {
+  const SigningEvent = ({ props, wishlistCount = 0 }: SigningEventComponentProps) => {
     const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<null | HTMLElement>(null);
     const eventId = props.id;
     const [isCollapsed, setIsCollapsed] = useState(() => getCollapsedEvents().includes(eventId));
@@ -176,6 +177,11 @@ import {
               {props.name}
             </Typography>
           )}
+          {wishlistCount > 0 && (
+            <Typography sx={{ fontSize: '0.8rem', color: colors.primary.main, fontWeight: 500 }}>
+              {wishlistCount} wishlist {wishlistCount === 1 ? 'card' : 'cards'} will be available
+            </Typography>
+          )}
 
           <Box sx={{
             display: 'flex',
@@ -200,12 +206,12 @@ import {
               onClick={handleCalendarMenuOpen}
               startIcon={<Calendar size={18} weight="duotone" />}
               sx={{
-                color: '#2d4a36',
+                color: colors.primary.main,
                 textTransform: 'none',
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 '&:hover': {
-                  backgroundColor: '#fafafa',
+                  backgroundColor: colors.neutral[50],
                 }
               }}
             >
@@ -216,10 +222,10 @@ import {
               onClick={handleShareClick}
               size="small"
               sx={{
-                color: '#757575',
+                color: colors.text.secondary,
                 '&:hover': {
-                  backgroundColor: '#fafafa',
-                  color: '#2d4a36',
+                  backgroundColor: colors.neutral[50],
+                  color: colors.primary.main,
                 }
               }}
               title="Copy link to event"
@@ -314,7 +320,7 @@ import {
                         aspectRatio: '1',
                         borderRadius: '6px',
                         overflow: 'hidden',
-                        backgroundColor: '#f5f5f5',
+                        backgroundColor: colors.neutral[100],
                         mb: 0.5,
                       }}
                     >
@@ -337,7 +343,7 @@ import {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: '#e0e0e0',
+                            backgroundColor: colors.neutral[200],
                           }}
                         >
                           <UsersThree size={24} weight="duotone" color={colors.neutral[500]} />
@@ -348,7 +354,7 @@ import {
                       sx={{
                         fontSize: '0.7rem',
                         fontWeight: 500,
-                        color: '#212121',
+                        color: colors.text.primary,
                         textAlign: 'center',
                         lineHeight: 1.2,
                       }}
