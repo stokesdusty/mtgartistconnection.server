@@ -131,7 +131,7 @@ const EventDetail = () => {
             <Button
               startIcon={<ArrowLeft size={18} />}
               onClick={() => navigate('/calendar')}
-              sx={{ mt: 2, color: '#2d4a36' }}
+              sx={{ mt: 2, color: colors.primary.main }}
             >
               Back to Calendar
             </Button>
@@ -191,12 +191,12 @@ const EventDetail = () => {
                 onClick={handleCalendarMenuOpen}
                 startIcon={<Calendar size={18} weight="duotone" />}
                 sx={{
-                  color: '#2d4a36',
+                  color: colors.primary.main,
                   textTransform: 'none',
                   fontSize: '0.875rem',
                   fontWeight: 500,
                   '&:hover': {
-                    backgroundColor: '#fafafa',
+                    backgroundColor: colors.neutral[50],
                   }
                 }}
               >
@@ -241,11 +241,11 @@ const EventDetail = () => {
             onClick={() => navigate('/calendar')}
             sx={{
               mb: 3,
-              color: '#2d4a36',
+              color: colors.primary.main,
               textTransform: 'none',
               fontWeight: 500,
               '&:hover': {
-                backgroundColor: '#fafafa',
+                backgroundColor: colors.neutral[50],
               }
             }}
           >
@@ -298,7 +298,7 @@ const EventDetail = () => {
                           aspectRatio: '1',
                           borderRadius: '8px',
                           overflow: 'hidden',
-                          backgroundColor: '#f5f5f5',
+                          backgroundColor: colors.neutral[100],
                           mb: 1,
                         }}
                       >
@@ -321,7 +321,7 @@ const EventDetail = () => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              backgroundColor: '#e0e0e0',
+                            backgroundColor: colors.neutral[200],
                             }}
                           >
                             <UsersThree size={40} weight="duotone" color={colors.neutral[500]} />
@@ -332,7 +332,7 @@ const EventDetail = () => {
                         sx={{
                           fontSize: '0.875rem',
                           fontWeight: 500,
-                          color: '#212121',
+                          color: colors.text.primary,
                           textAlign: 'center',
                         }}
                       >

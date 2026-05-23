@@ -1,3 +1,1 @@
-export const FEATURE_FLAGS = {
-  SHOPPING_CART: true,
-};
+export const FEATURE_FLAGS = {};

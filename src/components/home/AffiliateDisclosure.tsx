@@ -1,5 +1,6 @@
 import { Box, Typography, Container } from "@mui/material";
 import { contentPageStyles } from "../../styles/content-page-styles";
+import { colors } from "../../styles/design-tokens";
 
 const AffiliateDisclosure = () => {
   return (
@@ -101,16 +102,16 @@ const AffiliateDisclosure = () => {
 
           <Typography sx={contentPageStyles.body}>
             If you have any questions about our affiliate relationships or how we use affiliate
-            links, please don't hesitate to <a href="/contact" style={{ color: '#2d4a36' }}>contact us</a>.
+            links, please don't hesitate to <a href="/contact" style={{ color: colors.primary.main }}>contact us</a>.
           </Typography>
 
           <Typography sx={{
             fontSize: '0.875rem',
-            color: '#757575',
+            color: colors.neutral[600],
             fontStyle: 'italic',
             marginTop: 4,
             paddingTop: 3,
-            borderTop: '1px solid #eeeeee',
+            borderTop: `1px solid ${colors.neutral[200]}`,
           }}>
             Last updated: {new Date().toLocaleDateString('en-US', {
               year: 'numeric',

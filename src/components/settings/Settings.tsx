@@ -18,6 +18,7 @@ import { RootState } from "../../store/store";
 import { useMutation, useQuery } from "@apollo/client";
 import { UPDATE_PASSWORD, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
 import { GET_CURRENT_USER } from "../graphql/queries";
+import { colors } from "../../styles/design-tokens";
 
 const Settings = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -58,16 +59,16 @@ const Settings = () => {
 
   const styles = {
     container: {
-      backgroundColor: "#f5f5f5",
+      backgroundColor: colors.background.dark,
       minHeight: "100vh",
       padding: { xs: 2, md: 4 },
     },
     paper: {
       padding: { xs: 3, md: 4 },
-      backgroundColor: "#ffffff",
+      backgroundColor: colors.neutral.white,
       borderRadius: "12px",
       boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      border: "1px solid #eeeeee",
+      border: `1px solid ${colors.neutral[200]}`,
     },
     section: {
       mb: 4,
@@ -75,7 +76,7 @@ const Settings = () => {
     sectionTitle: {
       fontSize: { xs: "1.25rem", md: "1.5rem" },
       fontWeight: 600,
-      color: "#2d4a36",
+      color: colors.primary.main,
       mb: 2,
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     },
@@ -85,26 +86,26 @@ const Settings = () => {
         borderRadius: "8px",
         transition: "200ms cubic-bezier(0.4, 0, 0.2, 1)",
         "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#2d4a36",
+          borderColor: colors.primary.main,
         },
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-          borderColor: "#2d4a36",
+          borderColor: colors.primary.main,
         },
       },
       "& .MuiInputLabel-root.Mui-focused": {
-        color: "#2d4a36",
+        color: colors.primary.main,
       },
     },
     button: {
-      backgroundColor: "#2d4a36",
-      color: "#ffffff",
+      backgroundColor: colors.primary.main,
+      color: colors.primary.contrast,
       textTransform: "none",
       fontWeight: 600,
       padding: "10px 24px",
       borderRadius: "8px",
       transition: "200ms cubic-bezier(0.4, 0, 0.2, 1)",
       "&:hover": {
-        backgroundColor: "#1a2d21",
+        backgroundColor: colors.primary.dark,
         transform: "translateY(-1px)",
         boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
       },
@@ -117,7 +118,7 @@ const Settings = () => {
         <Container maxWidth="md">
           <Paper elevation={0} sx={styles.paper}>
             <Typography sx={{
-              color: "#e74c3c",
+              color: colors.accent.red,
               textAlign: "center",
               fontSize: "0.875rem",
               fontWeight: 500,
@@ -136,7 +137,7 @@ const Settings = () => {
         <Container maxWidth="md">
           <Paper elevation={0} sx={styles.paper}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-              <CircularProgress sx={{ color: '#2d4a36' }} />
+              <CircularProgress sx={{ color: colors.primary.main }} />
             </Box>
           </Paper>
         </Container>
@@ -220,7 +221,7 @@ const Settings = () => {
         <Paper elevation={0} sx={styles.paper}>
           <Typography variant="h4" sx={{
             fontWeight: 700,
-            color: "#2d4a36",
+            color: colors.primary.main,
             mb: 4,
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
           }}>
@@ -231,22 +232,22 @@ const Settings = () => {
             <Typography sx={styles.sectionTitle}>Account Information</Typography>
             <Typography sx={{
               mb: 1,
-              color: "#616161",
+              color: colors.text.secondary,
               fontSize: "0.875rem",
               lineHeight: 1.75,
             }}>
-              <strong style={{ color: "#212121" }}>Email:</strong> {user?.email}
+              <strong style={{ color: colors.text.primary }}>Email:</strong> {user?.email}
             </Typography>
             <Typography sx={{
-              color: "#616161",
+              color: colors.text.secondary,
               fontSize: "0.875rem",
               lineHeight: 1.75,
             }}>
-              <strong style={{ color: "#212121" }}>Name:</strong> {user?.name}
+              <strong style={{ color: colors.text.primary }}>Name:</strong> {user?.name}
             </Typography>
           </Box>
 
-          <Divider sx={{ my: 3, borderColor: "#e0e0e0" }} />
+          <Divider sx={{ my: 3, borderColor: colors.neutral[300] }} />
 
           <Box sx={styles.section}>
             <Typography sx={styles.sectionTitle}>Change Password</Typography>
@@ -257,8 +258,8 @@ const Settings = () => {
                 sx={{
                   mb: 2,
                   borderRadius: "8px",
-                  border: "1px solid #e74c3c",
-                  backgroundColor: "#fef5f5",
+                  border: `1px solid ${colors.accent.red}`,
+                  backgroundColor: colors.accent.redLight,
                 }}
               >
                 {passwordError}
@@ -271,8 +272,8 @@ const Settings = () => {
                 sx={{
                   mb: 2,
                   borderRadius: "8px",
-                  border: "1px solid #27ae60",
-                  backgroundColor: "#f0f9f4",
+                  border: `1px solid ${colors.accent.green}`,
+                  backgroundColor: colors.primary.lighter,
                 }}
               >
                 {passwordSuccess}
@@ -309,7 +310,7 @@ const Settings = () => {
             </Button>
           </Box>
 
-          <Divider sx={{ my: 3, borderColor: "#e0e0e0" }} />
+          <Divider sx={{ my: 3, borderColor: colors.neutral[300] }} />
 
           <Box sx={styles.section}>
             <Typography sx={styles.sectionTitle}>Email Preferences</Typography>
@@ -320,8 +321,8 @@ const Settings = () => {
                 sx={{
                   mb: 2,
                   borderRadius: "8px",
-                  border: "1px solid #27ae60",
-                  backgroundColor: "#f0f9f4",
+                  border: `1px solid ${colors.accent.green}`,
+                  backgroundColor: colors.primary.lighter,
                 }}
               >
                 {preferencesSuccess}
@@ -336,10 +337,10 @@ const Settings = () => {
                     onChange={() => handlePreferenceChange("siteUpdates")}
                     sx={{
                       "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: "#2d4a36",
+                        color: colors.primary.main,
                       },
                       "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: "#2d4a36",
+                        backgroundColor: colors.primary.main,
                       },
                     }}
                   />
@@ -349,7 +350,7 @@ const Settings = () => {
                   mb: 1,
                   "& .MuiFormControlLabel-label": {
                     fontSize: "0.875rem",
-                    color: "#212121",
+                    color: colors.text.primary,
                   },
                 }}
               />
@@ -360,10 +361,10 @@ const Settings = () => {
                     onChange={() => handlePreferenceChange("artistUpdates")}
                     sx={{
                       "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: "#2d4a36",
+                        color: colors.primary.main,
                       },
                       "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: "#2d4a36",
+                        backgroundColor: colors.primary.main,
                       },
                     }}
                   />
@@ -373,7 +374,7 @@ const Settings = () => {
                   mb: 1,
                   "& .MuiFormControlLabel-label": {
                     fontSize: "0.875rem",
-                    color: "#212121",
+                    color: colors.text.primary,
                   },
                 }}
               />
@@ -384,10 +385,10 @@ const Settings = () => {
                     onChange={() => handlePreferenceChange("localSigningEvents")}
                     sx={{
                       "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: "#2d4a36",
+                        color: colors.primary.main,
                       },
                       "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: "#2d4a36",
+                        backgroundColor: colors.primary.main,
                       },
                     }}
                   />
@@ -397,7 +398,7 @@ const Settings = () => {
                   mb: 1,
                   "& .MuiFormControlLabel-label": {
                     fontSize: "0.875rem",
-                    color: "#212121",
+                    color: colors.text.primary,
                   },
                 }}
               />
@@ -408,10 +409,10 @@ const Settings = () => {
                     onChange={() => handlePreferenceChange("newArtistNotifications")}
                     sx={{
                       "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: "#2d4a36",
+                        color: colors.primary.main,
                       },
                       "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: "#2d4a36",
+                        backgroundColor: colors.primary.main,
                       },
                     }}
                   />
@@ -420,7 +421,7 @@ const Settings = () => {
                 sx={{
                   "& .MuiFormControlLabel-label": {
                     fontSize: "0.875rem",
-                    color: "#212121",
+                    color: colors.text.primary,
                   },
                 }}
               />

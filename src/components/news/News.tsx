@@ -56,7 +56,7 @@ const News: React.FC = () => {
     fetchPolicy: 'network-only',
   });
 
-  const articles: NewsArticle[] = data?.newsReviews || [];
+  const articles: NewsArticle[] = useMemo(() => data?.newsReviews || [], [data?.newsReviews]);
 
   // Helper to get all artist names from an article (handles both legacy and new format)
   const getArticleArtistNames = (article: NewsArticle): string[] => {

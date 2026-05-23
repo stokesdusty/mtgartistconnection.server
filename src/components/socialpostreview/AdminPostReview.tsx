@@ -16,6 +16,7 @@ import {
 import { Trash, CheckCircle, ArrowSquareOut, Article } from "@phosphor-icons/react";
 import { GET_ARTIST_POSTS } from '../graphql/queries';
 import { UPDATE_ARTIST_POST, DELETE_ARTIST_POST, DELETE_REVIEWED_ARTIST_POSTS, GENERATE_NEWS_ARTICLE } from '../graphql/mutations';
+import { colors, platformColors } from '../../styles/design-tokens';
 
 interface ArtistPost {
   id: string;
@@ -126,77 +127,69 @@ const AdminPostReview: React.FC = () => {
 
   const styles = {
     container: {
-      backgroundColor: '#f5f5f5',
+      backgroundColor: colors.background.dark,
       minHeight: '100vh',
       padding: { xs: 2, md: 4 },
     },
     paper: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.neutral.white,
       borderRadius: '12px',
       boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-      border: '1px solid #eeeeee',
+      border: `1px solid ${colors.neutral[200]}`,
       overflow: 'hidden',
     },
     header: {
       padding: { xs: 2, md: 3 },
-      borderBottom: '1px solid #e0e0e0',
+      borderBottom: `1px solid ${colors.neutral[300]}`,
     },
     title: {
       fontWeight: 700,
-      color: '#2d4a36',
+      color: colors.primary.main,
       mb: 0.5,
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     },
     subtitle: {
-      color: '#616161',
+      color: colors.text.secondary,
       fontSize: '0.875rem',
       mb: 2,
     },
     button: {
-      backgroundColor: '#2d4a36',
-      color: '#ffffff',
+      backgroundColor: colors.primary.main,
+      color: colors.primary.contrast,
       textTransform: 'none',
       fontWeight: 600,
       borderRadius: '8px',
       transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
       '&:hover': {
-        backgroundColor: '#1a2d21',
+        backgroundColor: colors.primary.dark,
       },
     },
     outlineButton: {
-      color: '#2d4a36',
-      borderColor: '#2d4a36',
+      color: colors.primary.main,
+      borderColor: colors.primary.main,
       textTransform: 'none',
       fontWeight: 600,
       borderRadius: '8px',
       transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
       '&:hover': {
-        borderColor: '#1a2d21',
+        borderColor: colors.primary.dark,
         backgroundColor: 'rgba(45, 74, 54, 0.04)',
       },
     },
     postCard: {
       padding: 3,
-      borderBottom: '1px solid #e0e0e0',
+      borderBottom: `1px solid ${colors.neutral[300]}`,
       '&:last-child': {
         borderBottom: 'none',
       },
       '&:hover': {
-        backgroundColor: '#fafafa',
+        backgroundColor: colors.neutral[50],
       },
     },
   };
 
   const getPlatformColor = (platform: string) => {
-    const colors: { [key: string]: string } = {
-      twitter: '#1DA1F2',
-      instagram: '#E4405F',
-      bluesky: '#0085FF',
-      facebook: '#1877F2',
-      patreon: '#FF424D',
-      other: '#757575'
-    };
-    return colors[platform.toLowerCase()] || '#757575';
+    return platformColors[platform.toLowerCase()] || platformColors.other;
   };
 
 
@@ -207,8 +200,8 @@ const AdminPostReview: React.FC = () => {
           <Paper elevation={0} sx={styles.paper}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
               <Box sx={{ textAlign: 'center' }}>
-                <CircularProgress sx={{ color: '#2d4a36' }} size={48} />
-                <Typography sx={{ mt: 2, color: '#616161' }}>Loading artist posts...</Typography>
+                <CircularProgress sx={{ color: colors.primary.main }} size={48} />
+                <Typography sx={{ mt: 2, color: colors.text.secondary }}>Loading artist posts...</Typography>
               </Box>
             </Box>
           </Paper>
@@ -225,8 +218,8 @@ const AdminPostReview: React.FC = () => {
             severity="error"
             sx={{
               borderRadius: '12px',
-              border: '1px solid #e74c3c',
-              backgroundColor: '#fef5f5',
+              border: `1px solid ${colors.accent.red}`,
+              backgroundColor: colors.accent.redLight,
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>Error Loading Posts</Typography>
@@ -301,16 +294,16 @@ const AdminPostReview: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="80"
                 height="80"
-                fill="#bdbdbd"
+                fill={colors.neutral[400]}
                 viewBox="0 0 16 16"
                 sx={{ mb: 2 }}
               >
                 <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
               </Box>
-              <Typography variant="h6" sx={{ color: '#757575', mb: 1 }}>
+              <Typography variant="h6" sx={{ color: colors.neutral[600], mb: 1 }}>
                 No {showReviewed ? 'reviewed' : 'unreviewed'} posts
               </Typography>
-              <Typography sx={{ color: '#9e9e9e', fontSize: '0.875rem' }}>
+              <Typography sx={{ color: colors.neutral[500], fontSize: '0.875rem' }}>
                 Check back later for new posts from social platforms
               </Typography>
             </Box>
@@ -321,13 +314,13 @@ const AdminPostReview: React.FC = () => {
                   key={post.id}
                   sx={{
                     ...styles.postCard,
-                    borderLeft: !post.isReviewed ? '4px solid #27ae60' : 'none',
+                    borderLeft: !post.isReviewed ? `4px solid ${colors.accent.green}` : 'none',
                   }}
                 >
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, color: '#212121' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: colors.text.primary }}>
                           {post.artistName}
                         </Typography>
                         <Chip
@@ -335,7 +328,7 @@ const AdminPostReview: React.FC = () => {
                           size="small"
                           sx={{
                             backgroundColor: getPlatformColor(post.platform),
-                            color: '#ffffff',
+                            color: colors.primary.contrast,
                             fontWeight: 600,
                             fontSize: '0.75rem',
                             textTransform: 'capitalize',
@@ -346,7 +339,7 @@ const AdminPostReview: React.FC = () => {
                       <Typography
                         sx={{
                           mb: 1.5,
-                          color: '#424242',
+                          color: colors.neutral[800],
                           fontSize: '0.9rem',
                           lineHeight: 1.6,
                           overflow: 'hidden',
@@ -356,7 +349,7 @@ const AdminPostReview: React.FC = () => {
                           WebkitBoxOrient: 'vertical',
                         }}
                       >
-                        {post.content || <em style={{ color: '#9e9e9e' }}>No text content</em>}
+                        {post.content || <em style={{ color: colors.neutral[500] }}>No text content</em>}
                       </Typography>
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -368,7 +361,7 @@ const AdminPostReview: React.FC = () => {
                           endIcon={<ArrowSquareOut size={16} />}
                           sx={{
                             textTransform: 'none',
-                            color: '#2d4a36',
+                            color: colors.primary.main,
                             fontWeight: 600,
                             fontSize: '0.875rem',
                           }}
@@ -403,9 +396,9 @@ const AdminPostReview: React.FC = () => {
                             startIcon={<CheckCircle size={16} weight="duotone" />}
                             sx={{
                               ...styles.button,
-                              backgroundColor: '#27ae60',
+                              backgroundColor: colors.accent.green,
                               '&:hover': {
-                                backgroundColor: '#1e8449',
+                                backgroundColor: colors.accent.greenDark,
                               },
                             }}
                           >
@@ -418,7 +411,7 @@ const AdminPostReview: React.FC = () => {
                           onClick={() => handleDelete(post.id)}
                           size="small"
                           sx={{
-                            color: '#e74c3c',
+                            color: colors.accent.red,
                             '&:hover': {
                               backgroundColor: 'rgba(231, 76, 60, 0.08)',
                             },

@@ -343,7 +343,7 @@ import {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: colors.neutral[200],
+                            backgroundColor: colors.neutral[200], // Already a token, no change needed.
                           }}
                         >
                           <UsersThree size={24} weight="duotone" color={colors.neutral[500]} />

@@ -20,6 +20,7 @@ import { RootState } from "../../store/store";
 import { useMutation, useQuery } from "@apollo/client";
 import { UNFOLLOW_ARTIST, FOLLOW_ARTIST, MONITOR_STATE, UNMONITOR_STATE } from "../graphql/mutations";
 import { GET_CURRENT_USER, GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
+import { colors } from "../../styles/design-tokens";
 
 const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
@@ -59,16 +60,16 @@ const Following = () => {
 
   const styles = {
     container: {
-      backgroundColor: "#f5f5f5",
+      backgroundColor: colors.background.dark,
       minHeight: "100vh",
       padding: { xs: 2, md: 4 },
     },
     paper: {
       padding: { xs: 3, md: 4 },
-      backgroundColor: "#ffffff",
+      backgroundColor: colors.neutral.white,
       borderRadius: "12px",
       boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      border: "1px solid #eeeeee",
+      border: `1px solid ${colors.neutral[200]}`,
     },
     section: {
       mb: 4,
@@ -76,7 +77,7 @@ const Following = () => {
     sectionTitle: {
       fontSize: { xs: "1.25rem", md: "1.5rem" },
       fontWeight: 600,
-      color: "#2d4a36",
+      color: colors.primary.main,
       mb: 2,
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     },
@@ -148,7 +149,7 @@ const Following = () => {
         <Container maxWidth="md">
           <Paper elevation={0} sx={styles.paper}>
             <Typography sx={{
-              color: "#e74c3c",
+              color: colors.accent.red,
               textAlign: "center",
               fontSize: "0.875rem",
               fontWeight: 500,
@@ -167,7 +168,7 @@ const Following = () => {
         <Container maxWidth="md">
           <Paper elevation={0} sx={styles.paper}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-              <CircularProgress sx={{ color: '#2d4a36' }} />
+              <CircularProgress sx={{ color: colors.primary.main }} />
             </Box>
           </Paper>
         </Container>
@@ -181,7 +182,7 @@ const Following = () => {
         <Paper elevation={0} sx={styles.paper}>
           <Typography variant="h4" sx={{
             fontWeight: 700,
-            color: "#2d4a36",
+            color: colors.primary.main,
             mb: 3,
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
           }}>
@@ -193,19 +194,19 @@ const Following = () => {
             onChange={(_, newValue) => setActiveTab(newValue)}
             sx={{
               mb: 4,
-              borderBottom: '1px solid #e0e0e0',
+              borderBottom: `1px solid ${colors.neutral[300]}`,
               '& .MuiTab-root': {
                 textTransform: 'none',
                 fontWeight: 500,
                 fontSize: '0.875rem',
-                color: '#757575',
+                color: colors.neutral[600],
                 '&.Mui-selected': {
-                  color: '#2d4a36',
+                  color: colors.primary.main,
                   fontWeight: 600,
                 },
               },
               '& .MuiTabs-indicator': {
-                backgroundColor: '#2d4a36',
+                backgroundColor: colors.primary.main,
               },
             }}
           >
@@ -218,19 +219,19 @@ const Following = () => {
               <Typography sx={styles.sectionTitle}>
                 Followed Artists
                 {userData?.me?.followedArtists?.length > 0 && (
-                  <Typography component="span" sx={{ ml: 1, fontSize: '0.875rem', fontWeight: 400, color: '#757575' }}>
+                  <Typography component="span" sx={{ ml: 1, fontSize: '0.875rem', fontWeight: 400, color: colors.neutral[600] }}>
                     ({userData.me.followedArtists.length} total)
                   </Typography>
                 )}
               </Typography>
 
               {followSuccess && (
-                <Alert severity="success" sx={{ mb: 2, borderRadius: '8px', border: '1px solid #27ae60', backgroundColor: '#f0f9f4' }}>
+                <Alert severity="success" sx={{ mb: 2, borderRadius: '8px', border: `1px solid ${colors.accent.green}`, backgroundColor: colors.primary.lighter }}>
                   {followSuccess}
                 </Alert>
               )}
               {followError && (
-                <Alert severity="error" sx={{ mb: 2, borderRadius: '8px', border: '1px solid #e74c3c', backgroundColor: '#fef5f5' }}>
+                <Alert severity="error" sx={{ mb: 2, borderRadius: '8px', border: `1px solid ${colors.accent.red}`, backgroundColor: colors.accent.redLight }}>
                   {followError}
                 </Alert>
               )}
@@ -251,10 +252,10 @@ const Following = () => {
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2d4a36' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2d4a36' },
+                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.primary.main },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: colors.primary.main },
                         },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#2d4a36' },
+                        '& .MuiInputLabel-root.Mui-focused': { color: colors.primary.main },
                       }}
                     />
                   )}
@@ -264,13 +265,13 @@ const Following = () => {
                   onClick={handleFollowArtist}
                   disabled={!selectedFollowArtist}
                   sx={{
-                    backgroundColor: '#2d4a36',
-                    color: '#ffffff',
+                    backgroundColor: colors.primary.main,
+                    color: colors.neutral.white,
                     borderRadius: '8px',
                     width: '40px',
                     height: '40px',
-                    '&:hover': { backgroundColor: '#1a2d21' },
-                    '&:disabled': { backgroundColor: '#e0e0e0', color: '#9e9e9e' },
+                    '&:hover': { backgroundColor: colors.primary.dark },
+                    '&:disabled': { backgroundColor: colors.neutral[300], color: colors.neutral[500] },
                   }}
                 >
                   <Plus size={20} />
@@ -293,7 +294,7 @@ const Following = () => {
                             py: 0.5,
                             borderRadius: '6px',
                             transition: '150ms',
-                            '&:hover': { backgroundColor: '#f0f0f0' },
+                            '&:hover': { backgroundColor: colors.neutral[100] },
                           }}
                         >
                           <Typography
@@ -301,7 +302,7 @@ const Following = () => {
                             to={`/artist/${artistName}`}
                             sx={{
                               textDecoration: 'none',
-                              color: '#2d4a36',
+                              color: colors.primary.main,
                               fontWeight: 500,
                               fontSize: '0.8125rem',
                               '&:hover': { textDecoration: 'underline' },
@@ -313,9 +314,9 @@ const Following = () => {
                             size="small"
                             onClick={() => handleUnfollow(artistName)}
                             sx={{
-                              color: '#bdbdbd',
+                              color: colors.neutral[400],
                               padding: '2px',
-                              '&:hover': { color: '#e74c3c', backgroundColor: 'transparent' },
+                              '&:hover': { color: colors.accent.red, backgroundColor: 'transparent' },
                             }}
                             aria-label={`Unfollow ${artistName}`}
                           >
@@ -336,8 +337,8 @@ const Following = () => {
                         sx={{
                           '& .MuiPaginationItem-root': {
                             '&.Mui-selected': {
-                              backgroundColor: '#2d4a36',
-                              '&:hover': { backgroundColor: '#1a2d21' },
+                              backgroundColor: colors.primary.main,
+                              '&:hover': { backgroundColor: colors.primary.dark },
                             },
                           },
                         }}
@@ -346,7 +347,7 @@ const Following = () => {
                   )}
                 </>
               ) : (
-                <Typography sx={{ color: '#757575', fontSize: '0.875rem', fontStyle: 'italic', py: 2 }}>
+                <Typography sx={{ color: colors.neutral[600], fontSize: '0.875rem', fontStyle: 'italic', py: 2 }}>
                   You are not following any artists yet. Use the dropdown above to follow an artist.
                 </Typography>
               )}
@@ -361,7 +362,7 @@ const Following = () => {
 
               <Typography sx={{
                 mb: 3,
-                color: '#616161',
+                color: colors.neutral[700],
                 fontSize: '0.875rem',
                 lineHeight: 1.75,
               }}>
@@ -376,8 +377,8 @@ const Following = () => {
                   sx={{
                     mb: 2,
                     borderRadius: "8px",
-                    border: "1px solid #27ae60",
-                    backgroundColor: "#f0f9f4",
+                    border: `1px solid ${colors.accent.green}`,
+                    backgroundColor: colors.primary.lighter,
                   }}
                 >
                   {stateSuccess}
@@ -390,8 +391,8 @@ const Following = () => {
                   sx={{
                     mb: 2,
                     borderRadius: "8px",
-                    border: "1px solid #e74c3c",
-                    backgroundColor: "#fef5f5",
+                    border: `1px solid ${colors.accent.red}`,
+                    backgroundColor: colors.accent.redLight,
                   }}
                 >
                   {stateError}
@@ -411,14 +412,14 @@ const Following = () => {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: '8px',
                           '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#2d4a36',
+                            borderColor: colors.primary.main,
                           },
                           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#2d4a36',
+                            borderColor: colors.primary.main,
                           },
                         },
                         '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#2d4a36',
+                          color: colors.primary.main,
                         },
                       }}
                     />
@@ -429,17 +430,17 @@ const Following = () => {
                   onClick={handleAddState}
                   disabled={!selectedState}
                   sx={{
-                    backgroundColor: '#2d4a36',
-                    color: '#ffffff',
+                    backgroundColor: colors.primary.main,
+                    color: colors.neutral.white,
                     borderRadius: '8px',
                     width: '48px',
                     height: '48px',
                     '&:hover': {
-                      backgroundColor: '#1a2d21',
+                      backgroundColor: colors.primary.dark,
                     },
                     '&:disabled': {
-                      backgroundColor: '#e0e0e0',
-                      color: '#9e9e9e',
+                      backgroundColor: colors.neutral[300],
+                      color: colors.neutral[500],
                     },
                   }}
                 >
@@ -460,19 +461,19 @@ const Following = () => {
                         py: 0.5,
                         borderRadius: '6px',
                         transition: '150ms',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
+                        '&:hover': { backgroundColor: colors.neutral[100] },
                       }}
                     >
-                      <Typography sx={{ color: '#2d4a36', fontWeight: 500, fontSize: '0.8125rem' }}>
+                      <Typography sx={{ color: colors.primary.main, fontWeight: 500, fontSize: '0.8125rem' }}>
                         {state}
                       </Typography>
                       <IconButton
                         size="small"
                         onClick={() => handleRemoveState(state)}
                         sx={{
-                          color: '#bdbdbd',
+                          color: colors.neutral[400],
                           padding: '2px',
-                          '&:hover': { color: '#e74c3c', backgroundColor: 'transparent' },
+                          '&:hover': { color: colors.accent.red, backgroundColor: 'transparent' },
                         }}
                         aria-label={`Stop monitoring ${state}`}
                       >
@@ -483,7 +484,7 @@ const Following = () => {
                 </Box>
               ) : (
                 <Typography sx={{
-                  color: '#757575',
+                  color: colors.neutral[600],
                   fontSize: '0.875rem',
                   fontStyle: 'italic',
                   py: 2,

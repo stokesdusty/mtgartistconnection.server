@@ -18,7 +18,7 @@ import { Eraser, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react
 import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
-import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
 import InputAdornment from "@mui/material/InputAdornment";
@@ -67,15 +67,17 @@ const Homepage = () => {
   const letterFilter = searchParams.get('letter') || '';
 
   // Helper to update URL params
-  const updateSearchParams = (key: string, value: string | boolean) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (value === '' || value === false) {
-      newParams.delete(key);
-    } else {
-      newParams.set(key, String(value));
-    }
-    setSearchParams(newParams, { replace: true });
-  };
+  const updateSearchParams = useCallback((key: string, value: string | boolean) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value === '' || value === false) {
+        next.delete(key);
+      } else {
+        next.set(key, String(value));
+      }
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   // Get upcoming event IDs
   const upcomingEventIds = useMemo(() => {
@@ -232,7 +234,7 @@ const Homepage = () => {
     }
 
     return chips;
-  }, [userSearch, locationFilter, letterFilter, marksSigServiceFilter, mountainMageFilter, hasUpcomingEventFilter, sellsApsFilter]);
+  }, [userSearch, locationFilter, letterFilter, marksSigServiceFilter, mountainMageFilter, hasUpcomingEventFilter, sellsApsFilter, updateSearchParams]);
 
   const locations = useMemo(() => {
       if (!data?.artists) return { US: [], Other: [] };

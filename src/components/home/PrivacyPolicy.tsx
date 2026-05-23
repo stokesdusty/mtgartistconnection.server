@@ -144,7 +144,7 @@ const PrivacyPolicy = () => {
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             MtG Artist Connection<br />
-            Federal Way, WA 98023
+            Federal Way, WA 98023 
           </Typography>
         </Paper>
       </Container>

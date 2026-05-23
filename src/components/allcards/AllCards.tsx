@@ -29,6 +29,7 @@ import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { colors, spacing } from "../../styles/design-tokens";
 
 interface Card {
   related_uris: any;
@@ -108,11 +109,11 @@ interface CollectionItem {
 }
 
 const COLLECTION_FIELDS = [
-  { field: 'artistProof',    Icon: DeviceMobileCamera,  label: 'Artist Proof (nonfoil)', color: '#0891b2' },
-  { field: 'artistProofFoil',Icon: DeviceMobileSpeaker, label: 'Artist Proof (foil)',    color: '#d97706' },
-  { field: 'signedNonfoil',  Icon: PenNib,             label: 'Signed (nonfoil)',        color: '#7c3aed' },
-  { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           color: '#db2777' },
-  { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   color: '#dc2626' },
+  { field: 'artistProof',    Icon: DeviceMobileCamera,  label: 'Artist Proof (nonfoil)', color: colors.accent.blue },
+  { field: 'artistProofFoil',Icon: DeviceMobileSpeaker, label: 'Artist Proof (foil)',    color: colors.accent.orange },
+  { field: 'signedNonfoil',  Icon: PenNib,             label: 'Signed (nonfoil)',        color: colors.accent.blueDark },
+  { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           color: colors.primary.main },
+  { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   color: colors.accent.red },
 ] as const;
 
 // ─── CardItem ────────────────────────────────────────────────────────────────
@@ -168,7 +169,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
       }}
     >
       {manapoolPrice && (
-        <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
+        <Typography sx={{ fontSize: '0.90rem', color: colors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
           {formatPrice(manapoolPrice)}
         </Typography>
       )}
@@ -200,7 +201,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
         '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
       }}
     >
-      <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
+      <Typography sx={{ fontSize: '0.90rem', color: colors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
         ${card.prices.usd}
       </Typography>
       <Box
@@ -240,7 +241,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
         '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
       }}
     >
-      <Typography sx={{ fontSize: '0.90rem', color: '#1976d2', fontWeight: 600, textDecoration: 'underline' }}>
+      <Typography sx={{ fontSize: '0.90rem', color: colors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
         {formatPrice(ckPrice.price)}
       </Typography>
       <Box
@@ -267,7 +268,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
                 color: active ? color : 'text.disabled',
                 p: 0.5,
                 cursor: isLoggedIn ? 'pointer' : 'default',
-                '&:hover': { backgroundColor: isLoggedIn ? undefined : 'transparent' },
+                '&:hover': { backgroundColor: isLoggedIn ? colors.neutral[50] : 'transparent' },
               }}
             >
               <Icon size={18} weight={active ? 'fill' : 'regular'} />
@@ -571,7 +572,7 @@ const AllCards = () => {
         }
       },
     });
-  }, [isLoggedIn, toggleCardCollectionField]);
+  }, [isLoggedIn, toggleCardCollectionField, artist]);
 
   const handleCheck = () => {
     setHideReprints(prev => {
@@ -621,29 +622,48 @@ const AllCards = () => {
 
   return (
     <Box sx={allCardsStyles.container}>
-      <Container maxWidth="lg">
-        <Paper elevation={0} sx={allCardsStyles.wrapper}>
-          <Box sx={allCardsStyles.bannerContainer}>
-            <img
-              src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistData.artistByName.filename}.jpeg`}
-              alt={`${artist} banner`}
-            />
-          </Box>
+      {/* Full-bleed hero banner */}
+      <Box sx={allCardsStyles.heroBanner}>
+        <img
+          src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistData.artistByName.filename}.jpeg`}
+          alt={`${artist} banner`}
+        />
+        <Box sx={allCardsStyles.bannerGradient} />
+        <Box sx={allCardsStyles.bannerNameOverlay}>
+          <Container maxWidth="lg" disableGutters>
+            <Box sx={{ px: { xs: spacing.lg, md: spacing.xxl }, pb: { xs: spacing.lg, md: spacing.xl } }}>
+              <Typography sx={allCardsStyles.bannerHeroName}>
+                {artist}
+              </Typography>
+              <Typography sx={allCardsStyles.bannerAltName}>
+                All Cards
+              </Typography>
+            </Box>
+          </Container>
+        </Box>
+      </Box>
 
-          <Typography variant="h2" sx={allCardsStyles.artistName}>
-            All {artist} Cards
-          </Typography>
-
-          <Link
-            href={`/artist/${artist}`}
-            underline="none"
-            sx={{ display: 'inline-block', mb: 2 }}
-          >
-            <Button sx={allCardsStyles.expandButton}>
+      {/* Sticky navigation rail */}
+      <Box sx={allCardsStyles.stickyRail}>
+        <Container maxWidth="lg">
+          <Box sx={allCardsStyles.stickyRailInner}>
+            <Typography sx={allCardsStyles.stickyName}>
+              All {artist} Cards
+            </Typography>
+            <Box sx={{ flex: 1 }} />
+            <Link
+              href={`/artist/${artist}`}
+              underline="none"
+              sx={allCardsStyles.stickyCtaLink}
+            >
               View Artist Details
-            </Button>
-          </Link>
+            </Link>
+          </Box>
+        </Container>
+      </Box>
 
+      <Container maxWidth="lg" sx={{ pt: spacing.xl }}>
+        <Paper elevation={0} sx={allCardsStyles.wrapper}>
           <Box sx={allCardsStyles.controlsSection}>
             <Box>
               <Typography sx={allCardsStyles.cardCount}>
@@ -792,8 +812,8 @@ const AllCards = () => {
             position: 'fixed',
             bottom: 24,
             right: 96,
-            bgcolor: '#2d4a36',
-            '&:hover': { bgcolor: '#1e3425' },
+            bgcolor: colors.primary.main,
+            '&:hover': { bgcolor: colors.primary.dark },
             zIndex: 999,
           }}
         >

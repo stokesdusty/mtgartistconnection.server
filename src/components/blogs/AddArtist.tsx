@@ -15,6 +15,7 @@ import {
   import { useMutation } from "@apollo/client";
   import { ADD_ARTIST } from "../graphql/mutations";
   import { useSelector } from "react-redux";
+  import { colors } from "../../styles/design-tokens";
   import { useState } from "react";
 import { RootState } from "../../store/store";
 import { Navigate } from "react-router-dom";
@@ -81,7 +82,7 @@ import { Navigate } from "react-router-dom";
   
       const styles = {
           container: {
-              backgroundColor: "#507A60",
+              backgroundColor: colors.primary.main,
               minHeight: "100vh",
               padding: { xs: 2, md: 4 },
           },
@@ -89,25 +90,25 @@ import { Navigate } from "react-router-dom";
               maxWidth: 800,
               margin: "0 auto",
               padding: { xs: 3, md: 4 },
-              backgroundColor: "#fff",
+              backgroundColor: colors.neutral.white,
               borderRadius: 2,
               boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           },
           pageTitle: {
-              color: "#507A60",
+              color: colors.primary.main,
               fontWeight: 700,
               fontSize: { xs: "2rem", md: "2.5rem" },
               marginBottom: 3,
               textAlign: "center",
           },
           sectionHeader: {
-              color: "#507A60",
+              color: colors.primary.main,
               fontWeight: 600,
               fontSize: "1.5rem",
               marginBottom: 2,
               marginTop: 3,
               paddingBottom: 1,
-              borderBottom: "2px solid #507A60",
+              borderBottom: `2px solid ${colors.primary.main}`,
           },
           form: {
               display: "flex",
@@ -118,15 +119,15 @@ import { Navigate } from "react-router-dom";
               "& .MuiOutlinedInput-root": {
                   borderRadius: "8px",
                   "&:hover fieldset": {
-                      borderColor: "#507A60",
+                      borderColor: colors.primary.main,
                   },
                   "&.Mui-focused fieldset": {
-                      borderColor: "#507A60",
+                      borderColor: colors.primary.main,
                   },
               },
               "& .MuiInputLabel-root": {
                   "&.Mui-focused": {
-                      color: "#507A60",
+                      color: colors.primary.main,
                   },
               },
           },
@@ -135,9 +136,9 @@ import { Navigate } from "react-router-dom";
                   margin: "0 16px 0 0",
               },
               "& .MuiRadio-root": {
-                  color: "#507A60",
+                  color: colors.primary.main,
                   "&.Mui-checked": {
-                      color: "#507A60",
+                      color: colors.primary.main,
                   },
               },
           },
@@ -146,33 +147,33 @@ import { Navigate } from "react-router-dom";
               marginBottom: 1,
           },
           formLabel: {
-              color: "#507A60",
+              color: colors.primary.main,
               fontWeight: 600,
               fontSize: "1rem",
               "&.Mui-focused": {
-                  color: "#507A60",
+                  color: colors.primary.main,
               },
           },
           submitButton: {
-              backgroundColor: "#507A60",
-              color: "white",
+              backgroundColor: colors.primary.main,
+              color: colors.neutral.white,
               marginTop: 3,
               padding: "12px 24px",
               fontSize: "1.1rem",
               fontWeight: 600,
               borderRadius: "8px",
               "&:hover": {
-                  backgroundColor: "#3c5c48",
+                  backgroundColor: colors.primary.dark,
               },
           },
           fieldSection: {
               marginBottom: 2,
           },
           errorMessage: {
-              color: "#d32f2f",
+              color: colors.accent.red,
               textAlign: "center",
               padding: 4,
-              backgroundColor: "rgba(211, 47, 47, 0.1)",
+              backgroundColor: colors.accent.redLight,
               borderRadius: 2,
               marginBottom: 2,
           },

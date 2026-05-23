@@ -18,9 +18,11 @@ import {
   IconButton,
   Modal,
   Backdrop,
+  alpha,
 } from '@mui/material';
 import { X, User, CalendarBlank, ArrowSquareOut, ArrowLeft } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEW } from '../graphql/queries';
+import { colors } from '../../styles/design-tokens';
 
 interface NewsArticleData {
   id: string;
@@ -54,7 +56,7 @@ const NewsArticle: React.FC = () => {
 
   const styles = {
     container: {
-      backgroundColor: '#f5f5f5',
+      backgroundColor: colors.background.dark,
       minHeight: '100vh',
       padding: { xs: 2, md: 4 },
     },
@@ -63,20 +65,20 @@ const NewsArticle: React.FC = () => {
       alignItems: 'center',
       gap: 1,
       mb: 3,
-      color: '#2d4a36',
+      color: colors.primary.main,
       cursor: 'pointer',
       fontWeight: 600,
       fontSize: '0.95rem',
       transition: 'all 200ms',
       '&:hover': {
-        color: '#1a2d21',
+        color: colors.primary.dark,
       },
     },
     articleCard: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.neutral.white,
       borderRadius: '12px',
       boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-      border: '1px solid #eeeeee',
+      border: `1px solid ${colors.neutral[200]}`,
     },
     titleContainer: {
       display: 'flex',
@@ -88,24 +90,24 @@ const NewsArticle: React.FC = () => {
       width: 60,
       height: 60,
       borderRadius: '8px',
-      border: '2px solid #2d4a36',
+      border: `2px solid ${colors.primary.main}`,
     },
     articleTitle: {
       fontWeight: 700,
-      color: '#212121',
+      color: colors.neutral[900],
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
       fontSize: '1.75rem',
       flex: 1,
     },
     summary: {
-      color: '#616161',
+      color: colors.neutral[700],
       fontSize: '1.05rem',
       fontStyle: 'italic',
       mb: 2,
       lineHeight: 1.6,
     },
     content: {
-      color: '#424242',
+      color: colors.neutral[800],
       fontSize: '1rem',
       lineHeight: 1.8,
       whiteSpace: 'pre-wrap',
@@ -119,13 +121,13 @@ const NewsArticle: React.FC = () => {
       mb: 2,
     },
     artistChip: {
-      backgroundColor: '#2d4a36',
-      color: '#ffffff',
+      backgroundColor: colors.primary.main,
+      color: colors.neutral.white,
       fontWeight: 600,
       cursor: 'pointer',
       transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
       '&:hover': {
-        backgroundColor: '#1a2d21',
+        backgroundColor: colors.primary.dark,
         transform: 'scale(1.05)',
       },
       '& .MuiChip-label': {
@@ -133,7 +135,7 @@ const NewsArticle: React.FC = () => {
       },
     },
     dateText: {
-      color: '#757575',
+      color: colors.neutral[600],
       fontSize: '0.9rem',
       display: 'flex',
       alignItems: 'center',
@@ -141,11 +143,11 @@ const NewsArticle: React.FC = () => {
     },
     sourceButton: {
       textTransform: 'none',
-      color: '#2d4a36',
+      color: colors.primary.main,
       fontWeight: 600,
-      borderColor: '#2d4a36',
+      borderColor: colors.primary.main,
       '&:hover': {
-        borderColor: '#1a2d21',
+        borderColor: colors.primary.dark,
         backgroundColor: 'rgba(45, 74, 54, 0.04)',
       },
     },
@@ -184,15 +186,15 @@ const NewsArticle: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             sx={{
-              color: '#2d4a36',
+              color: colors.primary.main,
               fontWeight: 600,
               textDecoration: 'none',
-              borderBottom: '1px solid #2d4a36',
+              borderBottom: `1px solid ${colors.primary.main}`,
               transition: 'all 200ms',
               '&:hover': {
-                color: '#1a2d21',
+                color: colors.primary.dark,
                 borderBottomWidth: '2px',
-                backgroundColor: 'rgba(45, 74, 54, 0.05)',
+                backgroundColor: alpha(colors.primary.main, 0.05),
               },
             }}
           >
@@ -210,8 +212,8 @@ const NewsArticle: React.FC = () => {
         <Container maxWidth="md">
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
             <Box sx={{ textAlign: 'center' }}>
-              <CircularProgress sx={{ color: '#2d4a36' }} size={48} />
-              <Typography sx={{ mt: 2, color: '#616161' }}>Loading article...</Typography>
+              <CircularProgress sx={{ color: colors.primary.main }} size={48} />
+              <Typography sx={{ mt: 2, color: colors.neutral[700] }}>Loading article...</Typography>
             </Box>
           </Box>
         </Container>
@@ -223,7 +225,14 @@ const NewsArticle: React.FC = () => {
     return (
       <Box sx={styles.container}>
         <Container maxWidth="md">
-          <Alert severity="error" sx={{ borderRadius: '12px', border: '1px solid #e74c3c', backgroundColor: '#fef5f5' }}>
+          <Alert
+            severity="error"
+            sx={{
+              borderRadius: '12px',
+              border: `1px solid ${colors.accent.red}`,
+              backgroundColor: colors.accent.redLight,
+            }}
+          >
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>Error Loading Article</Typography>
             <Typography>{error.message}</Typography>
           </Alert>
@@ -243,7 +252,14 @@ const NewsArticle: React.FC = () => {
             <ArrowLeft size={20} />
             Back to News
           </Box>
-          <Alert severity="warning" sx={{ borderRadius: '12px', border: '1px solid #f39c12', backgroundColor: '#fffbf0' }}>
+          <Alert
+            severity="warning"
+            sx={{
+              borderRadius: '12px',
+              border: `1px solid ${colors.accent.orange}`,
+              backgroundColor: colors.neutral[50],
+            }}
+          >
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>Article Not Found</Typography>
             <Typography>The article you're looking for doesn't exist or has been removed.</Typography>
           </Alert>
@@ -292,7 +308,7 @@ const NewsArticle: React.FC = () => {
                 artistNames.map((name) => (
                   <Chip
                     key={name}
-                    icon={<User size={14} weight="duotone" color="#ffffff" />}
+                    icon={<User size={14} weight="duotone" color={colors.neutral.white} />}
                     label={name}
                     onClick={() => handleArtistClick(name)}
                     sx={styles.artistChip}
@@ -302,8 +318,8 @@ const NewsArticle: React.FC = () => {
                 <Chip
                   label="General News"
                   sx={{
-                    backgroundColor: '#757575',
-                    color: '#ffffff',
+                    backgroundColor: colors.neutral[600],
+                    color: colors.neutral.white,
                     fontWeight: 600,
                   }}
                 />
@@ -335,7 +351,7 @@ const NewsArticle: React.FC = () => {
                     cursor: 'pointer',
                     borderRadius: '8px',
                     overflow: 'hidden',
-                    border: '1px solid #e0e0e0',
+                    border: `1px solid ${colors.neutral[300]}`,
                     transition: 'all 200ms',
                     '&:hover': {
                       boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
@@ -360,7 +376,7 @@ const NewsArticle: React.FC = () => {
                     display: 'block',
                     textAlign: 'center',
                     mt: 1,
-                    color: '#757575',
+                    color: colors.neutral[600],
                   }}
                 >
                   Click image to view full size
@@ -396,7 +412,7 @@ const NewsArticle: React.FC = () => {
           BackdropComponent={Backdrop}
           BackdropProps={{
             timeout: 300,
-            sx: { backgroundColor: 'rgba(0, 0, 0, 0.9)' },
+            sx: { backgroundColor: alpha(colors.neutral.black, 0.9) },
           }}
         >
           <Box
@@ -416,9 +432,9 @@ const NewsArticle: React.FC = () => {
                 position: 'absolute',
                 top: -48,
                 right: 0,
-                color: '#ffffff',
+                color: colors.neutral.white,
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: alpha(colors.neutral.white, 0.1),
                 },
               }}
             >

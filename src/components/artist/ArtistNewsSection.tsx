@@ -69,14 +69,14 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
               <Box
                 key={article.id}
                 sx={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: colors.neutral.white,
                   borderRadius: '8px',
                   padding: 2,
                   border: '1px solid #e0e0e0',
                   cursor: 'pointer',
                   transition: 'all 200ms',
                   '&:hover': {
-                    borderColor: '#2d4a36',
+                    borderColor: colors.primary.main,
                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   },
                 }}
@@ -85,7 +85,7 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
                 <Typography
                   sx={{
                     fontWeight: 600,
-                    color: '#212121',
+                    color: colors.text.primary,
                     fontSize: '1rem',
                     mb: 0.5,
                     display: 'flex',
@@ -104,7 +104,7 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
                       alignItems: 'center',
                       gap: 0.5,
                       mb: 1,
-                      color: '#757575',
+                      color: colors.neutral[600],
                     }}
                   >
                     <CalendarBlank size={14} weight="duotone" />
@@ -116,7 +116,7 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
 
                 <Typography
                   sx={{
-                    color: '#616161',
+                    color: colors.neutral[700],
                     fontSize: '0.9rem',
                     lineHeight: 1.5,
                   }}
@@ -135,14 +135,14 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 0.5,
-                color: '#2d4a36',
+                color: colors.primary.main,
                 fontWeight: 600,
                 fontSize: '0.9rem',
                 mt: 1,
                 cursor: 'pointer',
                 transition: 'all 200ms',
                 '&:hover': {
-                  color: '#1a2d21',
+                  color: colors.primary.dark,
                 },
               }}
             >

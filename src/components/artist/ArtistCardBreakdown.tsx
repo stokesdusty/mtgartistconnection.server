@@ -10,7 +10,7 @@ import {
     PieChart, Pie, Cell
 } from 'recharts';
 import { cardBreakdownStyles } from '../../styles/card-breakdown-styles';
-import { spacing } from '../../styles/design-tokens';
+import { colors, spacing } from '../../styles/design-tokens';
 
 interface Card {
     related_uris: {
@@ -298,24 +298,30 @@ const ArtistCardAnalysis = () => {
     })).sort((a, b) => b.count - a.count);
 
     // Colors for the charts
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+    const COLORS = [
+        colors.accent.blue,
+        colors.accent.green,
+        colors.accent.orange,
+        colors.accent.blueDark,
+        colors.primary.main
+    ];
     const COLOR_MAP = {
-        'W': '#F8F6D8', // White
-        'U': '#0E68AB', // Blue
-        'B': '#A69F9D', // Black (using gray since black may not be visible)
-        'R': '#D3202A', // Red
-        'G': '#00733E', // Green
-        'common': '#1a1718',
-        'uncommon': '#707883',
-        'rare': '#a58e4a',
-        'mythic': '#bf4427'
+        'W': colors.neutral.white,
+        'U': colors.accent.blue,
+        'B': colors.neutral[900],
+        'R': colors.accent.red,
+        'G': colors.accent.green,
+        'common': colors.neutral[400],
+        'uncommon': colors.neutral[300],
+        'rare': colors.accent.orange,
+        'mythic': colors.accent.red,
     };
 
     // Calculate some statistics
     const avgCmc = cardsWithDupes.length > 0
         ? cardsWithDupes.reduce((sum, card) => sum + card.cmc, 0) / cardsWithDupes.length
         : 0;
-    const mostCommonType = typeData.length > 0
+    const mostCommonType = typeData.length > 0 && typeData[0]
         ? typeData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.type || 'N/A'
         : 'N/A';
     const mostCommonColor = colorData.length > 0
@@ -427,22 +433,22 @@ const ArtistCardAnalysis = () => {
                         <Typography sx={cardBreakdownStyles.chartTitle}>Mana Cost Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={manaCostData} margin={{ top: 20, right: 10, left: 0, bottom: 40 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} />
                                 <XAxis 
                                     dataKey="cmc" 
-                                    label={{ value: 'Converted Mana Cost', position: 'insideBottom', offset: -10, fill: '#666' }} 
-                                    tick={{ fill: '#666' }}
-                                    axisLine={{ stroke: '#ccc' }}
+                                    label={{ value: 'Converted Mana Cost', position: 'insideBottom', offset: -10, fill: colors.neutral[700] }} 
+                                    tick={{ fill: colors.neutral[700] }}
+                                    axisLine={{ stroke: colors.neutral[300] }}
                                 />
                                 <YAxis 
-                                    label={{ value: 'Number of Cards', angle: -90, position: 'insideLeft', offset: 5, fill: '#666' }} 
-                                    tick={{ fill: '#666' }}
-                                    axisLine={{ stroke: '#ccc' }}
+                                    label={{ value: 'Number of Cards', angle: -90, position: 'insideLeft', offset: 5, fill: colors.neutral[700] }} 
+                                    tick={{ fill: colors.neutral[700] }}
+                                    axisLine={{ stroke: colors.neutral[300] }}
                                 />
                                 <Tooltip 
-                                    formatter={(value) => [`${value} cards`, 'Count']}
-                                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '4px', border: '1px solid #ddd' }}
-                                    labelStyle={{ fontWeight: 'bold', color: '#333' }}
+                                    formatter={(value: number) => [`${value} cards`, 'Count']}
+                                    contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
+                                    labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
                                 />
                                 <Bar 
                                     dataKey="count" 
@@ -453,8 +459,8 @@ const ArtistCardAnalysis = () => {
                                 />
                                 <defs>
                                     <linearGradient id="manaCostGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.9}/>
-                                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0.6}/>
+                                        <stop offset="5%" stopColor={colors.primary.main} stopOpacity={0.9}/>
+                                        <stop offset="95%" stopColor={colors.primary.main} stopOpacity={0.6}/>
                                     </linearGradient>
                                 </defs>
                             </BarChart>
@@ -472,40 +478,40 @@ const ArtistCardAnalysis = () => {
                                     cy="50%"
                                     innerRadius={40}
                                     outerRadius={80}
-                                    fill="#8884d8"
+                                    fill={colors.primary.main}
                                     dataKey="count"
                                     nameKey="type"
                                     paddingAngle={3}
                                     animationDuration={1500}
                                     animationBegin={300}
                                     label={({ type, percent }) => `${type}: ${(percent * 100).toFixed(0)}%`}
-                                    labelLine={{ stroke: '#ccc', strokeWidth: 1 }}
+                                    labelLine={{ stroke: colors.neutral[300], strokeWidth: 1 }}
                                 >
                                     {typeData.map((entry, index) => (
-                                        <Cell 
+                                        <Cell
                                             key={`cell-${index}`} 
                                             fill={COLORS[index % COLORS.length]} 
-                                            stroke="#fff"
+                                            stroke={colors.neutral.white}
                                             strokeWidth={1}
                                         />
                                     ))}
                                 </Pie>
                                 <Tooltip 
-                                    formatter={(value, name) => {
+                                    formatter={(value: number, name: string) => {
                                         const numValue = Number(value);
                                         const percentage = isNaN(numValue) ? 0 : ((numValue / cardsWithDupes.length) * 100).toFixed(1);
                                         return [`${value} cards (${percentage}%)`, name];
                                     }}
-                                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '4px', border: '1px solid #ddd' }}
-                                    labelStyle={{ fontWeight: 'bold', color: '#333' }}
+                                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
+                                    labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
                                 />
                                 <Legend 
                                     layout="horizontal" 
                                     verticalAlign="bottom" 
                                     align="center"
-                                    iconSize={8}
+                                    iconSize={8} // This is a number, not a color.
                                     iconType="circle"
-                                    formatter={(value) => <span style={{ color: '#666', fontSize: '0.8rem' }}>{value}</span>}
+                                    formatter={(value) => <span style={{ color: colors.neutral[600], fontSize: '0.8rem' }}>{value}</span>}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -516,20 +522,20 @@ const ArtistCardAnalysis = () => {
                         <Typography sx={cardBreakdownStyles.chartTitle}>Color Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={colorData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} />
                                 <XAxis 
                                     dataKey="fullName" 
-                                    tick={{ fill: '#666', fontSize: '0.7rem' }}
-                                    axisLine={{ stroke: '#ccc' }}
+                                    tick={{ fill: colors.neutral[700], fontSize: '0.7rem' }}
+                                    axisLine={{ stroke: colors.neutral[300] }}
                                 />
                                 <YAxis 
-                                    tick={{ fill: '#666' }}
-                                    axisLine={{ stroke: '#ccc' }}
+                                    tick={{ fill: colors.neutral[700] }}
+                                    axisLine={{ stroke: colors.neutral[300] }}
                                 />
                                 <Tooltip 
-                                    formatter={(value) => [`${value} cards`, 'Count']}
-                                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '4px', border: '1px solid #ddd' }}
-                                    labelStyle={{ fontWeight: 'bold', color: '#333' }}
+                                    formatter={(value: number) => [`${value} cards`, 'Count']}
+                                    contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
+                                    labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
                                 />
                                 <Bar 
                                     dataKey="count" 
@@ -540,7 +546,7 @@ const ArtistCardAnalysis = () => {
                                         <Cell
                                             key={`cell-${index}`}
                                             fill={COLOR_MAP[entry.color as 'W' | 'U' | 'B' | 'R' | 'G'] || COLORS[index % COLORS.length]}
-                                            stroke="#fff"
+                                            stroke={colors.neutral.white}
                                             strokeWidth={1}
                                         />
                                     ))}
@@ -558,23 +564,23 @@ const ArtistCardAnalysis = () => {
                                 layout="vertical" 
                                 margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} horizontal={true} vertical={false} />
                                 <XAxis 
                                     type="number" 
-                                    tick={{ fill: '#666' }}
-                                    axisLine={{ stroke: '#ccc' }}
+                                    tick={{ fill: colors.neutral[700] }}
+                                    axisLine={{ stroke: colors.neutral[300] }}
                                 />
                                 <YAxis 
                                     dataKey="set" 
                                     type="category" 
-                                    tick={{ fill: '#666', fontSize: '0.75rem' }}
-                                    axisLine={{ stroke: '#ccc' }}
+                                    tick={{ fill: colors.neutral[700], fontSize: '0.75rem' }}
+                                    axisLine={{ stroke: colors.neutral[300] }}
                                     width={70}
                                 />
                                 <Tooltip 
-                                    formatter={(value) => [`${value} cards`, 'Count']}
-                                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '4px', border: '1px solid #ddd' }}
-                                    labelStyle={{ fontWeight: 'bold', color: '#333' }}
+                                    formatter={(value: number) => [`${value} cards`, 'Count']}
+                                    contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
+                                    labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
                                 />
                                 <Bar 
                                     dataKey="count" 
@@ -584,8 +590,8 @@ const ArtistCardAnalysis = () => {
                                 />
                                 <defs>
                                     <linearGradient id="setGradient" x1="0" y1="0" x2="1" y2="0">
-                                        <stop offset="5%" stopColor="#FFBB28" stopOpacity={0.9}/>
-                                        <stop offset="95%" stopColor="#FFBB28" stopOpacity={0.6}/>
+                                        <stop offset="5%" stopColor={colors.accent.orange} stopOpacity={0.9}/>
+                                        <stop offset="95%" stopColor={colors.accent.orange} stopOpacity={0.6}/>
                                     </linearGradient>
                                 </defs>
                             </BarChart>

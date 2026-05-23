@@ -13,11 +13,13 @@ import {
   Paper,
   Chip,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { PaperPlaneRight, ArrowLeft, CloudArrowUp, Trash } from "@phosphor-icons/react";
 import { GET_ARTISTS_FOR_HOMEPAGE } from '../graphql/queries';
 import { GENERATE_MANUAL_NEWS_ARTICLE, UPLOAD_NEWS_IMAGE } from '../graphql/mutations';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
+import { colors } from '../../styles/design-tokens';
 
 interface Artist {
   name: string;
@@ -160,7 +162,7 @@ const ManualArticleSubmit: React.FC = () => {
 
   const styles = {
     container: {
-      backgroundColor: '#f5f5f5',
+      backgroundColor: colors.background.dark,
       minHeight: '100vh',
       py: 4,
     },
@@ -174,11 +176,11 @@ const ManualArticleSubmit: React.FC = () => {
     },
     title: {
       fontWeight: 700,
-      color: '#2d4a36',
+      color: colors.primary.main,
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     },
     subtitle: {
-      color: '#616161',
+      color: colors.neutral[700],
       mt: 1,
     },
     backButton: {
@@ -186,13 +188,13 @@ const ManualArticleSubmit: React.FC = () => {
       alignItems: 'center',
       gap: 1,
       mb: 3,
-      color: '#2d4a36',
+      color: colors.primary.main,
       cursor: 'pointer',
       fontWeight: 600,
       fontSize: '0.95rem',
       transition: 'all 200ms',
       '&:hover': {
-        color: '#1a2d21',
+        color: colors.primary.dark,
       },
     },
     form: {
@@ -201,15 +203,15 @@ const ManualArticleSubmit: React.FC = () => {
       gap: 3,
     },
     submitButton: {
-      backgroundColor: '#2d4a36',
-      color: '#fff',
+      backgroundColor: colors.primary.main,
+      color: colors.neutral.white,
       fontWeight: 600,
       py: 1.5,
       '&:hover': {
-        backgroundColor: '#1a2d21',
+        backgroundColor: colors.primary.dark,
       },
       '&:disabled': {
-        backgroundColor: '#ccc',
+        backgroundColor: colors.neutral[300],
       },
     },
   };
@@ -306,12 +308,12 @@ const ManualArticleSubmit: React.FC = () => {
                     key={option.name}
                     label={option.name}
                     sx={{
-                      backgroundColor: '#2d4a36',
-                      color: '#fff',
+                      backgroundColor: colors.primary.main,
+                      color: colors.neutral.white,
                       '& .MuiChip-deleteIcon': {
                         color: 'rgba(255,255,255,0.7)',
                         '&:hover': {
-                          color: '#fff',
+                          color: colors.neutral.white,
                         },
                       },
                     }}
@@ -341,7 +343,7 @@ const ManualArticleSubmit: React.FC = () => {
 
             {/* Image Upload Section */}
             <Box>
-              <Typography sx={{ mb: 1, fontWeight: 600, color: '#424242' }}>
+              <Typography sx={{ mb: 1, fontWeight: 600, color: colors.neutral[800] }}>
                 Article Image (Optional)
               </Typography>
               <input
@@ -359,10 +361,10 @@ const ManualArticleSubmit: React.FC = () => {
                     component="span"
                     startIcon={<CloudArrowUp size={18} weight="duotone" />}
                     sx={{
-                      borderColor: '#2d4a36',
-                      color: '#2d4a36',
+                      borderColor: colors.primary.main,
+                      color: colors.primary.main,
                       '&:hover': {
-                        borderColor: '#1a2d21',
+                        borderColor: colors.primary.dark,
                         backgroundColor: 'rgba(45, 74, 54, 0.04)',
                       },
                     }}
@@ -379,7 +381,7 @@ const ManualArticleSubmit: React.FC = () => {
                       maxWidth: '100%',
                       maxHeight: 200,
                       borderRadius: 8,
-                      border: '1px solid #e0e0e0',
+                      border: `1px solid ${colors.neutral[200]}`,
                     }}
                   />
                   <Button
@@ -391,9 +393,9 @@ const ManualArticleSubmit: React.FC = () => {
                       position: 'absolute',
                       top: 8,
                       right: 8,
-                      backgroundColor: 'rgba(0,0,0,0.6)',
+                      backgroundColor: alpha(colors.neutral.black, 0.6),
                       '&:hover': {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        backgroundColor: alpha(colors.neutral.black, 0.8),
                       },
                     }}
                   >
@@ -401,7 +403,7 @@ const ManualArticleSubmit: React.FC = () => {
                   </Button>
                 </Box>
               )}
-              <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#757575' }}>
+              <Typography variant="caption" sx={{ display: 'block', mt: 1, color: colors.neutral[600] }}>
                 Supported formats: JPG, PNG, GIF. Max size: 5MB
               </Typography>
             </Box>

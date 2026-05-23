@@ -36,7 +36,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     fontFamily: typography.fontFamily.heading,
     fontWeight: typography.fontWeight.bold,
     fontSize: { xs: typography.fontSize['3xl'], sm: typography.fontSize['4xl'], md: typography.fontSize['5xl'] },
-    color: '#ffffff',
+    color: colors.neutral.white,
     lineHeight: typography.lineHeight.tight,
     letterSpacing: '-0.02em',
     textShadow: '0 2px 12px rgba(0,0,0,0.5)',

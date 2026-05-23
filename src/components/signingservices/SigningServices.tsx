@@ -19,6 +19,7 @@ import {
 import { CaretDown } from "@phosphor-icons/react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { contentPageStyles } from "../../styles/content-page-styles";
+import { colors } from "../../styles/design-tokens";
 
 interface Service {
   name: string;
@@ -162,7 +163,7 @@ const SigningServices = () => {
           <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: '1px solid', borderColor: 'divider' }}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: 'action.hover' }}>
+                <TableRow sx={{ backgroundColor: colors.neutral[100] }}>
                   <TableCell sx={{ fontWeight: 'bold' }}>Service</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}># of Artists</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Cost Per Signature</TableCell>

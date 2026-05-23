@@ -35,9 +35,11 @@ export const colors = {
     orangeLight: '#fdf0e0', // Light amber tint for chip/badge backgrounds
     orangeDark: '#9e5a12',  // Deep amber for hover states
     blue: '#3498db',        // Info states
+    blueDark: '#2980b9',    // Info hover states
     red: '#e74c3c',         // Error states
     redLight: '#fef5f5',    // Light red background for error states
     green: '#27ae60',       // Success states
+    greenDark: '#1e8449',  // Dark green for hover states
   },
 
   // Background
@@ -159,6 +161,16 @@ export const borders = {
   medium: `2px solid ${colors.neutral[300]}`,
   thick: `3px solid ${colors.neutral[400]}`,
   primary: `2px solid ${colors.primary.main}`,
+};
+
+// Social platform brand colors
+export const platformColors: { [key: string]: string } = {
+  twitter: '#1DA1F2',
+  instagram: '#E4405F',
+  bluesky: '#0085FF',
+  facebook: '#1877F2',
+  patreon: '#FF424D',
+  other: '#757575',
 };
 
 // Status chip colors — semantic colors used in status/payment badges that

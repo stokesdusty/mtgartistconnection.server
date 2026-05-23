@@ -18,12 +18,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  alpha,
 } from '@mui/material';
 import { Trash, CheckCircle, PencilSimple, UploadSimple, ArrowSquareOut, Plus } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { UPDATE_NEWS_REVIEW, DELETE_NEWS_REVIEW } from '../graphql/mutations';
+import { colors } from '../../styles/design-tokens';
 
-interface NewsReview {
+interface NewsArticle {
   id: string;
   artistPostId: string;
   artistId: string;
@@ -42,7 +44,7 @@ const NewsReview: React.FC = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'unreviewed' | 'reviewed' | 'published'>('unreviewed');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedArticle, setSelectedArticle] = useState<NewsReview | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedSummary, setEditedSummary] = useState('');
   const [editedContent, setEditedContent] = useState('');
@@ -69,9 +71,9 @@ const NewsReview: React.FC = () => {
   const [updateNewsReview] = useMutation(UPDATE_NEWS_REVIEW);
   const [deleteNewsReview] = useMutation(DELETE_NEWS_REVIEW);
 
-  const articles: NewsReview[] = data?.newsReviews || [];
+  const articles: NewsArticle[] = data?.newsReviews || [];
 
-  const handleEdit = (article: NewsReview) => {
+  const handleEdit = (article: NewsArticle) => {
     setSelectedArticle(article);
     setEditedTitle(article.title);
     setEditedSummary(article.summary);
@@ -163,63 +165,63 @@ const NewsReview: React.FC = () => {
 
   const styles = {
     container: {
-      backgroundColor: '#f5f5f5',
+      backgroundColor: colors.neutral[50],
       minHeight: '100vh',
       padding: { xs: 2, md: 4 },
     },
     paper: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.neutral.white,
       borderRadius: '12px',
       boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-      border: '1px solid #eeeeee',
+      border: `1px solid ${colors.neutral[200]}`,
       overflow: 'hidden',
     },
     header: {
       padding: { xs: 2, md: 3 },
-      borderBottom: '1px solid #e0e0e0',
+      borderBottom: `1px solid ${colors.neutral[200]}`,
     },
     title: {
       fontWeight: 700,
-      color: '#2d4a36',
+      color: colors.primary.main,
       mb: 0.5,
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     },
     subtitle: {
-      color: '#616161',
+      color: colors.neutral[700],
       fontSize: '0.875rem',
       mb: 2,
     },
     button: {
-      backgroundColor: '#2d4a36',
-      color: '#ffffff',
+      backgroundColor: colors.primary.main,
+      color: colors.neutral.white,
       textTransform: 'none',
       fontWeight: 600,
       borderRadius: '8px',
       transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
       '&:hover': {
-        backgroundColor: '#1a2d21',
+        backgroundColor: colors.primary.dark,
       },
     },
     outlineButton: {
-      color: '#2d4a36',
-      borderColor: '#2d4a36',
+      color: colors.primary.main,
+      borderColor: colors.primary.main,
       textTransform: 'none',
       fontWeight: 600,
       borderRadius: '8px',
       transition: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
       '&:hover': {
-        borderColor: '#1a2d21',
-        backgroundColor: 'rgba(45, 74, 54, 0.04)',
+        borderColor: colors.primary.dark,
+        backgroundColor: alpha(colors.primary.main, 0.04),
       },
     },
     articleCard: {
       padding: 3,
-      borderBottom: '1px solid #e0e0e0',
+      borderBottom: `1px solid ${colors.neutral[200]}`,
       '&:last-child': {
         borderBottom: 'none',
       },
       '&:hover': {
-        backgroundColor: '#fafafa',
+        backgroundColor: colors.neutral[50],
       },
     },
   };
@@ -231,8 +233,8 @@ const NewsReview: React.FC = () => {
           <Paper elevation={0} sx={styles.paper}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
               <Box sx={{ textAlign: 'center' }}>
-                <CircularProgress sx={{ color: '#2d4a36' }} size={48} />
-                <Typography sx={{ mt: 2, color: '#616161' }}>Loading news articles...</Typography>
+                <CircularProgress sx={{ color: colors.primary.main }} size={48} />
+                <Typography sx={{ mt: 2, color: colors.neutral[700] }}>Loading news articles...</Typography>
               </Box>
             </Box>
           </Paper>
@@ -245,8 +247,8 @@ const NewsReview: React.FC = () => {
     return (
       <Box sx={styles.container}>
         <Container maxWidth="lg">
-          <Alert severity="error" sx={{ borderRadius: '12px', border: '1px solid #e74c3c', backgroundColor: '#fef5f5' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>Error Loading Articles</Typography>
+          <Alert severity="error" sx={{ borderRadius: '12px', border: `1px solid ${colors.accent.red}`, backgroundColor: colors.accent.redLight }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: colors.accent.red }}>Error Loading Articles</Typography>
             <Typography>{error.message}</Typography>
           </Alert>
         </Container>
@@ -309,10 +311,10 @@ const NewsReview: React.FC = () => {
 
           {articles.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 8 }}>
-              <Typography variant="h6" sx={{ color: '#757575', mb: 1 }}>
+              <Typography variant="h6" sx={{ color: colors.neutral[600], mb: 1 }}>
                 No {filter} articles
               </Typography>
-              <Typography sx={{ color: '#9e9e9e', fontSize: '0.875rem' }}>
+              <Typography sx={{ color: colors.neutral[500], fontSize: '0.875rem' }}>
                 Generate articles from social posts to see them here
               </Typography>
             </Box>
@@ -322,27 +324,27 @@ const NewsReview: React.FC = () => {
                 <Box key={article.id} sx={styles.articleCard}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="h5" sx={{ fontWeight: 600, color: '#212121', mb: 1 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 600, color: colors.text.primary, mb: 1 }}>
                         {article.title}
                       </Typography>
 
-                      <Typography sx={{ color: '#616161', fontSize: '0.875rem', mb: 1, fontStyle: 'italic' }}>
+                      <Typography sx={{ color: colors.neutral[700], fontSize: '0.875rem', mb: 1, fontStyle: 'italic' }}>
                         {article.summary}
                       </Typography>
 
-                      <Typography sx={{ color: '#424242', fontSize: '0.9rem', lineHeight: 1.6, mb: 2, whiteSpace: 'pre-wrap' }}>
+                      <Typography sx={{ color: colors.neutral[800], fontSize: '0.9rem', lineHeight: 1.6, mb: 2, whiteSpace: 'pre-wrap' }}>
                         {article.content}
                       </Typography>
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                        <Chip label={article.artistName} size="small" sx={{ backgroundColor: '#2d4a36', color: '#fff' }} />
+                        <Chip label={article.artistName} size="small" sx={{ backgroundColor: colors.primary.main, color: colors.neutral.white }} />
                         <Button
                           href={article.sourcePostUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           size="small"
                           endIcon={<ArrowSquareOut size={16} />}
-                          sx={{ textTransform: 'none', color: '#2d4a36', fontWeight: 600, fontSize: '0.875rem' }}
+                          sx={{ textTransform: 'none', color: colors.primary.main, fontWeight: 600, fontSize: '0.875rem' }}
                         >
                           View Source Post
                         </Button>
@@ -369,7 +371,7 @@ const NewsReview: React.FC = () => {
                             size="small"
                             onClick={() => handleMarkReviewed(article.id)}
                             startIcon={<CheckCircle size={16} weight="duotone" />}
-                            sx={{ ...styles.button, backgroundColor: '#27ae60', '&:hover': { backgroundColor: '#1e8449' } }}
+                            sx={{ ...styles.button, backgroundColor: colors.accent.green, '&:hover': { backgroundColor: colors.accent.greenDark } }}
                           >
                             Mark Reviewed
                           </Button>
@@ -383,7 +385,7 @@ const NewsReview: React.FC = () => {
                             size="small"
                             onClick={() => handlePublish(article.id)}
                             startIcon={<UploadSimple size={16} />}
-                            sx={{ ...styles.button, backgroundColor: '#3498db', '&:hover': { backgroundColor: '#2980b9' } }}
+                            sx={{ ...styles.button, backgroundColor: colors.accent.blue, '&:hover': { backgroundColor: colors.accent.blueDark } }}
                           >
                             Publish
                           </Button>
@@ -391,7 +393,7 @@ const NewsReview: React.FC = () => {
                       )}
 
                       <Tooltip title="Delete article">
-                        <IconButton onClick={() => handleDelete(article.id)} size="small" sx={{ color: '#e74c3c', '&:hover': { backgroundColor: 'rgba(231, 76, 60, 0.08)' } }}>
+                        <IconButton onClick={() => handleDelete(article.id)} size="small" sx={{ color: colors.accent.red, '&:hover': { backgroundColor: alpha(colors.accent.red, 0.08) } }}>
                           <Trash size={20} />
                         </IconButton>
                       </Tooltip>

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Box, Typography, Container, Link } from "@mui/material";
 import { FaBluesky } from "react-icons/fa6";
 import { footerStyles } from "../../styles/footer-styles";
+import { colors, spacing } from "../../styles/design-tokens";
 
 const currentYear = new Date().getFullYear();
 const copyrightText = `© ${currentYear} MTG Artist Connection`;
@@ -42,7 +43,7 @@ const KofiButton = () => {
         const kofi = (window as any).kofiwidget2;
         if (!kofi) return;
         renderedRef.current = true;
-        kofi.init("Support us", "#2d4a36", "Y8Y71T8GEF");
+        kofi.init("Support us", colors.primary.main, "Y8Y71T8GEF");
         el.innerHTML = kofi.getHTML();
         const anchor = el.querySelector("a");
         if (anchor && anchor.href) {
@@ -118,11 +119,11 @@ const Footer = () => {
             </Box>
             <Typography sx={{
               fontSize: '0.75rem',
-              color: '#9e9e9e',
+              color: colors.neutral[500],
               textAlign: 'center',
               marginTop: 1,
               maxWidth: '800px',
-              margin: '8px auto 0',
+              margin: `${spacing.sm} auto 0`,
             }}>
               MTG Artist Connection is a participant in affiliate programs with eBay, Original Magic Art, and Manapool.
               When you purchase through these links, you support this site at no additional cost to you.

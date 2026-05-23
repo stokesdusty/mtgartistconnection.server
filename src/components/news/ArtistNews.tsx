@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { User, CalendarBlank, ArrowRight, ArrowLeft } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS_BY_ARTIST } from '../graphql/queries';
+import { colors } from '../../styles/design-tokens';
 
 interface NewsArticle {
   id: string;
@@ -42,11 +43,11 @@ const ArtistNews: React.FC = () => {
     skip: !decodedArtistName,
   });
 
-  const articles: NewsArticle[] = data?.newsReviewsByArtist || [];
+  const articles: NewsArticle[] = useMemo(() => data?.newsReviewsByArtist || [], [data?.newsReviewsByArtist]);
 
   const styles = {
     container: {
-      backgroundColor: '#f5f5f5',
+      backgroundColor: colors.background.dark,
       minHeight: '100vh',
       padding: { xs: 2, md: 4 },
     },
@@ -55,13 +56,13 @@ const ArtistNews: React.FC = () => {
       alignItems: 'center',
       gap: 1,
       mb: 3,
-      color: '#2d4a36',
+      color: colors.primary.main,
       cursor: 'pointer',
       fontWeight: 600,
       fontSize: '0.95rem',
       transition: 'all 200ms',
       '&:hover': {
-        color: '#1a2d21',
+        color: colors.primary.dark,
       },
     },
     header: {
@@ -70,26 +71,26 @@ const ArtistNews: React.FC = () => {
     },
     title: {
       fontWeight: 700,
-      color: '#2d4a36',
+      color: colors.primary.main,
       mb: 1,
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     },
     subtitle: {
-      color: '#616161',
+      color: colors.neutral[700],
       fontSize: '1.1rem',
     },
     articleCard: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.neutral.white,
       borderRadius: '12px',
       boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-      border: '1px solid #eeeeee',
+      border: `1px solid ${colors.neutral[200]}`,
       mb: 3,
       cursor: 'pointer',
       transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
       '&:hover': {
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         transform: 'translateY(-2px)',
-        borderColor: '#2d4a36',
+        borderColor: colors.primary.main,
       },
     },
     titleContainer: {
@@ -102,17 +103,17 @@ const ArtistNews: React.FC = () => {
       width: 50,
       height: 50,
       borderRadius: '8px',
-      border: '2px solid #2d4a36',
+      border: `2px solid ${colors.primary.main}`,
     },
     articleTitle: {
       fontWeight: 700,
-      color: '#212121',
+      color: colors.neutral[900],
       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
       fontSize: '1.25rem',
       flex: 1,
     },
     summary: {
-      color: '#616161',
+      color: colors.neutral[700],
       fontSize: '1rem',
       lineHeight: 1.6,
       mb: 2,
@@ -125,13 +126,13 @@ const ArtistNews: React.FC = () => {
       mb: 2,
     },
     artistChip: {
-      backgroundColor: '#2d4a36',
-      color: '#ffffff',
+      backgroundColor: colors.primary.main,
+      color: colors.neutral.white,
       fontWeight: 600,
       cursor: 'pointer',
       transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
       '&:hover': {
-        backgroundColor: '#1a2d21',
+        backgroundColor: colors.primary.dark,
         transform: 'scale(1.05)',
       },
       '& .MuiChip-label': {
@@ -139,7 +140,7 @@ const ArtistNews: React.FC = () => {
       },
     },
     dateText: {
-      color: '#757575',
+      color: colors.neutral[600],
       fontSize: '0.9rem',
       display: 'flex',
       alignItems: 'center',
@@ -149,7 +150,7 @@ const ArtistNews: React.FC = () => {
       display: 'flex',
       alignItems: 'center',
       gap: 0.5,
-      color: '#2d4a36',
+      color: colors.primary.main,
       fontWeight: 600,
       fontSize: '0.9rem',
       mt: 1,
@@ -190,8 +191,8 @@ const ArtistNews: React.FC = () => {
         <Container maxWidth="md">
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
             <Box sx={{ textAlign: 'center' }}>
-              <CircularProgress sx={{ color: '#2d4a36' }} size={48} />
-              <Typography sx={{ mt: 2, color: '#616161' }}>Loading news articles...</Typography>
+              <CircularProgress sx={{ color: colors.primary.main }} size={48} />
+              <Typography sx={{ mt: 2, color: colors.neutral[700] }}>Loading news articles...</Typography>
             </Box>
           </Box>
         </Container>
@@ -203,7 +204,14 @@ const ArtistNews: React.FC = () => {
     return (
       <Box sx={styles.container}>
         <Container maxWidth="md">
-          <Alert severity="error" sx={{ borderRadius: '12px', border: '1px solid #e74c3c', backgroundColor: '#fef5f5' }}>
+          <Alert
+            severity="error"
+            sx={{
+              borderRadius: '12px',
+              border: `1px solid ${colors.accent.red}`,
+              backgroundColor: colors.accent.redLight,
+            }}
+          >
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>Error Loading News</Typography>
             <Typography>{error.message}</Typography>
           </Alert>
@@ -234,10 +242,10 @@ const ArtistNews: React.FC = () => {
 
         {articles.length === 0 ? (
           <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '12px' }}>
-            <Typography variant="h6" sx={{ color: '#757575', mb: 1 }}>
+            <Typography variant="h6" sx={{ color: colors.neutral[600], mb: 1 }}>
               No news articles yet
             </Typography>
-            <Typography sx={{ color: '#9e9e9e' }}>
+            <Typography sx={{ color: colors.neutral[500] }}>
               Check back soon for updates about {decodedArtistName}!
             </Typography>
           </Paper>
@@ -264,7 +272,7 @@ const ArtistNews: React.FC = () => {
 
                   <Box sx={styles.metaInfo}>
                     <Chip
-                      icon={<User size={14} weight="duotone" color="#ffffff" />}
+                      icon={<User size={14} weight="duotone" color={colors.neutral.white} />}
                       label={article.artistName}
                       onClick={(e) => handleArtistClick(article.artistName, e)}
                       sx={styles.artistChip}

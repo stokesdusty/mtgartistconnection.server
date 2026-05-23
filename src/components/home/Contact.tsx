@@ -9,6 +9,7 @@ import {
   import { FaBluesky } from "react-icons/fa6";
   import { contentPageStyles } from "../../styles/content-page-styles";
   import { usePageTitle } from "../../hooks/usePageTitle";
+  import { colors } from "../../styles/design-tokens";
 
   const ContactPage = () => {
     usePageTitle("Contact Us");
@@ -59,7 +60,7 @@ import {
               </Box>
 
               <Box sx={contentPageStyles.contactMethod}>
-                <FaBluesky color="#2d4a36" size={24} />
+                <FaBluesky color={colors.primary.main} size={24} />
                 <Link
                   href="https://bsky.app/profile/mtgartistconnect.bsky.social"
                   target="_blank"

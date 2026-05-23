@@ -16,6 +16,7 @@ import {
   import { useEffect, useState } from "react";
   import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS } from "../graphql/queries";
   import { ADD_ARTISTTOEVENT } from "../graphql/mutations";
+  import { colors } from "../../styles/design-tokens";
   
   const AddArtistToEvent = () => {
       const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
@@ -30,7 +31,7 @@ import {
       
       const styles = {
           container: {
-              backgroundColor: "#507A60",
+              backgroundColor: colors.primary.main,
               minHeight: "100vh",
               padding: { xs: 2, md: 4 },
           },
@@ -38,25 +39,25 @@ import {
               maxWidth: 600,
               margin: "0 auto",
               padding: { xs: 3, md: 4 },
-              backgroundColor: "#fff",
+              backgroundColor: colors.neutral.white,
               borderRadius: 2,
               boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           },
           pageTitle: {
-              color: "#507A60",
+              color: colors.primary.main,
               fontWeight: 700,
               fontSize: { xs: "2rem", md: "2.5rem" },
               marginBottom: 3,
               textAlign: "center",
           },
           sectionHeader: {
-              color: "#507A60",
+              color: colors.primary.main,
               fontWeight: 600,
               fontSize: "1.5rem",
               marginBottom: 2,
               marginTop: 3,
               paddingBottom: 1,
-              borderBottom: "2px solid #507A60",
+              borderBottom: `2px solid ${colors.primary.main}`,
           },
           form: {
               display: "flex",
@@ -67,50 +68,50 @@ import {
               "& .MuiOutlinedInput-root": {
                   borderRadius: "8px",
                   "&:hover fieldset": {
-                      borderColor: "#507A60",
+                      borderColor: colors.primary.main,
                   },
                   "&.Mui-focused fieldset": {
-                      borderColor: "#507A60",
+                      borderColor: colors.primary.main,
                   },
               },
               "& .MuiInputLabel-root": {
                   "&.Mui-focused": {
-                      color: "#507A60",
+                      color: colors.primary.main,
                   },
               },
           },
           submitButton: {
-              backgroundColor: "#507A60",
-              color: "white",
+              backgroundColor: colors.primary.main,
+              color: colors.neutral.white,
               marginTop: 3,
               padding: "12px 24px",
               fontSize: "1.1rem",
               fontWeight: 600,
               borderRadius: "8px",
               "&:hover": {
-                  backgroundColor: "#3c5c48",
+                  backgroundColor: colors.primary.dark,
               },
           },
           fieldSection: {
               marginBottom: 2,
           },
           errorMessage: {
-              color: "#d32f2f",
+              color: colors.accent.red,
               textAlign: "center",
               padding: 4,
-              backgroundColor: "rgba(211, 47, 47, 0.1)",
+              backgroundColor: colors.accent.redLight,
               borderRadius: 2,
               marginBottom: 2,
           },
           loadingContainer: {
-              backgroundColor: "#507A60",
+              backgroundColor: colors.primary.main,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               height: "50vh",
           },
           helperText: {
-              color: "#666",
+              color: colors.neutral[600],
               fontSize: "0.875rem",
               marginTop: 1,
           },
@@ -166,7 +167,7 @@ import {
           return (
               <Box sx={styles.container}>
                   <Box sx={styles.loadingContainer}>
-                      <LinearProgress sx={{ color: "#507A60", width: "300px" }} />
+                      <LinearProgress sx={{ color: colors.primary.main, width: "300px" }} />
                   </Box>
               </Box>
           );

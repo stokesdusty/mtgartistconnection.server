@@ -30,6 +30,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 import { artistStyles } from "../../styles/artist-styles";
 
+import { alpha } from '@mui/material/styles';
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ArtistNewsSection from './ArtistNewsSection';
@@ -169,7 +170,7 @@ const Artist = () => {
         fetchUserCardCollection({ variables: { scryfallIds: ids } });
       }
     });
-  }, [isLoggedIn, data?.artistByName?.name]);
+  }, [isLoggedIn, data?.artistByName?.name, fetchUserCardCollection]);
 
   // Check if user is following this artist
   useEffect(() => {
@@ -268,49 +269,49 @@ const Artist = () => {
       label: "Website",
       url: artistByName.url,
       icon: TbWorldWww,
-      color: "#2d4a36",
+      color: colors.primary.main,
     },
     {
       label: "Facebook",
       url: artistByName.facebook,
       icon: FaFacebookF,
-      color: "#4267B2",
+      color: colors.primary.main,
     },
     {
       label: "Instagram",
       url: artistByName.instagram,
       icon: FaInstagram,
-      color: "#C13584",
+      color: colors.primary.main,
     },
     {
       label: "Twitter",
       url: artistByName.twitter,
       icon: FaTwitter,
-      color: "#1DA1F2",
+      color: colors.primary.main,
     },
     {
       label: "Patreon",
       url: artistByName.patreon,
       icon: FaPatreon,
-      color: "#f96854",
+      color: colors.primary.main,
     },
     {
       label: "YouTube",
       url: artistByName.youtube,
       icon: FaYoutube,
-      color: "#FF0000",
+      color: colors.primary.main,
     },
     {
       label: "Artstation",
       url: artistByName.artstation,
       icon: FaArtstation,
-      color: "#13AFF0",
+      color: colors.primary.main,
     },
     {
       label: "Bluesky",
       url: artistByName.bluesky,
       icon: FaBluesky,
-      color: "#1285FE",
+      color: colors.primary.main,
     },
   ];
 
@@ -573,7 +574,7 @@ const Artist = () => {
                         label="Not confirmed"
                         size="small"
                         sx={{
-                          backgroundColor: 'rgba(117, 117, 117, 0.12)',
+                          backgroundColor: alpha(colors.neutral[600], 0.12),
                           color: 'text.secondary',
                           fontSize: '0.8rem',
                           fontWeight: 500,
