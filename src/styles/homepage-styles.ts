@@ -240,6 +240,30 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     gap: { xs: spacing.sm, sm: spacing.md, md: spacing.xl },
     marginTop: spacing.xl,
   },
+  artistsGridCompact: {
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: 'repeat(3, 1fr)',
+      sm: 'repeat(4, 1fr)',
+      md: 'repeat(6, 1fr)',
+      lg: 'repeat(7, 1fr)',
+      xl: 'repeat(8, 1fr)',
+    },
+    gap: { xs: spacing.xs, sm: spacing.sm, md: spacing.md },
+    marginTop: spacing.xl,
+  },
+  artistsGridGallery: {
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: 'repeat(1, 1fr)',
+      sm: 'repeat(2, 1fr)',
+      md: 'repeat(2, 1fr)',
+      lg: 'repeat(3, 1fr)',
+      xl: 'repeat(4, 1fr)',
+    },
+    gap: { xs: spacing.sm, sm: spacing.md, md: spacing.lg },
+    marginTop: spacing.xl,
+  },
   loadingContainer: {
     backgroundColor: colors.background.default,
     display: 'flex',

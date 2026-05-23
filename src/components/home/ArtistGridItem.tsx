@@ -1,42 +1,116 @@
 import { Box } from "@mui/system";
-import { artistGridStyles, gridHtmlElementStyles } from "../../styles/artist-grid-styles";
+import {
+  artistGridStyles,
+  artistCompactStyles,
+  artistGalleryStyles,
+  gridHtmlElementStyles,
+} from "../../styles/artist-grid-styles";
 import { Link, Typography } from "@mui/material";
+import { GridDensity } from "./DensityToggle";
 
-const ArtistGridItem = ({ artistData, eager, hasEvent }: { artistData: any; eager?: boolean; hasEvent?: boolean }) => {
+const S3 = 'https://mtgartistconnection.s3.us-west-1.amazonaws.com';
+
+const ArtistGridItem = ({
+  artistData,
+  eager,
+  hasEvent,
+  density = 'comfortable',
+}: {
+  artistData: any;
+  eager?: boolean;
+  hasEvent?: boolean;
+  density?: GridDensity;
+}) => {
+  if (density === 'compact') {
     return (
-      <Box sx={artistGridStyles.container}>
-        <Link sx={artistGridStyles.link} href={`/artist/${artistData.name}`}>
-          <Box sx={artistGridStyles.imageBox} className="artist-image-box">
+      <Box sx={artistCompactStyles.container}>
+        <Link sx={artistCompactStyles.link} href={`/artist/${artistData.name}`}>
+          <Box sx={artistCompactStyles.imageBox} className="artist-image-box">
             {hasEvent && <Box sx={artistGridStyles.eventDot} />}
             <img
               alt={artistData.name}
               style={gridHtmlElementStyles.img}
-              src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${artistData.filename}.jpg`}
-              loading={eager ? "eager" : "lazy"}
+              src={`${S3}/grid/${artistData.filename}.jpg`}
+              loading={eager ? 'eager' : 'lazy'}
               decoding="async"
               width="300"
               height="300"
             />
-          </Box>
-          <Typography sx={artistGridStyles.text} className="artist-name">
-            {artistData.name}
-            {artistData.alternate_names && (
-              <Typography
-                component="span"
-                sx={{
-                  fontSize: '0.75em',
-                  fontWeight: 400,
-                  color: 'text.secondary',
-                  ml: 0.5,
-                }}
-              >
-                ({artistData.alternate_names})
+            <Box sx={artistCompactStyles.overlay}>
+              <Typography sx={artistCompactStyles.overlayName}>
+                {artistData.name}
               </Typography>
-            )}
-          </Typography>
+            </Box>
+          </Box>
         </Link>
       </Box>
     );
+  }
+
+  if (density === 'gallery') {
+    return (
+      <Box sx={artistGalleryStyles.container}>
+        <Link sx={artistGalleryStyles.link} href={`/artist/${artistData.name}`}>
+          <Box sx={artistGalleryStyles.imageBox} className="artist-image-box">
+            {hasEvent && <Box sx={artistGridStyles.eventDot} />}
+            <img
+              alt={artistData.name}
+              style={gridHtmlElementStyles.img}
+              src={`${S3}/banner/${artistData.filename}.jpeg`}
+              loading={eager ? 'eager' : 'lazy'}
+              decoding="async"
+              width="600"
+              height="337"
+            />
+            <Box sx={artistGalleryStyles.overlay} className="gallery-overlay">
+              <Typography sx={artistGalleryStyles.overlayName}>
+                {artistData.name}
+                {artistData.alternate_names && (
+                  <Typography
+                    component="span"
+                    sx={{ fontSize: '0.75em', fontWeight: 400, opacity: 0.8, ml: 0.5 }}
+                  >
+                    ({artistData.alternate_names})
+                  </Typography>
+                )}
+              </Typography>
+            </Box>
+          </Box>
+        </Link>
+      </Box>
+    );
+  }
+
+  // comfortable (default)
+  return (
+    <Box sx={artistGridStyles.container}>
+      <Link sx={artistGridStyles.link} href={`/artist/${artistData.name}`}>
+        <Box sx={artistGridStyles.imageBox} className="artist-image-box">
+          {hasEvent && <Box sx={artistGridStyles.eventDot} />}
+          <img
+            alt={artistData.name}
+            style={gridHtmlElementStyles.img}
+            src={`${S3}/grid/${artistData.filename}.jpg`}
+            loading={eager ? 'eager' : 'lazy'}
+            decoding="async"
+            width="300"
+            height="300"
+          />
+        </Box>
+        <Typography sx={artistGridStyles.text} className="artist-name">
+          {artistData.name}
+          {artistData.alternate_names && (
+            <Typography
+              component="span"
+              sx={{ fontSize: '0.75em', fontWeight: 400, color: 'text.secondary', ml: 0.5 }}
+            >
+              ({artistData.alternate_names})
+            </Typography>
+          )}
+        </Typography>
+      </Link>
+    </Box>
+  );
 };
 
 export default ArtistGridItem;

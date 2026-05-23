@@ -59,6 +59,109 @@ export const artistGridStyles: Styles = {
   }
 };
 
+export const artistCompactStyles: Styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  imageBox: {
+    position: 'relative',
+    width: '100%',
+    aspectRatio: '1',
+    overflow: 'hidden',
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.neutral[100],
+    border: `1px solid ${colors.neutral[200]}`,
+    transition: transitions.base,
+  },
+  overlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '55%',
+    background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)',
+    display: 'flex',
+    alignItems: 'flex-end',
+    padding: `${spacing.xs} ${spacing.sm}`,
+    pointerEvents: 'none',
+  },
+  overlayName: {
+    color: colors.neutral.white,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.display,
+    lineHeight: typography.lineHeight.tight,
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+  } as any,
+  link: {
+    textDecoration: 'none',
+    display: 'block',
+    transition: transitions.base,
+    '&:hover': {
+      '& .artist-image-box': {
+        borderColor: colors.primary.main,
+        boxShadow: shadows.md,
+      },
+    },
+  },
+};
+
+export const artistGalleryStyles: Styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  imageBox: {
+    position: 'relative',
+    width: '100%',
+    aspectRatio: '16/9',
+    overflow: 'hidden',
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.neutral[100],
+    border: `1px solid ${colors.neutral[200]}`,
+    transition: transitions.base,
+    '&:hover': {
+      borderColor: colors.primary.main,
+      boxShadow: shadows.md,
+    },
+    '&:hover .gallery-overlay': {
+      opacity: 1,
+    },
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 45%, transparent 70%)',
+    opacity: 0,
+    transition: transitions.base,
+    display: 'flex',
+    alignItems: 'flex-end',
+    padding: spacing.md,
+    pointerEvents: 'none',
+  },
+  overlayName: {
+    color: colors.neutral.white,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.display,
+    lineHeight: typography.lineHeight.tight,
+  },
+  link: {
+    textDecoration: 'none',
+    display: 'block',
+    transition: transitions.base,
+  },
+};
+
 export const gridHtmlElementStyles: { [key: string]: CSSProperties } = {
   img: {
     width: '100%',

@@ -18,6 +18,7 @@ import { Eraser, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react
 import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
+import DensityToggle, { GridDensity, getDensityPreference, saveDensityPreference } from "./DensityToggle";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
@@ -48,6 +49,7 @@ const Homepage = () => {
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
   const [searchParams, setSearchParams] = useSearchParams();
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [density, setDensity] = useState<GridDensity>(getDensityPreference);
   const [showIntro] = useState(() => {
     const seen = localStorage.getItem(INTRO_SEEN_KEY) === 'true';
     if (!seen) {
@@ -167,6 +169,11 @@ const Homepage = () => {
       const randomArtist = data.artists[randomIndex];
       navigate(`/artist/${randomArtist.name}`);
     }
+  };
+
+  const handleDensityChange = (v: GridDensity) => {
+    setDensity(v);
+    saveDensityPreference(v);
   };
 
   // Check if any filter is active
@@ -567,40 +574,44 @@ const Homepage = () => {
         </Box>
 
         {/* Filter Summary Strip */}
-        <Box sx={{ ...homepageStyles.filterStrip as object, backgroundColor: hasActiveFilters ? colors.neutral[100] : 'transparent' }}>
-          <Typography sx={homepageStyles.filterStripCount}>
-            {hasActiveFilters
-              ? `Showing ${filteredData.length} of ${data.artists.length} artists`
-              : `${data.artists.length} artists`
-            }
-          </Typography>
+        <Box sx={{ ...homepageStyles.filterStrip as object, backgroundColor: hasActiveFilters ? colors.neutral[100] : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, flex: 1 }}>
+            <Typography sx={homepageStyles.filterStripCount}>
+              {hasActiveFilters
+                ? `Showing ${filteredData.length} of ${data.artists.length} artists`
+                : `${data.artists.length} artists`
+              }
+            </Typography>
 
-          {activeFilterChips.map((chip) => (
-            <Chip
-              key={chip.key}
-              label={chip.label}
-              size="small"
-              onDelete={chip.onDelete}
-              sx={chip.key === 'hasEvent' ? homepageStyles.filterChipAmber : homepageStyles.filterChip}
-            />
-          ))}
+            {activeFilterChips.map((chip) => (
+              <Chip
+                key={chip.key}
+                label={chip.label}
+                size="small"
+                onDelete={chip.onDelete}
+                sx={chip.key === 'hasEvent' ? homepageStyles.filterChipAmber : homepageStyles.filterChip}
+              />
+            ))}
 
-          {hasActiveFilters && activeFilterChips.length > 1 && (
-            <Button
-              size="small"
-              startIcon={<Eraser size={16} />}
-              onClick={handleClearAllFilters}
-              sx={homepageStyles.clearAllButton}
-            >
-              Clear all
-            </Button>
-          )}
+            {hasActiveFilters && activeFilterChips.length > 1 && (
+              <Button
+                size="small"
+                startIcon={<Eraser size={16} />}
+                onClick={handleClearAllFilters}
+                sx={homepageStyles.clearAllButton}
+              >
+                Clear all
+              </Button>
+            )}
+          </Box>
+
+          <DensityToggle value={density} onChange={handleDensityChange} />
         </Box>
 
-        <Box sx={homepageStyles.artistsGrid}>
+        <Box sx={density === 'compact' ? homepageStyles.artistsGridCompact : density === 'gallery' ? homepageStyles.artistsGridGallery : homepageStyles.artistsGrid}>
           {filteredData.length > 0 ? (
             filteredData.map((artist: Artist, index: number) => (
-              <ArtistGridItem artistData={artist} key={artist.name} eager={index < 8} hasEvent={artistsWithEvents.has(artist.name)} />
+              <ArtistGridItem artistData={artist} key={artist.name} eager={index < 8} hasEvent={artistsWithEvents.has(artist.name)} density={density} />
             ))
           ) : (userSearch.length >= 2 ||
             locationFilter !== "" ||
