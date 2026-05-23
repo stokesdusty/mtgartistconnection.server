@@ -211,7 +211,7 @@ const Header = () => {
                 {renderTabs()}
               </Tabs>
               {isLoggedIn ? (
-                <Button onClick={toggleDrawer(true)} sx={headerStyles.accountButton}>
+                <Button onClick={toggleDrawer(true)} sx={headerStyles.accountButton} startIcon={<ListIcon size={18} />}>
                   {user?.email?.split('@')[0]}
                 </Button>
               ) : (
@@ -224,45 +224,32 @@ const Header = () => {
             <>
               <IconButton
                 id="menu-button"
-                aria-controls={open ? "basic-menu" : undefined}
+                aria-controls={(!isLoggedIn && open) ? "basic-menu" : undefined}
                 aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                onClick={handleClick}
+                aria-expanded={(!isLoggedIn && open) ? "true" : undefined}
+                onClick={isLoggedIn ? toggleDrawer(true) : handleClick}
                 sx={headerStyles.menuButton}
                 edge="end"
               >
                 <ListIcon size={24} />
               </IconButton>
-              <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                  "aria-labelledby": "menu-button",
-                }}
-                sx={headerStyles.menu}
-              >
-                {renderMenuItems()}
-                {isLoggedIn ? (
-                  <MenuItem
-                    onClick={(e) => {
-                      handleClose();
-                      toggleDrawer(true)(e);
-                    }}
-                    sx={headerStyles.menuItem}
-                  >
-                    {user?.email}
-                  </MenuItem>
-                ) : (
-                  <MenuItem
-                    onClick={handleLogin}
-                    sx={headerStyles.menuItem}
-                  >
+              {!isLoggedIn && (
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    "aria-labelledby": "menu-button",
+                  }}
+                  sx={headerStyles.menu}
+                >
+                  {renderMenuItems()}
+                  <MenuItem onClick={handleLogin} sx={headerStyles.menuItem}>
                     Login
                   </MenuItem>
-                )}
-              </Menu>
+                </Menu>
+              )}
             </>
           )}
         </Box>
@@ -278,7 +265,31 @@ const Header = () => {
             <Box sx={headerStyles.drawerHeaderLabel}>Account</Box>
             <Box sx={headerStyles.drawerHeaderEmail}>{user?.email}</Box>
           </Box>
-          <List sx={{ p: 1 }}>
+          {isBelowLarge && (
+            <>
+              <List sx={{ p: 1 }}>
+                {navItems.map((item) => (
+                  <ListItem key={item.to} disablePadding>
+                    <ListItemButton
+                      onClick={() => { navigate(item.to); setDrawerOpen(false); }}
+                      selected={location.pathname === item.to}
+                      sx={headerStyles.drawerListItem}
+                    >
+                      <ListItemText primary={item.label} primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+              <Divider />
+            </>
+          )}
+          <List sx={{ p: 1 }}
+            subheader={
+              <Box sx={{ px: 1, pt: 1, pb: 0.5, fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.5 }}>
+                Account Tools
+              </Box>
+            }
+          >
             <ListItem disablePadding>
               <ListItemButton onClick={handleYourCardsClick} sx={headerStyles.drawerListItem}>
                 <ListItemIcon>
