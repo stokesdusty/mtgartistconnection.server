@@ -1,5 +1,5 @@
-import { Box, Skeleton, Card, CardContent } from '@mui/material';
-import { colors, spacing, borderRadius } from '../../styles/design-tokens';
+import { Box, Skeleton, Card, CardContent, Container, Paper } from '@mui/material';
+import { colors, spacing, borderRadius, shadows } from '../../styles/design-tokens';
 
 // Artist grid skeleton for homepage
 export const ArtistGridSkeleton = ({ count = 8 }: { count?: number }) => {
@@ -205,6 +205,142 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
         </Card>
       ))}
     </>
+  );
+};
+
+// AllCards card grid skeleton — matches the auto-fill grid with MTG card aspect ratio
+export const AllCardsGridSkeleton = ({ count = 12 }: { count?: number }) => {
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: 'repeat(auto-fill, minmax(200px, 1fr))',
+          sm: 'repeat(auto-fill, minmax(220px, 1fr))',
+          md: 'repeat(auto-fill, minmax(240px, 1fr))',
+        },
+        gap: spacing.lg,
+        mt: spacing.xl,
+      }}
+    >
+      {Array.from({ length: count }).map((_, i) => (
+        <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* MTG border_crop is ~0.72 aspect ratio */}
+          <Skeleton
+            variant="rounded"
+            sx={{
+              width: '100%',
+              aspectRatio: '0.72',
+              borderRadius: borderRadius.md,
+              backgroundColor: colors.neutral[200],
+            }}
+          />
+          {/* Price + icon row */}
+          <Box sx={{ display: 'flex', gap: 1, mt: 1, justifyContent: 'center' }}>
+            <Skeleton
+              variant="rounded"
+              sx={{ width: 56, height: 20, borderRadius: borderRadius.sm, backgroundColor: colors.neutral[200] }}
+            />
+            <Skeleton
+              variant="rounded"
+              sx={{ width: 56, height: 20, borderRadius: borderRadius.sm, backgroundColor: colors.neutral[200] }}
+            />
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
+// AllCards full-page skeleton — hero banner + sticky rail + controls + card grid
+export const AllCardsSkeleton = () => {
+  return (
+    <Box sx={{ backgroundColor: colors.neutral[800], minHeight: '100vh' }}>
+      {/* Hero banner */}
+      <Skeleton
+        variant="rectangular"
+        sx={{
+          width: '100%',
+          height: { xs: '280px', sm: '360px', md: '440px' },
+          backgroundColor: colors.neutral[700],
+        }}
+      />
+
+      {/* Sticky rail */}
+      <Box
+        sx={{
+          height: '68px',
+          backgroundColor: colors.neutral.white,
+          borderBottom: `1px solid ${colors.neutral[200]}`,
+          display: 'flex',
+          alignItems: 'center',
+          px: { xs: 2, md: 4 },
+          gap: 2,
+        }}
+      >
+        <Skeleton
+          variant="text"
+          sx={{ width: 260, height: 32, backgroundColor: colors.neutral[200] }}
+        />
+        <Box sx={{ flex: 1 }} />
+        <Skeleton
+          variant="rounded"
+          sx={{ width: 130, height: 28, borderRadius: borderRadius.sm, backgroundColor: colors.neutral[200] }}
+        />
+      </Box>
+
+      {/* Content area */}
+      <Container maxWidth="lg" sx={{ pt: spacing.xl }}>
+        <Paper
+          elevation={0}
+          sx={{
+            maxWidth: '1400px',
+            margin: '0 auto',
+            padding: { xs: spacing.lg, md: spacing.xxl },
+            backgroundColor: colors.neutral.white,
+            borderRadius: borderRadius.xl,
+            boxShadow: shadows.sm,
+          }}
+        >
+          {/* Controls bar */}
+          <Box
+            sx={{
+              backgroundColor: colors.neutral[50],
+              borderRadius: borderRadius.lg,
+              padding: spacing.lg,
+              marginBottom: spacing.xl,
+              border: `1px solid ${colors.neutral[200]}`,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: spacing.md,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Skeleton
+              variant="text"
+              sx={{ width: 140, height: 28, backgroundColor: colors.neutral[200] }}
+            />
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Skeleton
+                variant="rounded"
+                sx={{ width: 180, height: 32, borderRadius: borderRadius.md, backgroundColor: colors.neutral[200] }}
+              />
+              <Skeleton
+                variant="rounded"
+                sx={{ width: 120, height: 32, borderRadius: borderRadius.md, backgroundColor: colors.neutral[200] }}
+              />
+              <Skeleton
+                variant="rounded"
+                sx={{ width: 130, height: 36, borderRadius: borderRadius.lg, backgroundColor: colors.neutral[200] }}
+              />
+            </Box>
+          </Box>
+
+          <AllCardsGridSkeleton />
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

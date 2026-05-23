@@ -12,7 +12,6 @@ import axios from "axios";
 import {
   Box,
   Checkbox,
-  CircularProgress,
   FormControlLabel,
   Link,
   Typography,
@@ -22,6 +21,7 @@ import {
   Fab,
   IconButton,
 } from "@mui/material";
+import { AllCardsSkeleton, AllCardsGridSkeleton } from "../shared/Skeletons";
 import { ArrowUp, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
 import { TOGGLE_CARD_COLLECTION_FIELD } from "../graphql/mutations";
@@ -587,14 +587,7 @@ const AllCards = () => {
   };
 
   if (!artist) return null;
-  if (loading)
-    return (
-      <Box sx={allCardsStyles.container}>
-        <Box sx={allCardsStyles.loadingContainer}>
-          <CircularProgress size={40} sx={allCardsStyles.loadingSpinner} />
-        </Box>
-      </Box>
-    );
+  if (loading) return <AllCardsSkeleton />;
   if (error)
     return (
       <Box sx={allCardsStyles.container}>
@@ -777,12 +770,7 @@ const AllCards = () => {
           )}
 
           {!cardData ? (
-            <Box sx={allCardsStyles.loadingContainer}>
-              <CircularProgress size={40} sx={allCardsStyles.loadingSpinner} />
-              <Typography sx={{ mt: 2, color: 'text.secondary' }}>
-                Loading cards...
-              </Typography>
-            </Box>
+            <AllCardsGridSkeleton count={12} />
           ) : (
             <>
               <Box sx={allCardsStyles.cardsGrid}>

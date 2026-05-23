@@ -176,7 +176,7 @@ const YourCards = () => {
                   <Box
                     key={artist.name}
                     component={RouterLink}
-                    to={`/allcards/${encodeURIComponent(artist.name)}`}
+                    to={`/allcards/${artist.name}`}
                     sx={styles.artistRow}
                   >
                     <Typography sx={styles.artistName}>{artist.name}</Typography>
