@@ -160,3 +160,13 @@ export const borders = {
   thick: `3px solid ${colors.neutral[400]}`,
   primary: `2px solid ${colors.primary.main}`,
 };
+
+// Status chip colors — semantic colors used in status/payment badges that
+// fall outside the core palette (e.g. sent-blue, shipped-purple, complete-green).
+export const statusColors = {
+  sent:        { text: '#1565c0', bg: '#e3f2fd' },
+  shippedBack: { text: '#6a1b9a', bg: '#f3e5f5' },
+  complete:    { text: '#1b5e20', bg: '#e8f5e9' },
+  unpaidText:  '#c62828',
+  primaryMutedBorder: '#b5ceba',
+};

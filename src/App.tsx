@@ -35,6 +35,7 @@ import { LoadingProvider } from "./LoadingContext";
 import Settings from "./components/settings/Settings";
 import Following from "./components/settings/Following";
 import YourCards from "./components/settings/YourCards";
+import SigningTracker from "./components/signingtracker/SigningTracker";
 import ScrollToTop from "./components/shared/ScrollToTop";
 
 function App() {
@@ -85,6 +86,7 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/yourcards" element={<YourCards />} />
               <Route path="/following" element={<Following />} />
+              <Route path="/signingtracker" element={<SigningTracker />} />
             </Routes>
           </main>
           <footer>

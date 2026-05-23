@@ -20,7 +20,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { shadows } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
@@ -116,6 +116,11 @@ const Header = () => {
   const handleYourCardsClick = () => {
     setDrawerOpen(false);
     navigate('/yourcards');
+  };
+
+  const handleSigningTrackerClick = () => {
+    setDrawerOpen(false);
+    navigate('/signingtracker');
   };
 
   const handleFollowingClick = () => {
@@ -288,6 +293,14 @@ const Header = () => {
                   <Heart size={20} weight="duotone" />
                 </ListItemIcon>
                 <ListItemText primary="Following" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleSigningTrackerClick} sx={headerStyles.drawerListItem}>
+                <ListItemIcon>
+                  <Envelope size={20} weight="duotone" />
+                </ListItemIcon>
+                <ListItemText primary="Signing Tracker" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
