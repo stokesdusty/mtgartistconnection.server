@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
+import EmptyState from '../shared/EmptyState';
 import {
   Box,
   Container,
-  Paper,
   Typography,
   CircularProgress,
   Alert,
@@ -241,14 +241,11 @@ const ArtistNews: React.FC = () => {
         </Box>
 
         {articles.length === 0 ? (
-          <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '12px' }}>
-            <Typography variant="h6" sx={{ color: colors.neutral[600], mb: 1 }}>
-              No news articles yet
-            </Typography>
-            <Typography sx={{ color: colors.neutral[500] }}>
-              Check back soon for updates about {decodedArtistName}!
-            </Typography>
-          </Paper>
+          <EmptyState
+            headline={`No news about ${decodedArtistName} yet`}
+            body="Check back soon for updates."
+            action={{ label: 'Browse all news', href: '/news' }}
+          />
         ) : (
           <Box>
             {articles.map((article) => (

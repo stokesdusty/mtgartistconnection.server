@@ -1,3 +1,4 @@
+import EmptyState from "../shared/EmptyState";
 import {
   Box,
   Container,
@@ -160,9 +161,11 @@ const YourCards = () => {
           </Typography>
 
           {artists.length === 0 ? (
-            <Typography sx={{ color: colors.neutral[600], fontSize: '0.875rem', fontStyle: 'italic', py: 2 }}>
-              No cards tracked yet. Visit an artist's card page and mark cards as signed, wishlisted, or artist proofs.
-            </Typography>
+            <EmptyState
+              headline="No cards tracked yet"
+              body="Visit an artist's page and mark cards as signed, wishlisted, or artist proofs."
+              action={{ label: 'Browse artists', href: '/' }}
+            />
           ) : (
             <Box>
               <Box sx={styles.headerRow}>

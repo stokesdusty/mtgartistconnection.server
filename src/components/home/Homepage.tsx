@@ -24,6 +24,7 @@ import { usePageTitle } from "../../hooks/usePageTitle";
 
 import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
+import EmptyState from "../shared/EmptyState";
 import { homepageStyles } from "../../styles/homepage-styles";
 import { colors } from "../../styles/design-tokens";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -619,9 +620,11 @@ const Homepage = () => {
             marksSigServiceFilter ||
             hasUpcomingEventFilter ||
             sellsApsFilter) && filteredData.length === 0 ? (
-            <Typography sx={homepageStyles.noResults}>
-              No artists found matching your search.
-            </Typography>
+            <EmptyState
+              headline="No artists match your search"
+              action={{ label: 'Clear search', onClick: handleClearAllFilters }}
+              sx={{ gridColumn: '1 / -1' }}
+            />
           ) : null
         }
         </Box>

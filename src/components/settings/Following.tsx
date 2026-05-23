@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { X, Plus } from "@phosphor-icons/react";
 import { Link as RouterLink } from "react-router-dom";
+import EmptyState from "../shared/EmptyState";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -347,9 +348,11 @@ const Following = () => {
                   )}
                 </>
               ) : (
-                <Typography sx={{ color: colors.neutral[600], fontSize: '0.875rem', fontStyle: 'italic', py: 2 }}>
-                  You are not following any artists yet. Use the dropdown above to follow an artist.
-                </Typography>
+                <EmptyState
+                  headline="You're not following any artists yet"
+                  body="Search for an artist in the field above to start following them."
+                  action={{ label: 'Browse artists', href: '/' }}
+                />
               )}
             </Box>
           )}

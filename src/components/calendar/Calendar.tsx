@@ -23,6 +23,7 @@ import { useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import SigningEvent from "./SigningEvent";
+import EmptyState from "../shared/EmptyState";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { calendarStyles } from "../../styles/calendar-styles";
 
@@ -462,12 +463,17 @@ const Calendar = () => {
               filteredAndSortedEvents.map((eventData: any) => (
                 <SigningEvent key={eventData.id} props={eventData} wishlistCount={wishlistCountByEvent[eventData.id] ?? 0} />
               ))
+            ) : locationFilter || artistFilter || dateRangeFilter !== 'all' ? (
+              <EmptyState
+                headline={`No events match${artistFilter ? ` for ${artistFilter}` : ''}${locationFilter ? ` in ${locationFilter}` : ''}${dateRangeFilter !== 'all' ? ` ${dateRangeFilter.replace('-', ' ')}` : ''}`}
+                body="Try broadening your filters."
+                action={{ label: 'Clear filters', onClick: handleClearFilters }}
+              />
             ) : (
-              <Typography sx={contentPageStyles.noEventsMessage}>
-                {locationFilter || artistFilter || dateRangeFilter !== 'all'
-                  ? `No upcoming events${dateRangeFilter !== 'all' ? ` ${dateRangeFilter.replace('-', ' ')}` : ''}${artistFilter ? ` with ${artistFilter}` : ''}${locationFilter ? ` in ${locationFilter}` : ''}. Try different filters or clear them.`
-                  : 'No upcoming events scheduled at this time. Check back soon!'}
-              </Typography>
+              <EmptyState
+                headline="No upcoming events scheduled"
+                body="Check back soon for new signing events."
+              />
             )}
           </Box>
         </Paper>

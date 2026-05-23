@@ -18,6 +18,7 @@ import {
   Button,
 } from '@mui/material';
 import { NewsCardSkeleton } from '../shared/Skeletons';
+import EmptyState from '../shared/EmptyState';
 import { User, CalendarBlank, ArrowRight, X } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { newsStyles, getDateChipStyles } from '../../styles/news-styles';
@@ -257,31 +258,16 @@ const News: React.FC = () => {
         )}
 
         {articles.length === 0 ? (
-          <Paper sx={newsStyles.emptyState}>
-            <Typography variant="h6" sx={newsStyles.emptyStateTitle}>
-              No news articles yet
-            </Typography>
-            <Typography sx={newsStyles.emptyStateText}>
-              Check back soon for updates from MTG artists!
-            </Typography>
-          </Paper>
+          <EmptyState
+            headline="No news articles yet"
+            body="Check back soon for updates from MTG artists!"
+          />
         ) : filteredArticles.length === 0 ? (
-          <Paper sx={newsStyles.emptyState}>
-            <Typography variant="h6" sx={newsStyles.emptyStateTitle}>
-              No articles match your filters
-            </Typography>
-            <Typography sx={{ ...newsStyles.emptyStateText, mb: 2 }}>
-              Try adjusting your filters or clear them to see all articles.
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<X size={16} />}
-              onClick={clearFilters}
-              sx={newsStyles.clearButton}
-            >
-              Clear filters
-            </Button>
-          </Paper>
+          <EmptyState
+            headline="No articles match your filters"
+            body="Try adjusting your filters or clear them to see all articles."
+            action={{ label: 'Clear filters', onClick: clearFilters }}
+          />
         ) : (
           <Box>
             {filteredArticles.map((article) => {
