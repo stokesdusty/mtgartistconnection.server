@@ -8,14 +8,13 @@ import {
   Link,
   Typography,
   Container,
-  Divider,
   Button,
   Chip,
   Tooltip,
 } from "@mui/material";
 import { ArtistPageSkeleton } from "../shared/Skeletons";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { colors } from "../../styles/design-tokens";
+import { colors, spacing } from "../../styles/design-tokens";
 import { Question, CalendarBlank, MapPin, BellRinging, UserPlus, PencilSimple, Cards } from "@phosphor-icons/react";
 import { TbWorldWww } from "react-icons/tb";
 import {
@@ -84,33 +83,8 @@ const ArtistEventCard = ({ event }: { event: any }) => {
   );
 };
 
-// Helper component to check and display events for an artist using batched query
-const UpcomingEventsSection = ({ artistName, upcomingEvents }: { artistName: string; upcomingEvents: any[] }) => {
-  const eventIds = useMemo(() => upcomingEvents.map(e => e.id), [upcomingEvents]);
-
-  const { data, loading } = useQuery(GET_ARTISTS_BY_EVENT_IDS, {
-    variables: { eventIds },
-    skip: eventIds.length === 0,
-  });
-
-  // Build a set of event IDs this artist is attending
-  const artistEventIds = useMemo(() => {
-    if (!data?.artistsByEventIds) return new Set<string>();
-    return new Set(
-      data.artistsByEventIds
-        .filter((a: any) => a.artistName === artistName)
-        .map((a: any) => a.eventId)
-    );
-  }, [data, artistName]);
-
-  // Filter events where artist is attending
-  const artistEvents = upcomingEvents.filter(event => artistEventIds.has(event.id));
-
-  // Don't show section if still loading or no events
-  if (loading || artistEvents.length === 0) {
-    return null;
-  }
-
+const UpcomingEventsSection = ({ artistEvents }: { artistEvents: any[] }) => {
+  if (artistEvents.length === 0) return null;
   return (
     <Box sx={artistStyles.infoRow}>
       <Typography variant="h5">Upcoming Events</Typography>
@@ -204,10 +178,8 @@ const Artist = () => {
     }
   }, [userData, name]);
 
-  // Filter upcoming events where this artist is attending - must be before early returns
   const upcomingEvents = useMemo(() => {
     if (!eventsData?.signingEvent) return [];
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return eventsData.signingEvent.filter((event: any) => {
@@ -217,6 +189,43 @@ const Artist = () => {
       new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     );
   }, [eventsData]);
+
+  const eventIds = useMemo(() => upcomingEvents.map((e: any) => e.id), [upcomingEvents]);
+
+  const { data: eventArtistsData } = useQuery(GET_ARTISTS_BY_EVENT_IDS, {
+    variables: { eventIds },
+    skip: eventIds.length === 0,
+  });
+
+  const artistEvents = useMemo(() => {
+    if (!eventArtistsData?.artistsByEventIds || !data?.artistByName?.name) return [];
+    const attending = new Set(
+      eventArtistsData.artistsByEventIds
+        .filter((a: any) => a.artistName === data.artistByName.name)
+        .map((a: any) => a.eventId)
+    );
+    return upcomingEvents.filter((e: any) => attending.has(e.id));
+  }, [eventArtistsData, data?.artistByName?.name, upcomingEvents]);
+
+  const nextSigningEvent = useMemo(() => {
+    if (artistEvents.length === 0) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const cutoff = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return artistEvents.find((e: any) => {
+      const start = new Date(e.startDate);
+      return start >= today && start <= cutoff;
+    }) ?? null;
+  }, [artistEvents]);
+
+  const daysUntilEvent = useMemo(() => {
+    if (!nextSigningEvent) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(nextSigningEvent.startDate);
+    start.setHours(0, 0, 0, 0);
+    return Math.ceil((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  }, [nextSigningEvent]);
 
   if (!name) return <Typography sx={{ textAlign: "center", p: 4 }}>No artist provided</Typography>;
   if (loading)
@@ -353,64 +362,93 @@ const Artist = () => {
     }
   };
 
+  const ebayHref = `https://www.ebay.com/sch/i.html?_nkw=${artistByName.name.split(" ").join("+")}+signed+cards+mtg&_sacat=0&_from=R40&_trksid=p2334524.m570.l1313&_odkw=${artistByName.name.split(" ").join("+")}+signed+cards&_osacat=0&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339140903&customid=&toolid=10001&mkevt=1&utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=ebay_artist_search`;
+
+  const signingPillLabel = daysUntilEvent === 0
+    ? `Signing at ${nextSigningEvent?.name} — today!`
+    : `Signing at ${nextSigningEvent?.name} in ${daysUntilEvent} day${daysUntilEvent === 1 ? '' : 's'}`;
+
   return (
     <Box sx={artistStyles.container}>
-      <Container maxWidth="lg">
-        <Box sx={artistStyles.contentWrapper}>
-          <Box sx={artistStyles.bannerContainer}>
-            <img
-              src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`}
-              alt={`${artistByName.name} banner`}
-            />
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-            <Typography variant="h2" sx={artistStyles.artistName}>
-              {artistByName.name}
+      {/* Full-bleed hero banner */}
+      <Box sx={artistStyles.heroBanner}>
+        <img
+          src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`}
+          alt={`${artistByName.name} banner`}
+        />
+        <Box sx={artistStyles.bannerGradient} />
+        <Box sx={artistStyles.bannerNameOverlay}>
+          <Container maxWidth="lg" disableGutters>
+            <Box sx={{ px: { xs: spacing.lg, md: spacing.xxl }, pb: { xs: spacing.lg, md: spacing.xl } }}>
+              <Typography sx={artistStyles.bannerHeroName}>
+                {artistByName.name}
+              </Typography>
               {artistByName.alternate_names && (
-                <Typography component="span" sx={artistStyles.alternateName}>
-                  ({artistByName.alternate_names})
+                <Typography sx={artistStyles.bannerAltName}>
+                  {artistByName.alternate_names}
                 </Typography>
               )}
-              {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
-                <Typography component="span" sx={{ fontSize: '1rem', fontWeight: 400, color: 'text.secondary', ml: 1, fontFamily: 'inherit' }}>
-                  (You have {[
-                    signedCount > 0 && `${signedCount} signed`,
-                    wishlistCount > 0 && `${wishlistCount} wishlisted`,
-                    artistProofCount > 0 && `${artistProofCount} artist proof`,
-                  ].filter(Boolean).join(', ')})
-                </Typography>
-              )}
+            </Box>
+          </Container>
+        </Box>
+      </Box>
+
+      {/* Sticky action rail */}
+      <Box sx={artistStyles.stickyRail}>
+        <Container maxWidth="lg">
+          <Box sx={artistStyles.stickyRailInner}>
+            <Typography sx={artistStyles.stickyName}>
+              {artistByName.name}
             </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {userData?.me?.role === 'admin' && (
-                <Button
-                  variant="outlined"
-                  startIcon={<PencilSimple size={18} />}
-                  onClick={() => navigate(`/editartist/${artistByName.id}`)}
-                  sx={artistStyles.editButton}
-                >
-                  Edit Artist
-                </Button>
-              )}
+            {/* Spacer pushes pill + follow to the right */}
+            <Box sx={{ flex: 1 }} />
 
-              <Button
-                variant={isFollowing ? 'contained' : 'outlined'}
+            {nextSigningEvent && (
+              <Chip
+                label={signingPillLabel}
                 size="small"
-                onClick={handleFollowToggle}
-                startIcon={isFollowing ? <BellRinging size={18} weight="duotone" /> : <UserPlus size={18} />}
-                sx={isFollowing ? artistStyles.followButtonActive : artistStyles.followButtonInactive}
+                sx={artistStyles.signingPill}
+              />
+            )}
+
+            <Button
+              variant={isFollowing ? 'contained' : 'outlined'}
+              size="medium"
+              onClick={handleFollowToggle}
+              startIcon={isFollowing ? <BellRinging size={18} weight="duotone" /> : <UserPlus size={18} />}
+              sx={isFollowing ? artistStyles.followButtonActive : artistStyles.followButtonInactive}
+            >
+              {!isLoggedIn ? 'Sign in to follow' : isFollowing ? 'Following' : 'Follow'}
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Main content card */}
+      <Container maxWidth="lg" sx={{ pt: spacing.xl }}>
+        <Box sx={artistStyles.contentWrapper}>
+          {userData?.me?.role === 'admin' && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: spacing.md }}>
+              <Button
+                variant="outlined"
+                startIcon={<PencilSimple size={18} />}
+                onClick={() => navigate(`/editartist/${artistByName.id}`)}
+                sx={artistStyles.editButton}
               >
-                {!isLoggedIn
-                  ? 'Sign in to follow'
-                  : isFollowing
-                    ? 'Following'
-                    : 'Follow'}
+                Edit Artist
               </Button>
             </Box>
-          </Box>
-
+          )}
+          {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
+            <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary', mb: spacing.lg }}>
+              Your collection: {[
+                signedCount > 0 && `${signedCount} signed`,
+                wishlistCount > 0 && `${wishlistCount} wishlisted`,
+                artistProofCount > 0 && `${artistProofCount} artist proof`,
+              ].filter(Boolean).join(', ')}
+            </Typography>
+          )}
           <Box sx={artistStyles.buttonContainer}>
             <ExternalLinkCard
               href={`/allcards/${artistByName.name}`}
@@ -426,11 +464,7 @@ const Artist = () => {
                 external
                 onClick={() => {
                   if ((window as any).gtag) {
-                    (window as any).gtag("event", "oma_link_click", {
-                      event_category: "artist_page",
-                      event_label: artistByName.name,
-                      artist_name: artistByName.name,
-                    });
+                    (window as any).gtag("event", "oma_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
                   }
                 }}
               />
@@ -443,33 +477,24 @@ const Artist = () => {
                 external
                 onClick={() => {
                   if ((window as any).gtag) {
-                    (window as any).gtag("event", "inprnt_link_click", {
-                      event_category: "artist_page",
-                      event_label: artistByName.name,
-                      artist_name: artistByName.name,
-                    });
+                    (window as any).gtag("event", "inprnt_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
                   }
                 }}
               />
             )}
             <ExternalLinkCard
-              href={`https://www.ebay.com/sch/i.html?_nkw=${artistByName.name.split(" ").join("+")}+signed+cards+mtg&_sacat=0&_from=R40&_trksid=p2334524.m570.l1313&_odkw=${artistByName.name.split(" ").join("+")}+signed+cards&_osacat=0&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339140903&customid=&toolid=10001&mkevt=1&utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=ebay_artist_search`}
+              href={ebayHref}
               label={`Search for signed ${artistByName.name} cards`}
               logo={<img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/EBay_logo.svg" alt="eBay" style={{ height: 18 }} />}
               external
               onClick={() => {
                 if ((window as any).gtag) {
-                  (window as any).gtag("event", "ebay_link_click", {
-                    event_category: "artist_page",
-                    event_label: artistByName.name,
-                    artist_name: artistByName.name,
-                  });
+                  (window as any).gtag("event", "ebay_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
                 }
               }}
             />
           </Box>
 
-          <Divider sx={artistStyles.sectionDivider} />
           <Box sx={artistStyles.infoSection}>
               <Box sx={artistStyles.artistInfo}>
                 <Typography sx={artistStyles.sectionHeader} variant="h4">
@@ -615,12 +640,7 @@ const Artist = () => {
                     </Box>
                   )}
 
-                {upcomingEvents.length > 0 && (
-                  <UpcomingEventsSection
-                    artistName={artistByName.name}
-                    upcomingEvents={upcomingEvents}
-                  />
-                )}
+                <UpcomingEventsSection artistEvents={artistEvents} />
               </Box>
               <Box sx={artistStyles.signatureSection}>
                 <ArtistNewsSection artistName={artistByName.name} />
@@ -629,9 +649,9 @@ const Artist = () => {
                 </Typography>
                 <img src={signatureImage} alt={`${artistByName.name} signature example`} />
               </Box>
+            </Box>
           </Box>
-        </Box>
-      </Container>
+        </Container>
     </Box>
   );
 };
