@@ -357,6 +357,70 @@ export const TOGGLE_CARD_COLLECTION_FIELD = gql`
     }
 `;
 
+export const SAVE_SIGNING_BATCH = gql`
+    mutation saveSigningBatch(
+        $batchId: String!,
+        $name: String!,
+        $createdAt: String!,
+        $archived: Boolean,
+        $expanded: Boolean,
+        $sortOrder: Int,
+        $rows: [CardRowInput]
+    ) {
+        saveSigningBatch(
+            batchId: $batchId,
+            name: $name,
+            createdAt: $createdAt,
+            archived: $archived,
+            expanded: $expanded,
+            sortOrder: $sortOrder,
+            rows: $rows
+        ) {
+            id
+            batchId
+            name
+            createdAt
+            archived
+            expanded
+            sortOrder
+            rows {
+                rowId
+                cardName
+                quantity
+                set
+                foil
+                owner
+                signatureType
+                sigNotes
+                pricePerSig
+                paymentStatus
+                status
+                signingMethod
+                signingMethodLabel
+                outboundTracking
+                inboundTracking
+            }
+        }
+    }
+`;
+
+export const DELETE_SIGNING_BATCH = gql`
+    mutation deleteSigningBatch($batchId: String!) {
+        deleteSigningBatch(batchId: $batchId) {
+            success
+            message
+        }
+    }
+`;
+
+export const REORDER_SIGNING_BATCHES = gql`
+    mutation reorderSigningBatches($orderedBatchIds: [String!]!) {
+        reorderSigningBatches(orderedBatchIds: $orderedBatchIds) {
+            success
+        }
+    }
+`;
+
 export const UPLOAD_NEWS_IMAGE = gql`
     mutation uploadNewsImage($base64Data: String!, $filename: String!, $contentType: String!) {
         uploadNewsImage(base64Data: $base64Data, filename: $filename, contentType: $contentType) {

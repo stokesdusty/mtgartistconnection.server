@@ -13,10 +13,13 @@ interface AuthState {
   user: User | null;
 }
 
+const storedToken = localStorage.getItem('token');
+const storedUser = localStorage.getItem('user');
+
 const initialState: AuthState = {
-  isLoggedIn: false,
-  token: localStorage.getItem('token'),
-  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
+  isLoggedIn: !!storedToken,
+  token: storedToken,
+  user: storedToken && storedUser ? JSON.parse(storedUser) : null,
 };
 
 const authSlice = createSlice({

@@ -13,7 +13,11 @@
       "Bash(node -e:*)",
       "Bash(find:*)",
       "Bash(npm run build:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(ls /Users/dprime/Documents/GitHub/mtgartistconnection.webservice 2>/dev/null && echo \"EXISTS\" || echo \"NOT FOUND\")",
+      "Bash(find /Users/dprime/Documents/GitHub -type f -name \"*SigningTracker*\" -o -name \"*signingtracker*\" | head -10)",
+      "Bash(npx tsc *)"
     ]
   }
 }

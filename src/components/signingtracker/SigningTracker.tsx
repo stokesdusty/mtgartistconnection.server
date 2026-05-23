@@ -1,4 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useQuery, useMutation } from '@apollo/client';
+import { RootState } from '../../store/store';
+import { GET_SIGNING_BATCHES } from '../graphql/queries';
+import { SAVE_SIGNING_BATCH, DELETE_SIGNING_BATCH, REORDER_SIGNING_BATCHES } from '../graphql/mutations';
 import {
   Box,
   Container,
@@ -140,6 +145,49 @@ const load = (): SigningBatch[] => {
 const save = (batches: SigningBatch[]): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(batches));
 };
+
+const fromDbBatch = (db: any): SigningBatch => ({
+  id: db.batchId,
+  name: db.name,
+  createdAt: db.createdAt,
+  archived: db.archived ?? false,
+  expanded: db.expanded ?? true,
+  rows: (db.rows ?? []).map((r: any) => ({
+    id: r.rowId,
+    cardName: r.cardName ?? '',
+    quantity: r.quantity ?? 1,
+    set: r.set ?? '',
+    foil: (r.foil ?? 'non-foil') as FoilType,
+    owner: r.owner ?? '',
+    signatureType: r.signatureType ?? '',
+    sigNotes: r.sigNotes ?? '',
+    pricePerSig: r.pricePerSig ?? 0,
+    paymentStatus: (r.paymentStatus ?? 'unpaid') as PaymentStatus,
+    status: (r.status ?? 'collecting') as CardStatus,
+    signingMethod: (r.signingMethod ?? 'mail-to-artist') as SigningMethod,
+    signingMethodLabel: r.signingMethodLabel ?? '',
+    outboundTracking: r.outboundTracking ?? '',
+    inboundTracking: r.inboundTracking ?? '',
+  })),
+});
+
+const toDbRows = (rows: CardRow[]) => rows.map(r => ({
+  rowId: r.id,
+  cardName: r.cardName,
+  quantity: r.quantity,
+  set: r.set,
+  foil: r.foil,
+  owner: r.owner,
+  signatureType: r.signatureType,
+  sigNotes: r.sigNotes,
+  pricePerSig: r.pricePerSig,
+  paymentStatus: r.paymentStatus,
+  status: r.status,
+  signingMethod: r.signingMethod,
+  signingMethodLabel: r.signingMethodLabel,
+  outboundTracking: r.outboundTracking,
+  inboundTracking: r.inboundTracking,
+}));
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
 
@@ -654,57 +702,146 @@ const SortableBatchPanel: React.FC<SortableWrapperProps> = ({ id, ...props }) =>
 
 const SigningTracker: React.FC = () => {
   usePageTitle('Signing Tracker');
-  const [batches, setBatches] = useState<SigningBatch[]>(load);
+  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
+
+  const [batches, setBatches] = useState<SigningBatch[]>([]);
   const [showArchived, setShowArchived] = useState(false);
+  const [dbInitialized, setDbInitialized] = useState(false);
+
+  const [saveSigningBatch] = useMutation(SAVE_SIGNING_BATCH);
+  const [deleteSigningBatchMutation] = useMutation(DELETE_SIGNING_BATCH);
+  const [reorderSigningBatchesMutation] = useMutation(REORDER_SIGNING_BATCHES);
+
+  useQuery(GET_SIGNING_BATCHES, {
+    skip: !isLoggedIn,
+    fetchPolicy: 'network-only',
+    onCompleted: (data: any) => {
+      const dbBatches: SigningBatch[] = (data.signingBatches ?? []).map(fromDbBatch);
+      if (dbBatches.length === 0) {
+        // Auto-migrate localStorage data on first login
+        const local = load();
+        if (local.length > 0) {
+          setBatches(local);
+          local.forEach((batch, index) => {
+            saveSigningBatch({
+              variables: {
+                batchId: batch.id, name: batch.name, createdAt: batch.createdAt,
+                archived: batch.archived, expanded: batch.expanded, sortOrder: index,
+                rows: toDbRows(batch.rows),
+              },
+            });
+          });
+        }
+      } else {
+        setBatches(dbBatches);
+      }
+      setDbInitialized(true);
+    },
+  });
+
+  // Init from localStorage for unauthenticated users
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setBatches(load());
+      setDbInitialized(true);
+    }
+  }, [isLoggedIn]);
+
+  const saveTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const scheduleSave = useCallback((batchId: string, batch: SigningBatch) => {
+    const existing = saveTimers.current.get(batchId);
+    if (existing) clearTimeout(existing);
+    saveTimers.current.set(batchId, setTimeout(() => {
+      saveSigningBatch({
+        variables: {
+          batchId, name: batch.name, createdAt: batch.createdAt,
+          archived: batch.archived, expanded: batch.expanded,
+          rows: toDbRows(batch.rows),
+        },
+      });
+      saveTimers.current.delete(batchId);
+    }, 800));
+  }, [saveSigningBatch]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const mutate = useCallback((fn: (prev: SigningBatch[]) => SigningBatch[]) => {
+  const mutate = useCallback((
+    fn: (prev: SigningBatch[]) => SigningBatch[],
+    saveIds?: string[] | 'all',
+  ) => {
     setBatches(prev => {
       const next = fn(prev);
-      save(next);
+      if (!isLoggedIn) {
+        save(next);
+      } else if (saveIds) {
+        const ids = saveIds === 'all' ? next.map(b => b.id) : saveIds;
+        for (const id of ids) {
+          const b = next.find(b => b.id === id);
+          if (b) scheduleSave(id, b);
+        }
+      }
       return next;
     });
-  }, []);
+  }, [isLoggedIn, scheduleSave]);
 
   const updateBatch = useCallback((id: string, changes: Partial<SigningBatch>) => {
-    mutate(prev => prev.map(b => b.id === id ? { ...b, ...changes } : b));
+    mutate(prev => prev.map(b => b.id === id ? { ...b, ...changes } : b), [id]);
   }, [mutate]);
 
   const updateRow = useCallback((batchId: string, rowId: string, changes: Partial<CardRow>) => {
     mutate(prev => prev.map(b =>
       b.id !== batchId ? b :
         { ...b, rows: b.rows.map(r => r.id === rowId ? { ...r, ...changes } : r) }
-    ));
+    ), [batchId]);
   }, [mutate]);
 
   const bulkUpdateRows = useCallback((batchId: string, changes: Partial<CardRow>) => {
     mutate(prev => prev.map(b =>
       b.id !== batchId ? b :
         { ...b, rows: b.rows.map(r => ({ ...r, ...changes })) }
-    ));
+    ), [batchId]);
   }, [mutate]);
 
   const addRow = useCallback((batchId: string) => {
     mutate(prev => prev.map(b =>
       b.id !== batchId ? b : { ...b, rows: [...b.rows, makeRow()] }
-    ));
+    ), [batchId]);
   }, [mutate]);
 
   const deleteRow = useCallback((batchId: string, rowId: string) => {
     mutate(prev => prev.map(b =>
       b.id !== batchId ? b : { ...b, rows: b.rows.filter(r => r.id !== rowId) }
-    ));
+    ), [batchId]);
   }, [mutate]);
 
-  const createBatch = () => mutate(prev => [...prev, makeBatch()]);
+  const createBatch = () => {
+    const newBatch = makeBatch();
+    setBatches(prev => {
+      const next = [...prev, newBatch];
+      if (!isLoggedIn) save(next);
+      return next;
+    });
+    if (isLoggedIn) {
+      const sortOrder = batches.filter(b => !b.archived).length;
+      saveSigningBatch({
+        variables: {
+          batchId: newBatch.id, name: newBatch.name, createdAt: newBatch.createdAt,
+          archived: false, expanded: true, sortOrder, rows: [],
+        },
+      });
+    }
+  };
 
   const deleteBatch = useCallback((id: string) => {
     mutate(prev => prev.filter(b => b.id !== id));
-  }, [mutate]);
+    if (isLoggedIn) {
+      deleteSigningBatchMutation({ variables: { batchId: id } });
+    }
+  }, [mutate, isLoggedIn, deleteSigningBatchMutation]);
 
   const archiveBatch = useCallback((id: string) => {
     updateBatch(id, { archived: true, expanded: false });
@@ -717,14 +854,17 @@ const SigningTracker: React.FC = () => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    mutate(prev => {
+    setBatches(prev => {
       const activeIds = prev.filter(b => !b.archived).map(b => b.id);
       const oldIndex = activeIds.indexOf(active.id as string);
       const newIndex = activeIds.indexOf(over.id as string);
       if (oldIndex === -1 || newIndex === -1) return prev;
       const reordered = arrayMove(activeIds, oldIndex, newIndex);
       const archived = prev.filter(b => b.archived);
-      return [...reordered.map(id => prev.find(b => b.id === id)!), ...archived];
+      const next = [...reordered.map(id => prev.find(b => b.id === id)!), ...archived];
+      if (!isLoggedIn) save(next);
+      else reorderSigningBatchesMutation({ variables: { orderedBatchIds: reordered } });
+      return next;
     });
   };
 
@@ -734,7 +874,7 @@ const SigningTracker: React.FC = () => {
 
   const toggleAllExpanded = () => {
     const expand = !anyExpanded;
-    mutate(prev => prev.map(b => b.archived ? b : { ...b, expanded: expand }));
+    mutate(prev => prev.map(b => b.archived ? b : { ...b, expanded: expand }), 'all');
   };
 
   const sharedBatchProps = {
@@ -746,6 +886,16 @@ const SigningTracker: React.FC = () => {
     onArchive: archiveBatch,
     onDelete: deleteBatch,
   };
+
+  if (!dbInitialized) {
+    return (
+      <Box sx={{ backgroundColor: colors.neutral[100], minHeight: '100vh', py: 4 }}>
+        <Container maxWidth={false} sx={{ maxWidth: 1680, px: { xs: 1, sm: 2, md: 3 } }}>
+          <Typography sx={{ color: colors.neutral[500], fontSize: '0.875rem' }}>Loading…</Typography>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ backgroundColor: colors.neutral[100], minHeight: '100vh', py: 4 }}>
@@ -795,6 +945,18 @@ const SigningTracker: React.FC = () => {
             </Button>
           </Box>
         </Box>
+
+        {!isLoggedIn && (
+          <Paper elevation={0} sx={{
+            p: 1.5, mb: 2.5, borderRadius: '8px',
+            border: `1px solid ${colors.neutral[300]}`,
+            backgroundColor: colors.neutral[50],
+          }}>
+            <Typography sx={{ fontSize: '0.8rem', color: colors.neutral[600] }}>
+              You're not logged in — data is saved in your browser only. Log in to sync across devices.
+            </Typography>
+          </Paper>
+        )}
 
         {/* Active batches — sortable */}
         {active.length === 0 ? (

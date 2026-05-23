@@ -276,6 +276,37 @@ export const GET_MY_CARD_COLLECTION = gql`
     }
 `;
 
+export const GET_SIGNING_BATCHES = gql`
+    query {
+        signingBatches {
+            id
+            batchId
+            name
+            createdAt
+            archived
+            expanded
+            sortOrder
+            rows {
+                rowId
+                cardName
+                quantity
+                set
+                foil
+                owner
+                signatureType
+                sigNotes
+                pricePerSig
+                paymentStatus
+                status
+                signingMethod
+                signingMethodLabel
+                outboundTracking
+                inboundTracking
+            }
+        }
+    }
+`;
+
 export const GET_NEWS_REVIEWS_BY_ARTIST = gql`
     query newsReviewsByArtist($artistName: String!, $limit: Int) {
         newsReviewsByArtist(artistName: $artistName, limit: $limit) {
