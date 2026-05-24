@@ -15,16 +15,8 @@ import {
 import { ArtistPageSkeleton } from "../shared/Skeletons";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { colors, spacing } from "../../styles/design-tokens";
-import { Question, CalendarBlank, MapPin, BellRinging, UserPlus, PencilSimple, Cards } from "@phosphor-icons/react";
-import { TbWorldWww } from "react-icons/tb";
-import {
-  FaArtstation,
-  FaFacebookF,
-  FaInstagram,
-  FaPatreon,
-  FaTwitter,
-  FaYoutube,
-} from "react-icons/fa";
+import { Question, CalendarBlank, MapPin, BellRinging, UserPlus, PencilSimple, Cards, GlobeSimple, FacebookLogo, InstagramLogo, TwitterLogo, PatreonLogo, YoutubeLogo } from "@phosphor-icons/react";
+import { FaArtstation } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
 import React, { useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
@@ -39,7 +31,7 @@ import ExternalLinkCard from './ExternalLinkCard';
 interface ArtistSocialLink {
   label: string;
   url: string;
-  icon: React.ComponentType<{ size: number; color: string }>;
+  icon: React.ComponentType<{ size?: number | string; color?: string }>;
   color: string;
 }
 
@@ -268,37 +260,37 @@ const Artist = () => {
     {
       label: "Website",
       url: artistByName.url,
-      icon: TbWorldWww,
+      icon: GlobeSimple,
       color: colors.primary.main,
     },
     {
       label: "Facebook",
       url: artistByName.facebook,
-      icon: FaFacebookF,
+      icon: FacebookLogo,
       color: colors.primary.main,
     },
     {
       label: "Instagram",
       url: artistByName.instagram,
-      icon: FaInstagram,
+      icon: InstagramLogo,
       color: colors.primary.main,
     },
     {
       label: "Twitter",
       url: artistByName.twitter,
-      icon: FaTwitter,
+      icon: TwitterLogo,
       color: colors.primary.main,
     },
     {
       label: "Patreon",
       url: artistByName.patreon,
-      icon: FaPatreon,
+      icon: PatreonLogo,
       color: colors.primary.main,
     },
     {
       label: "YouTube",
       url: artistByName.youtube,
-      icon: FaYoutube,
+      icon: YoutubeLogo,
       color: colors.primary.main,
     },
     {

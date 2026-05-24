@@ -14,7 +14,7 @@ import {
   ListSubheader,
 } from "@mui/material";
 import { ArtistGridSkeleton } from "../shared/Skeletons";
-import { Eraser, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react";
+import { Eraser, Funnel, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react";
 import { useQuery } from "@apollo/client";
 import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
@@ -30,6 +30,7 @@ import { themeColors } from "../../styles/design-tokens";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
 interface Artist {
   name: string;
@@ -58,6 +59,7 @@ const Homepage = () => {
     }
     return !seen;
   });
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const navigate = useNavigate();
 
   // Read filter state from URL params
@@ -435,7 +437,7 @@ const Homepage = () => {
           )}
         </Box>
 
-        <Box sx={{ ...homepageStyles.filtersSection, py: 1.5 }}>
+        <Box sx={{ ...homepageStyles.filtersSection, py: 1.5, display: { xs: 'none', sm: 'block' } }}>
           <Box sx={{ ...homepageStyles.filtersGrid, gap: 2 }}>
             <Box sx={homepageStyles.searchContainer}>
               <TextField
@@ -560,6 +562,28 @@ const Homepage = () => {
           </Box>
         </Box>
 
+        {/* Mobile filter trigger — hidden on sm+ where the full filter panel shows */}
+        <Box sx={homepageStyles.mobileFilterRow}>
+          <Button
+            variant={activeFilterChips.length > 0 ? 'contained' : 'outlined'}
+            size="small"
+            onClick={() => setFilterSheetOpen(true)}
+            startIcon={<Funnel size={16} weight={activeFilterChips.length > 0 ? 'fill' : 'regular'} />}
+            sx={activeFilterChips.length > 0 ? homepageStyles.mobileFilterButtonActive : homepageStyles.mobileFilterButton}
+          >
+            {activeFilterChips.length > 0 ? `Filters (${activeFilterChips.length})` : 'Filters'}
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleRandomArtist}
+            startIcon={<Shuffle size={16} />}
+            sx={{ ...homepageStyles.randomButton, flex: 1, fontSize: '0.8125rem', py: '5px' }}
+          >
+            Random
+          </Button>
+        </Box>
+
         <Box sx={homepageStyles.alphabetBar}>
           {['A','B','C','D','E','F','G','H','I','J','K','L','M',
             'N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0-9','Other'].map((letter) => (
@@ -629,6 +653,111 @@ const Homepage = () => {
         }
         </Box>
       </Box>
+
+      <SwipeableDrawer
+        anchor="bottom"
+        open={filterSheetOpen}
+        onClose={() => setFilterSheetOpen(false)}
+        onOpen={() => setFilterSheetOpen(true)}
+        disableSwipeToOpen
+        PaperProps={{ sx: homepageStyles.filterSheetPaper }}
+      >
+        <Box sx={{ overflowY: 'auto' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1.5, pb: 0.5 }}>
+            <Box sx={homepageStyles.filterSheetHandle} />
+          </Box>
+          <Box sx={homepageStyles.filterSheetHeader}>
+            <Typography sx={homepageStyles.filterSheetTitle}>Filters</Typography>
+            {hasActiveFilters && (
+              <Button
+                size="small"
+                startIcon={<Eraser size={14} />}
+                onClick={handleClearAllFilters}
+                sx={homepageStyles.clearAllButton}
+              >
+                Clear all
+              </Button>
+            )}
+          </Box>
+          <Box sx={homepageStyles.filterSheetContent}>
+            <TextField
+              size="small"
+              sx={{ ...homepageStyles.textField, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
+              value={userSearch}
+              placeholder="Search for an artist"
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MagnifyingGlass size={20} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <FormControl size="small" sx={{ ...homepageStyles.locationSelect, '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
+              <InputLabel id="location-select-label-sheet" sx={{ color: themeColors.text.secondary, '&.Mui-focused': { color: themeColors.primary.main } }}>Filter by Location</InputLabel>
+              <Select
+                labelId="location-select-label-sheet"
+                id="location-select-sheet"
+                value={locationFilter}
+                label="Filter by Location"
+                onChange={handleLocationChange}
+                sx={{ fontSize: '0.875rem' }}
+              >
+                <MenuItem value="">All Locations</MenuItem>
+                {locations.US.length > 0 && [
+                  <ListSubheader key="us-header-s" sx={homepageStyles.listSubheader}>US States</ListSubheader>,
+                  <MenuItem key="us-all-s" value="US" sx={{ pl: 3 }}>Anywhere in the US</MenuItem>,
+                  ...locations.US.map((location) => (
+                    <MenuItem key={`s-${location}`} value={location} sx={{ pl: 3 }}>{location.split(',')[0]}</MenuItem>
+                  ))
+                ]}
+                {locations.Other.length > 0 && [
+                  <ListSubheader key="other-header-s" sx={homepageStyles.listSubheader}>Other Locations</ListSubheader>,
+                  ...locations.Other.map((location) => (
+                    <MenuItem key={`s-${location}`} value={location} sx={{ pl: 3 }}>{location}</MenuItem>
+                  ))
+                ]}
+              </Select>
+            </FormControl>
+            <Box sx={homepageStyles.checkboxContainer}>
+              <Typography sx={{ ...homepageStyles.signingAgentLabel, fontSize: '0.875rem', mb: 0.5 }}>Options</Typography>
+              <FormGroup sx={{ ...homepageStyles.checkboxesContainer, gap: 0 }}>
+                <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
+                  control={<Checkbox size="small" checked={marksSigServiceFilter} onChange={handleMarksSigServiceChange} name="marksSigService-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
+                  label="Marks Signature Service"
+                />
+                <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
+                  control={<Checkbox size="small" checked={mountainMageFilter} onChange={handleMountainMageChange} name="mountainMage-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
+                  label="Mountain Mage Signing Service"
+                />
+                <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
+                  control={<Checkbox size="small" checked={hasUpcomingEventFilter} onChange={handleHasUpcomingEventChange} name="hasUpcomingEvent-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
+                  label="Has Upcoming Event"
+                />
+                <FormControlLabel
+                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
+                  control={<Checkbox size="small" checked={sellsApsFilter} onChange={handleSellsApsChange} name="sellsAps-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
+                  label="Sells APs on Website"
+                />
+              </FormGroup>
+            </Box>
+          </Box>
+          <Box sx={homepageStyles.filterSheetActions}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => setFilterSheetOpen(false)}
+              sx={{ ...homepageStyles.randomButton, py: 1.25 }}
+            >
+              Done
+            </Button>
+          </Box>
+        </Box>
+      </SwipeableDrawer>
 
       <Fade in={showScrollTop}>
         <Fab
