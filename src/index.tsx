@@ -5,21 +5,22 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom";
 import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from '@apollo/client/link/context';
+import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
 import { Provider } from 'react-redux';
 import store from './store/store';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const CACHE_KEY = 'apollo-cache';
+const CACHE_TS_KEY = 'apollo-cache-ts';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+const cache = new InMemoryCache();
 
 const httpLink = createHttpLink({
   uri: "https://mtgartistconnectionwebservice-production.up.railway.app/graphql",
 });
 
 const authLink = setContext((_, { headers }) => {
-  // Get the authentication token from local storage if it exists
   const token = localStorage.getItem('token');
-  // Return the headers to the context so httpLink can read them
   return {
     headers: {
       ...headers,
@@ -30,20 +31,36 @@ const authLink = setContext((_, { headers }) => {
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
+  cache,
 });
 
-root.render(
-  <Provider store={store}>
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ApolloProvider>
-  </Provider>
-);
+async function render() {
+  const ts = localStorage.getItem(CACHE_TS_KEY);
+  if (!ts || Date.now() - Number(ts) > CACHE_TTL_MS) {
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+  }
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+  await persistCache({
+    cache,
+    storage: new LocalStorageWrapper(window.localStorage),
+    key: CACHE_KEY,
+  });
+
+  const root = ReactDOM.createRoot(
+    document.getElementById('root') as HTMLElement
+  );
+
+  root.render(
+    <Provider store={store}>
+      <ApolloProvider client={client}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ApolloProvider>
+    </Provider>
+  );
+}
+
+render();
 reportWebVitals();
