@@ -21,7 +21,7 @@ import {
   Fab,
   IconButton,
 } from "@mui/material";
-import { AllCardsSkeleton, AllCardsGridSkeleton } from "../shared/Skeletons";
+import { AllCardsGridSkeleton } from "../shared/Skeletons";
 import { ArrowUp, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
 import { TOGGLE_CARD_COLLECTION_FIELD } from "../graphql/mutations";
@@ -107,6 +107,20 @@ interface CollectionItem {
   artistProof: boolean;
   artistProofFoil: boolean;
 }
+
+const normalizeArtistName = (str: string) =>
+  str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\./g, " ")
+    .replace(/-/g, " ")
+    .replace(/"/g, "")
+    .replace(/[()]/g, "")
+    .replace(/'/g, " ")
+    .replace(/,/g, "")
+    .replace(/\s+/g, "")
+    .trim();
 
 const COLLECTION_FIELDS = [
   { field: 'artistProof',    Icon: DeviceMobileCamera,  label: 'Artist Proof (nonfoil)', color: colors.accent.blue },
@@ -316,6 +330,7 @@ const AllCards = () => {
   const [cardCollection, setCardCollection] = useState<Map<string, CollectionItem>>(new Map());
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   const [sortByNewest, setSortByNewest] = useState<boolean>(false);
+  const [isFetchingCards, setIsFetchingCards] = useState<boolean>(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -415,53 +430,50 @@ const AllCards = () => {
   }, [formattedArtistName, artist, includeDigital]);
 
   useEffect(() => {
-    const fetchAllCards = async (url: string, allCards: Card[] = []): Promise<Card[]> => {
-      try {
-        const response = await axios.get<ScryfallResponse>(url);
-        const newCards = [...allCards, ...response.data.data];
-        if (response.data.has_more && response.data.next_page) {
-          return await fetchAllCards(response.data.next_page, newCards);
+    if (!scryfallQuery) return;
+
+    let cancelled = false;
+    const accumulated: Card[] = [];
+    const normalizedArtist = normalizeArtistName(artist || "");
+
+    const run = async () => {
+      setIsFetchingCards(true);
+      setCardData(null);
+
+      let nextUrl: string | undefined =
+        hideReprints ? scryfallQuery.withoutDuplicates : scryfallQuery.withDuplicates;
+
+      while (nextUrl) {
+        const currentUrl: string = nextUrl;
+        if (cancelled) break;
+        try {
+          const response = await axios.get<ScryfallResponse>(currentUrl);
+          if (cancelled) break;
+
+          const pageFiltered = response.data.data.filter((card: Card) => {
+            const normalizedCard = normalizeArtistName(card.artist || "");
+            return (
+              normalizedCard === normalizedArtist ||
+              normalizedCard.split(/[&,]/).some((n) => n.trim() === normalizedArtist)
+            );
+          });
+
+          accumulated.push(...pageFiltered);
+          // Render whatever we have so far — first page appears immediately
+          setCardData({ data: [...accumulated], total_cards: accumulated.length });
+
+          nextUrl = response.data.has_more ? response.data.next_page : undefined;
+        } catch (err) {
+          console.error("Error fetching cards:", err);
+          break;
         }
-        return newCards;
-      } catch (error) {
-        console.error("Error fetching cards:", error);
-        return allCards;
       }
+
+      if (!cancelled) setIsFetchingCards(false);
     };
 
-    const fetchData = async () => {
-      if (!scryfallQuery) return;
-
-      const url = hideReprints ? scryfallQuery.withoutDuplicates : scryfallQuery.withDuplicates;
-      const fetchedCards = await fetchAllCards(url);
-
-      const normalize = (str: string) => {
-        return str
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[̀-ͯ]/g, "")
-          .replace(/\./g, " ")
-          .replace(/-/g, " ")
-          .replace(/"/g, "")
-          .replace(/[()]/g, "")
-          .replace(/'/g, " ")
-          .replace(/,/g, "")
-          .replace(/\s+/g, "")
-          .trim();
-      };
-
-      const normalizedArtist = normalize(artist || "");
-      const filteredCards = fetchedCards.filter((card) => {
-        const cardArtist = card.artist || "";
-        const normalizedCardArtist = normalize(cardArtist);
-        return normalizedCardArtist === normalizedArtist ||
-               normalizedCardArtist.split(/[&,]/).some(name => name.trim() === normalizedArtist);
-      });
-
-      setCardData({ data: filteredCards, total_cards: filteredCards.length });
-    };
-
-    fetchData();
+    run();
+    return () => { cancelled = true; };
   }, [scryfallQuery, hideReprints, includeDigital, artist]);
 
   const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
@@ -499,27 +511,29 @@ const AllCards = () => {
   }, [cards, filterMode, cardCollection]);
 
   useEffect(() => {
-    if (cards.length > 0) {
-      const cardLookups = cards
-        .filter(card => card.set && card.collector_number)
-        .map(card => ({
-          set_code: card.set!.toUpperCase(),
-          number: card.collector_number!,
-        }));
+    // Wait until all Scryfall pages are in before sending price/collection requests,
+    // so we don't fire once-per-page for artists with large card counts.
+    if (cards.length === 0 || isFetchingCards) return;
 
-      if (cardLookups.length > 0) {
-        fetchCardPrices({ variables: { cards: cardLookups } });
-      }
+    const cardLookups = cards
+      .filter(card => card.set && card.collector_number)
+      .map(card => ({
+        set_code: card.set!.toUpperCase(),
+        number: card.collector_number!,
+      }));
 
-      const uniqueScryfallIds = Array.from(new Set(cards.map(card => card.id).filter(Boolean)));
-      if (uniqueScryfallIds.length > 0) {
-        fetchCardKingdomPrices({ variables: { scryfallIds: uniqueScryfallIds } });
-        if (isLoggedIn) {
-          fetchUserCardCollection({ variables: { scryfallIds: uniqueScryfallIds } });
-        }
+    if (cardLookups.length > 0) {
+      fetchCardPrices({ variables: { cards: cardLookups } });
+    }
+
+    const uniqueScryfallIds = Array.from(new Set(cards.map(card => card.id).filter(Boolean)));
+    if (uniqueScryfallIds.length > 0) {
+      fetchCardKingdomPrices({ variables: { scryfallIds: uniqueScryfallIds } });
+      if (isLoggedIn) {
+        fetchUserCardCollection({ variables: { scryfallIds: uniqueScryfallIds } });
       }
     }
-  }, [cards, fetchCardPrices, fetchCardKingdomPrices, fetchUserCardCollection, isLoggedIn]);
+  }, [cards, isFetchingCards, fetchCardPrices, fetchCardKingdomPrices, fetchUserCardCollection, isLoggedIn]);
 
   const signedCount = useMemo(
     () => Array.from(cardCollection.values()).filter(item => item.signedNonfoil || item.signedFoil).length,
@@ -583,7 +597,9 @@ const AllCards = () => {
   };
 
   if (!artist) return null;
-  if (loading) return <AllCardsSkeleton />;
+  // Don't gate the whole page on the GraphQL artist query — Scryfall cards fetch in
+  // parallel and should be visible as soon as the first page arrives.
+  // Only block for definitive error states once the query has settled.
   if (error)
     return (
       <Box sx={allCardsStyles.container}>
@@ -596,7 +612,7 @@ const AllCards = () => {
         </Container>
       </Box>
     );
-  if (!artistData?.artistByName)
+  if (!loading && !artistData?.artistByName)
     return (
       <Box sx={allCardsStyles.container}>
         <Container maxWidth="lg">
@@ -611,12 +627,14 @@ const AllCards = () => {
 
   return (
     <Box sx={allCardsStyles.container}>
-      {/* Full-bleed hero banner */}
+      {/* Full-bleed hero banner — image fades in once GraphQL resolves */}
       <Box sx={allCardsStyles.heroBanner}>
-        <img
-          src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistData.artistByName.filename}.jpeg`}
-          alt={`${artist} banner`}
-        />
+        {artistData?.artistByName?.filename && (
+          <img
+            src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistData.artistByName.filename}.jpeg`}
+            alt={`${artist} banner`}
+          />
+        )}
         <Box sx={allCardsStyles.bannerGradient} />
         <Box sx={allCardsStyles.bannerNameOverlay}>
           <Container maxWidth="lg" disableGutters>
