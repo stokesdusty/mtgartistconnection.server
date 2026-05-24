@@ -30,7 +30,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     marginBottom: { xs: spacing.xs, md: 0 },
     color: themeColors.text.primary,
     fontFamily: typography.fontFamily.heading,
-    letterSpacing: '-0.01em',
+    letterSpacing: { xs: '-0.01em', md: '-0.022em' },
     lineHeight: typography.lineHeight.tight,
   },
   description: {

@@ -21,7 +21,7 @@ export const contentPageStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize['3xl'], md: typography.fontSize['4xl'] },
     marginBottom: spacing.xxl,
     textAlign: 'center',
-    letterSpacing: '-0.01em',
+    letterSpacing: { xs: '-0.01em', md: '-0.022em' },
     lineHeight: typography.lineHeight.tight,
     fontFamily: typography.fontFamily.heading,
   },

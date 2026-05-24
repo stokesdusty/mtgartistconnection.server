@@ -38,7 +38,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize['3xl'], sm: typography.fontSize['4xl'], md: typography.fontSize['5xl'] },
     color: colors.neutral.white,
     lineHeight: typography.lineHeight.tight,
-    letterSpacing: '-0.02em',
+    letterSpacing: { xs: '-0.01em', sm: '-0.022em' },
     textShadow: '0 2px 12px rgba(0,0,0,0.5)',
   },
   bannerAltName: {
@@ -151,7 +151,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     fontSize: { xs: typography.fontSize['3xl'], md: typography.fontSize['4xl'] },
     marginBottom: spacing.lg,
     textAlign: 'center',
-    letterSpacing: '-0.01em',
+    letterSpacing: { xs: '-0.01em', md: '-0.022em' },
     lineHeight: typography.lineHeight.tight,
     fontFamily: typography.fontFamily.heading,
   },
