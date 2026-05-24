@@ -9,7 +9,7 @@ import {
   import { FaBluesky } from "react-icons/fa6";
   import { contentPageStyles } from "../../styles/content-page-styles";
   import { usePageTitle } from "../../hooks/usePageTitle";
-  import { colors } from "../../styles/design-tokens";
+  import { colors, themeColors } from "../../styles/design-tokens";
 
   const ContactPage = () => {
     usePageTitle("Contact Us");
@@ -50,7 +50,7 @@ import {
               </Typography>
 
               <Box sx={contentPageStyles.contactMethod}>
-                <Envelope size={24} weight="duotone" />
+                <Envelope size={24} weight="duotone" color={themeColors.primary.main} />
                 <Link
                   href="mailto:mtgartistconnection@gmail.com"
                   sx={contentPageStyles.contactLink}

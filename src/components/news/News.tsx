@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Container,
-  Paper,
   Typography,
   Alert,
   Chip,

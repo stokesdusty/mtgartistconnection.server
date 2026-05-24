@@ -29,7 +29,7 @@ import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { colors, spacing } from "../../styles/design-tokens";
+import { colors, themeColors, spacing } from "../../styles/design-tokens";
 
 interface Card {
   related_uris: any;
@@ -112,7 +112,7 @@ const COLLECTION_FIELDS = [
   { field: 'artistProof',    Icon: DeviceMobileCamera,  label: 'Artist Proof (nonfoil)', color: colors.accent.blue },
   { field: 'artistProofFoil',Icon: DeviceMobileSpeaker, label: 'Artist Proof (foil)',    color: colors.accent.orange },
   { field: 'signedNonfoil',  Icon: PenNib,             label: 'Signed (nonfoil)',        color: colors.accent.blueDark },
-  { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           color: colors.primary.main },
+  { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           color: themeColors.primary.main },
   { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   color: colors.accent.red },
 ] as const;
 
@@ -169,11 +169,13 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
       }}
     >
       {manapoolPrice && (
-        <Typography sx={{ fontSize: '0.90rem', color: colors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
+        <Typography sx={{ fontSize: '0.90rem', color: themeColors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
           {formatPrice(manapoolPrice)}
         </Typography>
       )}
-      <img src="/manapool-icon.ico" alt="Manapool" style={{ height: '16px', width: '16px' }} />
+      <Box sx={{ width: 20, height: 20, backgroundColor: themeColors.neutral.white, borderRadius: '3px', border: '1px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Box component="img" src="/manapool-icon.ico" alt="Manapool" sx={{ width: 14, height: 14, objectFit: 'contain' }} />
+      </Box>
     </Link>
   );
 
@@ -201,15 +203,12 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
         '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
       }}
     >
-      <Typography sx={{ fontSize: '0.90rem', color: colors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
+      <Typography sx={{ fontSize: '0.90rem', color: themeColors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
         ${card.prices.usd}
       </Typography>
-      <Box
-        component="img"
-        src="/tcgplayer.png"
-        alt="TCGPlayer"
-        sx={{ height: '16px', width: '32px', objectFit: 'cover', objectPosition: 'left center' }}
-      />
+      <Box sx={{ width: 20, height: 20, backgroundColor: themeColors.neutral.white, borderRadius: '3px', border: '1px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+        <Box component="img" src="/tcgplayer.png" alt="TCGPlayer" sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} />
+      </Box>
     </Link>
   );
 
@@ -241,15 +240,12 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
         '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
       }}
     >
-      <Typography sx={{ fontSize: '0.90rem', color: colors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
+      <Typography sx={{ fontSize: '0.90rem', color: themeColors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
         {formatPrice(ckPrice.price)}
       </Typography>
-      <Box
-        component="img"
-        src="/cardkingdom.jpg"
-        alt="Card Kingdom"
-        sx={{ height: '16px', width: '16px', objectFit: 'contain' }}
-      />
+      <Box sx={{ width: 20, height: 20, backgroundColor: themeColors.neutral.white, borderRadius: '3px', border: '1px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Box component="img" src="/cardkingdom.jpg" alt="Card Kingdom" sx={{ width: 14, height: 14, objectFit: 'contain' }} />
+      </Box>
     </Link>
   );
 
@@ -265,10 +261,10 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
               size="small"
               onClick={() => onToggle(card, field)}
               sx={{
-                color: active ? color : 'text.disabled',
+                color: active ? color : themeColors.text.disabled,
                 p: 0.5,
                 cursor: isLoggedIn ? 'pointer' : 'default',
-                '&:hover': { backgroundColor: isLoggedIn ? colors.neutral[50] : 'transparent' },
+                '&:hover': { backgroundColor: isLoggedIn ? themeColors.neutral[100] : 'transparent' },
               }}
             >
               <Icon size={18} weight={active ? 'fill' : 'regular'} />

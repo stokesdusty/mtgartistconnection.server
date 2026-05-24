@@ -2,7 +2,7 @@ import { Box, Container, Typography, Breadcrumbs, Link, Paper } from "@mui/mater
 import { Link as RouterLink } from "react-router-dom";
 import { CaretRight } from "@phosphor-icons/react";
 import { contentPageStyles } from "../../styles/content-page-styles";
-import { colors, spacing } from "../../styles/design-tokens";
+import { colors, themeColors, spacing } from "../../styles/design-tokens";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
 const TermsOfService = () => {
@@ -16,6 +16,9 @@ const TermsOfService = () => {
             separator={<CaretRight size={16} />}
             sx={{
               marginBottom: spacing.xl,
+              '& .MuiBreadcrumbs-separator': {
+                color: themeColors.text.primary,
+              },
               '& a': {
                 color: colors.primary.main,
                 textDecoration: 'none',
@@ -28,7 +31,7 @@ const TermsOfService = () => {
             <Link component={RouterLink} to="/">
               Home
             </Link>
-            <Typography color="text.primary">Terms of Service</Typography>
+            <Typography sx={{ color: themeColors.text.primary }}>Terms of Service</Typography>
           </Breadcrumbs>
 
           <Typography variant="h1" sx={contentPageStyles.pageTitle}>
@@ -41,7 +44,7 @@ const TermsOfService = () => {
             marginBottom: spacing.xxl,
             textAlign: 'center'
           }}>
-            Last Updated: March 15, 2025
+            Last Updated: May 24, 2026
           </Typography>
 
           <Typography sx={contentPageStyles.paragraph}>
@@ -93,10 +96,10 @@ const TermsOfService = () => {
           </Box>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            6. User Contributions
+            6. Artist Profiles and Submitted Content
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
-            Our website may contain message boards, forums, bulletin boards, and other interactive features that allow users to post, submit, publish, display, or transmit content or materials. Any user contribution you post will be considered non-confidential and non-proprietary. By providing any user contribution, you grant us and our affiliates a non-exclusive, royalty-free, perpetual, irrevocable right to use, reproduce, modify, adapt, publish, translate, distribute, and display such content.
+            Artists may submit profiles, images, contact information, and other materials to be listed on our website. Any content you submit will be considered non-confidential and non-proprietary. By submitting content, you grant MtG Artist Connection a non-exclusive, royalty-free, perpetual right to display and distribute such content on the website. You represent that you own or have the necessary rights to all content you submit.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
@@ -116,7 +119,7 @@ const TermsOfService = () => {
             8. Copyright Infringement
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
-            If you believe that any content on our website violates your copyright, please notify us in accordance with our Copyright Policy. It is our policy to terminate the accounts of repeat infringers.
+            If you believe that any content on our website violates your copyright, please contact us directly at mtgartistconnection@gmail.com with details of the alleged infringement. It is our policy to promptly investigate and, where appropriate, remove infringing content.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
@@ -137,7 +140,7 @@ const TermsOfService = () => {
             11. Governing Law and Jurisdiction
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
-            These Terms shall be governed by and construed in accordance with the laws of the State of California, without giving effect to any principles of conflicts of law. Any legal action or proceeding relating to your access to, or use of, the website or these Terms shall be instituted in a state or federal court in California.
+            These Terms shall be governed by and construed in accordance with the laws of the State of Washington, without giving effect to any principles of conflicts of law. Any legal action or proceeding relating to your access to, or use of, the website or these Terms shall be instituted in a state or federal court in Washington.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>

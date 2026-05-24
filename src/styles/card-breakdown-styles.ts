@@ -1,9 +1,9 @@
 import { SxProps, Theme } from '@mui/material';
-import { colors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
+import { colors, themeColors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
 
 export const cardBreakdownStyles: Record<string, SxProps<Theme>> = {
   container: {
-    backgroundColor: colors.background.default,
+    backgroundColor: themeColors.background.default,
     minHeight: '100vh',
     paddingTop: spacing.xl,
     paddingBottom: spacing.xxxl,
@@ -12,12 +12,12 @@ export const cardBreakdownStyles: Record<string, SxProps<Theme>> = {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: { xs: spacing.lg, md: spacing.xxl },
-    backgroundColor: colors.neutral.white,
+    backgroundColor: themeColors.neutral.white,
     borderRadius: borderRadius.xl,
     boxShadow: shadows.sm,
   },
   pageTitle: {
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     fontWeight: typography.fontWeight.bold,
     fontSize: { xs: typography.fontSize['3xl'], md: typography.fontSize['4xl'] },
     marginBottom: spacing.md,
@@ -27,7 +27,7 @@ export const cardBreakdownStyles: Record<string, SxProps<Theme>> = {
     fontFamily: typography.fontFamily.display,
   },
   artistTitle: {
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     fontWeight: typography.fontWeight.semibold,
     fontSize: { xs: typography.fontSize.xl, md: typography.fontSize['2xl'] },
     marginBottom: spacing.xxl,
@@ -35,17 +35,17 @@ export const cardBreakdownStyles: Record<string, SxProps<Theme>> = {
     fontFamily: typography.fontFamily.display,
   },
   chartCard: {
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     borderRadius: borderRadius.lg,
     padding: spacing.xl,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
     transition: transitions.base,
     '&:hover': {
       boxShadow: shadows.md,
     },
   },
   chartTitle: {
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     fontWeight: typography.fontWeight.bold,
     fontSize: { xs: typography.fontSize.lg, md: typography.fontSize.xl },
     marginBottom: spacing.lg,
@@ -59,20 +59,20 @@ export const cardBreakdownStyles: Record<string, SxProps<Theme>> = {
     marginBottom: spacing.xl,
   },
   loadingContainer: {
-    backgroundColor: colors.background.default,
+    backgroundColor: themeColors.background.default,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
   },
   loadingSpinner: {
-    color: colors.primary.main,
+    color: themeColors.primary.main,
   },
   errorMessage: {
     color: colors.accent.red,
     textAlign: 'center',
     padding: spacing.xl,
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     borderRadius: borderRadius.lg,
     border: `1px solid ${colors.accent.red}`,
     fontSize: typography.fontSize.lg,
@@ -80,63 +80,63 @@ export const cardBreakdownStyles: Record<string, SxProps<Theme>> = {
   },
   table: {
     minWidth: '100%',
-    background: colors.neutral.white,
+    background: themeColors.neutral.white,
     fontSize: { xs: typography.fontSize.xs, sm: typography.fontSize.sm, md: typography.fontSize.base },
     borderCollapse: 'collapse',
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
     borderRadius: borderRadius.md,
     overflow: 'hidden',
   },
   tableHead: {
-    backgroundColor: colors.neutral[100],
+    backgroundColor: themeColors.neutral[100],
   },
   tableHeaderCell: {
     padding: { xs: spacing.md, md: spacing.lg },
     textAlign: 'left',
     fontWeight: typography.fontWeight.semibold,
-    borderBottom: `1px solid ${colors.neutral[300]}`,
-    borderRight: `1px solid ${colors.neutral[200]}`,
-    color: colors.text.primary,
+    borderBottom: `1px solid ${themeColors.neutral[300]}`,
+    borderRight: `1px solid ${themeColors.neutral[200]}`,
+    color: themeColors.text.primary,
   },
   tableRow: {
     '&:nth-of-type(even)': {
-      backgroundColor: colors.neutral[50],
+      backgroundColor: themeColors.neutral[50],
     },
   },
   tableCell: {
     padding: { xs: spacing.md, md: spacing.lg },
-    borderBottom: `1px solid ${colors.neutral[200]}`,
-    borderRight: `1px solid ${colors.neutral[200]}`,
-    color: colors.text.secondary,
+    borderBottom: `1px solid ${themeColors.neutral[200]}`,
+    borderRight: `1px solid ${themeColors.neutral[200]}`,
+    color: themeColors.text.secondary,
   },
   tableCellName: {
     padding: { xs: spacing.md, md: spacing.lg },
     fontWeight: typography.fontWeight.medium,
-    color: colors.primary.main,
-    borderBottom: `1px solid ${colors.neutral[200]}`,
-    borderRight: `1px solid ${colors.neutral[200]}`,
+    color: themeColors.primary.main,
+    borderBottom: `1px solid ${themeColors.neutral[200]}`,
+    borderRight: `1px solid ${themeColors.neutral[200]}`,
   },
   tableCellOracleText: {
     padding: { xs: spacing.md, md: spacing.lg },
     fontSize: { xs: typography.fontSize.xs, sm: typography.fontSize.sm },
-    borderBottom: `1px solid ${colors.neutral[200]}`,
+    borderBottom: `1px solid ${themeColors.neutral[200]}`,
     maxWidth: { xs: '300px', lg: '400px' },
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
   },
   statsCard: {
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     padding: { xs: spacing.lg, md: spacing.xl },
     borderRadius: borderRadius.md,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
   },
   statsTitle: {
     fontWeight: typography.fontWeight.semibold,
     fontSize: { xs: typography.fontSize.base, md: typography.fontSize.lg },
     marginBottom: { xs: spacing.md, md: spacing.lg },
-    color: colors.text.primary,
+    color: themeColors.text.primary,
   },
   statsList: {
     display: 'flex',
@@ -150,9 +150,9 @@ export const cardBreakdownStyles: Record<string, SxProps<Theme>> = {
   },
   statsLabel: {
     fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
   },
   statsValue: {
-    color: colors.text.primary,
+    color: themeColors.text.primary,
   },
 };

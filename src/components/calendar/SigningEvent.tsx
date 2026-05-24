@@ -16,7 +16,7 @@ import {
   import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ShareNetwork, CaretDown } from "@phosphor-icons/react";
   import { useMemo, useState } from "react";
   import { contentPageStyles } from "../../styles/content-page-styles";
-  import { colors } from "../../styles/design-tokens";
+  import { colors, themeColors } from "../../styles/design-tokens";
   import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
   
   interface SigningEventComponentProps {
@@ -282,7 +282,7 @@ import {
                   ` (${artistData.mapArtistToEventByEventId.length})`}
               </Typography>
             </Box>
-            <Box component="span" sx={{ color: 'text.secondary', transition: 'transform 0.2s', transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)', display: 'inline-flex' }}>
+            <Box component="span" sx={{ color: themeColors.text.secondary, transition: 'transform 0.2s', transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)', display: 'inline-flex' }}>
               <CaretDown size={18} />
             </Box>
           </Box>

@@ -88,13 +88,7 @@ const RandomFlavorText = () => {
 
                 <Typography
                   variant="subtitle1"
-                  sx={{
-                    fontStyle: 'italic',
-                    color: 'text.secondary',
-                    mb: 0,
-                    mt: 0,
-                    textAlign: 'center'
-                  }}
+                  sx={contentPageStyles.artistByline}
                 >
                   Art by {cardData.artist}
                 </Typography>

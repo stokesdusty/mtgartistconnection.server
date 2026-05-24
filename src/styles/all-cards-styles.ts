@@ -1,9 +1,9 @@
 import { SxProps, Theme } from '@mui/material';
-import { colors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
+import { colors, themeColors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
 
 export const allCardsStyles: Record<string, SxProps<Theme>> = {
   container: {
-    backgroundColor: colors.background.dark,
+    backgroundColor: themeColors.background.dark,
     minHeight: '100vh',
     paddingBottom: spacing.xxxl,
   },
@@ -11,7 +11,7 @@ export const allCardsStyles: Record<string, SxProps<Theme>> = {
     maxWidth: '1400px',
     margin: '0 auto',
     padding: { xs: spacing.lg, md: spacing.xxl },
-    backgroundColor: colors.neutral.white,
+    backgroundColor: themeColors.neutral.white,
     borderRadius: borderRadius.xl,
     boxShadow: shadows.sm,
   },
@@ -62,8 +62,8 @@ export const allCardsStyles: Record<string, SxProps<Theme>> = {
     position: 'sticky',
     top: 0,
     zIndex: 200,
-    backgroundColor: colors.neutral.white,
-    borderBottom: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: themeColors.neutral.white,
+    borderBottom: `1px solid ${themeColors.neutral[200]}`,
     boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
   },
   stickyRailInner: {
@@ -80,7 +80,7 @@ export const allCardsStyles: Record<string, SxProps<Theme>> = {
     fontFamily: typography.fontFamily.heading,
     fontWeight: typography.fontWeight.semibold,
     fontSize: { xs: typography.fontSize.xl, md: typography.fontSize['2xl'] },
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     letterSpacing: '-0.02em',
     whiteSpace: 'nowrap',
     flexShrink: 0,
@@ -93,24 +93,24 @@ export const allCardsStyles: Record<string, SxProps<Theme>> = {
     borderRadius: borderRadius.sm,
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.medium,
-    color: colors.text.secondary,
-    border: `1px solid ${colors.neutral[200]}`,
+    color: themeColors.text.secondary,
+    border: `1px solid ${themeColors.neutral[200]}`,
     whiteSpace: 'nowrap',
     transition: transitions.base,
     lineHeight: 1.4,
     '&:hover': {
-      color: colors.text.primary,
-      borderColor: colors.primary.main,
-      backgroundColor: colors.neutral[50],
+      color: themeColors.text.primary,
+      borderColor: themeColors.primary.main,
+      backgroundColor: themeColors.neutral[50],
       textDecoration: 'none',
     },
   },
   controlsSection: {
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginBottom: spacing.xl,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
     display: 'flex',
     flexDirection: { xs: 'column', md: 'row' },
     alignItems: { xs: 'flex-start', md: 'center' },
@@ -118,20 +118,23 @@ export const allCardsStyles: Record<string, SxProps<Theme>> = {
     gap: spacing.md,
   },
   cardCount: {
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.fontFamily.display,
   },
   checkbox: {
-    color: colors.primary.main,
+    color: themeColors.primary.main,
     '&.Mui-checked': {
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
   },
   checkboxLabel: {
-    fontSize: typography.fontSize.sm,
-    fontFamily: typography.fontFamily.primary,
+    '& .MuiFormControlLabel-label': {
+      color: themeColors.text.primary,
+      fontSize: typography.fontSize.sm,
+      fontFamily: typography.fontFamily.primary,
+    },
   },
   expandButton: {
     backgroundColor: colors.primary.main,
@@ -162,26 +165,26 @@ export const allCardsStyles: Record<string, SxProps<Theme>> = {
     borderRadius: borderRadius.md,
     boxShadow: shadows.md,
     transition: transitions.base,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
     '&:hover': {
       transform: 'translateY(-4px)',
       boxShadow: shadows.lg,
     },
   },
   loadingContainer: {
-    backgroundColor: colors.background.default,
+    backgroundColor: themeColors.background.default,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '50vh',
   },
   loadingSpinner: {
-    color: colors.primary.main,
+    color: themeColors.primary.main,
   },
   noCards: {
     textAlign: 'center',
     padding: spacing.xxxl,
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.medium,
   },

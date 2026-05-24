@@ -387,7 +387,7 @@ const Calendar = () => {
           </Box>
 
           <Box sx={{ marginBottom: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <FormControl sx={{ minWidth: 250 }}>
+            <FormControl sx={calendarStyles.filterFormControl}>
               <InputLabel id="location-select-label">Filter by Location</InputLabel>
               <Select
                 labelId="location-select-label"
@@ -426,7 +426,7 @@ const Calendar = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ minWidth: 250 }}>
+            <FormControl sx={calendarStyles.filterFormControl}>
               <InputLabel id="artist-select-label">Filter by Artist</InputLabel>
               <Select
                 labelId="artist-select-label"

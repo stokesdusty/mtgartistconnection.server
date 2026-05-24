@@ -48,26 +48,23 @@ const KofiButton = () => {
         const anchor = el.querySelector("a");
         if (anchor && anchor.href) {
           anchor.href += "?utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=kofi_support_click";
+          anchor.target = "_blank";
+          anchor.rel = "noopener noreferrer";
 
-          // Add click handler directly to the anchor tag
           anchor.addEventListener("click", (e) => {
             if ((window as any).gtag) {
-              // Prevent immediate navigation
               e.preventDefault();
 
-              // Fire GA event with callback
               (window as any).gtag("event", "kofi_support_click", {
                 event_category: "donations",
                 event_label: "kofi_footer",
                 event_callback: () => {
-                  // Navigate after event is sent
-                  window.location.href = anchor.href;
+                  window.open(anchor.href, "_blank", "noopener,noreferrer");
                 },
               });
 
-              // Fallback: navigate after 300ms if callback doesn't fire
               setTimeout(() => {
-                window.location.href = anchor.href;
+                window.open(anchor.href, "_blank", "noopener,noreferrer");
               }, 300);
             }
           });

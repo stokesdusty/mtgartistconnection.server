@@ -20,9 +20,10 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
-import { shadows } from '../../styles/design-tokens';
+import { useColorMode } from '../../ColorModeContext';
+import { shadows, themeColors } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
 import { logout } from '../../store/auth-slice';
@@ -67,6 +68,7 @@ const Header = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { mode, toggleColorMode } = useColorMode();
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -200,6 +202,9 @@ const Header = () => {
           </Link>
         </Box>
         <Box sx={headerStyles.tabContainer}>
+          <IconButton onClick={toggleColorMode} sx={headerStyles.themeToggle} aria-label="toggle dark mode">
+            {mode === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </IconButton>
           {!isBelowLarge ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Tabs
@@ -258,7 +263,7 @@ const Header = () => {
         anchor="right"
         open={drawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ sx: { boxShadow: shadows.lg } }}
+        PaperProps={{ sx: { boxShadow: shadows.lg, backgroundColor: themeColors.neutral.white } }}
       >
         <Box sx={{ width: 280 }} role="presentation">
           <Box sx={headerStyles.drawerHeader}>

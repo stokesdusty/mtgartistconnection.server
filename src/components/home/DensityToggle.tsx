@@ -1,6 +1,6 @@
 import { Box, Tooltip } from '@mui/material';
 import { SquaresFour, GridNine, Images } from '@phosphor-icons/react';
-import { colors, borderRadius, transitions } from '../../styles/design-tokens';
+import { colors, themeColors, borderRadius, transitions } from '../../styles/design-tokens';
 
 export type GridDensity = 'comfortable' | 'compact' | 'gallery';
 
@@ -45,10 +45,10 @@ const DensityToggle = ({
       sx={{
         display: 'flex',
         gap: '2px',
-        border: `1px solid ${colors.neutral[200]}`,
+        border: `1px solid ${themeColors.neutral[200]}`,
         borderRadius: borderRadius.md,
         padding: '2px',
-        backgroundColor: colors.neutral[50],
+        backgroundColor: themeColors.neutral[50],
         flexShrink: 0,
       }}
     >
@@ -70,9 +70,9 @@ const DensityToggle = ({
               cursor: 'pointer',
               transition: transitions.fast,
               backgroundColor: value === v ? colors.primary.main : 'transparent',
-              color: value === v ? colors.neutral.white : colors.text.secondary,
+              color: value === v ? colors.neutral.white : themeColors.text.secondary,
               '&:hover': {
-                backgroundColor: value === v ? colors.primary.dark : colors.neutral[200],
+                backgroundColor: value === v ? colors.primary.dark : themeColors.neutral[200],
               },
             }}
           >

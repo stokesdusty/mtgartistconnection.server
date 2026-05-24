@@ -2,7 +2,7 @@ import { Box, Container, Typography, Breadcrumbs, Link, Paper } from "@mui/mater
 import { Link as RouterLink } from "react-router-dom";
 import { CaretRight } from "@phosphor-icons/react";
 import { contentPageStyles } from "../../styles/content-page-styles";
-import { colors, spacing } from "../../styles/design-tokens";
+import { colors, themeColors, spacing } from "../../styles/design-tokens";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
 const PrivacyPolicy = () => {
@@ -16,6 +16,9 @@ const PrivacyPolicy = () => {
             separator={<CaretRight size={16} />}
             sx={{
               marginBottom: spacing.xl,
+              '& .MuiBreadcrumbs-separator': {
+                color: themeColors.text.primary,
+              },
               '& a': {
                 color: colors.primary.main,
                 textDecoration: 'none',
@@ -28,7 +31,7 @@ const PrivacyPolicy = () => {
             <Link component={RouterLink} to="/">
               Home
             </Link>
-            <Typography color="text.primary">Privacy Policy</Typography>
+            <Typography sx={{ color: themeColors.text.primary }}>Privacy Policy</Typography>
           </Breadcrumbs>
 
           <Typography variant="h1" sx={contentPageStyles.pageTitle}>
@@ -41,7 +44,7 @@ const PrivacyPolicy = () => {
             marginBottom: spacing.xxl,
             textAlign: 'center'
           }}>
-            Last Updated: March 15, 2025
+            Last Updated: May 24, 2026
           </Typography>
 
           <Typography sx={contentPageStyles.paragraph}>
@@ -58,7 +61,7 @@ const PrivacyPolicy = () => {
             <li>Personal information such as name and email address when voluntarily provided</li>
             <li>Usage information about your activity on our website</li>
             <li>Device information including your IP address, browser type, and operating system</li>
-            <li>Cookies and similar tracking technologies</li>
+            <li>Usage data collected via Google Analytics, including pages visited, time on site, and general geographic region — this data is aggregated and not linked to your identity</li>
           </Box>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
@@ -70,7 +73,7 @@ const PrivacyPolicy = () => {
           <Box component="ul" sx={{ paddingLeft: spacing.xxl, marginBottom: spacing.lg, '& li': { marginBottom: spacing.sm, color: colors.text.secondary, lineHeight: 1.6 } }}>
             <li>Providing and maintaining our website</li>
             <li>Improving our website and user experience</li>
-            <li>Communicating with you about updates or changes to our services</li>
+            <li>Sending you newsletters or updates about artists and events if you have subscribed to our mailing list</li>
             <li>Analyzing usage patterns and trends</li>
             <li>Complying with legal obligations</li>
           </Box>

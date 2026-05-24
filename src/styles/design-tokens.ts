@@ -58,6 +58,36 @@ export const colors = {
   },
 };
 
+// CSS var references — values flip when html[data-dark] is toggled.
+// Use these instead of `colors` for any token that differs between modes.
+export const themeColors = {
+  background: {
+    default: 'var(--c-bg-default)',
+    paper:   'var(--c-bg-paper)',
+    dark:    'var(--c-bg-dark)',
+  },
+  text: {
+    primary:   'var(--c-text-primary)',
+    secondary: 'var(--c-text-secondary)',
+    disabled:  'var(--c-text-disabled)',
+    hint:      'var(--c-text-hint)',
+  },
+  neutral: {
+    ...colors.neutral,
+    white: 'var(--c-neutral-white)',
+    50:    'var(--c-neutral-50)',
+    100:   'var(--c-neutral-100)',
+    200:   'var(--c-neutral-200)',
+    300:   'var(--c-neutral-300)',
+  },
+  primary: {
+    ...colors.primary,
+    main:    'var(--c-primary-main)',
+    lighter: 'var(--c-primary-lighter)',
+  },
+  accent: colors.accent,
+};
+
 export const spacing = {
   xs: '0.25rem',    // 4px
   sm: '0.5rem',     // 8px

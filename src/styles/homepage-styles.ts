@@ -1,5 +1,5 @@
 import { SxProps, Theme } from '@mui/material';
-import { colors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
+import { colors, themeColors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
 
 export type Styles = {
     [key:string]: SxProps;
@@ -7,7 +7,7 @@ export type Styles = {
 
 export const homepageStyles: Record<string, SxProps<Theme>> = {
   container: {
-    backgroundColor: colors.background.default,
+    backgroundColor: themeColors.background.default,
     minHeight: '100vh',
     paddingTop: { xs: spacing.sm, md: spacing.xs },
     paddingBottom: spacing.xxxl,
@@ -28,14 +28,14 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     fontWeight: typography.fontWeight.bold,
     fontSize: { xs: typography.fontSize['3xl'], md: typography.fontSize['4xl'], lg: typography.fontSize['5xl'] },
     marginBottom: { xs: spacing.xs, md: 0 },
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     fontFamily: typography.fontFamily.heading,
     letterSpacing: '-0.01em',
     lineHeight: typography.lineHeight.tight,
   },
   description: {
     fontSize: { xs: typography.fontSize.base, md: typography.fontSize.lg },
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     lineHeight: { xs: typography.lineHeight.relaxed, md: typography.lineHeight.normal },
     marginBottom: { xs: spacing.xs, md: 0 },
     fontFamily: typography.fontFamily.primary,
@@ -44,13 +44,13 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   },
   descriptionList: {
     fontSize: { xs: typography.fontSize.sm, md: typography.fontSize.base },
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     lineHeight: { xs: typography.lineHeight.relaxed, md: typography.lineHeight.normal },
     marginBottom: 0,
     maxWidth: '800px',
     margin: `0 auto`,
     '& b': {
-      color: colors.text.primary,
+      color: themeColors.text.primary,
       fontWeight: typography.fontWeight.semibold,
     },
   },
@@ -79,8 +79,8 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     paddingBottom: { xs: spacing.lg, md: spacing.xl },
     marginBottom: spacing.xl,
     marginTop: spacing.xl,
-    borderTop: `1px solid ${colors.neutral[200]}`,
-    borderBottom: `1px solid ${colors.neutral[200]}`,
+    borderTop: `1px solid ${themeColors.neutral[200]}`,
+    borderBottom: `1px solid ${themeColors.neutral[200]}`,
   },
   filtersGrid: {
     display: 'grid',
@@ -114,55 +114,74 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     width: '100%',
     '& .MuiOutlinedInput-root': {
       borderRadius: borderRadius.md,
-      backgroundColor: colors.neutral.white,
+      backgroundColor: themeColors.neutral.white,
+      color: themeColors.text.primary,
       transition: transitions.base,
+      '& fieldset': {
+        borderColor: themeColors.neutral[300],
+      },
       '&:hover fieldset': {
-        borderColor: colors.primary.main,
+        borderColor: themeColors.primary.main,
       },
       '&.Mui-focused fieldset': {
-        borderColor: colors.primary.main,
+        borderColor: themeColors.primary.main,
         borderWidth: '2px',
       },
     },
     '& .MuiInputLabel-root': {
+      color: themeColors.text.secondary,
       '&.Mui-focused': {
-        color: colors.primary.main,
+        color: themeColors.primary.main,
       },
+    },
+    '& .MuiInputAdornment-root': {
+      color: themeColors.text.secondary,
     },
   },
   locationSelect: {
     width: '100%',
     '& .MuiOutlinedInput-root': {
       borderRadius: borderRadius.md,
-      backgroundColor: colors.neutral.white,
+      backgroundColor: themeColors.neutral.white,
+      color: themeColors.text.primary,
       transition: transitions.base,
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: themeColors.neutral[300],
+      },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: colors.primary.main,
+        borderColor: themeColors.primary.main,
       },
       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: colors.primary.main,
+        borderColor: themeColors.primary.main,
         borderWidth: '2px',
       },
     },
     '& .MuiInputLabel-root': {
+      color: themeColors.text.secondary,
       '&.Mui-focused': {
-        color: colors.primary.main,
+        color: themeColors.primary.main,
       },
+    },
+    '& .MuiSvgIcon-root': {
+      color: themeColors.text.secondary,
     },
   },
   checkboxContainer: {
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     borderRadius: borderRadius.md,
     padding: spacing.md,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
   },
   checkboxesContainer: {
     display: 'flex',
     flexDirection: 'column',
     gap: 0,
+    '& .MuiFormControlLabel-label': {
+      color: themeColors.text.primary,
+    },
   },
   signingAgentLabel: {
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     fontWeight: typography.fontWeight.semibold,
     fontSize: typography.fontSize.sm,
     marginBottom: spacing.sm,
@@ -171,9 +190,9 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     fontFamily: typography.fontFamily.display,
   },
   checkbox: {
-    color: colors.primary.main,
+    color: themeColors.primary.main,
     '&.Mui-checked': {
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
   },
   alphabetBar: {
@@ -190,10 +209,10 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     minWidth: { xs: '32px', md: '36px' },
     height: { xs: '32px', md: '36px' },
     padding: `${spacing.xs} ${spacing.sm}`,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.neutral.white,
-    color: colors.text.primary,
+    backgroundColor: themeColors.neutral.white,
+    color: themeColors.text.primary,
     fontSize: { xs: typography.fontSize.xs, md: typography.fontSize.sm },
     fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.fontFamily.display,
@@ -265,20 +284,20 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     marginTop: spacing.xl,
   },
   loadingContainer: {
-    backgroundColor: colors.background.default,
+    backgroundColor: themeColors.background.default,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
   },
   loadingSpinner: {
-    color: colors.primary.main,
+    color: themeColors.primary.main,
   },
   errorMessage: {
     color: colors.accent.red,
     textAlign: 'center',
     padding: spacing.xl,
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     borderRadius: borderRadius.md,
     border: `1px solid ${colors.accent.red}`,
     fontSize: typography.fontSize.lg,
@@ -287,7 +306,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   scrollToTop: {
     position: 'fixed',
     bottom: spacing.xl,
-    right: '96px', // Positioned left of cart button
+    right: '96px',
     backgroundColor: colors.primary.main,
     color: colors.neutral.white,
     boxShadow: shadows.lg,
@@ -299,7 +318,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   noResults: {
     textAlign: 'center',
     padding: spacing.xxxl,
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.medium,
     gridColumn: '1 / -1',
@@ -316,12 +335,12 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     marginTop: '20px',
   },
   filterStripActive: {
-    backgroundColor: colors.neutral[100],
+    backgroundColor: themeColors.neutral[100],
   },
   filterStripCount: {
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.neutral[800],
+    color: themeColors.text.primary,
     mr: 1,
   },
   filterChip: {
@@ -338,15 +357,16 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   clearAllButton: {
     fontSize: typography.fontSize.xs,
     textTransform: 'none',
-    color: colors.neutral[700],
+    color: themeColors.text.secondary,
     ml: 1,
     '&:hover': {
       backgroundColor: 'rgba(0,0,0,0.04)',
-      color: colors.neutral[800],
+      color: themeColors.text.primary,
     },
   },
   listSubheader: {
-    backgroundColor: colors.neutral[100],
+    backgroundColor: themeColors.neutral[100],
+    color: themeColors.text.primary,
     fontWeight: typography.fontWeight.semibold,
     lineHeight: '32px',
   },

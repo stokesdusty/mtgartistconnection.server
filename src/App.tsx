@@ -32,6 +32,7 @@ import ContactPage from "./components/home/Contact";
 import AffiliateDisclosure from "./components/home/AffiliateDisclosure";
 import ArtistCardAnalysis from "./components/artist/ArtistCardBreakdown";
 import { LoadingProvider } from "./LoadingContext";
+import { ColorModeProvider } from "./ColorModeContext";
 import Settings from "./components/settings/Settings";
 import Following from "./components/settings/Following";
 import YourCards from "./components/settings/YourCards";
@@ -50,6 +51,7 @@ function App() {
     }
   }, [dispatch, isLoggedIn]);
   return (
+    <ColorModeProvider>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <LoadingProvider>
         <div>
@@ -95,6 +97,7 @@ function App() {
         </div>
       </LoadingProvider>
     </LocalizationProvider>
+    </ColorModeProvider>
   );
 }
 

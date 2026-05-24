@@ -1,5 +1,5 @@
 import { CSSProperties } from "react";
-import { colors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
+import { colors, themeColors, spacing, shadows, typography, transitions, borderRadius } from './design-tokens';
 import { Styles } from './homepage-styles';
 
 export const artistGridStyles: Styles = {
@@ -16,8 +16,8 @@ export const artistGridStyles: Styles = {
     aspectRatio: '1',
     overflow: 'hidden',
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.neutral[100],
-    border: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: themeColors.neutral[100],
+    border: `1px solid ${themeColors.neutral[200]}`,
     transition: transitions.base,
   },
   eventDot: {
@@ -33,7 +33,7 @@ export const artistGridStyles: Styles = {
   },
   link: {
     textDecoration: 'none',
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     display: 'flex',
     flexDirection: 'column',
     gap: spacing.md,
@@ -41,11 +41,11 @@ export const artistGridStyles: Styles = {
     transition: transitions.base,
     '&:hover': {
       '& .artist-image-box': {
-        borderColor: colors.primary.main,
+        borderColor: themeColors.primary.main,
         boxShadow: shadows.md,
       },
       '& .artist-name': {
-        color: colors.primary.main,
+        color: themeColors.primary.main,
       },
     },
   },
@@ -53,7 +53,7 @@ export const artistGridStyles: Styles = {
     textAlign: 'center',
     fontWeight: typography.fontWeight.medium,
     fontSize: { xs: typography.fontSize.xs, sm: typography.fontSize.sm },
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     transition: transitions.fast,
     fontFamily: typography.fontFamily.display,
   }
@@ -71,8 +71,8 @@ export const artistCompactStyles: Styles = {
     aspectRatio: '1',
     overflow: 'hidden',
     borderRadius: borderRadius.md,
-    backgroundColor: colors.neutral[100],
-    border: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: themeColors.neutral[100],
+    border: `1px solid ${themeColors.neutral[200]}`,
     transition: transitions.base,
   },
   overlay: {
@@ -104,7 +104,7 @@ export const artistCompactStyles: Styles = {
     transition: transitions.base,
     '&:hover': {
       '& .artist-image-box': {
-        borderColor: colors.primary.main,
+        borderColor: themeColors.primary.main,
         boxShadow: shadows.md,
       },
     },
@@ -123,11 +123,11 @@ export const artistGalleryStyles: Styles = {
     aspectRatio: '16/9',
     overflow: 'hidden',
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.neutral[100],
-    border: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: themeColors.neutral[100],
+    border: `1px solid ${themeColors.neutral[200]}`,
     transition: transitions.base,
     '&:hover': {
-      borderColor: colors.primary.main,
+      borderColor: themeColors.primary.main,
       boxShadow: shadows.md,
     },
     '&:hover .gallery-overlay': {

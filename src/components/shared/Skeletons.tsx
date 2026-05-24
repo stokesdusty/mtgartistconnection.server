@@ -1,5 +1,5 @@
 import { Box, Skeleton, Card, CardContent, Container, Paper } from '@mui/material';
-import { colors, spacing, borderRadius, shadows } from '../../styles/design-tokens';
+import { colors, themeColors, spacing, borderRadius, shadows } from '../../styles/design-tokens';
 
 // Artist grid skeleton for homepage
 export const ArtistGridSkeleton = ({ count = 8 }: { count?: number }) => {
@@ -21,7 +21,7 @@ export const ArtistGridSkeleton = ({ count = 8 }: { count?: number }) => {
               width: '100%',
               aspectRatio: '1',
               borderRadius: borderRadius.lg,
-              backgroundColor: colors.neutral[200],
+              backgroundColor: themeColors.neutral[200],
             }}
           />
           <Skeleton
@@ -30,7 +30,7 @@ export const ArtistGridSkeleton = ({ count = 8 }: { count?: number }) => {
               width: '70%',
               height: 20,
               margin: '0 auto',
-              backgroundColor: colors.neutral[200],
+              backgroundColor: themeColors.neutral[200],
             }}
           />
         </Box>
@@ -47,10 +47,10 @@ export const EventCardSkeleton = ({ count = 4 }: { count?: number }) => {
         <Box
           key={index}
           sx={{
-            backgroundColor: colors.neutral[50],
+            backgroundColor: themeColors.neutral[50],
             borderRadius: borderRadius.lg,
             padding: { xs: spacing.md, md: spacing.lg },
-            border: `1px solid ${colors.neutral[200]}`,
+            border: `1px solid ${themeColors.neutral[200]}`,
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -60,7 +60,7 @@ export const EventCardSkeleton = ({ count = 4 }: { count?: number }) => {
                 sx={{
                   width: '60%',
                   height: 32,
-                  backgroundColor: colors.neutral[200],
+                  backgroundColor: themeColors.neutral[200],
                 }}
               />
               <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
@@ -69,7 +69,7 @@ export const EventCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   sx={{
                     width: 120,
                     height: 20,
-                    backgroundColor: colors.neutral[200],
+                    backgroundColor: themeColors.neutral[200],
                   }}
                 />
                 <Skeleton
@@ -77,7 +77,7 @@ export const EventCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   sx={{
                     width: 100,
                     height: 20,
-                    backgroundColor: colors.neutral[200],
+                    backgroundColor: themeColors.neutral[200],
                   }}
                 />
               </Box>
@@ -88,7 +88,7 @@ export const EventCardSkeleton = ({ count = 4 }: { count?: number }) => {
                 width: 80,
                 height: 32,
                 borderRadius: borderRadius.md,
-                backgroundColor: colors.neutral[200],
+                backgroundColor: themeColors.neutral[200],
               }}
             />
           </Box>
@@ -101,7 +101,7 @@ export const EventCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   width: 80,
                   height: 28,
                   borderRadius: borderRadius.md,
-                  backgroundColor: colors.neutral[200],
+                  backgroundColor: themeColors.neutral[200],
                 }}
               />
             ))}
@@ -121,7 +121,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
           key={index}
           sx={{
             borderRadius: '12px',
-            border: `1px solid ${colors.neutral[200]}`,
+            border: `1px solid ${themeColors.neutral[200]}`,
             boxShadow: 'none',
             mb: 2,
           }}
@@ -134,7 +134,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   width: 48,
                   height: 48,
                   borderRadius: borderRadius.md,
-                  backgroundColor: colors.neutral[200],
+                  backgroundColor: themeColors.neutral[200],
                   flexShrink: 0,
                 }}
               />
@@ -144,7 +144,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   sx={{
                     width: '80%',
                     height: 28,
-                    backgroundColor: colors.neutral[200],
+                    backgroundColor: themeColors.neutral[200],
                   }}
                 />
                 <Skeleton
@@ -152,7 +152,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   sx={{
                     width: '40%',
                     height: 20,
-                    backgroundColor: colors.neutral[200],
+                    backgroundColor: themeColors.neutral[200],
                   }}
                 />
               </Box>
@@ -164,7 +164,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   width: 100,
                   height: 24,
                   borderRadius: borderRadius.full,
-                  backgroundColor: colors.neutral[200],
+                  backgroundColor: themeColors.neutral[200],
                 }}
               />
               <Skeleton
@@ -173,7 +173,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
                   width: 120,
                   height: 24,
                   borderRadius: borderRadius.full,
-                  backgroundColor: colors.neutral[200],
+                  backgroundColor: themeColors.neutral[200],
                 }}
               />
             </Box>
@@ -182,7 +182,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
               sx={{
                 width: '100%',
                 height: 20,
-                backgroundColor: colors.neutral[200],
+                backgroundColor: themeColors.neutral[200],
               }}
             />
             <Skeleton
@@ -190,7 +190,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
               sx={{
                 width: '90%',
                 height: 20,
-                backgroundColor: colors.neutral[200],
+                backgroundColor: themeColors.neutral[200],
               }}
             />
             <Skeleton
@@ -198,7 +198,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
               sx={{
                 width: '70%',
                 height: 20,
-                backgroundColor: colors.neutral[200],
+                backgroundColor: themeColors.neutral[200],
               }}
             />
           </CardContent>
@@ -232,18 +232,18 @@ export const AllCardsGridSkeleton = ({ count = 12 }: { count?: number }) => {
               width: '100%',
               aspectRatio: '0.72',
               borderRadius: borderRadius.md,
-              backgroundColor: colors.neutral[200],
+              backgroundColor: themeColors.neutral[200],
             }}
           />
           {/* Price + icon row */}
           <Box sx={{ display: 'flex', gap: 1, mt: 1, justifyContent: 'center' }}>
             <Skeleton
               variant="rounded"
-              sx={{ width: 56, height: 20, borderRadius: borderRadius.sm, backgroundColor: colors.neutral[200] }}
+              sx={{ width: 56, height: 20, borderRadius: borderRadius.sm, backgroundColor: themeColors.neutral[200] }}
             />
             <Skeleton
               variant="rounded"
-              sx={{ width: 56, height: 20, borderRadius: borderRadius.sm, backgroundColor: colors.neutral[200] }}
+              sx={{ width: 56, height: 20, borderRadius: borderRadius.sm, backgroundColor: themeColors.neutral[200] }}
             />
           </Box>
         </Box>
@@ -270,8 +270,8 @@ export const AllCardsSkeleton = () => {
       <Box
         sx={{
           height: '68px',
-          backgroundColor: colors.neutral.white,
-          borderBottom: `1px solid ${colors.neutral[200]}`,
+          backgroundColor: themeColors.neutral.white,
+          borderBottom: `1px solid ${themeColors.neutral[200]}`,
           display: 'flex',
           alignItems: 'center',
           px: { xs: 2, md: 4 },
@@ -280,12 +280,12 @@ export const AllCardsSkeleton = () => {
       >
         <Skeleton
           variant="text"
-          sx={{ width: 260, height: 32, backgroundColor: colors.neutral[200] }}
+          sx={{ width: 260, height: 32, backgroundColor: themeColors.neutral[200] }}
         />
         <Box sx={{ flex: 1 }} />
         <Skeleton
           variant="rounded"
-          sx={{ width: 130, height: 28, borderRadius: borderRadius.sm, backgroundColor: colors.neutral[200] }}
+          sx={{ width: 130, height: 28, borderRadius: borderRadius.sm, backgroundColor: themeColors.neutral[200] }}
         />
       </Box>
 
@@ -297,7 +297,7 @@ export const AllCardsSkeleton = () => {
             maxWidth: '1400px',
             margin: '0 auto',
             padding: { xs: spacing.lg, md: spacing.xxl },
-            backgroundColor: colors.neutral.white,
+            backgroundColor: themeColors.neutral.white,
             borderRadius: borderRadius.xl,
             boxShadow: shadows.sm,
           }}
@@ -305,11 +305,11 @@ export const AllCardsSkeleton = () => {
           {/* Controls bar */}
           <Box
             sx={{
-              backgroundColor: colors.neutral[50],
+              backgroundColor: themeColors.neutral[50],
               borderRadius: borderRadius.lg,
               padding: spacing.lg,
               marginBottom: spacing.xl,
-              border: `1px solid ${colors.neutral[200]}`,
+              border: `1px solid ${themeColors.neutral[200]}`,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -319,20 +319,20 @@ export const AllCardsSkeleton = () => {
           >
             <Skeleton
               variant="text"
-              sx={{ width: 140, height: 28, backgroundColor: colors.neutral[200] }}
+              sx={{ width: 140, height: 28, backgroundColor: themeColors.neutral[200] }}
             />
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <Skeleton
                 variant="rounded"
-                sx={{ width: 180, height: 32, borderRadius: borderRadius.md, backgroundColor: colors.neutral[200] }}
+                sx={{ width: 180, height: 32, borderRadius: borderRadius.md, backgroundColor: themeColors.neutral[200] }}
               />
               <Skeleton
                 variant="rounded"
-                sx={{ width: 120, height: 32, borderRadius: borderRadius.md, backgroundColor: colors.neutral[200] }}
+                sx={{ width: 120, height: 32, borderRadius: borderRadius.md, backgroundColor: themeColors.neutral[200] }}
               />
               <Skeleton
                 variant="rounded"
-                sx={{ width: 130, height: 36, borderRadius: borderRadius.lg, backgroundColor: colors.neutral[200] }}
+                sx={{ width: 130, height: 36, borderRadius: borderRadius.lg, backgroundColor: themeColors.neutral[200] }}
               />
             </Box>
           </Box>
@@ -355,7 +355,7 @@ export const ArtistPageSkeleton = () => {
           width: '100%',
           height: { xs: 150, md: 200 },
           borderRadius: borderRadius.lg,
-          backgroundColor: colors.neutral[200],
+          backgroundColor: themeColors.neutral[200],
           mb: 3,
         }}
       />
@@ -367,7 +367,7 @@ export const ArtistPageSkeleton = () => {
           sx={{
             width: 250,
             height: 48,
-            backgroundColor: colors.neutral[200],
+            backgroundColor: themeColors.neutral[200],
           }}
         />
         <Skeleton
@@ -376,7 +376,7 @@ export const ArtistPageSkeleton = () => {
             width: 100,
             height: 36,
             borderRadius: borderRadius.md,
-            backgroundColor: colors.neutral[200],
+            backgroundColor: themeColors.neutral[200],
           }}
         />
       </Box>
@@ -391,7 +391,7 @@ export const ArtistPageSkeleton = () => {
               width: { xs: '100%', sm: 200 },
               height: 48,
               borderRadius: borderRadius.lg,
-              backgroundColor: colors.neutral[200],
+              backgroundColor: themeColors.neutral[200],
             }}
           />
         ))}
@@ -405,7 +405,7 @@ export const ArtistPageSkeleton = () => {
             sx={{
               width: 120,
               height: 32,
-              backgroundColor: colors.neutral[200],
+              backgroundColor: themeColors.neutral[200],
               mb: 2,
             }}
           />
@@ -416,7 +416,7 @@ export const ArtistPageSkeleton = () => {
                 sx={{
                   width: 100,
                   height: 24,
-                  backgroundColor: colors.neutral[200],
+                  backgroundColor: themeColors.neutral[200],
                 }}
               />
               <Skeleton
@@ -424,7 +424,7 @@ export const ArtistPageSkeleton = () => {
                 sx={{
                   width: 180,
                   height: 20,
-                  backgroundColor: colors.neutral[200],
+                  backgroundColor: themeColors.neutral[200],
                 }}
               />
             </Box>
@@ -436,7 +436,7 @@ export const ArtistPageSkeleton = () => {
             sx={{
               width: 160,
               height: 32,
-              backgroundColor: colors.neutral[200],
+              backgroundColor: themeColors.neutral[200],
               mb: 2,
             }}
           />
@@ -446,7 +446,7 @@ export const ArtistPageSkeleton = () => {
               width: '100%',
               height: 300,
               borderRadius: borderRadius.lg,
-              backgroundColor: colors.neutral[200],
+              backgroundColor: themeColors.neutral[200],
             }}
           />
         </Box>

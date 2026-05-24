@@ -1,9 +1,9 @@
 import { SxProps, Theme } from '@mui/material';
-import { colors, typography, shadows, borderRadius, transitions } from './design-tokens';
+import { colors, themeColors, typography, shadows, borderRadius, transitions } from './design-tokens';
 
 export const authStyles: Record<string, SxProps<Theme>> = {
   container: {
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     minHeight: '100vh',
     padding: { xs: 2, md: 4 },
     display: 'flex',
@@ -13,10 +13,10 @@ export const authStyles: Record<string, SxProps<Theme>> = {
   contentWrapper: {
     maxWidth: 500,
     width: '100%',
-    backgroundColor: colors.neutral.white,
+    backgroundColor: themeColors.neutral.white,
     borderRadius: borderRadius.md,
     boxShadow: shadows.sm,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
     overflow: 'hidden',
   },
   header: {
@@ -24,21 +24,21 @@ export const authStyles: Record<string, SxProps<Theme>> = {
     paddingBottom: 2,
   },
   title: {
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     fontWeight: typography.fontWeight.semibold,
     fontSize: { xs: '1.5rem', md: typography.fontSize['3xl'] },
     textAlign: 'center',
     marginBottom: 1,
   },
   subtitle: {
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     fontSize: typography.fontSize.sm,
     textAlign: 'center',
   },
   tabs: {
-    borderBottom: `1px solid ${colors.neutral[200]}`,
+    borderBottom: `1px solid ${themeColors.neutral[200]}`,
     '& .MuiTabs-indicator': {
-      backgroundColor: colors.primary.main,
+      backgroundColor: themeColors.primary.main,
       height: 2,
     },
   },
@@ -46,9 +46,9 @@ export const authStyles: Record<string, SxProps<Theme>> = {
     textTransform: 'none',
     fontWeight: typography.fontWeight.medium,
     fontSize: typography.fontSize.base,
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     '&.Mui-selected': {
-      color: colors.primary.main,
+      color: themeColors.primary.main,
       fontWeight: typography.fontWeight.semibold,
     },
   },
@@ -59,11 +59,11 @@ export const authStyles: Record<string, SxProps<Theme>> = {
     marginBottom: 2,
     '& .MuiOutlinedInput-root': {
       borderRadius: borderRadius.md,
-      '&:hover fieldset': { borderColor: colors.primary.main },
-      '&.Mui-focused fieldset': { borderColor: colors.primary.main },
+      '&:hover fieldset': { borderColor: themeColors.primary.main },
+      '&.Mui-focused fieldset': { borderColor: themeColors.primary.main },
     },
     '& .MuiInputLabel-root': {
-      '&.Mui-focused': { color: colors.primary.main },
+      '&.Mui-focused': { color: themeColors.primary.main },
     },
   },
   submitButton: {
@@ -89,15 +89,15 @@ export const authStyles: Record<string, SxProps<Theme>> = {
     padding: 2,
   },
   signupInfoBox: {
-    backgroundColor: colors.neutral[50],
+    backgroundColor: themeColors.neutral[50],
     padding: 2,
     borderRadius: borderRadius.md,
     marginBottom: 3,
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
   },
   signupInfoText: {
     fontSize: typography.fontSize.sm,
-    color: colors.text.primary,
+    color: themeColors.text.primary,
     lineHeight: 1.6,
     marginBottom: 1.5,
   },
@@ -106,18 +106,18 @@ export const authStyles: Record<string, SxProps<Theme>> = {
     paddingLeft: 2.5,
     '& li': {
       fontSize: typography.fontSize.sm,
-      color: colors.neutral[700],
+      color: themeColors.text.secondary,
       lineHeight: 1.6,
       marginBottom: 0.5,
     },
   },
   signupInfoFootnote: {
     fontSize: '0.8rem',
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     marginTop: 1.5,
     fontStyle: 'italic',
   },
   spinner: {
-    color: colors.primary.main,
+    color: themeColors.primary.main,
   },
 };

@@ -19,7 +19,7 @@ import {
 import { CaretDown } from "@phosphor-icons/react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { contentPageStyles } from "../../styles/content-page-styles";
-import { colors } from "../../styles/design-tokens";
+import { themeColors } from "../../styles/design-tokens";
 
 interface Service {
   name: string;
@@ -160,10 +160,10 @@ const SigningServices = () => {
           </Typography>
 
           {/* Quick Comparison Table */}
-          <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: '1px solid', borderColor: 'divider' }}>
-            <Table>
+          <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: `1px solid ${themeColors.neutral[200]}`, backgroundColor: themeColors.background.paper }}>
+            <Table sx={{ '& .MuiTableCell-root': { color: themeColors.text.primary, borderColor: themeColors.neutral[200] } }}>
               <TableHead>
-                <TableRow sx={{ backgroundColor: colors.neutral[100] }}>
+                <TableRow sx={{ backgroundColor: themeColors.neutral[100] }}>
                   <TableCell sx={{ fontWeight: 'bold' }}>Service</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}># of Artists</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Cost Per Signature</TableCell>
@@ -225,13 +225,13 @@ const SigningServices = () => {
             elevation={0}
             sx={{
               mb: 4,
-              border: '1px solid',
-              borderColor: 'divider',
+              border: `1px solid ${themeColors.neutral[200]}`,
               '&:before': { display: 'none' },
+              backgroundColor: themeColors.background.dark,
             }}
           >
-            <AccordionSummary expandIcon={<CaretDown size={20} />}>
-              <Typography variant="h2" sx={{ ...contentPageStyles.sectionTitle, mb: 0 }}>
+            <AccordionSummary expandIcon={<CaretDown size={20} color="var(--c-text-primary)" />}>
+              <Typography variant="h2" sx={{ ...contentPageStyles.sectionTitle, mb: 0, mt: 0 }}>
                 How Do Signing Services Work?
               </Typography>
             </AccordionSummary>

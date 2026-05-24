@@ -1,10 +1,10 @@
 import { SxProps, Theme } from '@mui/material';
-import { colors, spacing, typography, transitions, borderRadius } from './design-tokens';
+import { themeColors, spacing, typography, transitions, borderRadius } from './design-tokens';
 
 export const footerStyles: Record<string, SxProps<Theme>> = {
   footerContainer: {
-    backgroundColor: colors.neutral.white,
-    borderTop: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: themeColors.neutral.white,
+    borderTop: `1px solid ${themeColors.neutral[200]}`,
     padding: { xs: spacing.xl, md: spacing.xxl },
     marginTop: 'auto',
   },
@@ -19,7 +19,7 @@ export const footerStyles: Record<string, SxProps<Theme>> = {
     gap: spacing.lg,
   },
   footerText: {
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     fontFamily: typography.fontFamily.primary,
@@ -39,7 +39,7 @@ export const footerStyles: Record<string, SxProps<Theme>> = {
     marginTop: { xs: spacing.md, md: 0 },
   },
   link: {
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     fontSize: typography.fontSize.sm,
     fontWeight: typography.fontWeight.medium,
     fontFamily: typography.fontFamily.primary,
@@ -48,13 +48,13 @@ export const footerStyles: Record<string, SxProps<Theme>> = {
     borderRadius: borderRadius.md,
     transition: transitions.base,
     '&:hover': {
-      color: colors.primary.main,
-      backgroundColor: colors.neutral[50],
+      color: themeColors.primary.main,
+      backgroundColor: themeColors.neutral[50],
       textDecoration: 'none',
     },
   },
   iconLink: {
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     padding: spacing.sm,
     borderRadius: borderRadius.md,
     transition: transitions.base,
@@ -62,13 +62,13 @@ export const footerStyles: Record<string, SxProps<Theme>> = {
     alignItems: 'center',
     justifyContent: 'center',
     '&:hover': {
-      color: colors.primary.main,
-      backgroundColor: colors.neutral[50],
+      color: themeColors.primary.main,
+      backgroundColor: themeColors.neutral[50],
     },
   },
   supportBanner: {
-    backgroundColor: colors.neutral[50],
-    borderTop: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: themeColors.neutral[50],
+    borderTop: `1px solid ${themeColors.neutral[200]}`,
     padding: { xs: spacing.md, md: spacing.lg },
   },
   supportBannerInner: {
@@ -79,7 +79,7 @@ export const footerStyles: Record<string, SxProps<Theme>> = {
     flexWrap: 'wrap',
   },
   supportText: {
-    color: colors.text.secondary,
+    color: themeColors.text.secondary,
     fontSize: typography.fontSize.sm,
     fontFamily: typography.fontFamily.primary,
   },

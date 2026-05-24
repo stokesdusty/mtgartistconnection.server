@@ -26,7 +26,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
 import EmptyState from "../shared/EmptyState";
 import { homepageStyles } from "../../styles/homepage-styles";
-import { colors } from "../../styles/design-tokens";
+import { themeColors } from "../../styles/design-tokens";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
@@ -464,7 +464,7 @@ const Homepage = () => {
             </Box>
 
             <FormControl size="small" sx={{ ...homepageStyles.locationSelect, '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
-              <InputLabel id="location-select-label">Filter by Location</InputLabel>
+              <InputLabel id="location-select-label" sx={{ color: themeColors.text.secondary, '&.Mui-focused': { color: themeColors.primary.main } }}>Filter by Location</InputLabel>
               <Select
                 labelId="location-select-label"
                 id="location-select"
@@ -575,7 +575,7 @@ const Homepage = () => {
         </Box>
 
         {/* Filter Summary Strip */}
-        <Box sx={{ ...homepageStyles.filterStrip as object, backgroundColor: hasActiveFilters ? colors.neutral[100] : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+        <Box sx={{ ...homepageStyles.filterStrip as object, backgroundColor: hasActiveFilters ? themeColors.neutral[100] : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, flex: 1 }}>
             <Typography sx={homepageStyles.filterStripCount}>
               {hasActiveFilters
