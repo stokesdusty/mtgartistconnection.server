@@ -15,11 +15,11 @@ import {
 } from "@mui/material";
 import { ArtistGridSkeleton } from "../shared/Skeletons";
 import { Eraser, Funnel, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react";
-import { useQuery } from "@apollo/client";
-import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
+import { useQuery, NetworkStatus } from "@apollo/client";
+import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
 import DensityToggle, { GridDensity, getDensityPreference, saveDensityPreference } from "./DensityToggle";
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
 import InputAdornment from "@mui/material/InputAdornment";
@@ -32,22 +32,56 @@ import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
+// Display record returned by artistsPage (filename needed to render the card image).
+interface ArtistDisplay {
+  name: string;
+  filename: string;
+}
+
+// Filter-index record returned by artistFilterFlags.
+interface ArtistFlag {
+  name: string;
+  flags: number;
+  location?: string;
+  alternate_names?: string;
+}
+
+// Merged shape passed to ArtistGridItem.
 interface Artist {
   name: string;
-  alternate_names?: string;
   filename: string;
   location?: string;
-  doesSigning?: boolean;
-  markssignatureservice?: string;
-  mountainmage?: string;
-  artistProofs?: string;
+  alternate_names?: string;
 }
+
+// Packed bitfield positions — must match the resolver.
+const FLAG_MARKSSIG     = 1 << 0; // markssignatureservice === "true"
+const FLAG_MOUNTAINMAGE = 1 << 1; // mountainmage truthy
+const FLAG_ARTISTPROOFS = 1 << 2; // artistProofs === "yes"|"true"
+
+const PAGE_SIZE = 60;
 
 const INTRO_SEEN_KEY = 'mtgac-intro-seen';
 
 const Homepage = () => {
   usePageTitle();
-  const { data, error, loading } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Page query — display fields only, paginated.
+  const {
+    data: pageData,
+    error,
+    loading: pageLoading,
+    fetchMore,
+    networkStatus,
+  } = useQuery(GET_ARTISTS_PAGE, {
+    variables: { offset: 0, limit: PAGE_SIZE },
+    notifyOnNetworkStatusChange: true,
+  });
+
+  // Filter-flags query — all artists, lightweight bitfield index.
+  const { data: flagsData } = useQuery(GET_ARTIST_FILTER_FLAGS);
+
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
   const [searchParams, setSearchParams] = useSearchParams();
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -83,6 +117,54 @@ const Homepage = () => {
       return next;
     }, { replace: true });
   }, [setSearchParams]);
+
+  // Pagination state derived from pageData.
+  const loadedArtists: ArtistDisplay[] = pageData?.artistsPage?.artists ?? [];
+  const totalArtists: number = pageData?.artistsPage?.total ?? 0;
+  const hasMore = loadedArtists.length < totalArtists;
+  const isFetchingMore = networkStatus === NetworkStatus.fetchMore;
+
+  // Map name → filename for joining with the flags index.
+  const filenameMap = useMemo(() => {
+    const m = new Map<string, string>();
+    loadedArtists.forEach((a) => m.set(a.name, a.filename));
+    return m;
+  }, [loadedArtists]);
+
+  // Full flags array — falls back to the loaded page data (flags=0) before flagsData arrives
+  // so the UI is not blank while the second query is in-flight.
+  const allFlags = useMemo<ArtistFlag[]>(() => {
+    if (flagsData?.artistFilterFlags) return flagsData.artistFilterFlags;
+    return loadedArtists.map((a) => ({ name: a.name, flags: 0 }));
+  }, [flagsData, loadedArtists]);
+
+  const loadMore = useCallback(() => {
+    if (!hasMore || isFetchingMore) return;
+    fetchMore({
+      variables: { offset: loadedArtists.length, limit: PAGE_SIZE },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult) return prev;
+        return {
+          artistsPage: {
+            ...fetchMoreResult.artistsPage,
+            artists: [...prev.artistsPage.artists, ...fetchMoreResult.artistsPage.artists],
+          },
+        };
+      },
+    });
+  }, [hasMore, isFetchingMore, loadedArtists.length, fetchMore]);
+
+  // Infinite scroll — fire loadMore when the sentinel enters the viewport.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: '300px' },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   // Get upcoming event IDs
   const upcomingEventIds = useMemo(() => {
@@ -167,9 +249,8 @@ const Homepage = () => {
   };
 
   const handleRandomArtist = () => {
-    if (data?.artists && data.artists.length > 0) {
-      const randomIndex = Math.floor(Math.random() * data.artists.length);
-      const randomArtist = data.artists[randomIndex];
+    if (allFlags.length > 0) {
+      const randomArtist = allFlags[Math.floor(Math.random() * allFlags.length)];
       navigate(`/artist/${randomArtist.name}`);
     }
   };
@@ -247,7 +328,7 @@ const Homepage = () => {
   }, [userSearch, locationFilter, letterFilter, marksSigServiceFilter, mountainMageFilter, hasUpcomingEventFilter, sellsApsFilter, updateSearchParams]);
 
   const locations = useMemo(() => {
-      if (!data?.artists) return { US: [], Other: [] };
+    if (!allFlags.length) return { US: [], Other: [] };
 
     const usStates = [
       "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
@@ -265,114 +346,74 @@ const Homepage = () => {
     const usLocations: string[] = [];
     const otherLocations: string[] = [];
 
-    data.artists.forEach((artist: Artist) => {
-      if (artist.location) {
-        if (artist.location.endsWith(', US') && usStates.includes(artist.location.split(',')[0])) {
-            usLocations.push(artist.location);
+    allFlags.forEach((a) => {
+      if (a.location) {
+        if (a.location.endsWith(', US') && usStates.includes(a.location.split(',')[0])) {
+          usLocations.push(a.location);
         } else {
-          otherLocations.push(artist.location);
+          otherLocations.push(a.location);
         }
       }
     });
 
-    const uniqueUsLocations = Array.from(new Set(usLocations)).sort();
-    const uniqueOtherLocations = Array.from(new Set(otherLocations)).sort();
-
     return {
-      US: uniqueUsLocations,
-      Other: uniqueOtherLocations,
+      US: Array.from(new Set(usLocations)).sort(),
+      Other: Array.from(new Set(otherLocations)).sort(),
     };
-  }, [data]);
+  }, [allFlags]);
 
-    const filteredData = useMemo(() => {
-    let filteredArtists = data?.artists || [];
+  // Filter the full flags index first — this runs over all artists regardless of what's loaded.
+  const matchingFlags = useMemo<ArtistFlag[]>(() => {
+    let filtered = allFlags;
 
-    // Location Filter
     if (locationFilter) {
-        filteredArtists = filteredArtists.filter((artist: Artist) => {
-            if (locationFilter === 'US') {
-                return artist.location?.endsWith(', US');
-            } else {
-                return artist.location === locationFilter;
-            }
-        });
+      filtered = filtered.filter((a) =>
+        locationFilter === 'US' ? a.location?.endsWith(', US') : a.location === locationFilter
+      );
     }
-
-    // Mountain Mage Filter
     if (mountainMageFilter) {
-      filteredArtists = filteredArtists.filter(
-        (artist: Artist) => artist.mountainmage && artist.mountainmage !== "" && artist.mountainmage !== "false"
-      );
+      filtered = filtered.filter((a) => (a.flags & FLAG_MOUNTAINMAGE) !== 0);
     }
-
-    // Marks Signature Service Filter
     if (marksSigServiceFilter) {
-      filteredArtists = filteredArtists.filter(
-        (artist: Artist) => artist.markssignatureservice === "true"
-      );
+      filtered = filtered.filter((a) => (a.flags & FLAG_MARKSSIG) !== 0);
     }
-
-    // Has Upcoming Event Filter
     if (hasUpcomingEventFilter) {
-      filteredArtists = filteredArtists.filter(
-        (artist: Artist) => artistsWithEvents.has(artist.name)
-      );
+      filtered = filtered.filter((a) => artistsWithEvents.has(a.name));
     }
-
-    // Sells APs on Website Filter
     if (sellsApsFilter) {
-      filteredArtists = filteredArtists.filter(
-        (artist: Artist) => artist.artistProofs === "yes" || artist.artistProofs === "true"
-      );
+      filtered = filtered.filter((a) => (a.flags & FLAG_ARTISTPROOFS) !== 0);
     }
-
-    // Letter Filter
     if (letterFilter) {
-      // Normalize to NFD so accented characters (é, ó, etc.) decompose to base letter + combining mark
-      const getBaseChar = (name: string) => name.normalize('NFD').charAt(0).toUpperCase();
-
+      const getBase = (name: string) => name.normalize('NFD').charAt(0).toUpperCase();
       if (letterFilter === 'Other') {
-        filteredArtists = filteredArtists.filter((artist: Artist) =>
-          !/^[a-zA-Z0-9]/.test(artist.name.normalize('NFD'))
-        );
+        filtered = filtered.filter((a) => !/^[a-zA-Z0-9]/.test(a.name.normalize('NFD')));
       } else if (letterFilter === '0-9') {
-        filteredArtists = filteredArtists.filter((artist: Artist) =>
-          /^[0-9]/.test(artist.name)
-        );
+        filtered = filtered.filter((a) => /^[0-9]/.test(a.name));
       } else {
-        filteredArtists = filteredArtists.filter((artist: Artist) =>
-          getBaseChar(artist.name) === letterFilter
-        );
+        filtered = filtered.filter((a) => getBase(a.name) === letterFilter);
       }
     }
-
-    // Search Filter
     if (userSearch.length >= 2) {
-      const searchTerm = userSearch.toLowerCase().replace(/\s/g, "");
-      filteredArtists = filteredArtists.filter((artist: Artist) => {
-        const artistInfo = `${artist.name}${artist.alternate_names || ""}${artist.filename}${
-          artist.location || ""
-        }`
-          .toLowerCase()
-          .replace(/\s/g, "");
-        return artistInfo.includes(searchTerm);
+      const term = userSearch.toLowerCase().replace(/\s/g, '');
+      filtered = filtered.filter((a) => {
+        const hay = `${a.name}${a.alternate_names ?? ''}${a.location ?? ''}`.toLowerCase().replace(/\s/g, '');
+        return hay.includes(term);
       });
     }
 
-    return filteredArtists;
-  }, [
-    userSearch,
-    data,
-    locationFilter,
-    mountainMageFilter,
-    marksSigServiceFilter,
-    hasUpcomingEventFilter,
-    sellsApsFilter,
-    artistsWithEvents,
-    letterFilter,
-  ]);
+    return filtered;
+  }, [allFlags, locationFilter, mountainMageFilter, marksSigServiceFilter,
+      hasUpcomingEventFilter, sellsApsFilter, letterFilter, userSearch, artistsWithEvents]);
 
-  if (loading)
+  // Join matching flags with loaded filenames to produce the display list.
+  // Artists whose page hasn't been fetched yet are omitted; they appear as the user scrolls.
+  const filteredData = useMemo<Artist[]>(() => {
+    return matchingFlags
+      .map((a) => ({ name: a.name, filename: filenameMap.get(a.name) ?? '', location: a.location, alternate_names: a.alternate_names }))
+      .filter((a) => a.filename !== '');
+  }, [matchingFlags, filenameMap]);
+
+  if (pageLoading && !pageData)
     return (
       <Box sx={homepageStyles.container}>
         <Box sx={homepageStyles.wrapper}>
@@ -399,7 +440,7 @@ const Homepage = () => {
       </Box>
     );
 
-  if (!data?.artists)
+  if (!pageData?.artistsPage)
     return (
       <Box sx={homepageStyles.container}>
         <Box sx={homepageStyles.wrapper}>
@@ -431,7 +472,7 @@ const Homepage = () => {
               </Typography>
 
               <Box component="span" sx={homepageStyles.count}>
-                Proudly indexing {data.artists.length} artists and counting
+                Proudly indexing {allFlags.length || totalArtists} artists and counting
               </Box>
             </>
           )}
@@ -603,8 +644,8 @@ const Homepage = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, flex: 1 }}>
             <Typography sx={homepageStyles.filterStripCount}>
               {hasActiveFilters
-                ? `Showing ${filteredData.length} of ${data.artists.length} artists`
-                : `${data.artists.length} artists`
+                ? `Showing ${filteredData.length} of ${matchingFlags.length} artists`
+                : `${allFlags.length || totalArtists} artists`
               }
             </Typography>
 
@@ -652,6 +693,9 @@ const Homepage = () => {
           ) : null
         }
         </Box>
+
+        {/* Infinite-scroll sentinel — IntersectionObserver triggers the next page fetch. */}
+        <div ref={sentinelRef} style={{ height: 1 }} />
       </Box>
 
       <SwipeableDrawer

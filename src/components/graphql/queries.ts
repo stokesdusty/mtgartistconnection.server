@@ -15,6 +15,29 @@ export const GET_ARTISTS_FOR_HOMEPAGE = gql`
     }
 `;
 
+export const GET_ARTISTS_PAGE = gql`
+    query artistsPage($offset: Int, $limit: Int) {
+        artistsPage(offset: $offset, limit: $limit) {
+            artists {
+                name
+                filename
+            }
+            total
+        }
+    }
+`;
+
+export const GET_ARTIST_FILTER_FLAGS = gql`
+    {
+        artistFilterFlags {
+            name
+            flags
+            location
+            alternate_names
+        }
+    }
+`;
+
 export const GET_ARTIST_BY_NAME = gql`
     query artistByName($name:String!){
         artistByName(name:$name){
