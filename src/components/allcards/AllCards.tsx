@@ -3,6 +3,7 @@ import {
   useState,
   useMemo,
   useCallback,
+  useRef,
   memo,
 } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
@@ -30,6 +31,7 @@ import { allCardsStyles } from "../../styles/all-cards-styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { colors, themeColors, spacing } from "../../styles/design-tokens";
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
 
 interface Card {
   related_uris: any;
@@ -129,6 +131,16 @@ const COLLECTION_FIELDS = [
   { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           color: themeColors.primary.main },
   { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   color: colors.accent.red },
 ] as const;
+
+const CARD_COL_MIN_WIDTH = 220; // px — narrowest column before adding another
+const GRID_GAP = 24;            // spacing.lg = 1.5rem
+const STICKY_TOP = 68;          // height of the sticky nav rail in px
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
 
 // ─── CardItem ────────────────────────────────────────────────────────────────
 // Defined outside AllCards so React.memo works correctly and getCardPrice/
@@ -312,6 +324,39 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
   );
 });
 
+// ─── VirtualRow ───────────────────────────────────────────────────────────────
+
+interface VirtualRowData {
+  rows: Card[][];
+  columnWidth: number;
+  getCardPrice: (card: Card) => CardPrice | undefined;
+  getCardKingdomPrice: (card: Card) => CardKingdomPrice | undefined;
+  cardCollection: Map<string, CollectionItem>;
+  isLoggedIn: boolean;
+  onToggle: (card: Card, field: string) => void;
+}
+
+const VirtualRow = memo(({ index, style, data }: ListChildComponentProps<VirtualRowData>) => {
+  const { rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, onToggle } = data;
+  const rowCards = rows[index] ?? [];
+  return (
+    <div style={{ ...style, display: 'flex', gap: GRID_GAP, boxSizing: 'border-box', paddingBottom: GRID_GAP }}>
+      {rowCards.map((card) => (
+        <div key={card.id} style={{ flex: `0 0 ${columnWidth}px`, minWidth: 0 }}>
+          <CardItem
+            card={card}
+            price={getCardPrice(card)}
+            ckPrice={getCardKingdomPrice(card)}
+            collectionItem={cardCollection.get(card.id)}
+            isLoggedIn={isLoggedIn}
+            onToggle={onToggle}
+          />
+        </div>
+      ))}
+    </div>
+  );
+});
+
 // ─── AllCards ─────────────────────────────────────────────────────────────────
 
 const AllCards = () => {
@@ -328,16 +373,56 @@ const AllCards = () => {
   const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
   const [cardKingdomPrices, setCardKingdomPrices] = useState<Map<string, CardKingdomPrice>>(new Map());
   const [cardCollection, setCardCollection] = useState<Map<string, CollectionItem>>(new Map());
+  const listRef = useRef<FixedSizeList>(null);
+  const gridWrapperRef = useRef<HTMLDivElement>(null);
+  // Cached document-offset of the grid wrapper; updated on mount, resize, and cardData change.
+  const scrollStartRef = useRef(0);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   const [sortByNewest, setSortByNewest] = useState<boolean>(false);
   const [isFetchingCards, setIsFetchingCards] = useState<boolean>(false);
+  const [containerWidth, setContainerWidth] = useState<number>(() => window.innerWidth - 80);
+  const [viewportHeight, setViewportHeight] = useState<number>(() => Math.max(300, window.innerHeight - STICKY_TOP));
+
+  // Measure how far the grid wrapper is from the top of the document so the
+  // window-scroll handler knows when to start offsetting the list.
+  const measureScrollStart = useCallback(() => {
+    if (gridWrapperRef.current) {
+      scrollStartRef.current =
+        gridWrapperRef.current.getBoundingClientRect().top + window.scrollY - STICKY_TOP;
+    }
+  }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > window.innerHeight);
+    const el = gridWrapperRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    measureScrollStart();
+    const onResize = () => {
+      setViewportHeight(Math.max(300, window.innerHeight - STICKY_TOP));
+      measureScrollStart();
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [measureScrollStart]);
+
+  // Re-measure after cardData arrives — the controls section may shift layout.
+  useEffect(() => {
+    if (cardData) measureScrollStart();
+  }, [cardData, measureScrollStart]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const offset = Math.max(0, window.scrollY - scrollStartRef.current);
+      listRef.current?.scrollTo(offset);
+      setShowScrollTop(window.scrollY > window.innerHeight * 0.5);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const scrollToTop = () => {
@@ -584,6 +669,48 @@ const AllCards = () => {
     });
   }, [isLoggedIn, toggleCardCollectionField, artist]);
 
+  const columnCount = useMemo(
+    () => Math.max(1, Math.floor((containerWidth + GRID_GAP) / (CARD_COL_MIN_WIDTH + GRID_GAP))),
+    [containerWidth]
+  );
+
+  // Effective column width drives row height so images never clip on resize.
+  const columnWidth = useMemo(
+    () => (containerWidth - (columnCount - 1) * GRID_GAP) / columnCount,
+    [containerWidth, columnCount]
+  );
+
+  // border_crop images are 480×680px (aspect ratio 480/680 ≈ 0.706).
+  const rowHeight = useMemo(
+    () => Math.ceil(columnWidth * (680 / 480)) + 80 + GRID_GAP,
+    [columnWidth]
+  );
+
+  const rows = useMemo(
+    () => chunkArray(displayedCards, columnCount),
+    [displayedCards, columnCount]
+  );
+
+  const itemData = useMemo<VirtualRowData>(
+    () => ({
+      rows,
+      columnWidth,
+      getCardPrice,
+      getCardKingdomPrice,
+      cardCollection,
+      isLoggedIn,
+      onToggle: handleCollectionToggle,
+    }),
+    [rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, handleCollectionToggle]
+  );
+
+  const totalListHeight = rows.length * rowHeight;
+
+  // When column count changes the list re-chunks, so scroll back to top.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [columnCount]);
+
   const handleCheck = () => {
     setHideReprints(prev => {
       const next = !prev;
@@ -783,25 +910,34 @@ const AllCards = () => {
             </Typography>
           )}
 
-          {!cardData ? (
-            <AllCardsGridSkeleton count={12} />
-          ) : (
-            <>
-              <Box sx={allCardsStyles.cardsGrid}>
-                {displayedCards.map((card) => (
-                  <CardItem
-                    key={card.id}
-                    card={card}
-                    price={getCardPrice(card)}
-                    ckPrice={getCardKingdomPrice(card)}
-                    collectionItem={cardCollection.get(card.id)}
-                    isLoggedIn={isLoggedIn}
-                    onToggle={handleCollectionToggle}
-                  />
-                ))}
-              </Box>
-            </>
-          )}
+          <Box
+            ref={gridWrapperRef}
+            sx={{
+              mt: spacing.xl,
+              width: '100%',
+              // Reserve the full virtual scroll height so the page is scrollable.
+              height: cardData ? totalListHeight : 'auto',
+            }}
+          >
+            {!cardData ? (
+              <AllCardsGridSkeleton count={12} />
+            ) : (
+              <div style={{ position: 'sticky', top: STICKY_TOP, height: viewportHeight }}>
+                <FixedSizeList
+                  ref={listRef}
+                  height={viewportHeight}
+                  itemCount={rows.length}
+                  itemSize={rowHeight}
+                  itemData={itemData}
+                  width={containerWidth}
+                  overscanCount={3}
+                  style={{ overflow: 'hidden', outline: 'none' }}
+                >
+                  {VirtualRow}
+                </FixedSizeList>
+              </div>
+            )}
+          </Box>
         </Paper>
       </Container>
 
