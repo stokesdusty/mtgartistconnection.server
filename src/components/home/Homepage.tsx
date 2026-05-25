@@ -13,6 +13,8 @@ import {
   Chip,
   ListSubheader,
 } from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
+import setArtistsData from "../../data/set-artists.json";
 import { ArtistGridSkeleton } from "../shared/Skeletons";
 import { Eraser, Funnel, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react";
 import { useQuery, NetworkStatus } from "@apollo/client";
@@ -27,6 +29,7 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import EmptyState from "../shared/EmptyState";
 import { homepageStyles } from "../../styles/homepage-styles";
 import { themeColors } from "../../styles/design-tokens";
+import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
@@ -53,6 +56,15 @@ interface Artist {
   location?: string;
   alternate_names?: string;
 }
+
+interface ScryfallSet {
+  code: string;
+  name: string;
+  set_type: string;
+  released_at: string;
+}
+
+const MAJOR_SET_TYPES = new Set(['core', 'expansion', 'masters', 'draft_innovation', 'starter']);
 
 // Packed bitfield positions — must match the resolver.
 const FLAG_MARKSSIG     = 1 << 0; // markssignatureservice === "true"
@@ -94,6 +106,8 @@ const Homepage = () => {
     return !seen;
   });
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [scryfallSets, setScryfallSets] = useState<ScryfallSet[]>([]);
+  const [setsLoading, setSetsLoading] = useState(false);
   const navigate = useNavigate();
 
   // Read filter state from URL params
@@ -104,6 +118,7 @@ const Homepage = () => {
   const hasUpcomingEventFilter = searchParams.get('hasEvent') === 'true';
   const sellsApsFilter = searchParams.get('sellsAps') === 'true';
   const letterFilter = searchParams.get('letter') || '';
+  const setFilter = searchParams.get('set') || '';
 
   // Helper to update URL params
   const updateSearchParams = useCallback((key: string, value: string | boolean) => {
@@ -119,7 +134,10 @@ const Homepage = () => {
   }, [setSearchParams]);
 
   // Pagination state derived from pageData.
-  const loadedArtists: ArtistDisplay[] = pageData?.artistsPage?.artists ?? [];
+  const loadedArtists = useMemo<ArtistDisplay[]>(
+    () => pageData?.artistsPage?.artists ?? [],
+    [pageData?.artistsPage?.artists],
+  );
   const totalArtists: number = pageData?.artistsPage?.total ?? 0;
   const hasMore = loadedArtists.length < totalArtists;
   const isFetchingMore = networkStatus === NetworkStatus.fetchMore;
@@ -188,6 +206,21 @@ const Homepage = () => {
     if (!eventArtistsData?.artistsByEventIds) return new Set<string>();
     return new Set(eventArtistsData.artistsByEventIds.map((a: any) => a.artistName));
   }, [eventArtistsData]);
+
+  // Fetch major MTG sets from Scryfall once on mount for the set filter dropdown.
+  useEffect(() => {
+    setSetsLoading(true);
+    axios.get<{ data: ScryfallSet[] }>('https://api.scryfall.com/sets')
+      .then(res => {
+        const filtered = res.data.data
+          .filter(s => MAJOR_SET_TYPES.has(s.set_type))
+          .sort((a, b) => new Date(b.released_at).getTime() - new Date(a.released_at).getTime());
+        setScryfallSets(filtered);
+      })
+      .catch(() => {})
+      .finally(() => setSetsLoading(false));
+  }, []);
+
 
   // Show scroll-to-top button when user scrolls below the fold
   useEffect(() => {
@@ -262,7 +295,7 @@ const Homepage = () => {
 
   // Check if any filter is active
   const hasActiveFilters = userSearch.length >= 2 || locationFilter || mountainMageFilter ||
-    marksSigServiceFilter || hasUpcomingEventFilter || sellsApsFilter || letterFilter;
+    marksSigServiceFilter || hasUpcomingEventFilter || sellsApsFilter || letterFilter || setFilter;
 
   // Clear all filters
   const handleClearAllFilters = () => {
@@ -323,9 +356,17 @@ const Homepage = () => {
         onDelete: () => updateSearchParams('sellsAps', false),
       });
     }
+    if (setFilter) {
+      const setObj = scryfallSets.find(s => s.code === setFilter);
+      chips.push({
+        key: 'set',
+        label: `Set: ${setObj?.name ?? setFilter.toUpperCase()}`,
+        onDelete: () => updateSearchParams('set', ''),
+      });
+    }
 
     return chips;
-  }, [userSearch, locationFilter, letterFilter, marksSigServiceFilter, mountainMageFilter, hasUpcomingEventFilter, sellsApsFilter, updateSearchParams]);
+  }, [userSearch, locationFilter, letterFilter, marksSigServiceFilter, mountainMageFilter, hasUpcomingEventFilter, sellsApsFilter, setFilter, scryfallSets, updateSearchParams]);
 
   const locations = useMemo(() => {
     if (!allFlags.length) return { US: [], Other: [] };
@@ -400,10 +441,15 @@ const Homepage = () => {
         return hay.includes(term);
       });
     }
+    if (setFilter) {
+      const setNames = new Set<string>((setArtistsData as Record<string, string[]>)[setFilter] ?? []);
+      filtered = filtered.filter((a) => setNames.has(a.name.toLowerCase().replace(/\s/g, '')));
+    }
 
     return filtered;
   }, [allFlags, locationFilter, mountainMageFilter, marksSigServiceFilter,
-      hasUpcomingEventFilter, sellsApsFilter, letterFilter, userSearch, artistsWithEvents]);
+      hasUpcomingEventFilter, sellsApsFilter, letterFilter, userSearch, artistsWithEvents,
+      setFilter]);
 
   // Join matching flags with loaded filenames to produce the display list.
   // Artists whose page hasn't been fetched yet are omitted; they appear as the user scrolls.
@@ -506,42 +552,64 @@ const Homepage = () => {
               </Button>
             </Box>
 
-            <FormControl size="small" sx={{ ...homepageStyles.locationSelect, '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
-              <InputLabel id="location-select-label" sx={{ color: themeColors.text.secondary, '&.Mui-focused': { color: themeColors.primary.main } }}>Filter by Location</InputLabel>
-              <Select
-                labelId="location-select-label"
-                id="location-select"
-                value={locationFilter}
-                label="Filter by Location"
-                onChange={handleLocationChange}
-                sx={{ fontSize: '0.875rem' }}
-              >
-                <MenuItem value="">All Locations</MenuItem>
-                {locations.US.length > 0 && [
-                  <ListSubheader key="us-header" sx={homepageStyles.listSubheader}>
-                    US States
-                  </ListSubheader>,
-                  <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
-                    Anywhere in the US
-                  </MenuItem>,
-                  ...locations.US.map((location) => (
-                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                      {location.split(',')[0]}
-                    </MenuItem>
-                  ))
-                ]}
-                {locations.Other.length > 0 && [
-                  <ListSubheader key="other-header" sx={homepageStyles.listSubheader}>
-                    Other Locations
-                  </ListSubheader>,
-                  ...locations.Other.map((location) => (
-                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                      {location}
-                    </MenuItem>
-                  ))
-                ]}
-              </Select>
-            </FormControl>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FormControl size="small" sx={{ ...homepageStyles.locationSelect, '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
+                <InputLabel id="location-select-label" sx={{ color: themeColors.text.secondary, '&.Mui-focused': { color: themeColors.primary.main } }}>Filter by Location</InputLabel>
+                <Select
+                  labelId="location-select-label"
+                  id="location-select"
+                  value={locationFilter}
+                  label="Filter by Location"
+                  onChange={handleLocationChange}
+                  sx={{ fontSize: '0.875rem' }}
+                >
+                  <MenuItem value="">All Locations</MenuItem>
+                  {locations.US.length > 0 && [
+                    <ListSubheader key="us-header" sx={homepageStyles.listSubheader}>
+                      US States
+                    </ListSubheader>,
+                    <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
+                      Anywhere in the US
+                    </MenuItem>,
+                    ...locations.US.map((location) => (
+                      <MenuItem key={location} value={location} sx={{ pl: 3 }}>
+                        {location.split(',')[0]}
+                      </MenuItem>
+                    ))
+                  ]}
+                  {locations.Other.length > 0 && [
+                    <ListSubheader key="other-header" sx={homepageStyles.listSubheader}>
+                      Other Locations
+                    </ListSubheader>,
+                    ...locations.Other.map((location) => (
+                      <MenuItem key={location} value={location} sx={{ pl: 3 }}>
+                        {location}
+                      </MenuItem>
+                    ))
+                  ]}
+                </Select>
+              </FormControl>
+
+              <Autocomplete
+                size="small"
+                options={scryfallSets}
+                getOptionLabel={(option) => option.name}
+                value={scryfallSets.find(s => s.code === setFilter) ?? null}
+                onChange={(_, newValue) => updateSearchParams('set', newValue?.code ?? '')}
+                loading={setsLoading}
+                loadingText="Loading sets..."
+                noOptionsText="No sets found"
+                sx={homepageStyles.locationSelect}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Filter by Set"
+                    size="small"
+                    sx={{ '& .MuiInputLabel-root': { fontSize: '0.875rem' }, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
+                  />
+                )}
+              />
+            </Box>
 
             <Box sx={homepageStyles.checkboxContainer}>
               <Typography sx={{ ...homepageStyles.signingAgentLabel, fontSize: '0.875rem', mb: 0.5 }}>Filters</Typography>
@@ -684,7 +752,8 @@ const Homepage = () => {
             mountainMageFilter ||
             marksSigServiceFilter ||
             hasUpcomingEventFilter ||
-            sellsApsFilter) && filteredData.length === 0 ? (
+            sellsApsFilter ||
+            setFilter) && filteredData.length === 0 ? (
             <EmptyState
               headline="No artists match your search"
               action={{ label: 'Clear search', onClick: handleClearAllFilters }}
@@ -764,6 +833,26 @@ const Homepage = () => {
                 ]}
               </Select>
             </FormControl>
+            <Autocomplete
+              size="small"
+              options={scryfallSets}
+              getOptionLabel={(option) => option.name}
+              value={scryfallSets.find(s => s.code === setFilter) ?? null}
+              onChange={(_, newValue) => updateSearchParams('set', newValue?.code ?? '')}
+              loading={setsLoading}
+              loadingText="Loading sets..."
+              noOptionsText="No sets found"
+              sx={homepageStyles.locationSelect}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Filter by Set"
+                  size="small"
+                  sx={{ '& .MuiInputLabel-root': { fontSize: '0.875rem' }, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
+                  InputProps={params.InputProps}
+                />
+              )}
+            />
             <Box sx={homepageStyles.checkboxContainer}>
               <Typography sx={{ ...homepageStyles.signingAgentLabel, fontSize: '0.875rem', mb: 0.5 }}>Options</Typography>
               <FormGroup sx={{ ...homepageStyles.checkboxesContainer, gap: 0 }}>

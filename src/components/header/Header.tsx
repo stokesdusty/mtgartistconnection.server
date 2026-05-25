@@ -23,7 +23,7 @@ import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
 import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
-import { shadows, themeColors } from '../../styles/design-tokens';
+import { shadows } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
 import { logout } from '../../store/auth-slice';
