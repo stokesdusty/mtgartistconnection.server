@@ -91,7 +91,7 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
   searchContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   randomButton: {
     backgroundColor: colors.primary.main,

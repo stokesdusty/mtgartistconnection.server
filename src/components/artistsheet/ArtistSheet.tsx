@@ -193,14 +193,14 @@ const ArtistSheet = () => {
   return (
     <>
       {/* Form */}
-      <Box sx={{ bgcolor: themeColors.background.default, py: 4 }}>
-        <Container maxWidth="sm">
+      <Box sx={{ bgcolor: themeColors.background.default, py: 2 }}>
+        <Container maxWidth="md">
           <Typography
-            variant="h4"
+            variant="h6"
             sx={{
               fontWeight: 700,
               color: themeColors.text.primary,
-              mb: 3,
+              mb: 1.5,
               fontFamily: 'Fraunces, Georgia, serif',
             }}
           >
@@ -210,63 +210,62 @@ const ArtistSheet = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              p: 1.5,
               bgcolor: themeColors.background.paper,
               border: `1px solid ${themeColors.neutral[200]}`,
               borderRadius: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
             }}
           >
-            <TextField
-              label="Your Name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              fullWidth
-              size="small"
-              sx={inputSx}
-            />
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5, mb: 1.5 }}>
+              <TextField
+                label="Your Name"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                fullWidth
+                size="small"
+                sx={inputSx}
+              />
 
-            <FormControl fullWidth size="small" sx={inputSx}>
-              <InputLabel>Artist</InputLabel>
-              <Select
-                value={artist}
-                label="Artist"
-                onChange={e => setArtist(e.target.value)}
-                MenuProps={{ PaperProps: { sx: { bgcolor: themeColors.background.paper } } }}
-              >
-                {artists.map(a => (
-                  <MenuItem key={a} value={a} sx={{ color: themeColors.text.primary }}>{a}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              <TextField
+                label="Color(s)"
+                placeholder="e.g. W, U, B, R, G"
+                value={color}
+                onChange={e => setColor(e.target.value)}
+                onKeyDown={handleKeyDown}
+                fullWidth
+                size="small"
+                sx={inputSx}
+              />
 
-            <FormControl fullWidth size="small" sx={inputSx}>
-              <InputLabel>Quantity</InputLabel>
-              <Select
-                value={quantity}
-                label="Quantity"
-                onChange={e => setQuantity(Number(e.target.value))}
-                MenuProps={{ PaperProps: { sx: { bgcolor: themeColors.background.paper } } }}
-              >
-                {QUANTITIES.map(n => (
-                  <MenuItem key={n} value={n} sx={{ color: themeColors.text.primary }}>{n}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              <FormControl fullWidth size="small" sx={inputSx}>
+                <InputLabel>Artist</InputLabel>
+                <Select
+                  value={artist}
+                  label="Artist"
+                  onChange={e => setArtist(e.target.value)}
+                  MenuProps={{ PaperProps: { sx: { bgcolor: themeColors.background.paper } } }}
+                >
+                  {artists.map(a => (
+                    <MenuItem key={a} value={a} sx={{ color: themeColors.text.primary }}>{a}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-            <TextField
-              label="Color(s)"
-              placeholder="e.g. W, U, B, R, G"
-              value={color}
-              onChange={e => setColor(e.target.value)}
-              onKeyDown={handleKeyDown}
-              fullWidth
-              size="small"
-              sx={inputSx}
-            />
+              <FormControl fullWidth size="small" sx={inputSx}>
+                <InputLabel>Quantity</InputLabel>
+                <Select
+                  value={quantity}
+                  label="Quantity"
+                  onChange={e => setQuantity(Number(e.target.value))}
+                  MenuProps={{ PaperProps: { sx: { bgcolor: themeColors.background.paper } } }}
+                >
+                  {QUANTITIES.map(n => (
+                    <MenuItem key={n} value={n} sx={{ color: themeColors.text.primary }}>{n}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
 
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <Button
@@ -274,6 +273,7 @@ const ArtistSheet = () => {
                 onClick={handleAdd}
                 disabled={!canAdd}
                 disableElevation
+                size="small"
                 sx={{
                   bgcolor: colors.primary.main,
                   '&:hover': { bgcolor: colors.primary.dark },
@@ -287,7 +287,8 @@ const ArtistSheet = () => {
                 <>
                   <Button
                     variant="outlined"
-                    startIcon={<Printer size={18} />}
+                    size="small"
+                    startIcon={<Printer size={16} />}
                     onClick={handlePrint}
                     sx={{ borderColor: themeColors.neutral[300], color: themeColors.text.primary }}
                   >
@@ -295,7 +296,8 @@ const ArtistSheet = () => {
                   </Button>
                   <Button
                     variant="text"
-                    startIcon={<Trash size={18} />}
+                    size="small"
+                    startIcon={<Trash size={16} />}
                     onClick={() => setSlots([])}
                     sx={{ color: colors.accent.red, ml: 'auto' }}
                   >
@@ -307,7 +309,7 @@ const ArtistSheet = () => {
           </Paper>
 
           {slots.length > 0 && (
-            <Typography sx={{ mt: 2, fontSize: '0.8rem', color: themeColors.text.secondary }}>
+            <Typography sx={{ mt: 1, fontSize: '0.75rem', color: themeColors.text.secondary }}>
               Preview below — keep adding slots or print when ready.
             </Typography>
           )}

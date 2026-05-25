@@ -554,6 +554,12 @@ const AllCards = () => {
         }
       }
 
+      // Scryfall returns 404 (throws) when there are no results, so cardData stays
+      // null after the loop. Set it to an empty array so the "no results" UI renders.
+      if (!cancelled && accumulated.length === 0) {
+        setCardData({ data: [], total_cards: 0 });
+      }
+
       if (!cancelled) setIsFetchingCards(false);
     };
 

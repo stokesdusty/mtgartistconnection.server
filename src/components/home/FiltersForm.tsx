@@ -232,11 +232,10 @@ const FiltersForm = ({
         <Box sx={homepageStyles.searchContainer}>
           {searchField}
           <Button
-            size="small"
             variant="contained"
             onClick={onRandomArtist}
             startIcon={<Shuffle size={20} />}
-            sx={{ ...homepageStyles.randomButton, fontSize: "0.8125rem" }}
+            sx={{ ...homepageStyles.randomButton, fontSize: "0.8125rem", height: '40px' }}
           >
             Random Artist
           </Button>
