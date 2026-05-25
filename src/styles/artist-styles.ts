@@ -63,10 +63,6 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     alignItems: 'center',
     gap: spacing.md,
     height: '68px',
-    overflowX: 'auto',
-    overflowY: 'hidden',
-    '&::-webkit-scrollbar': { display: 'none' },
-    scrollbarWidth: 'none',
   },
   stickyName: {
     fontFamily: typography.fontFamily.heading,
@@ -76,6 +72,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     letterSpacing: '-0.02em',
     whiteSpace: 'nowrap',
     flexShrink: 0,
+    display: { xs: 'none', sm: 'block' },
   },
   stickyDivider: {
     width: '1px',
@@ -117,7 +114,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     fontWeight: typography.fontWeight.semibold,
     height: '26px',
     flexShrink: 0,
-    cursor: 'default',
+    cursor: 'pointer',
     '& .MuiChip-label': {
       paddingLeft: '10px',
       paddingRight: '10px',

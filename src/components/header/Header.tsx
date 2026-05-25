@@ -20,7 +20,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
 import { shadows } from '../../styles/design-tokens';
@@ -38,7 +38,6 @@ const navItems: NavItem[] = [
   { label: "News", to: "/news" },
   { label: "Services", to: "/signingservices" },
   { label: "Events", to: "/calendar" },
-  { label: "Random Flavor Text", to: "/randomflavortext" },
 ];
 
 const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
@@ -64,7 +63,7 @@ const Header = () => {
   );
 
   const theme = useTheme();
-  const isBelowLarge = useMediaQuery(theme.breakpoints.down("lg"));
+  const isBelowLarge = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -128,6 +127,11 @@ const Header = () => {
   const handleFollowingClick = () => {
     setDrawerOpen(false);
     navigate('/following');
+  };
+
+  const handleRandomFlavorTextClick = () => {
+    setDrawerOpen(false);
+    navigate('/randomflavortext');
   };
 
   useEffect(() => {
@@ -267,8 +271,8 @@ const Header = () => {
       >
         <Box sx={{ width: 280, color: 'text.primary' }} role="presentation">
           <Box sx={headerStyles.drawerHeader}>
-            <Box sx={{ ...headerStyles.drawerHeaderLabel, color: 'text.primary' }}>Account</Box>
-            <Box sx={{ ...headerStyles.drawerHeaderEmail, color: 'text.secondary' }}>{user?.email}</Box>
+            <Box sx={headerStyles.drawerHeaderLabel}>Account</Box>
+            <Box sx={headerStyles.drawerHeaderEmail}>{user?.email}</Box>
           </Box>
           {isBelowLarge && (
             <>
@@ -317,6 +321,14 @@ const Header = () => {
                   <Envelope size={20} weight="duotone" />
                 </ListItemIcon>
                 <ListItemText primary="Signing Tracker" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleRandomFlavorTextClick} sx={headerStyles.drawerListItem}>
+                <ListItemIcon>
+                  <Shuffle size={20} weight="duotone" />
+                </ListItemIcon>
+                <ListItemText primary="Random Flavor Text" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

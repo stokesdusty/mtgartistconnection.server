@@ -402,6 +402,7 @@ const Artist = () => {
                 label={signingPillLabel}
                 size="small"
                 sx={artistStyles.signingPill}
+                onClick={() => navigate(`/calendar/${nextSigningEvent.id}`)}
               />
             )}
 

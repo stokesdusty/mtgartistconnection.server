@@ -1,22 +1,12 @@
 import {
   Box,
-  TextField,
   Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
   Button,
   Chip,
-  ListSubheader,
 } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
 import setArtistsData from "../../data/set-artists.json";
 import { ArtistGridSkeleton } from "../shared/Skeletons";
-import { Eraser, Funnel, MagnifyingGlass, Shuffle, ArrowUp } from "@phosphor-icons/react";
+import { Eraser, Funnel, Shuffle, ArrowUp } from "@phosphor-icons/react";
 import { useQuery, NetworkStatus } from "@apollo/client";
 import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
@@ -24,8 +14,8 @@ import DensityToggle, { GridDensity, getDensityPreference, saveDensityPreference
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
-import InputAdornment from "@mui/material/InputAdornment";
 import { SelectChangeEvent } from '@mui/material/Select';
+import FiltersForm, { ScryfallSet } from "./FiltersForm";
 import EmptyState from "../shared/EmptyState";
 import { homepageStyles } from "../../styles/homepage-styles";
 import { themeColors } from "../../styles/design-tokens";
@@ -55,13 +45,6 @@ interface Artist {
   filename: string;
   location?: string;
   alternate_names?: string;
-}
-
-interface ScryfallSet {
-  code: string;
-  name: string;
-  set_type: string;
-  released_at: string;
 }
 
 const MAJOR_SET_TYPES = new Set(['core', 'expansion', 'masters', 'draft_innovation', 'starter']);
@@ -97,7 +80,13 @@ const Homepage = () => {
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
   const [searchParams, setSearchParams] = useSearchParams();
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [density, setDensity] = useState<GridDensity>(getDensityPreference);
+  const [density, setDensity] = useState<GridDensity>(() => {
+    const urlDensity = searchParams.get('density');
+    if (urlDensity === 'comfortable' || urlDensity === 'compact' || urlDensity === 'gallery') {
+      return urlDensity;
+    }
+    return getDensityPreference();
+  });
   const [showIntro] = useState(() => {
     const seen = localStorage.getItem(INTRO_SEEN_KEY) === 'true';
     if (!seen) {
@@ -291,6 +280,7 @@ const Homepage = () => {
   const handleDensityChange = (v: GridDensity) => {
     setDensity(v);
     saveDensityPreference(v);
+    updateSearchParams('density', v === 'comfortable' ? '' : v);
   };
 
   // Check if any filter is active
@@ -525,150 +515,28 @@ const Homepage = () => {
         </Box>
 
         <Box sx={{ ...homepageStyles.filtersSection, py: 1.5, display: { xs: 'none', sm: 'block' } }}>
-          <Box sx={{ ...homepageStyles.filtersGrid, gap: 2 }}>
-            <Box sx={homepageStyles.searchContainer}>
-              <TextField
-                size="small"
-                sx={{ ...homepageStyles.textField, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
-                value={userSearch}
-                placeholder="Search for an artist"
-                onChange={handleSearchChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <MagnifyingGlass size={20} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Button
-                size="small"
-                variant="contained"
-                onClick={handleRandomArtist}
-                startIcon={<Shuffle size={20} />}
-                sx={{ ...homepageStyles.randomButton, fontSize: '0.8125rem' }}
-              >
-                Random Artist
-              </Button>
-            </Box>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <FormControl size="small" sx={{ ...homepageStyles.locationSelect, '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
-                <InputLabel id="location-select-label" sx={{ color: themeColors.text.secondary, '&.Mui-focused': { color: themeColors.primary.main } }}>Filter by Location</InputLabel>
-                <Select
-                  labelId="location-select-label"
-                  id="location-select"
-                  value={locationFilter}
-                  label="Filter by Location"
-                  onChange={handleLocationChange}
-                  sx={{ fontSize: '0.875rem' }}
-                >
-                  <MenuItem value="">All Locations</MenuItem>
-                  {locations.US.length > 0 && [
-                    <ListSubheader key="us-header" sx={homepageStyles.listSubheader}>
-                      US States
-                    </ListSubheader>,
-                    <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
-                      Anywhere in the US
-                    </MenuItem>,
-                    ...locations.US.map((location) => (
-                      <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                        {location.split(',')[0]}
-                      </MenuItem>
-                    ))
-                  ]}
-                  {locations.Other.length > 0 && [
-                    <ListSubheader key="other-header" sx={homepageStyles.listSubheader}>
-                      Other Locations
-                    </ListSubheader>,
-                    ...locations.Other.map((location) => (
-                      <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                        {location}
-                      </MenuItem>
-                    ))
-                  ]}
-                </Select>
-              </FormControl>
-
-              <Autocomplete
-                size="small"
-                options={scryfallSets}
-                getOptionLabel={(option) => option.name}
-                value={scryfallSets.find(s => s.code === setFilter) ?? null}
-                onChange={(_, newValue) => updateSearchParams('set', newValue?.code ?? '')}
-                loading={setsLoading}
-                loadingText="Loading sets..."
-                noOptionsText="No sets found"
-                sx={homepageStyles.locationSelect}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Filter by Set"
-                    size="small"
-                    sx={{ '& .MuiInputLabel-root': { fontSize: '0.875rem' }, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
-                  />
-                )}
-              />
-            </Box>
-
-            <Box sx={homepageStyles.checkboxContainer}>
-              <Typography sx={{ ...homepageStyles.signingAgentLabel, fontSize: '0.875rem', mb: 0.5 }}>Filters</Typography>
-              <FormGroup sx={{ ...homepageStyles.checkboxesContainer, gap: 0 }}>
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={marksSigServiceFilter}
-                      onChange={handleMarksSigServiceChange}
-                      name="marksSigService"
-                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-                    />
-                  }
-                  label="Marks Signature Service"
-                />
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={mountainMageFilter}
-                      onChange={handleMountainMageChange}
-                      name="mountainMage"
-                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-                    />
-                  }
-                  label="Mountain Mage Signing Service"
-                />
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={hasUpcomingEventFilter}
-                      onChange={handleHasUpcomingEventChange}
-                      name="hasUpcomingEvent"
-                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-                    />
-                  }
-                  label="Has Upcoming Event"
-                />
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={sellsApsFilter}
-                      onChange={handleSellsApsChange}
-                      name="sellsAps"
-                      sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-                    />
-                  }
-                  label="Sells APs on Website"
-                />
-              </FormGroup>
-            </Box>
-          </Box>
+          <FiltersForm
+            layout="grid"
+            idSuffix=""
+            userSearch={userSearch}
+            locationFilter={locationFilter}
+            setFilter={setFilter}
+            locations={locations}
+            scryfallSets={scryfallSets}
+            setsLoading={setsLoading}
+            marksSigServiceFilter={marksSigServiceFilter}
+            mountainMageFilter={mountainMageFilter}
+            hasUpcomingEventFilter={hasUpcomingEventFilter}
+            sellsApsFilter={sellsApsFilter}
+            onSearchChange={handleSearchChange}
+            onLocationChange={handleLocationChange}
+            onSetChange={(code) => updateSearchParams('set', code)}
+            onMarksSigServiceChange={handleMarksSigServiceChange}
+            onMountainMageChange={handleMountainMageChange}
+            onHasUpcomingEventChange={handleHasUpcomingEventChange}
+            onSellsApsChange={handleSellsApsChange}
+            onRandomArtist={handleRandomArtist}
+          />
         </Box>
 
         {/* Mobile filter trigger — hidden on sm+ where the full filter panel shows */}
@@ -793,91 +661,27 @@ const Homepage = () => {
             )}
           </Box>
           <Box sx={homepageStyles.filterSheetContent}>
-            <TextField
-              size="small"
-              sx={{ ...homepageStyles.textField, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
-              value={userSearch}
-              placeholder="Search for an artist"
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MagnifyingGlass size={20} />
-                  </InputAdornment>
-                ),
-              }}
+            <FiltersForm
+              layout="stack"
+              idSuffix="-m"
+              userSearch={userSearch}
+              locationFilter={locationFilter}
+              setFilter={setFilter}
+              locations={locations}
+              scryfallSets={scryfallSets}
+              setsLoading={setsLoading}
+              marksSigServiceFilter={marksSigServiceFilter}
+              mountainMageFilter={mountainMageFilter}
+              hasUpcomingEventFilter={hasUpcomingEventFilter}
+              sellsApsFilter={sellsApsFilter}
+              onSearchChange={handleSearchChange}
+              onLocationChange={handleLocationChange}
+              onSetChange={(code) => updateSearchParams('set', code)}
+              onMarksSigServiceChange={handleMarksSigServiceChange}
+              onMountainMageChange={handleMountainMageChange}
+              onHasUpcomingEventChange={handleHasUpcomingEventChange}
+              onSellsApsChange={handleSellsApsChange}
             />
-            <FormControl size="small" sx={{ ...homepageStyles.locationSelect, '& .MuiInputLabel-root': { fontSize: '0.875rem' } }}>
-              <InputLabel id="location-select-label-sheet" sx={{ color: themeColors.text.secondary, '&.Mui-focused': { color: themeColors.primary.main } }}>Filter by Location</InputLabel>
-              <Select
-                labelId="location-select-label-sheet"
-                id="location-select-sheet"
-                value={locationFilter}
-                label="Filter by Location"
-                onChange={handleLocationChange}
-                sx={{ fontSize: '0.875rem' }}
-              >
-                <MenuItem value="">All Locations</MenuItem>
-                {locations.US.length > 0 && [
-                  <ListSubheader key="us-header-s" sx={homepageStyles.listSubheader}>US States</ListSubheader>,
-                  <MenuItem key="us-all-s" value="US" sx={{ pl: 3 }}>Anywhere in the US</MenuItem>,
-                  ...locations.US.map((location) => (
-                    <MenuItem key={`s-${location}`} value={location} sx={{ pl: 3 }}>{location.split(',')[0]}</MenuItem>
-                  ))
-                ]}
-                {locations.Other.length > 0 && [
-                  <ListSubheader key="other-header-s" sx={homepageStyles.listSubheader}>Other Locations</ListSubheader>,
-                  ...locations.Other.map((location) => (
-                    <MenuItem key={`s-${location}`} value={location} sx={{ pl: 3 }}>{location}</MenuItem>
-                  ))
-                ]}
-              </Select>
-            </FormControl>
-            <Autocomplete
-              size="small"
-              options={scryfallSets}
-              getOptionLabel={(option) => option.name}
-              value={scryfallSets.find(s => s.code === setFilter) ?? null}
-              onChange={(_, newValue) => updateSearchParams('set', newValue?.code ?? '')}
-              loading={setsLoading}
-              loadingText="Loading sets..."
-              noOptionsText="No sets found"
-              sx={homepageStyles.locationSelect}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Filter by Set"
-                  size="small"
-                  sx={{ '& .MuiInputLabel-root': { fontSize: '0.875rem' }, '& .MuiInputBase-input': { fontSize: '0.875rem' } }}
-                  InputProps={params.InputProps}
-                />
-              )}
-            />
-            <Box sx={homepageStyles.checkboxContainer}>
-              <Typography sx={{ ...homepageStyles.signingAgentLabel, fontSize: '0.875rem', mb: 0.5 }}>Options</Typography>
-              <FormGroup sx={{ ...homepageStyles.checkboxesContainer, gap: 0 }}>
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={<Checkbox size="small" checked={marksSigServiceFilter} onChange={handleMarksSigServiceChange} name="marksSigService-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
-                  label="Marks Signature Service"
-                />
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={<Checkbox size="small" checked={mountainMageFilter} onChange={handleMountainMageChange} name="mountainMage-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
-                  label="Mountain Mage Signing Service"
-                />
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={<Checkbox size="small" checked={hasUpcomingEventFilter} onChange={handleHasUpcomingEventChange} name="hasUpcomingEvent-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
-                  label="Has Upcoming Event"
-                />
-                <FormControlLabel
-                  sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.8125rem' }, my: -0.25 }}
-                  control={<Checkbox size="small" checked={sellsApsFilter} onChange={handleSellsApsChange} name="sellsAps-s" sx={{ ...homepageStyles.checkbox, p: 0.5 }} />}
-                  label="Sells APs on Website"
-                />
-              </FormGroup>
-            </Box>
           </Box>
           <Box sx={homepageStyles.filterSheetActions}>
             <Button

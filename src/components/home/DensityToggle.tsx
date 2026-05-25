@@ -24,7 +24,7 @@ export function saveDensityPreference(value: GridDensity): void {
 
 const MODES: { value: GridDensity; Icon: React.ComponentType<any>; label: string }[] = [
   { value: 'comfortable', Icon: SquaresFour, label: 'Comfortable' },
-  { value: 'compact',     Icon: GridNine,    label: 'Compact'     },
+  { value: 'compact',     Icon: GridNine,    label: 'Compact rows' },
   { value: 'gallery',     Icon: Images,      label: 'Gallery'     },
 ];
 
