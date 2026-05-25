@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { ArtistPageSkeleton } from "../shared/Skeletons";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { colors, spacing } from "../../styles/design-tokens";
+import { colors, themeColors, spacing } from "../../styles/design-tokens";
 import { Question, CalendarBlank, MapPin, BellRinging, UserPlus, PencilSimple, Cards, GlobeSimple, FacebookLogo, InstagramLogo, TwitterLogo, PatreonLogo, YoutubeLogo } from "@phosphor-icons/react";
 import { FaArtstation } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
@@ -261,49 +261,49 @@ const Artist = () => {
       label: "Website",
       url: artistByName.url,
       icon: GlobeSimple,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
     {
       label: "Facebook",
       url: artistByName.facebook,
       icon: FacebookLogo,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
     {
       label: "Instagram",
       url: artistByName.instagram,
       icon: InstagramLogo,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
     {
       label: "Twitter",
       url: artistByName.twitter,
       icon: TwitterLogo,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
     {
       label: "Patreon",
       url: artistByName.patreon,
       icon: PatreonLogo,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
     {
       label: "YouTube",
       url: artistByName.youtube,
       icon: YoutubeLogo,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
     {
       label: "Artstation",
       url: artistByName.artstation,
       icon: FaArtstation,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
     {
       label: "Bluesky",
       url: artistByName.bluesky,
       icon: FaBluesky,
-      color: colors.primary.main,
+      color: themeColors.primary.main,
     },
   ];
 
@@ -568,7 +568,7 @@ const Artist = () => {
                         size="small"
                         sx={{
                           backgroundColor: alpha(colors.neutral[600], 0.12),
-                          color: 'text.secondary',
+                          color: themeColors.text.secondary,
                           fontSize: '0.8rem',
                           fontWeight: 500,
                         }}
@@ -583,6 +583,11 @@ const Artist = () => {
                           border: `1px solid ${colors.accent.orange}`,
                           fontSize: '0.8rem',
                           fontWeight: 600,
+                          'html[data-dark] &': {
+                            backgroundColor: 'rgba(200, 115, 26, 0.15)',
+                            color: colors.accent.orangeOnDark,
+                            borderColor: 'rgba(200, 115, 26, 0.5)',
+                          },
                         }}
                       />
                     )}

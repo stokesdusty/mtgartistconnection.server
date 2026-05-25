@@ -20,7 +20,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
 import { shadows } from '../../styles/design-tokens';
@@ -127,6 +127,11 @@ const Header = () => {
   const handleFollowingClick = () => {
     setDrawerOpen(false);
     navigate('/following');
+  };
+
+  const handleArtistSheetClick = () => {
+    setDrawerOpen(false);
+    navigate('/artistsheet');
   };
 
   const handleRandomFlavorTextClick = () => {
@@ -304,7 +309,7 @@ const Header = () => {
                 <ListItemIcon>
                   <Cards size={20} weight="duotone" />
                 </ListItemIcon>
-                <ListItemText primary="Your Cards" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+                <ListItemText primary="Your Signed Cards" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -320,7 +325,15 @@ const Header = () => {
                 <ListItemIcon>
                   <Envelope size={20} weight="duotone" />
                 </ListItemIcon>
-                <ListItemText primary="Signing Tracker" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+                <ListItemText primary="Signing Status Tracker" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleArtistSheetClick} sx={headerStyles.drawerListItem}>
+                <ListItemIcon>
+                  <ClipboardText size={20} weight="duotone" />
+                </ListItemIcon>
+                <ListItemText primary="Artist Sheet Generator" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

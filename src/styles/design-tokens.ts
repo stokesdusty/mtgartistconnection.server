@@ -31,9 +31,10 @@ export const colors = {
 
   // Accent Colors - Minimal use
   accent: {
-    orange: '#c8731a',      // Burnt amber — collector-action moments (signing, live events)
-    orangeLight: '#fdf0e0', // Light amber tint for chip/badge backgrounds
-    orangeDark: '#9e5a12',  // Deep amber for hover states
+    orange: '#c8731a',        // Burnt amber — collector-action moments (signing, live events)
+    orangeLight: '#fdf0e0',  // Light amber tint for chip/badge backgrounds
+    orangeDark: '#9e5a12',   // Deep amber for hover states
+    orangeOnDark: '#e8a060', // Readable amber for text on dark backgrounds
     blue: '#3498db',        // Info states
     blueDark: '#2980b9',    // Info hover states
     red: '#e74c3c',         // Error states
