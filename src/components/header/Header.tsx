@@ -263,12 +263,12 @@ const Header = () => {
         anchor="right"
         open={drawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ sx: { boxShadow: shadows.lg, backgroundColor: themeColors.neutral.white } }}
+        PaperProps={{ sx: { boxShadow: shadows.lg, backgroundColor: 'background.paper', backgroundImage: 'none' } }}
       >
-        <Box sx={{ width: 280 }} role="presentation">
+        <Box sx={{ width: 280, color: 'text.primary' }} role="presentation">
           <Box sx={headerStyles.drawerHeader}>
-            <Box sx={headerStyles.drawerHeaderLabel}>Account</Box>
-            <Box sx={headerStyles.drawerHeaderEmail}>{user?.email}</Box>
+            <Box sx={{ ...headerStyles.drawerHeaderLabel, color: 'text.primary' }}>Account</Box>
+            <Box sx={{ ...headerStyles.drawerHeaderEmail, color: 'text.secondary' }}>{user?.email}</Box>
           </Box>
           {isBelowLarge && (
             <>
@@ -280,7 +280,7 @@ const Header = () => {
                       selected={location.pathname === item.to}
                       sx={headerStyles.drawerListItem}
                     >
-                      <ListItemText primary={item.label} primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                      <ListItemText primary={item.label} primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                     </ListItemButton>
                   </ListItem>
                 ))}
@@ -290,7 +290,7 @@ const Header = () => {
           )}
           <List sx={{ p: 1 }}
             subheader={
-              <Box sx={{ px: 1, pt: 1, pb: 0.5, fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.5 }}>
+              <Box sx={{ px: 1, pt: 1, pb: 0.5, fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'text.secondary', opacity: 0.7 }}>
                 Account Tools
               </Box>
             }
@@ -300,7 +300,7 @@ const Header = () => {
                 <ListItemIcon>
                   <Cards size={20} weight="duotone" />
                 </ListItemIcon>
-                <ListItemText primary="Your Cards" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                <ListItemText primary="Your Cards" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -308,7 +308,7 @@ const Header = () => {
                 <ListItemIcon>
                   <Heart size={20} weight="duotone" />
                 </ListItemIcon>
-                <ListItemText primary="Following" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                <ListItemText primary="Following" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -316,7 +316,7 @@ const Header = () => {
                 <ListItemIcon>
                   <Envelope size={20} weight="duotone" />
                 </ListItemIcon>
-                <ListItemText primary="Signing Tracker" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                <ListItemText primary="Signing Tracker" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -324,7 +324,7 @@ const Header = () => {
                 <ListItemIcon>
                   <GearSix size={20} />
                 </ListItemIcon>
-                <ListItemText primary="Settings" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                <ListItemText primary="Settings" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
             {isLoggedIn && isAdmin && <>
@@ -333,7 +333,7 @@ const Header = () => {
                   <ListItemIcon>
                     <GearSix size={20} />
                   </ListItemIcon>
-                  <ListItemText primary="Add Artist" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                  <ListItemText primary="Add Artist" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
@@ -341,7 +341,7 @@ const Header = () => {
                   <ListItemIcon>
                     <GearSix size={20} />
                   </ListItemIcon>
-                  <ListItemText primary="Review Socials" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                  <ListItemText primary="Review Socials" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
@@ -349,7 +349,7 @@ const Header = () => {
                   <ListItemIcon>
                     <GearSix size={20} />
                   </ListItemIcon>
-                  <ListItemText primary="Review News" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                  <ListItemText primary="Review News" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
               </ListItem>
             </>}
@@ -359,7 +359,7 @@ const Header = () => {
                 <ListItemIcon>
                   <SignOut size={20} />
                 </ListItemIcon>
-                <ListItemText primary="Sign Out" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+                <ListItemText primary="Sign Out" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
               </ListItemButton>
             </ListItem>
           </List>
