@@ -406,6 +406,18 @@ const Artist = () => {
               />
             )}
 
+            {userData?.me?.role === 'admin' && (
+              <Button
+                variant="outlined"
+                size="medium"
+                startIcon={<PencilSimple size={18} />}
+                onClick={() => navigate(`/editartist/${artistByName.id}`)}
+                sx={{ ...artistStyles.editButton, display: { xs: 'none', md: 'flex' } }}
+              >
+                Edit Artist
+              </Button>
+            )}
+
             <Button
               variant={isFollowing ? 'contained' : 'outlined'}
               size="medium"
@@ -422,27 +434,6 @@ const Artist = () => {
       {/* Main content card */}
       <Container maxWidth="lg" sx={{ pt: spacing.xl }}>
         <Box sx={artistStyles.contentWrapper}>
-          {userData?.me?.role === 'admin' && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: spacing.md }}>
-              <Button
-                variant="outlined"
-                startIcon={<PencilSimple size={18} />}
-                onClick={() => navigate(`/editartist/${artistByName.id}`)}
-                sx={artistStyles.editButton}
-              >
-                Edit Artist
-              </Button>
-            </Box>
-          )}
-          {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
-            <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary', mb: spacing.lg }}>
-              Your collection: {[
-                signedCount > 0 && `${signedCount} signed`,
-                wishlistCount > 0 && `${wishlistCount} wishlisted`,
-                artistProofCount > 0 && `${artistProofCount} artist proof`,
-              ].filter(Boolean).join(', ')}
-            </Typography>
-          )}
           <Box sx={artistStyles.buttonContainer}>
             <ExternalLinkCard
               href={`/allcards/${artistByName.name}`}
@@ -491,9 +482,20 @@ const Artist = () => {
 
           <Box sx={artistStyles.infoSection}>
               <Box sx={artistStyles.artistInfo}>
-                <Typography sx={artistStyles.sectionHeader} variant="h4">
-                  Artist Info
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, flexWrap: 'wrap' }}>
+                  <Typography sx={artistStyles.sectionHeader} variant="h4">
+                    Artist Info
+                  </Typography>
+                  {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
+                    <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                      Your collection: {[
+                        signedCount > 0 && `${signedCount} signed`,
+                        wishlistCount > 0 && `${wishlistCount} wishlisted`,
+                        artistProofCount > 0 && `${artistProofCount} artist proof`,
+                      ].filter(Boolean).join(', ')}
+                    </Typography>
+                  )}
+                </Box>
 
                 <Box sx={artistStyles.infoRow}>
                   <Typography variant="h5">
@@ -578,15 +580,15 @@ const Artist = () => {
                         label={capitalizeFirstLetter(artistByName.signing)}
                         size="small"
                         sx={{
-                          backgroundColor: colors.accent.orangeLight,
-                          color: colors.accent.orangeDark,
-                          border: `1px solid ${colors.accent.orange}`,
+                          backgroundColor: '#eafaf1',
+                          color: colors.accent.greenDark,
+                          border: `1px solid ${colors.accent.green}`,
                           fontSize: '0.8rem',
                           fontWeight: 600,
                           'html[data-dark] &': {
-                            backgroundColor: 'rgba(200, 115, 26, 0.15)',
-                            color: colors.accent.orangeOnDark,
-                            borderColor: 'rgba(200, 115, 26, 0.5)',
+                            backgroundColor: 'rgba(39, 174, 96, 0.15)',
+                            color: '#6fcf97',
+                            borderColor: 'rgba(39, 174, 96, 0.5)',
                           },
                         }}
                       />
