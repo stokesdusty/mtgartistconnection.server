@@ -123,7 +123,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
   contentWrapper: {
     maxWidth: '1200px',
     margin: '0 auto',
-    padding: { xs: spacing.lg, md: spacing.xxl },
+    padding: { xs: spacing.lg, md: spacing.lg },
     backgroundColor: themeColors.neutral.white,
     borderRadius: borderRadius.lg,
     boxShadow: shadows.sm,
@@ -160,7 +160,7 @@ export const artistStyles: Record<string, SxProps<Theme>> = {
     flexWrap: 'wrap',
     gap: spacing.lg,
     marginBottom: spacing.xxl,
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
   },
   viewCardsLink: {
     backgroundColor: colors.primary.main,

@@ -432,7 +432,7 @@ const Artist = () => {
       </Box>
 
       {/* Main content card */}
-      <Container maxWidth="lg" sx={{ pt: spacing.xl }}>
+      <Container maxWidth="lg" sx={{ pt: spacing.sm }}>
         <Box sx={artistStyles.contentWrapper}>
           <Box sx={artistStyles.buttonContainer}>
             <ExternalLinkCard
