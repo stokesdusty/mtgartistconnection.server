@@ -21,7 +21,7 @@ import {
   const AddArtistToEvent = () => {
       const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
   
-      const {data: eventData, error: eventDataError, loading: eventDataLoading} = useQuery(GET_SIGNINGEVENTS);
+      const {data: eventData, error: eventDataError, loading: eventDataLoading} = useQuery(GET_SIGNINGEVENTS, { fetchPolicy: 'network-only' });
       const {data: artistData, error: artistDataError, loading: artistDataLoading}= useQuery(GET_ARTISTS_FOR_HOMEPAGE);
       const [ addArtistToEvent ] = useMutation(ADD_ARTISTTOEVENT);
   
