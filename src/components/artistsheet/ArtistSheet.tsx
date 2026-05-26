@@ -4,14 +4,11 @@ import {
   Box,
   Button,
   Container,
-  FormControl,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Printer, Trash } from '@phosphor-icons/react';
 import { GET_ARTISTS_FOR_HOMEPAGE } from '../graphql/queries';
 import { usePageTitle } from '../../hooks/usePageTitle';
@@ -26,12 +23,10 @@ interface Slot {
 
 interface ArtistRecord {
   name: string;
-  mountainmage: boolean;
 }
 
 const SLOTS_PER_PAGE = 30;
 
-const QUANTITIES = Array.from({ length: 10 }, (_, i) => i + 1);
 
 // Shared MUI overrides so form fields adapt to dark mode
 const inputSx = {
@@ -41,8 +36,7 @@ const inputSx = {
   '& .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.neutral[300] },
   '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.text.hint },
   '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.primary.main },
-  '& .MuiSelect-icon': { color: themeColors.text.secondary },
-  '& .MuiSelect-select': { color: themeColors.text.primary },
+  '& .MuiSvgIcon-root': { color: themeColors.text.secondary },
 };
 
 // SlotCard always uses light/print colors — it represents content on white paper
@@ -111,7 +105,6 @@ const ArtistSheet = () => {
   const { data } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
 
   const artists: string[] = (data?.artists ?? [])
-    .filter((a: ArtistRecord) => a.mountainmage)
     .map((a: ArtistRecord) => a.name)
     .sort();
 
@@ -238,33 +231,40 @@ const ArtistSheet = () => {
                 sx={inputSx}
               />
 
-              <FormControl fullWidth size="small" sx={inputSx}>
-                <InputLabel>Artist</InputLabel>
-                <Select
-                  value={artist}
-                  label="Artist"
-                  onChange={e => setArtist(e.target.value)}
-                  MenuProps={{ PaperProps: { sx: { bgcolor: themeColors.background.paper } } }}
-                >
-                  {artists.map(a => (
-                    <MenuItem key={a} value={a} sx={{ color: themeColors.text.primary }}>{a}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                fullWidth
+                size="small"
+                options={artists}
+                value={artist || null}
+                onChange={(_, v) => setArtist(v ?? '')}
+                sx={inputSx}
+                componentsProps={{
+                  paper: { sx: { bgcolor: themeColors.background.paper, color: themeColors.text.primary } },
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Artist"
+                    placeholder="Search artists..."
+                    sx={inputSx}
+                  />
+                )}
+              />
 
-              <FormControl fullWidth size="small" sx={inputSx}>
-                <InputLabel>Quantity</InputLabel>
-                <Select
-                  value={quantity}
-                  label="Quantity"
-                  onChange={e => setQuantity(Number(e.target.value))}
-                  MenuProps={{ PaperProps: { sx: { bgcolor: themeColors.background.paper } } }}
-                >
-                  {QUANTITIES.map(n => (
-                    <MenuItem key={n} value={n} sx={{ color: themeColors.text.primary }}>{n}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                label="Quantity"
+                type="number"
+                value={quantity}
+                onChange={e => {
+                  const v = Math.max(1, Math.min(99, Number(e.target.value) || 1));
+                  setQuantity(v);
+                }}
+                onKeyDown={handleKeyDown}
+                fullWidth
+                size="small"
+                inputProps={{ min: 1, max: 99 }}
+                sx={inputSx}
+              />
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
