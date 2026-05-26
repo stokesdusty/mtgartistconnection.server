@@ -580,14 +580,14 @@ const Artist = () => {
                         label={capitalizeFirstLetter(artistByName.signing)}
                         size="small"
                         sx={{
-                          backgroundColor: '#eafaf1',
+                          backgroundColor: colors.accent.greenLight,
                           color: colors.accent.greenDark,
                           border: `1px solid ${colors.accent.green}`,
                           fontSize: '0.8rem',
                           fontWeight: 600,
                           'html[data-dark] &': {
                             backgroundColor: 'rgba(39, 174, 96, 0.15)',
-                            color: '#6fcf97',
+                            color: colors.accent.greenOnDark,
                             borderColor: 'rgba(39, 174, 96, 0.5)',
                           },
                         }}
