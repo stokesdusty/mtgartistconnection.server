@@ -536,10 +536,11 @@ const AllCards = () => {
           if (cancelled) break;
 
           const pageFiltered = response.data.data.filter((card: Card) => {
-            const normalizedCard = normalizeArtistName(card.artist || "");
+            const rawArtist = card.artist || "";
+            const normalizedCard = normalizeArtistName(rawArtist);
             return (
               normalizedCard === normalizedArtist ||
-              normalizedCard.split(/[&,]/).some((n) => n.trim() === normalizedArtist)
+              rawArtist.split(/[&,]/).some((n) => normalizeArtistName(n.trim()) === normalizedArtist)
             );
           });
 
