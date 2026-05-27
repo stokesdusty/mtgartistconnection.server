@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-import { login } from "./store/auth-slice";
+import { login, logout, tokenRefreshed, refreshAccessToken, getTokenExpiry } from "./store/auth-slice";
 import { RootState } from "./store/store";
 import { LoadingProvider } from "./LoadingContext";
 import { ColorModeProvider } from "./ColorModeContext";
@@ -67,9 +67,24 @@ function App() {
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
+
     if (storedToken && storedUser && !isLoggedIn) {
-      const user = JSON.parse(storedUser);
-      dispatch(login({ token: storedToken, user }));
+      const storedRefreshToken = localStorage.getItem('refreshToken') || '';
+      dispatch(login({ token: storedToken, refreshToken: storedRefreshToken, user: JSON.parse(storedUser) }));
+      return;
+    }
+
+    if (storedToken) {
+      const exp = getTokenExpiry(storedToken);
+      if (exp && Date.now() / 1000 > exp) {
+        refreshAccessToken().then(newToken => {
+          if (newToken) {
+            dispatch(tokenRefreshed(newToken));
+          } else {
+            dispatch(logout());
+          }
+        });
+      }
     }
   }, [dispatch, isLoggedIn]);
 

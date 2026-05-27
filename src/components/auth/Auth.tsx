@@ -33,6 +33,7 @@ interface UserData {
 
 interface AuthResponse {
     token: string;
+    refreshToken: string;
     user: UserData;
 }
 
@@ -64,7 +65,7 @@ const Auth = () => {
     };
 
     const onResponseReceived = (authResponse: AuthResponse) => {
-        dispatch(login({ token: authResponse.token, user: authResponse.user }));
+        dispatch(login({ token: authResponse.token, refreshToken: authResponse.refreshToken, user: authResponse.user }));
         navigate("/");
     };
 
