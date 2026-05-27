@@ -421,6 +421,22 @@ export const REORDER_SIGNING_BATCHES = gql`
     }
 `;
 
+export const LOG_PRICE_CLICK = gql`
+    mutation logPriceClick($artistName: String!, $platform: String!, $cardName: String, $cardSet: String) {
+        logPriceClick(artistName: $artistName, platform: $platform, cardName: $cardName, cardSet: $cardSet) {
+            success
+        }
+    }
+`;
+
+export const LOG_LINK_CLICK = gql`
+    mutation logLinkClick($artistName: String!, $linkType: String!) {
+        logLinkClick(artistName: $artistName, linkType: $linkType) {
+            success
+        }
+    }
+`;
+
 export const UPLOAD_NEWS_IMAGE = gql`
     mutation uploadNewsImage($base64Data: String!, $filename: String!, $contentType: String!) {
         uploadNewsImage(base64Data: $base64Data, filename: $filename, contentType: $contentType) {

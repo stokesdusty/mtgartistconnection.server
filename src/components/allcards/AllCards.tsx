@@ -25,7 +25,7 @@ import {
 import { AllCardsGridSkeleton } from "../shared/Skeletons";
 import { ArrowUp, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
-import { TOGGLE_CARD_COLLECTION_FIELD } from "../graphql/mutations";
+import { TOGGLE_CARD_COLLECTION_FIELD, LOG_PRICE_CLICK } from "../graphql/mutations";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
 import { useSelector } from "react-redux";
@@ -153,9 +153,10 @@ interface CardItemProps {
   collectionItem: CollectionItem | undefined;
   isLoggedIn: boolean;
   onToggle: (card: Card, field: string) => void;
+  onPriceClick: (platform: string, cardName: string, cardSet: string) => void;
 }
 
-const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onToggle }: CardItemProps) => {
+const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onToggle, onPriceClick }: CardItemProps) => {
   const formatPrice = (cents: number | null): string => {
     if (cents === null || cents === undefined) return '-';
     return `$${(cents / 100).toFixed(2)}`;
@@ -182,6 +183,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
             card_set: card.set,
           });
         }
+        onPriceClick('manapool', card.name || '', card.set || '');
       }}
       sx={{
         display: 'flex',
@@ -217,6 +219,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
             card_set: card.set,
           });
         }
+        onPriceClick('tcgplayer', card.name || '', card.set || '');
       }}
       sx={{
         display: 'flex',
@@ -254,6 +257,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
             card_set: card.set,
           });
         }
+        onPriceClick('cardkingdom', card.name || '', card.set || '');
       }}
       sx={{
         display: 'flex',
@@ -334,10 +338,11 @@ interface VirtualRowData {
   cardCollection: Map<string, CollectionItem>;
   isLoggedIn: boolean;
   onToggle: (card: Card, field: string) => void;
+  onPriceClick: (platform: string, cardName: string, cardSet: string) => void;
 }
 
 const VirtualRow = memo(({ index, style, data }: ListChildComponentProps<VirtualRowData>) => {
-  const { rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, onToggle } = data;
+  const { rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, onToggle, onPriceClick } = data;
   const rowCards = rows[index] ?? [];
   return (
     <div style={{ ...style, display: 'flex', gap: GRID_GAP, boxSizing: 'border-box', paddingBottom: GRID_GAP }}>
@@ -350,6 +355,7 @@ const VirtualRow = memo(({ index, style, data }: ListChildComponentProps<Virtual
             collectionItem={cardCollection.get(card.id)}
             isLoggedIn={isLoggedIn}
             onToggle={onToggle}
+            onPriceClick={onPriceClick}
           />
         </div>
       ))}
@@ -363,6 +369,7 @@ const AllCards = () => {
   const { name: artist } = useParams<{ name?: string }>();
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
   const [hideReprints, setHideReprints] = useState<boolean>(() => {
     try { return localStorage.getItem('mtgac-hide-reprints') === 'true'; }
     catch { return false; }
@@ -480,6 +487,13 @@ const AllCards = () => {
       console.error('Error toggling card collection field:', error);
     },
   });
+
+  const [logPriceClick] = useMutation(LOG_PRICE_CLICK);
+
+  const handlePriceClick = useCallback((platform: string, cardName: string, cardSet: string) => {
+    if (userRole === 'admin') return;
+    logPriceClick({ variables: { artistName: artist || '', platform, cardName, cardSet } });
+  }, [userRole, artist, logPriceClick]);
 
   useEffect(() => {
     if (!artist) {
@@ -708,8 +722,9 @@ const AllCards = () => {
       cardCollection,
       isLoggedIn,
       onToggle: handleCollectionToggle,
+      onPriceClick: handlePriceClick,
     }),
-    [rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, handleCollectionToggle]
+    [rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, handleCollectionToggle, handlePriceClick]
   );
 
   const totalListHeight = rows.length * rowHeight;

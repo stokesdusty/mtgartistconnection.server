@@ -2,7 +2,7 @@ import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CURRENT_USER, GET_USER_CARD_COLLECTION } from "../graphql/queries";
-import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
+import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES, LOG_LINK_CLICK } from "../graphql/mutations";
 import {
   Box,
   Link,
@@ -120,6 +120,12 @@ const Artist = () => {
   const [followArtist] = useMutation(FOLLOW_ARTIST);
   const [unfollowArtist] = useMutation(UNFOLLOW_ARTIST);
   const [updateEmailPreferences] = useMutation(UPDATE_EMAIL_PREFERENCES);
+  const [logLinkClick] = useMutation(LOG_LINK_CLICK);
+
+  const trackClick = (linkType: string) => {
+    if (userData?.me?.role === 'admin') return;
+    logLinkClick({ variables: { artistName: name || '', linkType } });
+  };
 
   const [fetchUserCardCollection] = useLazyQuery(GET_USER_CARD_COLLECTION, {
     onCompleted: (collectionData) => {
@@ -452,6 +458,7 @@ const Artist = () => {
                   if ((window as any).gtag) {
                     (window as any).gtag("event", "oma_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
                   }
+                  trackClick('oma');
                 }}
               />
             )}
@@ -465,6 +472,7 @@ const Artist = () => {
                   if ((window as any).gtag) {
                     (window as any).gtag("event", "inprnt_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
                   }
+                  trackClick('inprnt');
                 }}
               />
             )}
@@ -477,6 +485,7 @@ const Artist = () => {
                 if ((window as any).gtag) {
                   (window as any).gtag("event", "ebay_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
                 }
+                trackClick('ebay');
               }}
             />
           </Box>
@@ -512,6 +521,7 @@ const Artist = () => {
                               href={link.url}
                               target="_blank"
                               sx={artistStyles.socialIcon}
+                              onClick={() => trackClick(link.label.toLowerCase())}
                             >
                               <link.icon
                                 size={20}
@@ -623,6 +633,7 @@ const Artist = () => {
                         sx={artistStyles.serviceLink}
                         target="_blank"
                         href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"
+                        onClick={() => trackClick('markssignatureservice')}
                       >
                         Services offered via Marks Signature Service
                       </Link>
@@ -636,6 +647,7 @@ const Artist = () => {
                         sx={artistStyles.serviceLink}
                         target="_blank"
                         href={artistByName.mountainmage}
+                        onClick={() => trackClick('mountainmage')}
                       >
                         Services offered via MountainMage Service
                       </Link>
