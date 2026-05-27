@@ -108,6 +108,7 @@ const YourCards = () => {
 
   const { data, loading } = useQuery(GET_MY_CARD_COLLECTION, {
     skip: !isLoggedIn,
+    fetchPolicy: 'network-only',
   });
 
   if (!isLoggedIn) {
