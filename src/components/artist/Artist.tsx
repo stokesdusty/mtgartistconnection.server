@@ -107,6 +107,7 @@ const Artist = () => {
     {
       variables: { name: name || "" },
       skip: !name,
+      fetchPolicy: 'network-only',
     }
   );
 

@@ -63,6 +63,7 @@ const EditArtist = () => {
     const { data, loading, error } = useQuery(GET_ARTIST_BY_ID, {
         variables: { id: artistId },
         skip: !isLoggedIn || !artistId,
+        fetchPolicy: 'network-only',
     });
 
     // Populate form when data loads

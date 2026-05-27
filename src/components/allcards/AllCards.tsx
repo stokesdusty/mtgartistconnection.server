@@ -496,6 +496,7 @@ const AllCards = () => {
   const { data: artistData, error, loading } = useQuery(GET_ARTIST_BY_NAME, {
     variables: { name: artist || "" },
     skip: !artist,
+    fetchPolicy: 'network-only',
   });
 
   const formattedArtistName = useMemo(() => {
