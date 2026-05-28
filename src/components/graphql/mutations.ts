@@ -209,6 +209,7 @@ export const UPDATE_ARTIST_BULK = gql`
         $markssignatureservice: String,
         $omalink: String,
         $inprnt: String,
+        $scryfall_name: String,
     ) {
         updateArtistBulk(
             id: $id,
@@ -232,6 +233,7 @@ export const UPDATE_ARTIST_BULK = gql`
             markssignatureservice: $markssignatureservice,
             omalink: $omalink,
             inprnt: $inprnt,
+            scryfall_name: $scryfall_name,
         ) {
             id
             name

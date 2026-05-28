@@ -1,10 +1,12 @@
 import { Box, CircularProgress, Typography, Container, Paper } from '@mui/material';
 import axios from 'axios';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useParams } from 'react-router';
 import { useLoading } from '../../LoadingContext';
 import { useNavigate } from "react-router-dom";
+import { useQuery } from '@apollo/client';
+import { GET_ARTIST_BY_NAME } from '../graphql/queries';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell
@@ -68,6 +70,18 @@ const ArtistCardAnalysis = () => {
     const [error, setError] = useState<string | null>(null);
     const [cardsWithDupes, setCardsWithDupes] = useState<Card[]>([]);
     const [, setHasTriedBothQueries] = useState(false);
+    const [noResultsFromPrimary, setNoResultsFromPrimary] = useState(false);
+    const fallbackInitiatedRef = useRef(false);
+
+    const { data: artistQueryData } = useQuery(GET_ARTIST_BY_NAME, {
+        variables: { name: artist || "" },
+        skip: !artist,
+    });
+
+    useEffect(() => {
+        setNoResultsFromPrimary(false);
+        fallbackInitiatedRef.current = false;
+    }, [artist]);
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -128,47 +142,105 @@ const ArtistCardAnalysis = () => {
         const fetchData = async () => {
             if (!scryfallQuery.withPaper || !artist) return;
 
-            // Try with game:paper filter first
-            let withDupesData = await fetchCards(scryfallQuery.withPaper);
-            let triedBothQueries = false;
+            const normalize = (str: string) =>
+                str
+                    .toLowerCase()
+                    .trim()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .replace(/'/g, " ")
+                    .replace(/\./g, "")
+                    .replace(/-/g, " ")
+                    .replace(/\s+/g, " ")
+                    .trim();
 
-            // If we got null (404 error), try without game:paper filter
-            if (!withDupesData) {
-                console.log("No results with game:paper, retrying without filter...");
-                setError(null); // Clear the error before retrying
-                withDupesData = await fetchCards(scryfallQuery.withoutPaper);
-                triedBothQueries = true;
-                setHasTriedBothQueries(true);
-            }
-
-            if (withDupesData) {
-                // Normalize to handle diacritics, apostrophes, and other special characters
-                const normalize = (str: string) => {
-                    return str
-                        .toLowerCase()
-                        .trim()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .replace(/'/g, " ")
-                        .replace(/\./g, "")
-                        .replace(/-/g, " ")
-                        .replace(/\s+/g, " ")
-                        .trim();
-                };
-                const normalizedArtist = normalize(artist);
-                const filtered = withDupesData.filter((card) => {
+            const fetchWithFallback = async (primaryUrl: string, fallbackUrl: string, normalizedName: string): Promise<Card[] | null> => {
+                let data = await fetchCards(primaryUrl);
+                if (!data) {
+                    setError(null);
+                    data = await fetchCards(fallbackUrl);
+                }
+                if (!data) return null;
+                return data.filter((card) => {
                     const normalizedCardArtist = normalize(card.artist || "");
-                    return normalizedCardArtist === normalizedArtist ||
-                           normalizedCardArtist.split(/[&,]/).some(name => normalize(name) === normalizedArtist);
+                    return normalizedCardArtist === normalizedName ||
+                           normalizedCardArtist.split(/[&,]/).some(n => normalize(n) === normalizedName);
                 });
+            };
+
+            // Try with primary artist name first (paper then non-paper fallback)
+            const filtered = await fetchWithFallback(scryfallQuery.withPaper, scryfallQuery.withoutPaper, normalize(artist));
+            setHasTriedBothQueries(true);
+
+            if (filtered !== null && filtered.length > 0) {
                 setCardsWithDupes(filtered);
-            } else if (triedBothQueries) {
-                // If we've tried both queries and still have no data, set a user-friendly error
-                setError("No cards found");
+            } else {
+                // Signal the scryfall_name fallback effect to take over.
+                // It will wait for artistQueryData to load if needed.
+                setNoResultsFromPrimary(true);
             }
         };
         fetchData();
     }, [scryfallQuery, fetchCards, artist]);
+
+    // Fallback: retry with scryfall_name when the primary fetch finds nothing.
+    // Runs as a separate effect so it naturally waits for artistQueryData to resolve.
+    useEffect(() => {
+        if (!noResultsFromPrimary || fallbackInitiatedRef.current) return;
+        const scryfallName = artistQueryData?.artistByName?.scryfall_name;
+        // If artistQueryData hasn't loaded yet, keep noResultsFromPrimary true so we retry when it does.
+        if (!scryfallName) {
+            if (artistQueryData !== undefined) setError("No cards found");
+            return;
+        }
+
+        const normalize = (str: string) =>
+            str.toLowerCase().trim().normalize("NFD")
+                .replace(/[̀-ͯ]/g, "").replace(/'/g, " ").replace(/\./g, "")
+                .replace(/-/g, " ").replace(/\s+/g, " ").trim();
+
+        if (normalize(scryfallName) === normalize(artist || "")) {
+            setError("No cards found");
+            return;
+        }
+
+        // Use a ref (no state change) to guard against being cancelled by our own re-render.
+        // The state reset happens after the fetch completes inside run().
+        fallbackInitiatedRef.current = true;
+
+        const encoded = encodeURIComponent(scryfallName);
+        const withPaper = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28artist%3A"${encoded}"%29`;
+        const withoutPaper = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28artist%3A"${encoded}"%29`;
+        const normalizedFallback = normalize(scryfallName);
+
+        let cancelled = false;
+        const run = async () => {
+            if (cancelled) return;
+            let data = await fetchCards(withPaper);
+            if (cancelled) return;
+            if (!data) {
+                setError(null);
+                data = await fetchCards(withoutPaper);
+            }
+            if (cancelled) return;
+            if (!data) { setError("No cards found"); return; }
+            const filtered = data.filter((card) => {
+                const n = normalize(card.artist || "");
+                return n === normalizedFallback || n.split(/[&,]/).some(p => normalize(p) === normalizedFallback);
+            });
+            if (filtered.length > 0) {
+                setCardsWithDupes(filtered);
+                setNoResultsFromPrimary(false);
+            } else {
+                setError("No cards found");
+            }
+        };
+        run();
+        return () => {
+            cancelled = true;
+            fallbackInitiatedRef.current = false;
+        };
+    }, [noResultsFromPrimary, artistQueryData, artist, fetchCards]);
 
     // Function to extract the main card type
     const getMainCardType = (typeLine: string) => {

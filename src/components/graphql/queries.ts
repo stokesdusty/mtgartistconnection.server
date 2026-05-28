@@ -44,6 +44,7 @@ export const GET_ARTIST_BY_NAME = gql`
             id
             name
             alternate_names
+            scryfall_name
             email
             artistProofs
             facebook
@@ -199,6 +200,7 @@ export const GET_ARTIST_BY_ID = gql`
             markssignatureservice
             omalink
             inprnt
+            scryfall_name
         }
     }
 `;

@@ -513,8 +513,15 @@ const AllCards = () => {
     fetchPolicy: 'network-only',
   });
 
+  const [noResultsFromPrimary, setNoResultsFromPrimary] = useState(false);
+  const fallbackInitiatedRef = useRef(false);
+  useEffect(() => {
+    setNoResultsFromPrimary(false);
+    fallbackInitiatedRef.current = false;
+  }, [artist]);
+
   const formattedArtistName = useMemo(() => {
-    return "!" + artist?.split(" ").join(" ") || "";
+    return artist?.split(" ").join(" ") || "";
   }, [artist]);
 
   const scryfallQuery = useMemo(() => {
@@ -573,6 +580,7 @@ const AllCards = () => {
       // Scryfall returns 404 (throws) when there are no results, so cardData stays
       // null after the loop. Set it to an empty array so the "no results" UI renders.
       if (!cancelled && accumulated.length === 0) {
+        setNoResultsFromPrimary(true);
         setCardData({ data: [], total_cards: 0 });
       }
 
@@ -582,6 +590,68 @@ const AllCards = () => {
     run();
     return () => { cancelled = true; };
   }, [scryfallQuery, hideReprints, includeDigital, artist]);
+
+  // Fallback: when the primary fetch returns 0 results, retry with scryfall_name if the
+  // artist has been renamed on Scryfall but our DB still uses the old display name.
+  // This runs as a separate effect so it naturally waits for artistData to resolve,
+  // avoiding the race condition where the Scryfall fetch finishes before GraphQL does.
+  useEffect(() => {
+    if (!noResultsFromPrimary || fallbackInitiatedRef.current) return;
+    const scryfallName = artistData?.artistByName?.scryfall_name;
+    // If artistData hasn't loaded yet, keep noResultsFromPrimary true so we retry when it does.
+    if (!scryfallName || normalizeArtistName(scryfallName) === normalizeArtistName(artist || "")) return;
+
+    // Use a ref (no state change) so this effect isn't immediately cancelled by its own re-render.
+    // The state reset happens after the fetch completes inside run().
+    fallbackInitiatedRef.current = true;
+
+    let cancelled = false;
+    const accumulated: Card[] = [];
+    const normalizedFallback = normalizeArtistName(scryfallName);
+
+    const run = async () => {
+      setIsFetchingCards(true);
+      const gameFilter = includeDigital ? "" : "%28game%3Apaper%29+";
+      const encodedFallback = encodeURIComponent(scryfallName);
+      const withDupes = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=${gameFilter}%28artist%3A"${encodedFallback}"%29`;
+      const withoutDupes = `https://api.scryfall.com/cards/search?as=grid&order=name&q=${gameFilter}%28artist%3A"${encodedFallback}"%29`;
+
+      let nextUrl: string | undefined = hideReprints ? withoutDupes : withDupes;
+      while (nextUrl) {
+        const currentUrl: string = nextUrl;
+        if (cancelled) break;
+        try {
+          const response = await axios.get<ScryfallResponse>(currentUrl);
+          if (cancelled) break;
+          const pageFiltered = response.data.data.filter((card: Card) => {
+            const rawArtist = card.artist || "";
+            const normalizedCard = normalizeArtistName(rawArtist);
+            return (
+              normalizedCard === normalizedFallback ||
+              rawArtist.split(/[&,]/).some((n) => normalizeArtistName(n.trim()) === normalizedFallback)
+            );
+          });
+          accumulated.push(...pageFiltered);
+          if (accumulated.length > 0) {
+            setCardData({ data: [...accumulated], total_cards: accumulated.length });
+          }
+          nextUrl = response.data.has_more ? response.data.next_page : undefined;
+        } catch {
+          break;
+        }
+      }
+      if (!cancelled) {
+        setNoResultsFromPrimary(false);
+        setIsFetchingCards(false);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+      fallbackInitiatedRef.current = false;
+    };
+  }, [noResultsFromPrimary, artistData, artist, hideReprints, includeDigital]);
 
   const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
     if (!cardData) {

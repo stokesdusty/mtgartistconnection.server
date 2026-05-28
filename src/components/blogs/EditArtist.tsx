@@ -39,6 +39,7 @@ type Inputs = {
     bluesky: string;
     omalink: string;
     inprnt: string;
+    scryfall_name: string;
 }
 
 const EditArtist = () => {
@@ -87,6 +88,7 @@ const EditArtist = () => {
                 bluesky: artist.bluesky || "",
                 omalink: artist.omalink || "",
                 inprnt: artist.inprnt || "",
+                scryfall_name: artist.scryfall_name || "",
             });
             setSignature(artist.haveSignature || "false");
             setArtistProof(artist.artistProofs || "false");
@@ -217,6 +219,7 @@ const EditArtist = () => {
         bluesky,
         omalink,
         inprnt,
+        scryfall_name,
     }: Inputs) => {
         try {
             await updateArtist({
@@ -242,6 +245,7 @@ const EditArtist = () => {
                     bluesky,
                     omalink,
                     inprnt,
+                    scryfall_name: scryfall_name || undefined,
                 },
             });
 
@@ -364,6 +368,16 @@ const EditArtist = () => {
                                 margin="normal"
                                 label="Website URL"
                                 {...register("url")}
+                                sx={styles.textField}
+                            />
+                        </Box>
+
+                        <Box sx={styles.fieldSection}>
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Scryfall Name (if different from display name)"
+                                {...register("scryfall_name")}
                                 sx={styles.textField}
                             />
                         </Box>
