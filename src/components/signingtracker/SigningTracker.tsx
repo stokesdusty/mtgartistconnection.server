@@ -23,6 +23,7 @@ import {
   Trash,
   CaretDown,
   CaretRight,
+  CaretUp,
   Archive,
   ArrowCounterClockwise,
   DotsSixVertical,
@@ -200,6 +201,7 @@ const smallInput = {
 
 const smallSelect = {
   height: 28, fontSize: '0.75rem', width: '100%',
+  backgroundColor: colors.background.default,
   '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.neutral[200] },
   '& .MuiSelect-select': { py: '3px', px: '7px', display: 'flex', alignItems: 'center' },
   '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.neutral[400] },
@@ -219,12 +221,13 @@ const chipSx = (cfg: { label: string; color: string; bg: string }) => ({
 
 interface RowEditorProps {
   row: CardRow;
+  index: number;
   disabled: boolean;
   onChange: (changes: Partial<CardRow>) => void;
   onDelete: () => void;
 }
 
-const CardRowEditor: React.FC<RowEditorProps> = ({ row, disabled, onChange, onDelete }) => {
+const CardRowEditor: React.FC<RowEditorProps> = ({ row, index, disabled, onChange, onDelete }) => {
   const total = (row.quantity * row.pricePerSig).toFixed(2);
 
   const txt = (field: keyof CardRow) => (
@@ -238,6 +241,8 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, disabled, onChange, onDe
     />
   );
 
+  const isEven = index % 2 === 0;
+
   return (
     <Box sx={{
       display: 'grid',
@@ -245,7 +250,8 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, disabled, onChange, onDe
       alignItems: 'center',
       px: 1, py: 0.35,
       borderBottom: `1px solid ${colors.neutral[100]}`,
-      '&:hover': { backgroundColor: colors.neutral[50] },
+      backgroundColor: isEven ? colors.accent.greenRow : colors.background.default,
+      '&:hover': { backgroundColor: colors.accent.greenRowHover },
     }}>
       <Box sx={{ px: 0.5 }}>{txt('cardName')}</Box>
 
@@ -258,7 +264,7 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, disabled, onChange, onDe
           size="small"
           fullWidth
           inputProps={{ min: 1, style: { padding: '3px 4px', fontSize: '0.75rem', textAlign: 'center' } }}
-          sx={{ '& .MuiOutlinedInput-root': { height: 28, '& fieldset': { borderColor: colors.neutral[200] } } }}
+          sx={{ '& .MuiOutlinedInput-root': { height: 28, backgroundColor: colors.background.default, '& fieldset': { borderColor: colors.neutral[200] } } }}
         />
       </Box>
 
@@ -285,7 +291,7 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, disabled, onChange, onDe
           size="small"
           fullWidth
           inputProps={{ min: 0, step: 0.01, style: { padding: '3px 7px', fontSize: '0.75rem' } }}
-          sx={{ '& .MuiOutlinedInput-root': { height: 28, '& fieldset': { borderColor: colors.neutral[200] } } }}
+          sx={{ '& .MuiOutlinedInput-root': { height: 28, backgroundColor: colors.background.default, '& fieldset': { borderColor: colors.neutral[200] } } }}
         />
       </Box>
 
@@ -391,6 +397,16 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
   const [bulkStatus, setBulkStatus] = useState('');
   const [bulkMethod, setBulkMethod] = useState('');
   const [bulkPayment, setBulkPayment] = useState('');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
+
+  const toggleSort = () => setSortDir(d => d === 'asc' ? 'desc' : d === 'desc' ? null : 'asc');
+
+  const displayRows = sortDir === null
+    ? batch.rows
+    : [...batch.rows].sort((a, b) => {
+        const cmp = a.cardName.localeCompare(b.cardName, undefined, { sensitivity: 'base' });
+        return sortDir === 'asc' ? cmp : -cmp;
+      });
 
   const batchTotal = batch.rows.reduce((s, r) => s + r.quantity * r.pricePerSig, 0);
   const allComplete = batch.rows.length > 0 && batch.rows.every(r => r.status === 'complete');
@@ -616,20 +632,40 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
               borderBottom: `1px solid ${colors.neutral[200]}`,
             }}>
               {COL_HEADERS.map((h, i) => (
-                <Typography key={i} sx={{
-                  px: 0.5, fontSize: '0.65rem', fontWeight: 600,
-                  color: colors.neutral[500], textTransform: 'uppercase', letterSpacing: '0.05em',
-                  userSelect: 'none',
-                }}>
-                  {h}
-                </Typography>
+                i === 0 ? (
+                  <Box key={i} onClick={toggleSort} sx={{
+                    px: 0.5, display: 'flex', alignItems: 'center', gap: 0.25,
+                    cursor: 'pointer', userSelect: 'none',
+                    '&:hover .sort-label': { color: colors.primary.main },
+                  }}>
+                    <Typography className="sort-label" sx={{
+                      fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      color: sortDir ? colors.primary.main : colors.neutral[500],
+                    }}>
+                      {h}
+                    </Typography>
+                    {sortDir === 'asc' && <CaretUp size={10} color={colors.primary.main} />}
+                    {sortDir === 'desc' && <CaretDown size={10} color={colors.primary.main} />}
+                    {sortDir === null && <CaretDown size={10} color={colors.neutral[400]} />}
+                  </Box>
+                ) : (
+                  <Typography key={i} sx={{
+                    px: 0.5, fontSize: '0.65rem', fontWeight: 600,
+                    color: colors.neutral[500], textTransform: 'uppercase', letterSpacing: '0.05em',
+                    userSelect: 'none',
+                  }}>
+                    {h}
+                  </Typography>
+                )
               ))}
             </Box>
 
-            {batch.rows.map(row => (
+            {displayRows.map((row, index) => (
               <CardRowEditor
                 key={row.id}
                 row={row}
+                index={index}
                 disabled={batch.archived}
                 onChange={changes => onUpdateRow(batch.id, row.id, changes)}
                 onDelete={() => onDeleteRow(batch.id, row.id)}

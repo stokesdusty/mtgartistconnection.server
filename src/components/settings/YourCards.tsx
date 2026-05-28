@@ -180,7 +180,7 @@ const YourCards = () => {
                   <Box
                     key={artist.name}
                     component={RouterLink}
-                    to={`/allcards/${artist.name}`}
+                    to={`/allcards/${artist.name.replace(/\./g, '')}`}
                     sx={styles.artistRow}
                   >
                     <Typography sx={styles.artistName}>{artist.name}</Typography>

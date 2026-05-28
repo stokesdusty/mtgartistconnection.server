@@ -300,7 +300,7 @@ const Following = () => {
                         >
                           <Typography
                             component={RouterLink}
-                            to={`/artist/${artistName}`}
+                            to={`/artist/${artistName.replace(/\./g, '')}`}
                             sx={{
                               textDecoration: 'none',
                               color: colors.primary.main,

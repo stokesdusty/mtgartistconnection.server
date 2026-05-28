@@ -744,7 +744,7 @@ const AllCards = () => {
       variables: {
         scryfallId: card.id,
         cardName: card.name,
-        artistName: artist || "",
+        artistName: (artist || "").replace(/\./g, ''),
         set: card.set,
         collectorNumber: card.collector_number,
         field,

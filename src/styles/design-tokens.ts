@@ -40,7 +40,9 @@ export const colors = {
     red: '#e74c3c',         // Error states
     redLight: '#fef5f5',    // Light red background for error states
     green: '#27ae60',       // Success states
-    greenLight: '#eafaf1', // Light green tint for chip/badge backgrounds
+    greenLight: '#eafaf1',  // Light green tint for chip/badge backgrounds
+    greenRow: '#e4f2ea',    // Alternating row background
+    greenRowHover: '#d4eadd', // Alternating row hover background
     greenDark: '#1e8449',  // Dark green for hover states
     greenOnDark: '#6fcf97', // Readable green for text on dark backgrounds
   },
