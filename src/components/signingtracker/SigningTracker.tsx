@@ -62,6 +62,7 @@ interface CardRow {
   set: string;
   foil: FoilType;
   owner: string;
+  artist: string;
   signatureType: string;
   sigNotes: string;
   pricePerSig: number;
@@ -108,9 +109,9 @@ const SIGNING_METHOD_LABELS: Record<SigningMethod, string> = {
   custom: 'Custom',
 };
 
-const GRID_COLS = '155px 50px 82px 86px 100px 100px 130px 60px 64px 96px 140px 116px 114px 140px 140px 36px';
+const GRID_COLS = '155px 50px 82px 86px 100px 120px 100px 130px 60px 64px 96px 140px 116px 114px 140px 140px 36px';
 const COL_HEADERS = [
-  'Card Name', 'Qty', 'Set', 'Foil', 'Owner',
+  'Card Name', 'Qty', 'Set', 'Foil', 'Owner', 'Artist',
   'Sig Type', 'Sig Notes', '$/Sig', 'Total',
   'Payment', 'Status', 'Method', 'Details',
   'Outbound Track.', 'Inbound Track.', '',
@@ -123,7 +124,7 @@ const genId = (): string => `${Date.now()}-${Math.random().toString(36).slice(2,
 const makeRow = (): CardRow => ({
   id: genId(),
   cardName: '', quantity: 1, set: '', foil: 'non-foil',
-  owner: '', signatureType: '', sigNotes: '', pricePerSig: 0,
+  owner: '', artist: '', signatureType: '', sigNotes: '', pricePerSig: 0,
   paymentStatus: 'unpaid', status: 'collecting',
   signingMethod: 'mail-to-artist', signingMethodLabel: '',
   outboundTracking: '', inboundTracking: '',
@@ -160,6 +161,7 @@ const fromDbBatch = (db: any): SigningBatch => ({
     set: r.set ?? '',
     foil: (r.foil ?? 'non-foil') as FoilType,
     owner: r.owner ?? '',
+    artist: r.artist ?? '',
     signatureType: r.signatureType ?? '',
     sigNotes: r.sigNotes ?? '',
     pricePerSig: r.pricePerSig ?? 0,
@@ -179,6 +181,7 @@ const toDbRows = (rows: CardRow[]) => rows.map(r => ({
   set: r.set,
   foil: r.foil,
   owner: r.owner,
+  artist: r.artist,
   signatureType: r.signatureType,
   sigNotes: r.sigNotes,
   pricePerSig: r.pricePerSig,
@@ -279,6 +282,7 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, index, disabled, onChang
       </Box>
 
       <Box sx={{ px: 0.5 }}>{txt('owner')}</Box>
+      <Box sx={{ px: 0.5 }}>{txt('artist')}</Box>
       <Box sx={{ px: 0.5 }}>{txt('signatureType')}</Box>
       <Box sx={{ px: 0.5 }}>{txt('sigNotes')}</Box>
 

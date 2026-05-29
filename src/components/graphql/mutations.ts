@@ -402,6 +402,7 @@ export const SAVE_SIGNING_BATCH = gql`
                 set
                 foil
                 owner
+                artist
                 signatureType
                 sigNotes
                 pricePerSig
