@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import {
   Box,
@@ -8,10 +8,15 @@ import {
   Alert,
   Container,
   Paper,
+  Link as MuiLink,
 } from "@mui/material";
 import { ArrowsCounterClockwise } from "@phosphor-icons/react";
+import { Link as RouterLink } from "react-router-dom";
+import { useQuery } from "@apollo/client";
 import axios from "axios";
 import { contentPageStyles } from "../../styles/content-page-styles";
+import { GET_ARTIST_FILTER_FLAGS } from "../graphql/queries";
+import { colors, themeColors, transitions } from "../../styles/design-tokens";
 
 interface CardData {
   id: string;
@@ -28,6 +33,21 @@ const RandomFlavorText = () => {
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: directoryData } = useQuery(GET_ARTIST_FILTER_FLAGS);
+
+  const artistLookup = useMemo(() => {
+    const map = new Map<string, string>();
+    directoryData?.artistFilterFlags?.forEach((a: { name: string }) => {
+      map.set(a.name.toLowerCase().trim(), a.name);
+    });
+    return map;
+  }, [directoryData]);
+
+  const matchedArtistName = useMemo(() => {
+    if (!cardData?.artist) return null;
+    return artistLookup.get(cardData.artist.toLowerCase().trim()) ?? null;
+  }, [cardData?.artist, artistLookup]);
 
   const scryfallQuery = "https://api.scryfall.com/cards/random?q=has%3Aflavor";
 
@@ -90,8 +110,58 @@ const RandomFlavorText = () => {
                   variant="subtitle1"
                   sx={contentPageStyles.artistByline}
                 >
-                  Art by {cardData.artist}
+                  Art by{" "}
+                  {matchedArtistName ? (
+                    <MuiLink
+                      component={RouterLink}
+                      to={`/artist/${matchedArtistName}`}
+                      sx={{
+                        color: themeColors.primary.main,
+                        textDecoration: "none",
+                        fontStyle: "inherit",
+                        transition: transitions.fast,
+                        "&:hover": {
+                          color: colors.primary.dark,
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      {cardData.artist}
+                    </MuiLink>
+                  ) : (
+                    <>
+                      {cardData.artist}
+                      {" "}
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        sx={{ color: themeColors.text.hint, fontStyle: "italic" }}
+                      >
+                        (not yet in the directory)
+                      </Typography>
+                    </>
+                  )}
                 </Typography>
+
+                {matchedArtistName && (
+                  <MuiLink
+                    component={RouterLink}
+                    to={`/allcards/${matchedArtistName}`}
+                    sx={{
+                      fontSize: "0.8125rem",
+                      color: themeColors.primary.main,
+                      textDecoration: "none",
+                      mt: "-0.25rem",
+                      transition: transitions.fast,
+                      "&:hover": {
+                        color: colors.primary.dark,
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    See all their cards →
+                  </MuiLink>
+                )}
 
                 <Box sx={contentPageStyles.imageContainer}>
                   {isLoading && cardData && (
