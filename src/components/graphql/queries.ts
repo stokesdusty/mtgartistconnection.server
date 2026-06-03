@@ -354,3 +354,31 @@ export const GET_NEWS_REVIEWS_BY_ARTIST = gql`
         }
     }
 `;
+
+export const GET_CLICK_STATS = gql`
+    query clickStats($range: String, $groupBy: String!) {
+        clickStats(range: $range, groupBy: $groupBy) {
+            key
+            count
+        }
+    }
+`;
+
+export const GET_TOP_ARTISTS_BY_CLICKS = gql`
+    query topArtistsByClicks($range: String, $limit: Int) {
+        topArtistsByClicks(range: $range, limit: $limit) {
+            artistName
+            artistId
+            count
+        }
+    }
+`;
+
+export const GET_CLICK_TIMESERIES = gql`
+    query clickTimeseries($range: String) {
+        clickTimeseries(range: $range) {
+            date
+            count
+        }
+    }
+`;

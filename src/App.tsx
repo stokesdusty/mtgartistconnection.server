@@ -47,6 +47,7 @@ const NewsReview = lazy(() => import(/* webpackChunkName: "admin-news-review" */
 const ManualArticleSubmit = lazy(() => import(/* webpackChunkName: "admin-manual-article" */ "./components/newsreview/ManualArticleSubmit"));
 const AddEvent = lazy(() => import(/* webpackChunkName: "admin-add-event" */ "./components/blogs/AddEvent"));
 const AddArtistToEvent = lazy(() => import(/* webpackChunkName: "admin-add-artist-to-event" */ "./components/blogs/AddArtistToEvent"));
+const AnalyticsDashboard = lazy(() => import(/* webpackChunkName: "admin-analytics" */ "./components/analytics/AnalyticsDashboard"));
 
 // ─── Suspense fallback ───────────────────────────────────────────────────────
 
@@ -130,6 +131,7 @@ function App() {
                     <Route path="/submitarticle" element={<ManualArticleSubmit />} />
                     <Route path="/addevent" element={<AddEvent />} />
                     <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
+                    <Route path="/analytics" element={<AnalyticsDashboard />} />
                   </>}
                 </Routes>
               </Suspense>

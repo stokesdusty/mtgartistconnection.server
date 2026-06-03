@@ -162,6 +162,11 @@ const Header = () => {
     navigate('/reviewnews');
   };
 
+  const handleAnalyticsClick = () => {
+    setDrawerOpen(false);
+    navigate('/analytics');
+  };
+
   useEffect(() => {
     setValue(
       validPaths.includes(location.pathname)
@@ -375,6 +380,14 @@ const Header = () => {
                     <GearSix size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Review News" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleAnalyticsClick} sx={headerStyles.drawerListItem}>
+                  <ListItemIcon>
+                    <GearSix size={20} />
+                  </ListItemIcon>
+                  <ListItemText primary="Analytics" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
               </ListItem>
             </>}
