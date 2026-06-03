@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -21,8 +21,9 @@ import {
   alpha,
 } from '@mui/material';
 import { X, User, CalendarBlank, ArrowSquareOut, ArrowLeft } from "@phosphor-icons/react";
-import { GET_NEWS_REVIEW } from '../graphql/queries';
+import { GET_NEWS_REVIEW, GET_ARTIST_FILTER_FLAGS } from '../graphql/queries';
 import { colors } from '../../styles/design-tokens';
+import ArtistLink from '../shared/ArtistLink';
 
 interface NewsArticleData {
   id: string;
@@ -51,6 +52,15 @@ const NewsArticle: React.FC = () => {
     variables: { id: articleId },
     fetchPolicy: 'network-only',
   });
+
+  const { data: artistFlagsData } = useQuery(GET_ARTIST_FILTER_FLAGS);
+
+  const sortedArtistNames = useMemo(() => {
+    if (!artistFlagsData?.artistFilterFlags) return [] as string[];
+    return (artistFlagsData.artistFilterFlags as Array<{ name: string }>)
+      .map((a) => a.name)
+      .sort((a, b) => b.length - a.length);
+  }, [artistFlagsData]);
 
   const article: NewsArticleData | null = data?.newsReview || null;
 
@@ -174,30 +184,49 @@ const NewsArticle: React.FC = () => {
   };
 
   const renderContentWithLinks = (content: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = content.split(urlRegex);
+    const urlLinkSx = {
+      color: colors.primary.main,
+      fontWeight: 600,
+      textDecoration: 'none',
+      borderBottom: `1px solid ${colors.primary.main}`,
+      transition: 'all 200ms',
+      '&:hover': {
+        color: colors.primary.dark,
+        borderBottomWidth: '2px',
+        backgroundColor: alpha(colors.primary.main, 0.05),
+      },
+    };
 
-    return parts.map((part, index) => {
+    if (sortedArtistNames.length > 0) {
+      const escapedNames = sortedArtistNames.map((n) =>
+        n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      );
+      const combined = new RegExp(
+        `(https?://[^\\s]+|\\b(?:${escapedNames.join('|')})\\b)`,
+        'g'
+      );
+      const artistNameSet = new Set(sortedArtistNames.map((n) => n.toLowerCase().trim()));
+
+      return content.split(combined).map((part, index) => {
+        if (part.match(/^https?:\/\//)) {
+          return (
+            <Link key={index} href={part} target="_blank" rel="noopener noreferrer" sx={urlLinkSx}>
+              {part}
+            </Link>
+          );
+        }
+        if (artistNameSet.has(part.toLowerCase().trim())) {
+          return <ArtistLink key={index} name={part} />;
+        }
+        return part;
+      });
+    }
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return content.split(urlRegex).map((part, index) => {
       if (part.match(urlRegex)) {
         return (
-          <Link
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              color: colors.primary.main,
-              fontWeight: 600,
-              textDecoration: 'none',
-              borderBottom: `1px solid ${colors.primary.main}`,
-              transition: 'all 200ms',
-              '&:hover': {
-                color: colors.primary.dark,
-                borderBottomWidth: '2px',
-                backgroundColor: alpha(colors.primary.main, 0.05),
-              },
-            }}
-          >
+          <Link key={index} href={part} target="_blank" rel="noopener noreferrer" sx={urlLinkSx}>
             {part}
           </Link>
         );

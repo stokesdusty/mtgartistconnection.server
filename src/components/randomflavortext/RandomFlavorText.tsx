@@ -16,7 +16,8 @@ import { useQuery } from "@apollo/client";
 import axios from "axios";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { GET_ARTIST_FILTER_FLAGS } from "../graphql/queries";
-import { colors, themeColors, transitions } from "../../styles/design-tokens";
+import { themeColors, transitions, colors } from "../../styles/design-tokens";
+import ArtistLink from "../shared/ArtistLink";
 
 interface CardData {
   id: string;
@@ -36,18 +37,15 @@ const RandomFlavorText = () => {
 
   const { data: directoryData } = useQuery(GET_ARTIST_FILTER_FLAGS);
 
-  const artistLookup = useMemo(() => {
-    const map = new Map<string, string>();
-    directoryData?.artistFilterFlags?.forEach((a: { name: string }) => {
-      map.set(a.name.toLowerCase().trim(), a.name);
-    });
-    return map;
-  }, [directoryData]);
-
   const matchedArtistName = useMemo(() => {
-    if (!cardData?.artist) return null;
-    return artistLookup.get(cardData.artist.toLowerCase().trim()) ?? null;
-  }, [cardData?.artist, artistLookup]);
+    if (!cardData?.artist || !directoryData?.artistFilterFlags) return null;
+    const trimmed = cardData.artist.toLowerCase().trim();
+    return (
+      directoryData.artistFilterFlags.find(
+        (a: { name: string }) => a.name.toLowerCase().trim() === trimmed
+      )?.name ?? null
+    );
+  }, [cardData?.artist, directoryData?.artistFilterFlags]);
 
   const scryfallQuery = "https://api.scryfall.com/cards/random?q=has%3Aflavor";
 
@@ -110,37 +108,7 @@ const RandomFlavorText = () => {
                   variant="subtitle1"
                   sx={contentPageStyles.artistByline}
                 >
-                  Art by{" "}
-                  {matchedArtistName ? (
-                    <MuiLink
-                      component={RouterLink}
-                      to={`/artist/${matchedArtistName}`}
-                      sx={{
-                        color: themeColors.primary.main,
-                        textDecoration: "none",
-                        fontStyle: "inherit",
-                        transition: transitions.fast,
-                        "&:hover": {
-                          color: colors.primary.dark,
-                          textDecoration: "underline",
-                        },
-                      }}
-                    >
-                      {cardData.artist}
-                    </MuiLink>
-                  ) : (
-                    <>
-                      {cardData.artist}
-                      {" "}
-                      <Typography
-                        component="span"
-                        variant="caption"
-                        sx={{ color: themeColors.text.hint, fontStyle: "italic" }}
-                      >
-                        (not yet in the directory)
-                      </Typography>
-                    </>
-                  )}
+                  Art by <ArtistLink name={cardData.artist} />
                 </Typography>
 
                 {matchedArtistName && (
