@@ -14,7 +14,7 @@ import {
   import { useMutation, useQuery } from "@apollo/client";
   import { useSelector } from "react-redux";
   import { useEffect, useState } from "react";
-  import { GET_ARTISTS_FOR_HOMEPAGE, GET_SIGNINGEVENTS } from "../graphql/queries";
+  import { GET_ARTIST_NAMES, GET_SIGNINGEVENTS } from "../graphql/queries";
   import { ADD_ARTISTTOEVENT } from "../graphql/mutations";
   import { colors } from "../../styles/design-tokens";
   
@@ -22,7 +22,7 @@ import {
       const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
   
       const {data: eventData, error: eventDataError, loading: eventDataLoading} = useQuery(GET_SIGNINGEVENTS, { fetchPolicy: 'network-only' });
-      const {data: artistData, error: artistDataError, loading: artistDataLoading}= useQuery(GET_ARTISTS_FOR_HOMEPAGE);
+      const {data: artistData, error: artistDataError, loading: artistDataLoading}= useQuery(GET_ARTIST_NAMES);
       const [ addArtistToEvent ] = useMutation(ADD_ARTISTTOEVENT);
   
       const [filteredData, setFilteredData] = useState<any[]>([]);
@@ -260,7 +260,7 @@ import {
                                       <MenuItem value={"Default"} disabled>
                                           Select an Artist
                                       </MenuItem>
-                                      {artistData.artists.map((singleArtist: any) => {
+                                      {artistData.artistNames.map((singleArtist: any) => {
                                           return (
                                               <MenuItem value={singleArtist.name} key={singleArtist.name}>
                                                   {singleArtist.name}

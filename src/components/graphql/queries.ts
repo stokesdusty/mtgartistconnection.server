@@ -1,16 +1,10 @@
 import { gql } from "@apollo/client";
 
-export const GET_ARTISTS_FOR_HOMEPAGE = gql`
+export const GET_ARTIST_NAMES = gql`
     {
-        artists{
+        artistNames {
             name
-            alternate_names
             filename
-            location
-            signing
-            markssignatureservice
-            mountainmage
-            artistProofs
         }
     }
 `;

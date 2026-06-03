@@ -11,7 +11,7 @@ import {
   ListItemText,
   Container,
 } from "@mui/material";
-import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
+import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTIST_NAMES } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ArrowLeft } from "@phosphor-icons/react";
 import { colors } from "../../styles/design-tokens";
@@ -33,7 +33,7 @@ const EventDetail = () => {
     skip: !eventId,
   });
 
-  const { data: allArtistsData } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
+  const { data: allArtistsData } = useQuery(GET_ARTIST_NAMES);
 
   const event = useMemo(() => {
     if (!eventsData?.signingEvent || !eventId) return null;
@@ -42,10 +42,10 @@ const EventDetail = () => {
 
   // Map artist names to their full data (including filename for images)
   const artistsWithImages = useMemo(() => {
-    if (!artistData?.mapArtistToEventByEventId || !allArtistsData?.artists) return [];
+    if (!artistData?.mapArtistToEventByEventId || !allArtistsData?.artistNames) return [];
 
     return artistData.mapArtistToEventByEventId.map((eventArtist: any) => {
-      const fullArtist = allArtistsData.artists.find(
+      const fullArtist = allArtistsData.artistNames.find(
         (a: any) => a.name === eventArtist.artistName
       );
       return {

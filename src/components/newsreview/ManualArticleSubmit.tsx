@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { PaperPlaneRight, ArrowLeft, CloudArrowUp, Trash } from "@phosphor-icons/react";
-import { GET_ARTISTS_FOR_HOMEPAGE } from '../graphql/queries';
+import { GET_ARTIST_NAMES } from '../graphql/queries';
 import { GENERATE_MANUAL_NEWS_ARTICLE, UPLOAD_NEWS_IMAGE } from '../graphql/mutations';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -42,11 +42,11 @@ const ManualArticleSubmit: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const { data: artistsData, loading: artistsLoading } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
+  const { data: artistsData, loading: artistsLoading } = useQuery(GET_ARTIST_NAMES);
   const [generateArticle, { loading: generating }] = useMutation(GENERATE_MANUAL_NEWS_ARTICLE);
   const [uploadNewsImage] = useMutation(UPLOAD_NEWS_IMAGE);
 
-  const artists: Artist[] = artistsData?.artists || [];
+  const artists: Artist[] = artistsData?.artistNames || [];
   const sortedArtists = [...artists].sort((a, b) => a.name.localeCompare(b.name));
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

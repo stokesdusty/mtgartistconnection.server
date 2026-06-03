@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Printer, Trash } from '@phosphor-icons/react';
-import { GET_ARTISTS_FOR_HOMEPAGE } from '../graphql/queries';
+import { GET_ARTIST_NAMES } from '../graphql/queries';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { colors, themeColors } from '../../styles/design-tokens';
 
@@ -102,9 +102,9 @@ const ArtistSheet = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [color, setColor] = useState('');
 
-  const { data } = useQuery(GET_ARTISTS_FOR_HOMEPAGE);
+  const { data } = useQuery(GET_ARTIST_NAMES);
 
-  const artists: string[] = (data?.artists ?? [])
+  const artists: string[] = (data?.artistNames ?? [])
     .map((a: ArtistRecord) => a.name)
     .sort();
 

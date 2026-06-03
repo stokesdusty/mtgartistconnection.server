@@ -20,7 +20,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useMutation, useQuery } from "@apollo/client";
 import { UNFOLLOW_ARTIST, FOLLOW_ARTIST, MONITOR_STATE, UNMONITOR_STATE } from "../graphql/mutations";
-import { GET_CURRENT_USER, GET_ARTISTS_FOR_HOMEPAGE } from "../graphql/queries";
+import { GET_CURRENT_USER, GET_ARTIST_NAMES } from "../graphql/queries";
 import { colors } from "../../styles/design-tokens";
 
 const US_STATES = [
@@ -50,7 +50,7 @@ const Following = () => {
     skip: !isLoggedIn,
   });
 
-  const { data: allArtistsData } = useQuery(GET_ARTISTS_FOR_HOMEPAGE, {
+  const { data: allArtistsData } = useQuery(GET_ARTIST_NAMES, {
     skip: !isLoggedIn,
   });
 
@@ -239,7 +239,7 @@ const Following = () => {
 
               <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
                 <Autocomplete
-                  options={(allArtistsData?.artists ?? [])
+                  options={(allArtistsData?.artistNames ?? [])
                     .map((a: { name: string }) => a.name)
                     .filter((name: string) => !userData?.me?.followedArtists?.includes(name))
                     .sort()}
