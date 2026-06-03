@@ -27,7 +27,6 @@ const NewsArticle = lazy(() => import(/* webpackChunkName: "news-article" */ "./
 const ArtistNews = lazy(() => import(/* webpackChunkName: "artist-news" */ "./components/news/ArtistNews"));
 const AllCards = lazy(() => import(/* webpackChunkName: "all-cards", webpackPrefetch: true */ "./components/allcards/AllCards"));
 const ArtistCardAnalysis = lazy(() => import(/* webpackChunkName: "artist-card-breakdown" */ "./components/artist/ArtistCardBreakdown"));
-const MarksCalendar = lazy(() => import(/* webpackChunkName: "marks-calendar" */ "./components/markscalendar/MarksCalendar"));
 const RandomFlavorText = lazy(() => import(/* webpackChunkName: "random-flavor-text" */ "./components/randomflavortext/RandomFlavorText"));
 const PrivacyPolicy = lazy(() => import(/* webpackChunkName: "privacy-policy" */ "./components/home/PrivacyPolicy"));
 const TermsOfService = lazy(() => import(/* webpackChunkName: "terms-of-service" */ "./components/home/TermsOfService"));
@@ -111,8 +110,7 @@ function App() {
                   <Route path="/news/:articleId" element={<NewsArticle />} />
                   <Route path="/artist/:name" element={<Artist />} />
                   <Route path="/allcards/:name" element={<AllCards />} />
-                  <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />
-                  <Route path="/markscalendar" element={<MarksCalendar />} />
+                  <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />                  
                   <Route path="/randomflavortext" element={<RandomFlavorText />} />
                   <Route path="/privacypolicy" element={<PrivacyPolicy />} />
                   <Route path="/termsofservice" element={<TermsOfService />} />
