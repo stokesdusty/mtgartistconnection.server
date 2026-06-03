@@ -92,19 +92,6 @@ export const GET_ARTISTS_BY_EVENT_IDS = gql`
     }
 `;
 
-export const GET_EVENTS_BY_ARTIST = gql`
-    query getEventsByArtist($artistName: String!) {
-        signingEvent {
-            id
-            name
-            city
-            startDate
-            endDate
-            url
-        }
-    }
-`;
-
 export const GET_CARD_PRICES = gql`
     query cardPricesByCards($cards: [CardLookupInput!]!) {
         cardPricesByCards(cards: $cards) {
