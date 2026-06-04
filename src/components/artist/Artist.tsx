@@ -90,6 +90,28 @@ const UpcomingEventsSection = ({ artistEvents }: { artistEvents: any[] }) => {
   );
 };
 
+const SCRYFALL_CACHE_TTL = 24 * 60 * 60 * 1000;
+
+function getCachedScryfallIds(artistName: string): string[] | null {
+  try {
+    const raw = localStorage.getItem(`scryfall_ids:${artistName}`);
+    if (!raw) return null;
+    const { ids, ts } = JSON.parse(raw);
+    if (Date.now() - ts > SCRYFALL_CACHE_TTL) return null;
+    return ids;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedScryfallIds(artistName: string, ids: string[]): void {
+  try {
+    localStorage.setItem(`scryfall_ids:${artistName}`, JSON.stringify({ ids, ts: Date.now() }));
+  } catch {
+    // localStorage unavailable
+  }
+}
+
 const Artist = () => {
   const { name } = useParams<{ name: string }>();
   const navigate = useNavigate();
@@ -107,7 +129,7 @@ const Artist = () => {
     {
       variables: { name: name || "" },
       skip: !name,
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'cache-and-network',
     }
   );
 
@@ -148,6 +170,19 @@ const Artist = () => {
     if (!isLoggedIn || !data?.artistByName?.name) return;
 
     const artistName = data.artistByName.name;
+
+    const runCollectionQuery = (ids: string[]) => {
+      if (ids.length > 0) {
+        fetchUserCardCollection({ variables: { scryfallIds: ids } });
+      }
+    };
+
+    const cached = getCachedScryfallIds(artistName);
+    if (cached) {
+      runCollectionQuery(cached);
+      return;
+    }
+
     const encodedName = encodeURIComponent("!" + artistName);
     const baseUrl = `https://api.scryfall.com/cards/search?as=grid&unique=prints&order=name&q=%28game%3Apaper%29+%28artist%3A"${encodedName}"%29`;
 
@@ -165,9 +200,8 @@ const Artist = () => {
     };
 
     fetchAllIds(baseUrl).then(ids => {
-      if (ids.length > 0) {
-        fetchUserCardCollection({ variables: { scryfallIds: ids } });
-      }
+      setCachedScryfallIds(artistName, ids);
+      runCollectionQuery(ids);
     });
   }, [isLoggedIn, data?.artistByName?.name, fetchUserCardCollection]);
 

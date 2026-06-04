@@ -3,10 +3,11 @@ import {
   Typography,
   Button,
   Chip,
+  Collapse,
 } from "@mui/material";
 import setArtistsData from "../../data/set-artists.json";
 import { ArtistGridSkeleton } from "../shared/Skeletons";
-import { Eraser, Funnel, Shuffle, ArrowUp } from "@phosphor-icons/react";
+import { Eraser, Funnel, Shuffle, ArrowUp, CaretDown, CaretUp } from "@phosphor-icons/react";
 import { useQuery, NetworkStatus } from "@apollo/client";
 import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
@@ -56,8 +57,6 @@ const FLAG_ARTISTPROOFS = 1 << 2; // artistProofs === "yes"|"true"
 
 const PAGE_SIZE = 60;
 
-const INTRO_SEEN_KEY = 'mtgac-intro-seen';
-
 const Homepage = () => {
   usePageTitle();
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -87,13 +86,7 @@ const Homepage = () => {
     }
     return getDensityPreference();
   });
-  const [showIntro] = useState(() => {
-    const seen = localStorage.getItem(INTRO_SEEN_KEY) === 'true';
-    if (!seen) {
-      localStorage.setItem(INTRO_SEEN_KEY, 'true');
-    }
-    return !seen;
-  });
+  const [showAbout, setShowAbout] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [scryfallSets, setScryfallSets] = useState<ScryfallSet[]>([]);
   const [setsLoading, setSetsLoading] = useState(false);
@@ -491,27 +484,36 @@ const Homepage = () => {
     <Box sx={homepageStyles.container}>
       <Box sx={homepageStyles.wrapper}>
         <Box sx={homepageStyles.headerSection}>
-          {showIntro && (
-            <>
-              <Typography variant="h6" sx={homepageStyles.description}>
-                Your go-to hub for discovering Magic: The Gathering artists
-              </Typography>
-
-              <Typography variant="body1" sx={homepageStyles.descriptionList}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+            <Typography component="span" sx={{ ...(homepageStyles.description as object), margin: 0 }}>
+              Your go-to hub for discovering Magic: The Gathering artists
+            </Typography>
+            <Box component="span" sx={{ ...(homepageStyles.count as object), margin: 0 }}>
+              Proudly indexing {allFlags.length || totalArtists} artists
+            </Box>
+            <Button
+              size="small"
+              variant="text"
+              onClick={() => setShowAbout((v) => !v)}
+              endIcon={showAbout ? <CaretUp size={14} /> : <CaretDown size={14} />}
+              sx={homepageStyles.aboutButton}
+            >
+              About
+            </Button>
+          </Box>
+          <Collapse in={showAbout}>
+            <Box sx={{ mt: 1.5, maxWidth: '700px', mx: 'auto', textAlign: 'left' }}>
+              <Typography variant="body2" sx={{ ...(homepageStyles.descriptionList as object), margin: 0, mb: 0.5 }}>
                 <b>Artist Profiles</b> – Find official sites, social media pages, and portfolios for hundreds of MTG artists.
               </Typography>
-              <Typography variant="body1" sx={homepageStyles.descriptionList}>
+              <Typography variant="body2" sx={{ ...(homepageStyles.descriptionList as object), margin: 0, mb: 0.5 }}>
                 <b>Where to Buy</b> – Easily locate artist stores for playmats, prints, tokens, and signed cards.
               </Typography>
-              <Typography variant="body1" sx={homepageStyles.descriptionList}>
+              <Typography variant="body2" sx={{ ...(homepageStyles.descriptionList as object), margin: 0 }}>
                 <b>Upcoming Events</b> – See which conventions, signings, or streams your favorite artists will be attending.
               </Typography>
-
-              <Box component="span" sx={homepageStyles.count}>
-                Proudly indexing {allFlags.length || totalArtists} artists and counting
-              </Box>
-            </>
-          )}
+            </Box>
+          </Collapse>
         </Box>
 
         <Box sx={{ ...homepageStyles.filtersSection, py: 1.5, display: { xs: 'none', sm: 'block' } }}>

@@ -449,6 +449,19 @@ export const homepageStyles: Record<string, SxProps<Theme>> = {
     flexDirection: 'column',
     gap: spacing.lg,
   },
+  aboutButton: {
+    fontSize: typography.fontSize.xs,
+    textTransform: 'none',
+    color: themeColors.text.secondary,
+    fontFamily: typography.fontFamily.display,
+    fontWeight: typography.fontWeight.semibold,
+    minWidth: 0,
+    px: 1,
+    '&:hover': {
+      backgroundColor: 'rgba(0,0,0,0.04)',
+      color: themeColors.text.primary,
+    },
+  },
   filterSheetActions: {
     px: spacing.md,
     pt: spacing.md,
