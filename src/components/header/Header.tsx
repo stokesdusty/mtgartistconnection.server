@@ -20,7 +20,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, ShareNetwork, Newspaper } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
 import { shadows } from '../../styles/design-tokens';
@@ -361,7 +361,7 @@ const Header = () => {
               <ListItem disablePadding>
                 <ListItemButton onClick={handleAddArtistClick} sx={headerStyles.drawerListItem}>
                   <ListItemIcon>
-                    <GearSix size={20} />
+                    <UserPlus size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Add Artist" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
@@ -369,7 +369,7 @@ const Header = () => {
               <ListItem disablePadding>
                 <ListItemButton onClick={handleReviewSocialsClick} sx={headerStyles.drawerListItem}>
                   <ListItemIcon>
-                    <GearSix size={20} />
+                    <ShareNetwork size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Review Socials" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
@@ -377,7 +377,7 @@ const Header = () => {
               <ListItem disablePadding>
                 <ListItemButton onClick={handleReviewNewsClick} sx={headerStyles.drawerListItem}>
                   <ListItemIcon>
-                    <GearSix size={20} />
+                    <Newspaper size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Review News" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
