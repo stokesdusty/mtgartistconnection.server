@@ -132,6 +132,33 @@ export const headerStyles: Record<string, SxProps<Theme>> = {
       color: colors.primary.dark,
     },
   },
+  signInButton: {
+    color: themeColors.text.secondary,
+    textTransform: 'none',
+    fontSize: { xs: typography.fontSize.sm, md: typography.fontSize.base },
+    fontWeight: typography.fontWeight.medium,
+    padding: { xs: '6px 12px', md: '8px 16px' },
+    borderRadius: borderRadius.sm,
+    transition: transitions.base,
+    '&:hover': {
+      backgroundColor: themeColors.neutral[50],
+      color: themeColors.primary.main,
+    },
+  },
+  signUpButton: {
+    textTransform: 'none',
+    fontSize: { xs: typography.fontSize.sm, md: typography.fontSize.base },
+    fontWeight: typography.fontWeight.semibold,
+    padding: { xs: '6px 12px', md: '8px 16px' },
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.primary.main,
+    color: colors.primary.contrast,
+    transition: transitions.base,
+    '&:hover': {
+      backgroundColor: colors.primary.dark,
+      color: colors.primary.contrast,
+    },
+  },
   drawerHeader: {
     p: 3,
     backgroundColor: colors.primary.main,

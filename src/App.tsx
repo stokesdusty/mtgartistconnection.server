@@ -37,6 +37,7 @@ const Following = lazy(() => import(/* webpackChunkName: "following" */ "./compo
 const YourCards = lazy(() => import(/* webpackChunkName: "your-cards" */ "./components/settings/YourCards"));
 const SigningTracker = lazy(() => import(/* webpackChunkName: "signing-tracker" */ "./components/signingtracker/SigningTracker"));
 const ArtistSheet = lazy(() => import(/* webpackChunkName: "artist-sheet" */ "./components/artistsheet/ArtistSheet"));
+const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ "./components/dashboard/Dashboard"));
 
 // Admin-only — routes absent for non-admin sessions so chunks are never fetched
 const AddArtist = lazy(() => import(/* webpackChunkName: "admin-add-artist" */ "./components/blogs/AddArtist"));
@@ -101,6 +102,7 @@ function App() {
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
                   <Route path="/" element={<Homepage />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/calendar/:eventId" element={<EventDetail />} />

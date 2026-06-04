@@ -54,7 +54,11 @@ const Header = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === 'admin';
 
-  const validPaths = useMemo(() => navItems.map(item => item.to), []);
+  const validPaths = useMemo(() => {
+    const paths = navItems.map(item => item.to);
+    if (isLoggedIn) paths.push('/dashboard');
+    return paths;
+  }, [isLoggedIn]);
 
   const [value, setValue] = useState<string | false>(() =>
     validPaths.includes(location.pathname)
@@ -95,6 +99,11 @@ const Header = () => {
 
   const handleLogin = () => {
     navigate('/auth');
+    handleClose();
+  };
+
+  const handleSignUp = () => {
+    navigate('/auth?tab=signup');
     handleClose();
   };
 
@@ -167,14 +176,6 @@ const Header = () => {
     navigate('/analytics');
   };
 
-  useEffect(() => {
-    setValue(
-      validPaths.includes(location.pathname)
-        ? location.pathname
-        : false
-    );
-  }, [location.pathname, validPaths]);
-
   const renderMenuItems = () => {
     return navItems.map((item) => (
       <MenuItem
@@ -220,7 +221,7 @@ const Header = () => {
             {mode === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </IconButton>
           {!isBelowLarge ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Tabs
                 value={value}
                 onChange={handleTabChange}
@@ -228,15 +229,30 @@ const Header = () => {
                 textColor="inherit"
               >
                 {renderTabs()}
+                {isLoggedIn && (
+                  <Tab
+                    component={NavLink}
+                    to="/dashboard"
+                    disableRipple
+                    label="Dashboard"
+                    value="/dashboard"
+                    sx={headerStyles.tab}
+                  />
+                )}
               </Tabs>
               {isLoggedIn ? (
-                <Button onClick={toggleDrawer(true)} sx={headerStyles.accountButton} startIcon={<ListIcon size={18} />}>
-                  {user?.email?.split('@')[0]}
-                </Button>
+                <IconButton onClick={toggleDrawer(true)} sx={headerStyles.menuButton} aria-label="open account menu">
+                  <ListIcon size={20} />
+                </IconButton>
               ) : (
-                <Button onClick={handleLogin} sx={headerStyles.accountButton}>
-                  Login
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button onClick={handleLogin} sx={headerStyles.signInButton}>
+                    Sign In
+                  </Button>
+                  <Button onClick={handleSignUp} sx={headerStyles.signUpButton}>
+                    Sign Up
+                  </Button>
+                </Box>
               )}
             </Box>
           ) : (
@@ -265,7 +281,10 @@ const Header = () => {
                 >
                   {renderMenuItems()}
                   <MenuItem onClick={handleLogin} sx={headerStyles.menuItem}>
-                    Login
+                    Sign In
+                  </MenuItem>
+                  <MenuItem onClick={handleSignUp} sx={headerStyles.menuItem}>
+                    Sign Up
                   </MenuItem>
                 </Menu>
               )}
@@ -298,6 +317,15 @@ const Header = () => {
                     </ListItemButton>
                   </ListItem>
                 ))}
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => { navigate('/dashboard'); setDrawerOpen(false); }}
+                    selected={location.pathname === '/dashboard'}
+                    sx={headerStyles.drawerListItem}
+                  >
+                    <ListItemText primary="Dashboard" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+                  </ListItemButton>
+                </ListItem>
               </List>
               <Divider />
             </>

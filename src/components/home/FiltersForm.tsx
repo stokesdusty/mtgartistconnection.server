@@ -48,6 +48,7 @@ interface FiltersFormProps {
   onHasUpcomingEventChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSellsApsChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onRandomArtist?: () => void;
+  hideSearch?: boolean;
 }
 
 const FiltersForm = ({
@@ -71,6 +72,7 @@ const FiltersForm = ({
   onHasUpcomingEventChange,
   onSellsApsChange,
   onRandomArtist,
+  hideSearch = false,
 }: FiltersFormProps) => {
   const locationLabelId = `location-select-label${idSuffix}`;
   const locationSelectId = `location-select${idSuffix}`;
@@ -251,7 +253,7 @@ const FiltersForm = ({
 
   return (
     <>
-      {searchField}
+      {!hideSearch && searchField}
       {locationSelect}
       {setAutocomplete}
       {checkboxGroup}

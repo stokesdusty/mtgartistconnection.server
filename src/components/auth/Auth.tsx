@@ -9,13 +9,13 @@ import {
     Tabs,
     Tab,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { USER_LOGIN, USER_SIGNUP } from "../graphql/mutations";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/auth-slice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { authStyles } from "../../styles/auth-styles";
 
 interface Inputs {
@@ -42,7 +42,14 @@ const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0
 const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+    const [searchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState<'login' | 'signup'>(
+        searchParams.get('tab') === 'signup' ? 'signup' : 'login'
+    );
+
+    useEffect(() => {
+        setActiveTab(searchParams.get('tab') === 'signup' ? 'signup' : 'login');
+    }, [searchParams]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loginMutation] = useMutation(USER_LOGIN);
@@ -66,7 +73,7 @@ const Auth = () => {
 
     const onResponseReceived = (authResponse: AuthResponse) => {
         dispatch(login({ token: authResponse.token, refreshToken: authResponse.refreshToken, user: authResponse.user }));
-        navigate("/");
+        navigate("/dashboard");
     };
 
     const onSubmit = async (inputData: Inputs) => {

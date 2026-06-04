@@ -4,10 +4,12 @@ import {
   Button,
   Chip,
   Collapse,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import setArtistsData from "../../data/set-artists.json";
 import { ArtistGridSkeleton } from "../shared/Skeletons";
-import { Eraser, Funnel, Shuffle, ArrowUp, CaretDown, CaretUp } from "@phosphor-icons/react";
+import { Eraser, Funnel, MagnifyingGlass, Shuffle, ArrowUp, CaretDown, CaretUp } from "@phosphor-icons/react";
 import { useQuery, NetworkStatus } from "@apollo/client";
 import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
 import ArtistGridItem from "./ArtistGridItem";
@@ -541,6 +543,25 @@ const Homepage = () => {
           />
         </Box>
 
+        {/* Mobile persistent search bar — hidden on sm+ where the full filter panel shows */}
+        <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 1 }}>
+          <TextField
+            fullWidth
+            size="small"
+            sx={{ ...homepageStyles.textField, "& .MuiInputBase-input": { fontSize: "0.875rem" } }}
+            value={userSearch}
+            placeholder="Search for an artist"
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <MagnifyingGlass size={20} />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+
         {/* Mobile filter trigger — hidden on sm+ where the full filter panel shows */}
         <Box sx={homepageStyles.mobileFilterRow}>
           <Button
@@ -666,6 +687,7 @@ const Homepage = () => {
             <FiltersForm
               layout="stack"
               idSuffix="-m"
+              hideSearch={true}
               userSearch={userSearch}
               locationFilter={locationFilter}
               setFilter={setFilter}
