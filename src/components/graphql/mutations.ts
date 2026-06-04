@@ -103,7 +103,7 @@ export const ADD_SIGNINGEVENT = gql`
                 endDate: $endDate,
                 url: $url,
             ){
-                name
+                id name city startDate endDate url
         }
     }
 `;

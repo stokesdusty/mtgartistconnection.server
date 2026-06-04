@@ -23,7 +23,9 @@ import {
   
       const {data: eventData, error: eventDataError, loading: eventDataLoading} = useQuery(GET_SIGNINGEVENTS, { fetchPolicy: 'network-only' });
       const {data: artistData, error: artistDataError, loading: artistDataLoading}= useQuery(GET_ARTIST_NAMES);
-      const [ addArtistToEvent ] = useMutation(ADD_ARTISTTOEVENT);
+      const [ addArtistToEvent ] = useMutation(ADD_ARTISTTOEVENT, {
+          refetchQueries: [{ query: GET_SIGNINGEVENTS }],
+      });
   
       const [filteredData, setFilteredData] = useState<any[]>([]);
       const [signingEvent, setSigningEvent] = useState<any>("Default");

@@ -8,6 +8,7 @@ import {
   } from "@mui/material";
   import { useMutation } from "@apollo/client";
   import { ADD_SIGNINGEVENT } from "../graphql/mutations";
+  import { GET_SIGNINGEVENTS } from "../graphql/queries";
   import { useSelector } from "react-redux";
   import { DatePicker } from "@mui/x-date-pickers";
   import { useState } from "react";
@@ -15,7 +16,9 @@ import {
   
   const AddEvent = () => {
       const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
-      const [ addSigningEvent ] = useMutation(ADD_SIGNINGEVENT);
+      const [ addSigningEvent ] = useMutation(ADD_SIGNINGEVENT, {
+          refetchQueries: [{ query: GET_SIGNINGEVENTS }],
+      });
       const [ name, setName] = useState<string>("");
       const [ city, setCity] = useState<string>("");
       const [ url, setUrl] = useState<string>("");

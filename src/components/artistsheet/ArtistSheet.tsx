@@ -221,7 +221,7 @@ const ArtistSheet = () => {
               />
 
               <TextField
-                label="Color(s)"
+                label="Signature Type/Color(s)"
                 placeholder="e.g. W, U, B, R, G"
                 value={color}
                 onChange={e => setColor(e.target.value)}
@@ -232,11 +232,13 @@ const ArtistSheet = () => {
               />
 
               <Autocomplete
+                freeSolo
                 fullWidth
                 size="small"
                 options={artists}
-                value={artist || null}
+                value={artist}
                 onChange={(_, v) => setArtist(v ?? '')}
+                onInputChange={(_, v) => setArtist(v)}
                 sx={inputSx}
                 componentsProps={{
                   paper: { sx: { bgcolor: themeColors.background.paper, color: themeColors.text.primary } },
@@ -245,7 +247,7 @@ const ArtistSheet = () => {
                   <TextField
                     {...params}
                     label="Artist"
-                    placeholder="Search artists..."
+                    placeholder="Search or type an artist name..."
                     sx={inputSx}
                   />
                 )}
