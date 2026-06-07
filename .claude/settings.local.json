@@ -17,7 +17,10 @@
       "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
       "Bash(ls /Users/dprime/Documents/GitHub/mtgartistconnection.webservice 2>/dev/null && echo \"EXISTS\" || echo \"NOT FOUND\")",
       "Bash(find /Users/dprime/Documents/GitHub -type f -name \"*SigningTracker*\" -o -name \"*signingtracker*\" | head -10)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(ls -la /Users/dprime/Documents/GitHub/ | grep -i server)",
+      "Bash(xargs ls -1)",
+      "Bash(git -C /Users/dprime/Documents/GitHub/mtgartistconnection.server log --oneline)"
     ]
   }
 }
