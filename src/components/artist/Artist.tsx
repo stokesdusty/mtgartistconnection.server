@@ -21,6 +21,7 @@ import { FaBluesky } from "react-icons/fa6";
 import React, { useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 import { artistStyles } from "../../styles/artist-styles";
+import PageMeta from "../shared/PageMeta";
 
 import { alpha } from '@mui/material/styles';
 import { useSelector } from "react-redux";
@@ -404,6 +405,21 @@ const Artist = () => {
 
   return (
     <Box sx={artistStyles.container}>
+      <PageMeta
+        title={artistByName.name}
+        description={`Explore ${artistByName.name}'s Magic: The Gathering card art, signing events, and contact links on MtG Artist Connection.`}
+        path={`/artist/${encodeURIComponent(artistByName.name)}`}
+        image={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": artistByName.name,
+          "url": `https://www.mtgartistconnection.com/artist/${encodeURIComponent(artistByName.name)}`,
+          "image": `https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`,
+          "jobTitle": "Magic: The Gathering Artist",
+          "worksFor": { "@id": "https://www.mtgartistconnection.com/#organization" },
+        }}
+      />
       {/* Full-bleed hero banner */}
       <Box sx={artistStyles.heroBanner}>
         <img

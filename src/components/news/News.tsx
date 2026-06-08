@@ -22,6 +22,7 @@ import { User, CalendarBlank, ArrowRight, X } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { newsStyles, getDateChipStyles } from '../../styles/news-styles';
 import { colors } from '../../styles/design-tokens';
+import PageMeta from '../shared/PageMeta';
 
 interface NewsArticle {
   id: string;
@@ -189,6 +190,11 @@ const News: React.FC = () => {
 
   return (
     <Box sx={newsStyles.container}>
+      <PageMeta
+        title="Artist News"
+        description="Stay up to date with the latest news and updates from Magic: The Gathering artists on MtG Artist Connection."
+        path="/news"
+      />
       <Container maxWidth="md">
         <Box sx={newsStyles.header}>
           <Typography variant="h3" sx={newsStyles.title}>

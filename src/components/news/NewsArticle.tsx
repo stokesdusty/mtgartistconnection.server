@@ -24,6 +24,7 @@ import { X, User, CalendarBlank, ArrowSquareOut, ArrowLeft } from "@phosphor-ico
 import { GET_NEWS_REVIEW, GET_ARTIST_FILTER_FLAGS } from '../graphql/queries';
 import { colors } from '../../styles/design-tokens';
 import ArtistLink from '../shared/ArtistLink';
+import PageMeta from '../shared/PageMeta';
 
 interface NewsArticleData {
   id: string;
@@ -307,6 +308,23 @@ const NewsArticle: React.FC = () => {
 
   return (
     <Box sx={styles.container}>
+      <PageMeta
+        title={article.title}
+        description={article.summary}
+        path={`/news/${article.id}`}
+        image={article.imageUrl}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          "headline": article.title,
+          "description": article.summary,
+          "datePublished": article.publishedAt,
+          "image": article.imageUrl,
+          "author": { "@type": "Organization", "@id": "https://www.mtgartistconnection.com/#organization" },
+          "publisher": { "@id": "https://www.mtgartistconnection.com/#organization" },
+          "url": `https://www.mtgartistconnection.com/news/${article.id}`,
+        }}
+      />
       <Container maxWidth="md">
         <Box
           onClick={() => navigate('/news')}

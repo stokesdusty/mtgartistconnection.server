@@ -3,6 +3,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from 'react-helmet-async';
 import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink, Observable } from "@apollo/client";
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
@@ -85,13 +86,15 @@ async function render() {
   );
 
   root.render(
-    <Provider store={store}>
-      <ApolloProvider client={client}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </ApolloProvider>
-    </Provider>
+    <HelmetProvider>
+      <Provider store={store}>
+        <ApolloProvider client={client}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ApolloProvider>
+      </Provider>
+    </HelmetProvider>
   );
 }
 
