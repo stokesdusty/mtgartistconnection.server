@@ -124,6 +124,7 @@ export const NewsCardSkeleton = ({ count = 4 }: { count?: number }) => {
             border: `1px solid ${themeColors.neutral[200]}`,
             boxShadow: 'none',
             mb: 2,
+            backgroundColor: themeColors.neutral.white,
           }}
         >
           <CardContent sx={{ p: 3 }}>

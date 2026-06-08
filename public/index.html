@@ -2,6 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <script>try{if(localStorage.getItem('color-mode')==='dark'){document.documentElement.dataset.dark=''}}catch(e){}</script>
+    <style>
+      :root {
+        --c-bg-default: #ffffff; --c-bg-paper: #faf9f7; --c-bg-dark: #f5f3f0;
+        --c-text-primary: #201e1b; --c-text-secondary: #736d67;
+        --c-text-disabled: #b9b4ae; --c-text-hint: #9c9690;
+        --c-neutral-white: #ffffff; --c-neutral-50: #faf9f7;
+        --c-neutral-100: #f5f3f0; --c-neutral-200: #ebe8e3; --c-neutral-300: #dedad4;
+        --c-primary-main: #2d4a36; --c-primary-lighter: #f0f9f4;
+        --c-primary-main-rgb: 45, 74, 54;
+      }
+      html[data-dark] {
+        --c-bg-default: #1a1917; --c-bg-paper: #201e1b; --c-bg-dark: #2a2724;
+        --c-text-primary: #f5f3f0; --c-text-secondary: #9c9690;
+        --c-text-disabled: #5f5a54; --c-text-hint: #736d67;
+        --c-neutral-white: #1a1917; --c-neutral-50: #201e1b;
+        --c-neutral-100: #2a2724; --c-neutral-200: #3a3733; --c-neutral-300: #4a4743;
+        --c-primary-main: #6ea880; --c-primary-lighter: #1e3328;
+        --c-primary-main-rgb: 110, 168, 128;
+      }
+      html, body { background-color: var(--c-bg-default); }
+    </style>
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -52,6 +74,50 @@
     <link rel="stylesheet" href="%PUBLIC_URL%/index.css" />
     <link rel="preload" href="%PUBLIC_URL%/App.css" as="style" />
     <link rel="stylesheet" href="%PUBLIC_URL%/App.css" />
+    <!-- Structured Data: Organization + WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.mtgartistconnection.com/#organization",
+          "name": "MtG Artist Connection",
+          "url": "https://www.mtgartistconnection.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.mtgartistconnection.com/logo.png"
+          },
+          "description": "Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, card art, and news.",
+          "sameAs": [
+            "https://bsky.app/profile/mtgartistconnect.bsky.social"
+          ],
+          "founder": {
+            "@type": "Person",
+            "name": "Dustin Stokes",
+            "email": "stokes.dusty@gmail.com"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.mtgartistconnection.com/#website",
+          "name": "MtG Artist Connection",
+          "url": "https://www.mtgartistconnection.com",
+          "publisher": {
+            "@id": "https://www.mtgartistconnection.com/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://www.mtgartistconnection.com/?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
