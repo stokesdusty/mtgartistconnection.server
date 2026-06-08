@@ -89,7 +89,7 @@ async function render() {
     <HelmetProvider>
       <Provider store={store}>
         <ApolloProvider client={client}>
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <App />
           </BrowserRouter>
         </ApolloProvider>

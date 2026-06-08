@@ -92,14 +92,14 @@ function BarList({ title, stats }: { title: string; stats: ClickStat[] }) {
                             </span>
                         </div>
                         <div style={{
-                            background: colors.neutral[200],
+                            background: themeColors.neutral[200],
                             borderRadius: borderRadius.full,
                             height: 6,
                         }}>
                             <div style={{
                                 width: `${(count / max) * 100}%`,
                                 height: '100%',
-                                background: colors.primary.main,
+                                background: themeColors.primary.main,
                                 borderRadius: borderRadius.full,
                                 transition: 'width 300ms ease',
                             }} />
@@ -173,9 +173,9 @@ export default function AnalyticsDashboard() {
                             style={{
                                 padding: '6px 16px',
                                 borderRadius: borderRadius.full,
-                                border: `1px solid ${active ? colors.primary.main : colors.neutral[300]}`,
-                                background: active ? colors.primary.main : 'transparent',
-                                color: active ? colors.primary.contrast : colors.text.secondary,
+                                border: `1px solid ${active ? themeColors.primary.main : themeColors.neutral[300]}`,
+                                background: active ? themeColors.primary.main : 'transparent',
+                                color: active ? colors.primary.contrast : themeColors.text.secondary,
                                 cursor: 'pointer',
                                 fontFamily: typography.fontFamily.primary,
                                 fontSize: typography.fontSize.sm,
@@ -244,8 +244,8 @@ export default function AnalyticsDashboard() {
                                         fontSize: typography.fontSize.xs,
                                         textTransform: 'uppercase' as const,
                                         letterSpacing: '0.08em',
-                                        color: colors.text.secondary,
-                                        borderBottom: borders.thin,
+                                        color: themeColors.text.secondary,
+                                        borderBottom: `1px solid ${themeColors.neutral[200]}`,
                                     }}>
                                         {h}
                                     </th>
@@ -256,13 +256,13 @@ export default function AnalyticsDashboard() {
                             {topArtists.map(({ artistName, count }, i) => (
                                 <tr
                                     key={artistName}
-                                    style={{ borderBottom: `1px solid ${colors.neutral[200]}` }}
+                                    style={{ borderBottom: `1px solid ${themeColors.neutral[200]}` }}
                                 >
                                     <td style={{
                                         padding: `${spacing.xs} ${spacing.sm}`,
                                         fontFamily: typography.fontFamily.primary,
                                         fontSize: typography.fontSize.sm,
-                                        color: colors.text.secondary,
+                                        color: themeColors.text.secondary,
                                         width: 40,
                                     }}>
                                         {i + 1}
@@ -274,7 +274,7 @@ export default function AnalyticsDashboard() {
                                     }}>
                                         <Link
                                             to={`/artist/${encodeURIComponent(artistName)}`}
-                                            style={{ color: colors.primary.main, textDecoration: 'none' }}
+                                            style={{ color: themeColors.primary.main, textDecoration: 'none' }}
                                         >
                                             {artistName}
                                         </Link>
@@ -328,7 +328,7 @@ export default function AnalyticsDashboard() {
                                     flex: 1,
                                     minWidth: 2,
                                     height: `${Math.max((count / maxTimeseries) * 100, 2)}%`,
-                                    background: colors.primary.main,
+                                    background: themeColors.primary.main,
                                     borderRadius: `${borderRadius.sm} ${borderRadius.sm} 0 0`,
                                     transition: 'height 300ms ease',
                                 }}

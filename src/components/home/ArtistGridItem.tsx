@@ -8,6 +8,14 @@ import {
 import { Link, Typography } from "@mui/material";
 import { GridDensity } from "./DensityToggle";
 
+// React <19 doesn't recognize `fetchPriority` (camelCase) at runtime — it was only
+// added in React 19. Lowercase props are passed through to the DOM silently.
+declare module 'react' {
+  interface ImgHTMLAttributes<T> {
+    fetchpriority?: 'high' | 'low' | 'auto';
+  }
+}
+
 const S3 = 'https://mtgartistconnection.s3.us-west-1.amazonaws.com';
 
 const ArtistGridItem = ({
@@ -34,7 +42,7 @@ const ArtistGridItem = ({
               srcSet={`${S3}/grid/${artistData.filename}.jpg 300w`}
               sizes="(max-width: 600px) calc(33vw - 12px), (max-width: 960px) calc(16vw - 16px), 180px"
               loading={eager ? 'eager' : 'lazy'}
-              fetchPriority={eager ? 'high' : undefined}
+              fetchpriority={eager ? 'high' : undefined}
               decoding="async"
               width="300"
               height="300"
@@ -63,7 +71,7 @@ const ArtistGridItem = ({
               srcSet={`${S3}/banner/${artistData.filename}.jpeg 600w`}
               sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 960px) calc(50vw - 24px), calc(33vw - 24px)"
               loading={eager ? 'eager' : 'lazy'}
-              fetchPriority={eager ? 'high' : undefined}
+              fetchpriority={eager ? 'high' : undefined}
               decoding="async"
               width="600"
               height="337"
@@ -100,7 +108,7 @@ const ArtistGridItem = ({
             srcSet={`${S3}/grid/${artistData.filename}.jpg 300w`}
             sizes="(max-width: 600px) calc(50vw - 24px), (max-width: 960px) calc(33vw - 20px), (max-width: 1280px) calc(25vw - 24px), 260px"
             loading={eager ? 'eager' : 'lazy'}
-            fetchPriority={eager ? 'high' : undefined}
+            fetchpriority={eager ? 'high' : undefined}
             decoding="async"
             width="300"
             height="300"

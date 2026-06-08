@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useApolloClient } from '@apollo/client';
 import { RootState } from '../../store/store';
 import { GET_SIGNING_BATCHES } from '../graphql/queries';
 import { SAVE_SIGNING_BATCH, DELETE_SIGNING_BATCH, REORDER_SIGNING_BATCHES } from '../graphql/mutations';
@@ -101,6 +101,8 @@ const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; color: string; bg: 
   partial: { label: 'Partial', color: colors.accent.orange,       bg: colors.accent.orangeLight },
   paid:    { label: 'Paid',    color: statusColors.complete.text, bg: statusColors.complete.bg  },
 };
+
+const STATUS_ORDER: CardStatus[] = ['collecting', 'sent', 'artist-received', 'signed', 'shipped-back', 'complete'];
 
 const SIGNING_METHOD_LABELS: Record<SigningMethod, string> = {
   'mail-to-artist': 'Mail to Artist',
@@ -414,6 +416,10 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
 
   const batchTotal = batch.rows.reduce((s, r) => s + r.quantity * r.pricePerSig, 0);
   const allComplete = batch.rows.length > 0 && batch.rows.every(r => r.status === 'complete');
+  const statusCounts = batch.rows.reduce((acc, r) => {
+    acc[r.status] = (acc[r.status] ?? 0) + 1;
+    return acc;
+  }, {} as Partial<Record<CardStatus, number>>);
 
   const commitName = () => {
     setEditingName(false);
@@ -510,6 +516,17 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
             sx={{ ml: 0.5, backgroundColor: statusColors.complete.bg, color: statusColors.complete.text, fontSize: '0.65rem', fontWeight: 600, height: 18 }} />
         )}
 
+        {!allComplete && batch.rows.length > 0 && (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, ml: 0.5 }}>
+            {STATUS_ORDER.filter(s => statusCounts[s]).map(s => (
+              <Chip key={s} size="small"
+                label={`${statusCounts[s]} ${STATUS_CONFIG[s].label}`}
+                sx={{ backgroundColor: STATUS_CONFIG[s].bg, color: STATUS_CONFIG[s].color, fontSize: '0.65rem', fontWeight: 600, height: 18 }}
+              />
+            ))}
+          </Box>
+        )}
+
         <Box sx={{ flex: 1 }} />
 
         {batchTotal > 0 && (
@@ -545,7 +562,7 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
         </Tooltip>
       </Box>
 
-      <Collapse in={batch.expanded}>
+      <Collapse in={batch.expanded} unmountOnExit>
         {/* Bulk-set bar */}
         {!batch.archived && batch.rows.length > 0 && (
           <Box sx={{
@@ -744,6 +761,8 @@ const SigningTracker: React.FC = () => {
   usePageTitle('Signing Tracker');
   const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
+  const apolloClient = useApolloClient();
+
   const [batches, setBatches] = useState<SigningBatch[]>([]);
   const [showArchived, setShowArchived] = useState(false);
   const [dbInitialized, setDbInitialized] = useState(false);
@@ -752,37 +771,68 @@ const SigningTracker: React.FC = () => {
   const [deleteSigningBatchMutation] = useMutation(DELETE_SIGNING_BATCH);
   const [reorderSigningBatchesMutation] = useMutation(REORDER_SIGNING_BATCHES);
 
-  useQuery(GET_SIGNING_BATCHES, {
+  const hasMigrated = useRef(false);
+
+  const { data: signingData } = useQuery(GET_SIGNING_BATCHES, {
     skip: !isLoggedIn,
-    fetchPolicy: 'network-only',
-    onCompleted: (data: any) => {
-      const dbBatches: SigningBatch[] = (data.signingBatches ?? []).map(fromDbBatch);
-      if (dbBatches.length === 0) {
-        // Auto-migrate localStorage data on first login
-        const local = load();
-        if (local.length > 0) {
-          setBatches(local);
-          local.forEach((batch, index) => {
-            saveSigningBatch({
-              variables: {
-                batchId: batch.id, name: batch.name, createdAt: batch.createdAt,
-                archived: batch.archived, expanded: batch.expanded, sortOrder: index,
-                rows: toDbRows(batch.rows),
-              },
-            });
-          });
-        }
-      } else {
-        setBatches(dbBatches);
-      }
-      setDbInitialized(true);
-    },
+    fetchPolicy: 'cache-and-network',
   });
 
-  // Init from localStorage for unauthenticated users
+  // On mount: seed from Apollo cache so repeat visits skip the network wait.
+  // Wrapped in startTransition so the heavy component tree renders concurrently
+  // (browser stays responsive / loading spinner stays visible) instead of
+  // blocking the main thread until the full tree is painted.
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    try {
+      const cached: any = apolloClient.readQuery({ query: GET_SIGNING_BATCHES });
+      if (cached?.signingBatches?.length) {
+        startTransition(() => {
+          setBatches((cached.signingBatches as any[]).map(b => ({ ...fromDbBatch(b), expanded: false })));
+          setDbInitialized(true);
+        });
+      }
+    } catch {}
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update from fresh network data (also handles first-login localStorage migration)
+  useEffect(() => {
+    if (!signingData) return;
+    const dbBatches: SigningBatch[] = (signingData.signingBatches ?? []).map(fromDbBatch);
+    if (dbBatches.length === 0 && !hasMigrated.current) {
+      hasMigrated.current = true;
+      // Auto-migrate localStorage data on first login
+      const local = load();
+      if (local.length > 0) {
+        setBatches(local.map(b => ({ ...b, expanded: false })));
+        local.forEach((batch, index) => {
+          saveSigningBatch({
+            variables: {
+              batchId: batch.id, name: batch.name, createdAt: batch.createdAt,
+              archived: batch.archived, expanded: batch.expanded, sortOrder: index,
+              rows: toDbRows(batch.rows),
+            },
+          });
+        });
+      }
+      setDbInitialized(true);
+    } else {
+      startTransition(() => {
+        // Functional update: preserve any batches the user already opened
+        // while waiting for the network response, rather than snapping them shut.
+        setBatches(prev => {
+          const expandedMap = new Map(prev.map(b => [b.id, b.expanded]));
+          return dbBatches.map(b => ({ ...b, expanded: expandedMap.get(b.id) ?? false }));
+        });
+        setDbInitialized(true);
+      });
+    }
+  }, [signingData]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reload from localStorage when auth state changes (e.g. logout mid-session)
   useEffect(() => {
     if (!isLoggedIn) {
-      setBatches(load());
+      setBatches(load().map(b => ({ ...b, expanded: false })));
       setDbInitialized(true);
     }
   }, [isLoggedIn]);
