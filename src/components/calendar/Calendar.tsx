@@ -26,6 +26,7 @@ import SigningEvent from "./SigningEvent";
 import EmptyState from "../shared/EmptyState";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { calendarStyles } from "../../styles/calendar-styles";
+import PageMeta from "../shared/PageMeta";
 
 // Map of state codes to full state names
 const stateCodeToName: { [key: string]: string } = {
@@ -335,6 +336,11 @@ const Calendar = () => {
   return (
     <Box sx={contentPageStyles.container}>
       <Container maxWidth="lg">
+        <PageMeta
+          title="Events Calendar"
+          description="Browse upcoming Magic: The Gathering artist signing events, conventions, and streams. Find where your favorite MTG artists will be."
+          path="/calendar"
+        />
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
           <Typography variant="h1" sx={contentPageStyles.pageTitle}>
             Events Calendar

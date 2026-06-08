@@ -27,6 +27,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
+import PageMeta from "../shared/PageMeta";
 
 // Display record returned by artistsPage (filename needed to render the card image).
 interface ArtistDisplay {
@@ -484,10 +485,15 @@ const Homepage = () => {
 
   return (
     <Box sx={homepageStyles.container}>
+      <PageMeta
+        title="MtG Artist Connection"
+        description="Discover Magic: The Gathering artists. Browse profiles, signing events, card art, and news on MtG Artist Connection."
+        path="/"
+      />
       <Box sx={homepageStyles.wrapper}>
         <Box sx={homepageStyles.headerSection}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-            <Typography component="span" sx={{ ...(homepageStyles.description as object), margin: 0 }}>
+            <Typography component="h1" sx={{ ...(homepageStyles.description as object), margin: 0 }}>
               Your go-to hub for discovering Magic: The Gathering artists
             </Typography>
             <Box component="span" sx={{ ...(homepageStyles.count as object), margin: 0 }}>

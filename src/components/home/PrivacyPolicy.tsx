@@ -4,12 +4,18 @@ import { CaretRight } from "@phosphor-icons/react";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { colors, themeColors, spacing } from "../../styles/design-tokens";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import PageMeta from "../shared/PageMeta";
 
 const PrivacyPolicy = () => {
   usePageTitle("Privacy Policy");
 
   return (
     <Box sx={contentPageStyles.container}>
+      <PageMeta
+        title="Privacy Policy"
+        description="Read the MtG Artist Connection privacy policy to understand how we collect, use, and protect your personal information."
+        path="/privacypolicy"
+      />
       <Container maxWidth="lg">
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
           <Breadcrumbs

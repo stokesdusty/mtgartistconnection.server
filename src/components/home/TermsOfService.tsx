@@ -4,12 +4,18 @@ import { CaretRight } from "@phosphor-icons/react";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { colors, themeColors, spacing } from "../../styles/design-tokens";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import PageMeta from "../shared/PageMeta";
 
 const TermsOfService = () => {
   usePageTitle("Terms of Service");
 
   return (
     <Box sx={contentPageStyles.container}>
+      <PageMeta
+        title="Terms of Service"
+        description="Read the MtG Artist Connection terms of service that govern your use of our website and community features."
+        path="/termsofservice"
+      />
       <Container maxWidth="lg">
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
           <Breadcrumbs

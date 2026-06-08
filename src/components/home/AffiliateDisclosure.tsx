@@ -1,10 +1,16 @@
 import { Box, Typography, Container, Paper } from "@mui/material";
+import PageMeta from "../shared/PageMeta";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { colors, themeColors, spacing } from "../../styles/design-tokens";
 
 const AffiliateDisclosure = () => {
   return (
     <Box sx={contentPageStyles.container}>
+      <PageMeta
+        title="Affiliate Disclosure"
+        description="MtG Artist Connection affiliate disclosure. Learn about our partnerships and how we may earn commissions from qualifying purchases."
+        path="/affiliate-disclosure"
+      />
       <Container maxWidth="md">
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
           <Typography variant="h1" sx={contentPageStyles.pageTitle}>

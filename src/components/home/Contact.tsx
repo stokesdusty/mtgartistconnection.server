@@ -10,12 +10,18 @@ import {
   import { contentPageStyles } from "../../styles/content-page-styles";
   import { usePageTitle } from "../../hooks/usePageTitle";
   import { colors, themeColors } from "../../styles/design-tokens";
+  import PageMeta from "../shared/PageMeta";
 
   const ContactPage = () => {
     usePageTitle("Contact Us");
 
     return (
       <Box sx={contentPageStyles.container}>
+        <PageMeta
+          title="Contact Us"
+          description="Get in touch with MtG Artist Connection. Reach out via email or Bluesky with questions, feedback, or suggestions."
+          path="/contact"
+        />
         <Container maxWidth="lg">
           <Paper elevation={0} sx={contentPageStyles.wrapper}>
             <Typography variant="h1" sx={contentPageStyles.pageTitle}>

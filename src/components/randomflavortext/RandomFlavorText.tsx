@@ -17,6 +17,7 @@ import axios from "axios";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { GET_ARTIST_FILTER_FLAGS } from "../graphql/queries";
 import { themeColors, transitions, colors } from "../../styles/design-tokens";
+import PageMeta from "../shared/PageMeta";
 import ArtistLink from "../shared/ArtistLink";
 
 interface CardData {
@@ -86,6 +87,11 @@ const RandomFlavorText = () => {
   return (
     <Box sx={contentPageStyles.container}>
       <Container maxWidth="lg">
+        <PageMeta
+          title="Random Flavor Text"
+          description="Read random Magic: The Gathering flavor text with beautiful card art from your favorite MTG artists."
+          path="/randomflavortext"
+        />
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
           <Typography variant="h1" sx={contentPageStyles.pageTitle}>
             Random Flavor Text

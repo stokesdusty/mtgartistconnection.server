@@ -20,6 +20,7 @@ import { CaretDown } from "@phosphor-icons/react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { themeColors } from "../../styles/design-tokens";
+import PageMeta from "../shared/PageMeta";
 
 interface Service {
   name: string;
@@ -153,6 +154,11 @@ const SigningServices = () => {
 
   return (
     <Box sx={contentPageStyles.container}>
+      <PageMeta
+        title="Card Signing Services"
+        description="Learn how to get your Magic: The Gathering cards signed through professional signing services like Mark's and MountainMage."
+        path="/signingservices"
+      />
       <Container maxWidth="lg">
         <Paper elevation={0} sx={contentPageStyles.wrapper}>
           <Typography variant="h1" sx={contentPageStyles.pageTitle}>
