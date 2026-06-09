@@ -94,6 +94,8 @@ const Homepage = () => {
   const [scryfallSets, setScryfallSets] = useState<ScryfallSet[]>([]);
   const [setsLoading, setSetsLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchInputValue, setSearchInputValue] = useState(() => new URLSearchParams(window.location.search).get('search') || '');
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Read filter state from URL params
   const userSearch = searchParams.get('search') || '';
@@ -220,18 +222,36 @@ const Homepage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Sync input display value when URL search param changes externally
+  // (e.g., letter filter clears search, clear-all, back/forward navigation)
+  useEffect(() => {
+    setSearchInputValue(userSearch);
+  }, [userSearch]);
+
+  // Cancel debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, []);
+
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (event.target.value) {
-      newParams.set('search', event.target.value);
-    } else {
-      newParams.delete('search');
-    }
-    // Clear letter filter when searching
-    if (letterFilter) {
-      newParams.delete('letter');
-    }
-    setSearchParams(newParams, { replace: true });
+    const value = event.target.value;
+    setSearchInputValue(value);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      searchDebounceRef.current = null;
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (value) {
+          next.set('search', value);
+        } else {
+          next.delete('search');
+        }
+        if (next.has('letter')) next.delete('letter');
+        return next;
+      }, { replace: true });
+    }, 300);
   };
 
   const handleLocationChange = (event: SelectChangeEvent) => {
@@ -255,6 +275,10 @@ const Homepage = () => {
   };
 
   const handleLetterFilter = (letter: string) => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = null;
+    }
     const newParams = new URLSearchParams(searchParams);
     if (letterFilter === letter) {
       newParams.delete('letter');
@@ -285,6 +309,10 @@ const Homepage = () => {
 
   // Clear all filters
   const handleClearAllFilters = () => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = null;
+    }
     setSearchParams(new URLSearchParams(), { replace: true });
   };
 
@@ -296,7 +324,13 @@ const Homepage = () => {
       chips.push({
         key: 'search',
         label: `Search: "${userSearch}"`,
-        onDelete: () => updateSearchParams('search', ''),
+        onDelete: () => {
+          if (searchDebounceRef.current) {
+            clearTimeout(searchDebounceRef.current);
+            searchDebounceRef.current = null;
+          }
+          updateSearchParams('search', '');
+        },
       });
     }
     if (locationFilter) {
@@ -528,7 +562,7 @@ const Homepage = () => {
           <FiltersForm
             layout="grid"
             idSuffix=""
-            userSearch={userSearch}
+            userSearch={searchInputValue}
             locationFilter={locationFilter}
             setFilter={setFilter}
             locations={locations}
@@ -555,7 +589,7 @@ const Homepage = () => {
             fullWidth
             size="small"
             sx={{ ...homepageStyles.textField, "& .MuiInputBase-input": { fontSize: "0.875rem" } }}
-            value={userSearch}
+            value={searchInputValue}
             placeholder="Search for an artist"
             onChange={handleSearchChange}
             InputProps={{
