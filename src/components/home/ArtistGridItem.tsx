@@ -11,6 +11,7 @@ import { GridDensity } from "./DensityToggle";
 // React <19 doesn't recognize `fetchPriority` (camelCase) at runtime — it was only
 // added in React 19. Lowercase props are passed through to the DOM silently.
 declare module 'react' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ImgHTMLAttributes<T> {
     fetchpriority?: 'high' | 'low' | 'auto';
   }
