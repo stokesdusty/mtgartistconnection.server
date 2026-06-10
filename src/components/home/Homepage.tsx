@@ -28,19 +28,12 @@ import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import PageMeta from "../shared/PageMeta";
+import { filterArtists, ArtistFlag } from "../../utils/artistFilters";
 
 // Display record returned by artistsPage (filename needed to render the card image).
 interface ArtistDisplay {
   name: string;
   filename: string;
-}
-
-// Filter-index record returned by artistFilterFlags.
-interface ArtistFlag {
-  name: string;
-  flags: number;
-  location?: string;
-  alternate_names?: string;
 }
 
 // Merged shape passed to ArtistGridItem.
@@ -52,11 +45,6 @@ interface Artist {
 }
 
 const MAJOR_SET_TYPES = new Set(['core', 'expansion', 'masters', 'draft_innovation', 'starter']);
-
-// Packed bitfield positions — must match the resolver.
-const FLAG_MARKSSIG     = 1 << 0; // markssignatureservice === "true"
-const FLAG_MOUNTAINMAGE = 1 << 1; // mountainmage truthy
-const FLAG_ARTISTPROOFS = 1 << 2; // artistProofs === "yes"|"true"
 
 const PAGE_SIZE = 60;
 
@@ -74,10 +62,13 @@ const Homepage = () => {
   } = useQuery(GET_ARTISTS_PAGE, {
     variables: { offset: 0, limit: PAGE_SIZE },
     notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'cache-and-network',
   });
 
   // Filter-flags query — all artists, lightweight bitfield index.
-  const { data: flagsData } = useQuery(GET_ARTIST_FILTER_FLAGS);
+  const { data: flagsData } = useQuery(GET_ARTIST_FILTER_FLAGS, {
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -191,7 +182,7 @@ const Homepage = () => {
   // Build set of artists with upcoming events from batched query result
   const artistsWithEvents = useMemo(() => {
     if (!eventArtistsData?.artistsByEventIds) return new Set<string>();
-    return new Set(eventArtistsData.artistsByEventIds.map((a: any) => a.artistName));
+    return new Set<string>(eventArtistsData.artistsByEventIds.map((a: any) => a.artistName as string));
   }, [eventArtistsData]);
 
   // Fetch major MTG sets from Scryfall once on mount for the set filter dropdown.
@@ -424,50 +415,18 @@ const Homepage = () => {
   }, [allFlags]);
 
   // Filter the full flags index first — this runs over all artists regardless of what's loaded.
-  const matchingFlags = useMemo<ArtistFlag[]>(() => {
-    let filtered = allFlags;
-
-    if (locationFilter) {
-      filtered = filtered.filter((a) =>
-        locationFilter === 'US' ? a.location?.endsWith(', US') : a.location === locationFilter
-      );
-    }
-    if (mountainMageFilter) {
-      filtered = filtered.filter((a) => (a.flags & FLAG_MOUNTAINMAGE) !== 0);
-    }
-    if (marksSigServiceFilter) {
-      filtered = filtered.filter((a) => (a.flags & FLAG_MARKSSIG) !== 0);
-    }
-    if (hasUpcomingEventFilter) {
-      filtered = filtered.filter((a) => artistsWithEvents.has(a.name));
-    }
-    if (sellsApsFilter) {
-      filtered = filtered.filter((a) => (a.flags & FLAG_ARTISTPROOFS) !== 0);
-    }
-    if (letterFilter) {
-      const getBase = (name: string) => name.normalize('NFD').charAt(0).toUpperCase();
-      if (letterFilter === 'Other') {
-        filtered = filtered.filter((a) => !/^[a-zA-Z0-9]/.test(a.name.normalize('NFD')));
-      } else if (letterFilter === '0-9') {
-        filtered = filtered.filter((a) => /^[0-9]/.test(a.name));
-      } else {
-        filtered = filtered.filter((a) => getBase(a.name) === letterFilter);
-      }
-    }
-    if (userSearch.length >= 2) {
-      const term = userSearch.toLowerCase().replace(/\s/g, '');
-      filtered = filtered.filter((a) => {
-        const hay = `${a.name}${a.alternate_names ?? ''}${a.location ?? ''}`.toLowerCase().replace(/\s/g, '');
-        return hay.includes(term);
-      });
-    }
-    if (setFilter) {
-      const setNames = new Set<string>((setArtistsData as Record<string, string[]>)[setFilter] ?? []);
-      filtered = filtered.filter((a) => setNames.has(a.name.toLowerCase().replace(/\s/g, '')));
-    }
-
-    return filtered;
-  }, [allFlags, locationFilter, mountainMageFilter, marksSigServiceFilter,
+  const matchingFlags = useMemo<ArtistFlag[]>(() => filterArtists(allFlags, {
+    locationFilter,
+    mountainMageFilter,
+    marksSigServiceFilter,
+    hasUpcomingEventFilter,
+    sellsApsFilter,
+    letterFilter,
+    userSearch,
+    artistsWithEvents,
+    setFilter,
+    setArtistsData: setArtistsData as Record<string, string[]>,
+  }), [allFlags, locationFilter, mountainMageFilter, marksSigServiceFilter,
       hasUpcomingEventFilter, sellsApsFilter, letterFilter, userSearch, artistsWithEvents,
       setFilter]);
 

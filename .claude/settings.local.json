@@ -20,7 +20,15 @@
       "Bash(npx tsc *)",
       "Bash(ls -la /Users/dprime/Documents/GitHub/ | grep -i server)",
       "Bash(xargs ls -1)",
-      "Bash(git -C /Users/dprime/Documents/GitHub/mtgartistconnection.server log --oneline)"
+      "Bash(git -C /Users/dprime/Documents/GitHub/mtgartistconnection.server log --oneline)",
+      "Bash(echo \"Components: $\\(find src/components -name \"*.tsx\")",
+      "Bash(npx react-scripts *)",
+      "Bash(ls \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\\")",
+      "Bash(ls /mnt/c/Users/NoUse/OneDrive/Documents/GitHub/)",
+      "Bash(cd /c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice && find src -type f \\\\\\( -name \"*.ts\" -o -name \"*.js\" -o -name \"*.json\" \\\\\\) | grep -v node_modules)",
+      "Bash(npm install *)",
+      "Bash(npx jest *)",
+      "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && npx jest --forceExit --testPathPattern=\"missingArtistsEmail\" 2>&1)"
     ]
   }
 }
