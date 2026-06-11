@@ -21,9 +21,10 @@ import {
   Button,
   Fab,
   IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import { AllCardsGridSkeleton } from "../shared/Skeletons";
-import { ArrowUp, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
+import { ArrowUp, ArrowsClockwise, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
 import { TOGGLE_CARD_COLLECTION_FIELD, LOG_PRICE_CLICK } from "../graphql/mutations";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
@@ -54,6 +55,7 @@ interface Card {
   card_faces?: {
     image_uris?: {
       normal: string;
+      border_crop?: string;
     };
   }[];
 }
@@ -126,11 +128,11 @@ const normalizeArtistName = (str: string) =>
     .trim();
 
 const COLLECTION_FIELDS = [
-  { field: 'artistProof',    Icon: DeviceMobileCamera,  label: 'Artist Proof (nonfoil)', color: colors.accent.blue },
-  { field: 'artistProofFoil',Icon: DeviceMobileSpeaker, label: 'Artist Proof (foil)',    color: colors.accent.orange },
-  { field: 'signedNonfoil',  Icon: PenNib,             label: 'Signed (nonfoil)',        color: colors.accent.blueDark },
-  { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           color: themeColors.primary.main },
-  { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   color: colors.accent.red },
+  { field: 'artistProof',    Icon: DeviceMobileCamera,  label: 'Artist Proof (nonfoil)', shortLabel: 'AP',       color: colors.accent.blue },
+  { field: 'artistProofFoil',Icon: DeviceMobileSpeaker, label: 'Artist Proof (foil)',    shortLabel: 'AP Foil',  color: colors.accent.orange },
+  { field: 'signedNonfoil',  Icon: PenNib,             label: 'Signed (nonfoil)',        shortLabel: 'Signed',   color: colors.accent.blueDark },
+  { field: 'signedFoil',     Icon: Sparkle,            label: 'Signed (foil)',           shortLabel: 'Signed F', color: themeColors.primary.main },
+  { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   shortLabel: 'Wishlist', color: colors.accent.red },
 ] as const;
 
 const CARD_COL_MIN_WIDTH = 220; // px — narrowest column before adding another
@@ -158,6 +160,9 @@ interface CardItemProps {
 }
 
 const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onToggle, onPriceClick }: CardItemProps) => {
+  const [showBack, setShowBack] = useState(false);
+  const isTouch = useMediaQuery('(hover: none)');
+
   const formatPrice = (cents: number | null): string => {
     if (cents === null || cents === undefined) return '-';
     return `$${(cents / 100).toFixed(2)}`;
@@ -281,9 +286,10 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
   );
 
   // Use native title attribute instead of MUI Tooltip — zero JS overhead, no portals or event listeners per card.
+  // On touch devices (hover: none), show a short text label below each icon since hover tooltips are inaccessible.
   const collectionControls = (
     <Box sx={{ display: 'flex', gap: 0.25, justifyContent: 'center', mt: 0.5 }}>
-      {COLLECTION_FIELDS.map(({ field, Icon, label, color }) => {
+      {COLLECTION_FIELDS.map(({ field, Icon, label, shortLabel, color }) => {
         const active = collectionItem ? (collectionItem as any)[field] : false;
         const tooltip = isLoggedIn ? label : "Log in to track your collection";
         return (
@@ -293,12 +299,19 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
               onClick={() => onToggle(card, field)}
               sx={{
                 color: active ? color : themeColors.text.disabled,
-                p: 0.5,
+                p: isTouch ? '5px 4px' : 0.5,
                 cursor: isLoggedIn ? 'pointer' : 'default',
+                flexDirection: 'column',
+                gap: '2px',
                 '&:hover': { backgroundColor: isLoggedIn ? themeColors.neutral[100] : 'transparent' },
               }}
             >
-              <Icon size={18} weight={active ? 'fill' : 'regular'} />
+              <Icon size={isTouch ? 20 : 18} weight={active ? 'fill' : 'regular'} />
+              {isTouch && (
+                <Typography component="span" sx={{ fontSize: '0.55rem', lineHeight: 1, color: 'inherit', userSelect: 'none' }}>
+                  {shortLabel}
+                </Typography>
+              )}
             </IconButton>
           </span>
         );
@@ -306,19 +319,43 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
     </Box>
   );
 
-  const imageSrc = card.image_uris?.border_crop ?? card.card_faces?.[0]?.image_uris?.normal;
+  const isTwoFaced = !!(card.card_faces && card.card_faces.length >= 2 && card.card_faces[1]?.image_uris);
+  const imageSrc = showBack && card.card_faces?.[1]?.image_uris
+    ? (card.card_faces[1].image_uris.border_crop ?? card.card_faces[1].image_uris.normal)
+    : (card.image_uris?.border_crop ?? card.card_faces?.[0]?.image_uris?.border_crop ?? card.card_faces?.[0]?.image_uris?.normal);
   if (!imageSrc) return null;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Link href={card?.scryfall_uri} target="_blank">
-        <Box
-          component="img"
-          alt={card.artist || "Card"}
-          src={imageSrc}
-          sx={allCardsStyles.cardImage}
-        />
-      </Link>
+      <Box sx={{ position: 'relative', display: 'inline-block' }}>
+        <Link href={card?.scryfall_uri} target="_blank">
+          <Box
+            component="img"
+            alt={card.artist || "Card"}
+            src={imageSrc}
+            sx={allCardsStyles.cardImage}
+          />
+        </Link>
+        {isTwoFaced && (
+          <IconButton
+            size="small"
+            title={showBack ? "Show front face" : "Show back face"}
+            onClick={(e) => { e.preventDefault(); setShowBack((prev) => !prev); }}
+            sx={{
+              position: 'absolute',
+              bottom: 10,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: 'rgba(0,0,0,0.70)',
+              color: '#fff',
+              p: '8px',
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.90)' },
+            }}
+          >
+            <ArrowsClockwise size={20} />
+          </IconButton>
+        )}
+      </Box>
       {collectionControls}
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
         {priceDisplay}
@@ -946,7 +983,7 @@ const AllCards = () => {
                 {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'} found
               </Typography>
               {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
-                <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 0.5 }}>
+                <Typography sx={{ fontSize: '0.85rem', color: themeColors.text.secondary, mt: 0.5 }}>
                   {signedCount > 0 && (
                     <Box
                       component="span"
@@ -1033,6 +1070,34 @@ const AllCards = () => {
                 </Button>
               </Link>
             </Box>
+          </Box>
+
+          {/* Icon legend */}
+          <Box sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: { xs: 1, sm: 1.5 },
+            px: 0.5,
+            pt: 1.5,
+            pb: 0.5,
+            mt: 1,
+            borderTop: `1px solid ${themeColors.neutral[200]}`,
+          }}>
+            <Typography sx={{ fontSize: '0.8rem', color: themeColors.text.secondary, mr: 0.5 }}>
+              {isLoggedIn
+                ? 'Click the icons below each card to track your collection:'
+                : 'Log in to track signed cards, artist proofs, and wishlists:'}
+            </Typography>
+            {COLLECTION_FIELDS.map(({ Icon, label, color }) => (
+              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Icon size={14} weight="fill" color={color} />
+                <Typography component="span" sx={{ fontSize: '0.75rem', color: themeColors.text.secondary }}>
+                  {label.replace('Wishlist: want signed', 'Wishlist')}
+                </Typography>
+              </Box>
+            ))}
           </Box>
 
           {totalCards === 0 && cardData && (
