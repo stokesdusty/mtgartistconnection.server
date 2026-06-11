@@ -28,6 +28,7 @@ import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL
 import { TOGGLE_CARD_COLLECTION_FIELD, LOG_PRICE_CLICK } from "../graphql/mutations";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { allCardsStyles } from "../../styles/all-cards-styles";
+import artistCardOverrides from "../../data/artist-card-overrides.json";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { colors, themeColors, spacing } from "../../styles/design-tokens";
@@ -387,6 +388,7 @@ const AllCards = () => {
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
   const [sortByNewest, setSortByNewest] = useState<boolean>(false);
   const [isFetchingCards, setIsFetchingCards] = useState<boolean>(false);
+  const [overrideCards, setOverrideCards] = useState<Card[]>([]);
   const [containerWidth, setContainerWidth] = useState<number>(() => window.innerWidth - 80);
   const [viewportHeight, setViewportHeight] = useState<number>(() => Math.max(300, window.innerHeight - STICKY_TOP));
 
@@ -653,20 +655,67 @@ const AllCards = () => {
     };
   }, [noResultsFromPrimary, artistData, artist, hideReprints, includeDigital]);
 
+  // Fetch any cards manually mapped to this artist that Scryfall doesn't credit them for.
+  useEffect(() => {
+    setOverrideCards([]);
+    if (!artist) return;
+
+    const overrideIds: string[] =
+      (artistCardOverrides as Record<string, string[]>)[normalizeArtistName(artist)] ?? [];
+    if (overrideIds.length === 0) return;
+
+    let cancelled = false;
+    const run = async () => {
+      const fetched: Card[] = [];
+      for (const chunk of chunkArray(overrideIds, 75)) {
+        if (cancelled) break;
+        try {
+          const response = await axios.post<{ data: Card[]; not_found: unknown[] }>(
+            'https://api.scryfall.com/cards/collection',
+            { identifiers: chunk.map((id) => ({ id })) },
+          );
+          if (!cancelled) fetched.push(...response.data.data);
+        } catch (err) {
+          console.error('Error fetching artist override cards:', err);
+        }
+      }
+      if (!cancelled) setOverrideCards(fetched);
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [artist]);
+
   const { cards, totalCards } = useMemo<CardsAndTotal>(() => {
     if (!cardData) {
       return { cards: [], totalCards: 0 };
     }
-    let sortedCards = [...cardData.data];
+
+    const mainIds = new Set(cardData.data.map((c) => c.id));
+    let newOverrides = overrideCards.filter((c) => !mainIds.has(c.id));
+    if (hideReprints) {
+      const seenNames = new Set<string>();
+      newOverrides = newOverrides.filter((c) => {
+        const name = c.name ?? '';
+        if (seenNames.has(name)) return false;
+        seenNames.add(name);
+        return true;
+      });
+    }
+
+    const sortedCards = [...cardData.data, ...newOverrides];
     if (sortByNewest) {
+      sortedCards.sort((a, b) =>
+        (b.released_at || '').localeCompare(a.released_at || ''),
+      );
+    } else {
       sortedCards.sort((a, b) => {
-        const dateA = a.released_at || '';
-        const dateB = b.released_at || '';
-        return dateB.localeCompare(dateA);
+        const nameCompare = (a.name ?? '').localeCompare(b.name ?? '');
+        if (nameCompare !== 0) return nameCompare;
+        return (a.released_at ?? '').localeCompare(b.released_at ?? '');
       });
     }
     return { cards: sortedCards, totalCards: sortedCards.length };
-  }, [cardData, sortByNewest]);
+  }, [cardData, sortByNewest, overrideCards, hideReprints]);
 
   const displayedCards = useMemo(() => {
     if (filterMode === 'signed') {

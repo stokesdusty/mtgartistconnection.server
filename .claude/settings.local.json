@@ -28,7 +28,9 @@
       "Bash(cd /c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice && find src -type f \\\\\\( -name \"*.ts\" -o -name \"*.js\" -o -name \"*.json\" \\\\\\) | grep -v node_modules)",
       "Bash(npm install *)",
       "Bash(npx jest *)",
-      "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && npx jest --forceExit --testPathPattern=\"missingArtistsEmail\" 2>&1)"
+      "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && npx jest --forceExit --testPathPattern=\"missingArtistsEmail\" 2>&1)",
+      "Bash(grep -E \"\\\\.\\(yml|yaml|json\\)$\")",
+      "Bash(powershell -Command \"Get-Content src\\\\data\\\\set-artists.json | Select-Object -First 5\")"
     ]
   }
 }
