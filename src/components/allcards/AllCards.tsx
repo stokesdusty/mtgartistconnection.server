@@ -347,7 +347,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
               left: '50%',
               transform: 'translateX(-50%)',
               backgroundColor: 'rgba(0,0,0,0.70)',
-              color: '#fff',
+              color: colors.neutral.white,
               p: '8px',
               '&:hover': { backgroundColor: 'rgba(0,0,0,0.90)' },
             }}
