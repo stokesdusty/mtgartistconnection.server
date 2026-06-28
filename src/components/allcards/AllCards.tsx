@@ -22,6 +22,8 @@ import {
   Fab,
   IconButton,
   useMediaQuery,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { AllCardsGridSkeleton } from "../shared/Skeletons";
 import { ArrowUp, ArrowsClockwise, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
@@ -418,6 +420,9 @@ const AllCards = () => {
   const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
   const [cardKingdomPrices, setCardKingdomPrices] = useState<Map<string, CardKingdomPrice>>(new Map());
   const [cardCollection, setCardCollection] = useState<Map<string, CollectionItem>>(new Map());
+  const cardCollectionRef = useRef(cardCollection);
+  useEffect(() => { cardCollectionRef.current = cardCollection; }, [cardCollection]);
+  const [toastError, setToastError] = useState<string | null>(null);
   const listRef = useRef<FixedSizeList>(null);
   const gridWrapperRef = useRef<HTMLDivElement>(null);
   // Cached document-offset of the grid wrapper; updated on mount, resize, and cardData change.
@@ -826,6 +831,31 @@ const AllCards = () => {
 
   const handleCollectionToggle = useCallback((card: Card, field: string) => {
     if (!isLoggedIn || !card.id || !card.name || !card.set || !card.collector_number) return;
+
+    // Snapshot current state for rollback if the mutation fails.
+    const previous = cardCollectionRef.current.get(card.id);
+
+    // Build the optimistic item — start from existing or create a blank entry.
+    const base: CollectionItem = previous ?? {
+      id: card.id,
+      scryfallId: card.id,
+      cardName: card.name,
+      set: card.set,
+      collectorNumber: card.collector_number,
+      signedNonfoil: false,
+      signedFoil: false,
+      wishlistSigned: false,
+      artistProof: false,
+      artistProofFoil: false,
+    };
+    const optimistic: CollectionItem = { ...base, [field]: !(base as any)[field] };
+
+    setCardCollection(prev => {
+      const next = new Map(prev);
+      next.set(card.id, optimistic);
+      return next;
+    });
+
     toggleCardCollectionField({
       variables: {
         scryfallId: card.id,
@@ -837,12 +867,30 @@ const AllCards = () => {
       },
       onCompleted: (data) => {
         if (data?.toggleCardCollectionField) {
+          // Merge server response with optimistic item so cardName/set/collectorNumber aren't lost
+          // (the mutation response only returns id, scryfallId, and the boolean fields).
           setCardCollection(prev => {
             const next = new Map(prev);
-            next.set(data.toggleCardCollectionField.scryfallId, data.toggleCardCollectionField);
+            const existing = next.get(data.toggleCardCollectionField.scryfallId);
+            next.set(data.toggleCardCollectionField.scryfallId, {
+              ...existing,
+              ...data.toggleCardCollectionField,
+            } as CollectionItem);
             return next;
           });
         }
+      },
+      onError: () => {
+        setCardCollection(prev => {
+          const next = new Map(prev);
+          if (previous) {
+            next.set(card.id, previous);
+          } else {
+            next.delete(card.id);
+          }
+          return next;
+        });
+        setToastError('Could not save. Please try again.');
       },
     });
   }, [isLoggedIn, toggleCardCollectionField, artist]);
@@ -1147,6 +1195,17 @@ const AllCards = () => {
           </Box>
         </Paper>
       </Container>
+
+      <Snackbar
+        open={!!toastError}
+        autoHideDuration={4000}
+        onClose={() => setToastError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setToastError(null)} sx={{ width: '100%' }}>
+          {toastError}
+        </Alert>
+      </Snackbar>
 
       {showScrollTop && (
         <Fab

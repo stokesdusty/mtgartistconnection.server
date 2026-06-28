@@ -91,6 +91,21 @@ const UpcomingEventsSection = ({ artistEvents }: { artistEvents: any[] }) => {
   );
 };
 
+const LastEventAttendedSection = ({ event }: { event: any | null }) => {
+  return (
+    <Box sx={artistStyles.infoRow}>
+      <Typography variant="h5">Last Event Attended</Typography>
+      {event ? (
+        <Box sx={artistStyles.eventsListContainer}>
+          <ArtistEventCard event={event} />
+        </Box>
+      ) : (
+        <Typography>Unknown</Typography>
+      )}
+    </Box>
+  );
+};
+
 const SCRYFALL_CACHE_TTL = 24 * 60 * 60 * 1000;
 
 function getCachedScryfallIds(artistName: string): string[] | null {
@@ -225,22 +240,46 @@ const Artist = () => {
     );
   }, [eventsData]);
 
-  const eventIds = useMemo(() => upcomingEvents.map((e: any) => e.id), [upcomingEvents]);
+  const pastEvents = useMemo(() => {
+    if (!eventsData?.signingEvent) return [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return eventsData.signingEvent.filter((event: any) => {
+      const endDate = new Date(event.endDate);
+      return endDate < today;
+    });
+  }, [eventsData]);
+
+  const allEventIds = useMemo(
+    () => (eventsData?.signingEvent ?? []).map((e: any) => e.id),
+    [eventsData]
+  );
 
   const { data: eventArtistsData } = useQuery(GET_ARTISTS_BY_EVENT_IDS, {
-    variables: { eventIds },
-    skip: eventIds.length === 0,
+    variables: { eventIds: allEventIds },
+    skip: allEventIds.length === 0,
   });
 
-  const artistEvents = useMemo(() => {
-    if (!eventArtistsData?.artistsByEventIds || !data?.artistByName?.name) return [];
-    const attending = new Set(
+  const attendingEventIds = useMemo(() => {
+    if (!eventArtistsData?.artistsByEventIds || !data?.artistByName?.name) return new Set<string>();
+    return new Set(
       eventArtistsData.artistsByEventIds
         .filter((a: any) => a.artistName === data.artistByName.name)
         .map((a: any) => a.eventId)
     );
-    return upcomingEvents.filter((e: any) => attending.has(e.id));
-  }, [eventArtistsData, data?.artistByName?.name, upcomingEvents]);
+  }, [eventArtistsData, data?.artistByName?.name]);
+
+  const artistEvents = useMemo(() => {
+    return upcomingEvents.filter((e: any) => attendingEventIds.has(e.id));
+  }, [attendingEventIds, upcomingEvents]);
+
+  const lastEventAttended = useMemo(() => {
+    const attendedPast = pastEvents.filter((e: any) => attendingEventIds.has(e.id));
+    if (attendedPast.length === 0) return null;
+    return attendedPast.reduce((latest: any, e: any) =>
+      new Date(e.endDate) > new Date(latest.endDate) ? e : latest
+    );
+  }, [attendingEventIds, pastEvents]);
 
   const nextSigningEvent = useMemo(() => {
     if (artistEvents.length === 0) return null;
@@ -705,6 +744,7 @@ const Artist = () => {
                   )}
 
                 <UpcomingEventsSection artistEvents={artistEvents} />
+                <LastEventAttendedSection event={lastEventAttended} />
               </Box>
               <Box sx={artistStyles.signatureSection}>
                 <ArtistNewsSection artistName={artistByName.name} />
