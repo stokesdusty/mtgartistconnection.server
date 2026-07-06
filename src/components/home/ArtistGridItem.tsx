@@ -6,6 +6,7 @@ import {
   gridHtmlElementStyles,
 } from "../../styles/artist-grid-styles";
 import { Link, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import { GridDensity } from "./DensityToggle";
 
 // React <19 doesn't recognize `fetchPriority` (camelCase) at runtime — it was only
@@ -33,7 +34,7 @@ const ArtistGridItem = ({
   if (density === 'compact') {
     return (
       <Box sx={artistCompactStyles.container}>
-        <Link sx={artistCompactStyles.link} href={`/artist/${artistData.name}`}>
+        <Link sx={artistCompactStyles.link} component={RouterLink} to={`/artist/${encodeURIComponent(artistData.name)}`}>
           <Box sx={artistCompactStyles.imageBox} className="artist-image-box">
             {hasEvent && <Box sx={artistGridStyles.eventDot} />}
             <img
@@ -62,7 +63,7 @@ const ArtistGridItem = ({
   if (density === 'gallery') {
     return (
       <Box sx={artistGalleryStyles.container}>
-        <Link sx={artistGalleryStyles.link} href={`/artist/${artistData.name}`}>
+        <Link sx={artistGalleryStyles.link} component={RouterLink} to={`/artist/${encodeURIComponent(artistData.name)}`}>
           <Box sx={artistGalleryStyles.imageBox} className="artist-image-box">
             {hasEvent && <Box sx={artistGridStyles.eventDot} />}
             <img
@@ -99,7 +100,7 @@ const ArtistGridItem = ({
   // comfortable (default)
   return (
     <Box sx={artistGridStyles.container}>
-      <Link sx={artistGridStyles.link} href={`/artist/${artistData.name}`}>
+      <Link sx={artistGridStyles.link} component={RouterLink} to={`/artist/${encodeURIComponent(artistData.name)}`}>
         <Box sx={artistGridStyles.imageBox} className="artist-image-box">
           {hasEvent && <Box sx={artistGridStyles.eventDot} />}
           <img

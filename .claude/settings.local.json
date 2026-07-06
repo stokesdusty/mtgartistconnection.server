@@ -30,7 +30,10 @@
       "Bash(npx jest *)",
       "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && npx jest --forceExit --testPathPattern=\"missingArtistsEmail\" 2>&1)",
       "Bash(grep -E \"\\\\.\\(yml|yaml|json\\)$\")",
-      "Bash(powershell -Command \"Get-Content src\\\\data\\\\set-artists.json | Select-Object -First 5\")"
+      "Bash(powershell -Command \"Get-Content src\\\\data\\\\set-artists.json | Select-Object -First 5\")",
+      "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && ls src/middleware && ls src/schema)",
+      "Read(//c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/**)",
+      "Bash(npm test *)"
     ]
   }
 }
