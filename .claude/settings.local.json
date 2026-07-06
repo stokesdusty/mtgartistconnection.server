@@ -83,7 +83,8 @@
       "Bash(rm src/App.css)",
       "Bash(rm \"src/types/types.ts\")",
       "Bash(ls .claude/skills/)",
-      "Bash(ls .claude/skills/verify)"
+      "Bash(ls .claude/skills/verify)",
+      "Bash(npx eslint *)"
     ]
   }
 }

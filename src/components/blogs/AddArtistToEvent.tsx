@@ -125,13 +125,7 @@ import {
       };
   
       useEffect(() => {
-          filterEvents();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [eventData]);
-      
-      const today = new Date();
-  
-      const filterEvents = () => {
+          const today = new Date();
           if (eventData) {
               let filtered: any[] = [];
               eventData.signingEvent.forEach((signingEvent: any) => {
@@ -140,7 +134,7 @@ import {
                       filtered.push(signingEvent)
                   }
               })
-              
+
               const sorted = filtered.sort((a, b) =>
                   new Date(a.endDate).getTime()
                   - new Date(b.endDate).getTime()
@@ -149,8 +143,8 @@ import {
              }  else {
                   setFilteredData([])
               }
-      };      
-      
+      }, [eventData]);
+
       const onSubmit = async () => {
           try {
               await addArtistToEvent({

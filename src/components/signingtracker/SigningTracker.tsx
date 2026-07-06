@@ -793,6 +793,10 @@ const SigningTracker: React.FC = () => {
         });
       }
     } catch {}
+    // Mount-only: seeds from whatever is already cached at load time. If isLoggedIn
+    // flips true later, the cache is empty anyway (first login) and the signingData
+    // effect below picks up the freshly-fetched data, so re-running this on
+    // isLoggedIn/apolloClient changes would add nothing.
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update from fresh network data (also handles first-login localStorage migration)
@@ -827,6 +831,9 @@ const SigningTracker: React.FC = () => {
         setDbInitialized(true);
       });
     }
+    // Only signingData should retrigger this: hasMigrated is a ref, saveSigningBatch
+    // is a stable mutate function, and load() is a pure import — none of them are
+    // meant to cause a re-run.
   }, [signingData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reload from localStorage when auth state changes (e.g. logout mid-session)
