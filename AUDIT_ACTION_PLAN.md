@@ -177,7 +177,7 @@ an attacker's job to just guessing/leaking the password.
 > (Railway) to set `MONGODB_URI` instead of `MONGODB_PASSWORD` before removing
 > the old variable. -->
 
-### 6. [webservice] Regex built from unescaped user input (ReDoS risk)
+<!-- ### 6. [webservice] Regex built from unescaped user input (ReDoS risk)
 
 **Files:** `src/handlers/handlers.ts:206` (`cardKingdomPricesByNames`),
 `src/handlers/handlers.ts:322` (`newsReviewsByArtist`, public/unauthenticated)
@@ -199,7 +199,7 @@ unauthenticated endpoint.
 > crafted input can't cause catastrophic backtracking (ReDoS) or broaden the
 > query beyond an exact case-insensitive match. Add a unit test that passes a
 > string containing regex special characters (e.g. `"Some (Artist)+"`) and
-> confirms it's treated as a literal match, not a pattern.
+> confirms it's treated as a literal match, not a pattern. -->
 
 ### 7. [webservice] Arbitrary field mass-assignment in `updateArtist`
 

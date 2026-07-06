@@ -61,7 +61,9 @@
       "Bash(railway whoami *)",
       "Bash(find \"c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/src/handlers\" -maxdepth 1 2>/dev/null)",
       "Bash(ls \"c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/src/utils\" 2>/dev/null)",
-      "Bash(find \"c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" -iname \"*.test.ts\" -not -path \"*/node_modules/*\" 2>/dev/null)"
+      "Bash(find \"c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" -iname \"*.test.ts\" -not -path \"*/node_modules/*\" 2>/dev/null)",
+      "Bash(ls -la ..; echo \"---\"; cat package.json | head -30)",
+      "Bash(npx --prefix \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" tsc -p \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/tsconfig.json\" --noEmit)"
     ]
   }
 }
