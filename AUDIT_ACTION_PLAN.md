@@ -573,7 +573,7 @@ than a hard bug.
 > improvement for GDPR/ePrivacy (EU) and CCPA (California) visitors, not a
 > functional bug fix, so scope it as its own PR. -->
 
-### 24. [server] Empty `featureFlags.ts` scaffolding
+<!-- ### 24. [server] Empty `featureFlags.ts` scaffolding
 
 **File:** `src/featureFlags.ts`
 
@@ -586,7 +586,7 @@ than a hard bug.
 > the next few changes, delete it; otherwise leave a one-line comment stating
 > what it's reserved for.
 
----
+--- -->
 
 ## New Feature Ideas
 
@@ -608,9 +608,9 @@ than a hard bug.
 > pattern already used for the set-artists feature rather than adding a new
 > backend endpoint, unless `BACKLOG.md` specifies otherwise.
 
-### 26. Cookie-consent banner
+<!-- ### 26. Cookie-consent banner
 
-See item 23 above — implementing the GA consent gate doubles as this feature.
+See item 23 above — implementing the GA consent gate doubles as this feature. -->
 
 ### 27. Public/shareable collection or wishlist pages
 

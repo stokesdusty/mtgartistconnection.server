@@ -196,18 +196,28 @@ const Dashboard = () => {
         }}
       >
         {[
-          { n: followCount, label: "Following" },
+          { n: followCount, label: "Following", href: "/following" },
           { n: wishlistCount, label: "Wishlist to sign" },
-          { n: signedCount, label: "Signed cards" },
-        ].map(({ n, label }) => (
+          { n: signedCount, label: "Signed cards", href: "/yourcards" },
+        ].map(({ n, label, href }) => (
           <Paper
             key={label}
             elevation={0}
+            {...(href ? { component: RouterLink, to: href } : {})}
             sx={{
               p: { xs: 1.5, sm: 2 },
               border: `1px solid ${themeColors.neutral[200]}`,
               borderRadius: borderRadius.md,
               backgroundColor: themeColors.background.paper,
+              textDecoration: "none",
+              display: "block",
+              ...(href && {
+                transition: "border-color 150ms ease, box-shadow 150ms ease",
+                "&:hover": {
+                  borderColor: colors.primary.light,
+                  boxShadow: shadows.sm,
+                },
+              }),
             }}
           >
             <Typography

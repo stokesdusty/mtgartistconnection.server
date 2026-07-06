@@ -59,11 +59,21 @@ export const authStyles: Record<string, SxProps<Theme>> = {
     marginBottom: 2,
     '& .MuiOutlinedInput-root': {
       borderRadius: borderRadius.md,
+      backgroundColor: themeColors.neutral.white,
+      color: themeColors.text.primary,
+      '& fieldset': { borderColor: themeColors.neutral[200] },
       '&:hover fieldset': { borderColor: themeColors.primary.main },
       '&.Mui-focused fieldset': { borderColor: themeColors.primary.main },
     },
     '& .MuiInputLabel-root': {
+      color: themeColors.text.secondary,
       '&.Mui-focused': { color: themeColors.primary.main },
+    },
+    '& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active': {
+      WebkitBoxShadow: `0 0 0 1000px ${themeColors.neutral.white} inset`,
+      WebkitTextFillColor: themeColors.text.primary,
+      caretColor: themeColors.text.primary,
+      transition: 'background-color 5000s ease-in-out 0s',
     },
   },
   submitButton: {

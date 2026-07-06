@@ -95,7 +95,32 @@
       "Bash(pkill -f \"react-scripts start\")",
       "Bash(pkill -f \"node.*start.js\")",
       "Bash(taskkill //F //IM node.exe //T)",
-      "Bash(rm \"src/featureFlags.ts\")"
+      "Bash(rm \"src/featureFlags.ts\")",
+      "Bash(timeout 60 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 1; done')",
+      "Bash(chromium-cli help *)",
+      "Bash(npx --no-install playwright install chromium --with-deps)",
+      "Bash(node check_auth_dark.js)",
+      "Bash(npm init *)",
+      "Bash(powershell -Command 'Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -eq '\\\\'''\\\\'' } | Select-Object Id')",
+      "Bash(node check_auth_border.js)",
+      "Bash(powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -First 5\")",
+      "Bash(npm start *)",
+      "Bash(timeout 90 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 2; done')",
+      "Bash(node -e \"console.log\\(require.resolve\\('playwright'\\)\\)\")",
+      "Bash(node -e \"console.log\\(require.resolve\\('puppeteer'\\)\\)\")",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --no-sandbox --virtual-time-budondget=8000 --virtual-time-budget=8000 --dump-dom \"http://localhost:3000/signingservices\")",
+      "Bash(echo \"exit:$?\")",
+      "Read(//tmp/**)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --no-sandbox --window-size=1400,1000 --virtual-time-budget=8000 --dump-dom \"http://localhost:3000/\")",
+      "Bash(npm ls *)",
+      "Bash(npm config *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 5 https://registry.npmjs.org/playwright)",
+      "Bash(mkdir -p \"/c/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/c9cb0f2d-0255-4e04-ae4a-3731d94a93ed/scratchpad/pw-test\")",
+      "Read(//c/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/c9cb0f2d-0255-4e04-ae4a-3731d94a93ed/scratchpad/**)",
+      "Read(//c/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/c9cb0f2d-0255-4e04-ae4a-3731d94a93ed/scratchpad/pw-test/**)",
+      "Bash(node test.js)",
+      "Bash(node test-mobile.js)",
+      "Bash(pkill -f \"node.*react-scripts\")"
     ]
   }
 }
