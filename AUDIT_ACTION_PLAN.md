@@ -428,7 +428,7 @@ the button itself, which isn't reliably exposed to assistive tech.
 > `src/components/home/DensityToggle.tsx:60-61`, which uses both `aria-label`
 > and `aria-pressed` correctly. -->
 
-### 17. [server] Dead file `App.css`
+<!-- ### 17. [server] Dead file `App.css`
 
 **File:** `src/App.css`
 
@@ -443,7 +443,7 @@ quote characters embedded in the value).
 > (`background-color: "#507A60";` has literal quote characters embedded,
 > which would be ignored by browsers even if the file were used). Delete
 > `src/App.css` entirely. Double-check no `.tsx`/`.ts` file imports it before
-> deleting.
+> deleting. -->
 
 ### 18. [server] Dead/legacy type definitions
 
