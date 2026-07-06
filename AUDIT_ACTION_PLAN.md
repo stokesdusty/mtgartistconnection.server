@@ -445,7 +445,7 @@ quote characters embedded in the value).
 > `src/App.css` entirely. Double-check no `.tsx`/`.ts` file imports it before
 > deleting. -->
 
-### 18. [server] Dead/legacy type definitions
+<!-- ### 18. [server] Dead/legacy type definitions
 
 **File:** `src/types/types.ts`
 
@@ -462,9 +462,9 @@ leftover boilerplate from an earlier iteration.
 > whole `src/` tree for imports from `types/types` or usages of `BlogType`/
 > `CommentType` to confirm they're genuinely unused. If confirmed dead,
 > delete `src/types/types.ts` entirely. If anything does import it, report
-> back what's using it instead of deleting.
+> back what's using it instead of deleting. -->
 
-### 19. [server] `build/` and `coverage/` directories committed to git
+<!-- ### 19. [server] `build/` and `coverage/` directories committed to git
 
 **Issue:** Same pattern as the webservice repo — stale build artifacts and
 coverage reports checked into source control.
@@ -477,9 +477,9 @@ coverage reports checked into source control.
 > confirmed tracked, add `build/` and `coverage/` to `.gitignore` if not
 > already present, then run `git rm -r --cached build coverage` to untrack
 > them without deleting local copies, and commit that cleanup separately from
-> any other changes.
+> any other changes. -->
 
-### 20. [server] Leftover debug `console.log` statements
+<!-- ### 20. [server] Leftover debug `console.log` statements
 
 **Files:** `src/components/blogs/AddArtistToEvent.tsx`,
 `src/components/blogs/AddEvent.tsx`, `src/components/blogs/EditArtist.tsx`,
@@ -502,7 +502,7 @@ coverage reports checked into source control.
 > intermediate values with no operational purpose), but keep/convert to
 > `console.error` any that are genuinely reporting caught errors. Do this file
 > by file and confirm each app flow still works after removal (e.g. admin
-> forms in the `blogs/` directory still submit correctly).
+> forms in the `blogs/` directory still submit correctly). -->
 
 ### 21. [server] `eslint-disable` suppressions worth auditing
 

@@ -128,8 +128,6 @@ import {
   
       const onSubmit = async () => {
           try {
-              console.log(name, city, url, startDateValue, endDateValue);
-              console.log('test');
               const start = startDateValue?.toString();
               const end = endDateValue?.toString();
               await addSigningEvent({
@@ -142,7 +140,7 @@ import {
                   },
               });
           } catch (err: any) {
-              console.log(err.message);
+              console.error(err.message);
           }
       };
   

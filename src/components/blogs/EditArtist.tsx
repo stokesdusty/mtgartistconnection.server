@@ -256,7 +256,7 @@ const EditArtist = () => {
                 navigate(`/artist/${name}`);
             }, 1500);
         } catch (err: any) {
-            console.log(err.message);
+            console.error(err.message);
         }
     };
 

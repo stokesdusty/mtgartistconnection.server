@@ -81,7 +81,9 @@
       "Bash(NODE_PATH=\"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\npm-cache/_npx/e41f203b7505f1fb/node_modules\" node -e \"require\\('module'\\).Module._initPaths\\(\\); const {chromium}=require\\('playwright'\\); console.log\\('ok', typeof chromium.launch\\)\")",
       "Bash(NODE_PATH=\"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\npm-cache/_npx/e41f203b7505f1fb/node_modules\" node \"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server\\\\0dc9df9f-2ad7-4b8a-ae79-9da195f759be\\\\scratchpad\\\\verify-refresh.js\")",
       "Bash(rm src/App.css)",
-      "Bash(rm \"src/types/types.ts\")"
+      "Bash(rm \"src/types/types.ts\")",
+      "Bash(ls .claude/skills/)",
+      "Bash(ls .claude/skills/verify)"
     ]
   }
 }

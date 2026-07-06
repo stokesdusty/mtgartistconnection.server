@@ -152,16 +152,15 @@ import {
       };      
       
       const onSubmit = async () => {
-          console.log(typeof signingEvent)
           try {
               await addArtistToEvent({
                   variables: {
-                      artistName: artist, 
+                      artistName: artist,
                       eventId: signingEvent,
                   },
               });
           } catch (err: any) {
-              console.log(err.message);
+              console.error(err.message);
           }
       }
   
