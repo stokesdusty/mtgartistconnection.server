@@ -153,7 +153,7 @@ for external ones.
 > containing a character like `&` or `/` (if one exists in the data) still
 > resolves correctly. -->
 
----
+<!-- ---
 
 ## Medium
 
@@ -175,7 +175,7 @@ an attacker's job to just guessing/leaking the password.
 > in both files. Update `.env.example` to show the new variable name (as a
 > placeholder, not a real value), and update the deployment environment
 > (Railway) to set `MONGODB_URI` instead of `MONGODB_PASSWORD` before removing
-> the old variable.
+> the old variable. -->
 
 ### 6. [webservice] Regex built from unescaped user input (ReDoS risk)
 

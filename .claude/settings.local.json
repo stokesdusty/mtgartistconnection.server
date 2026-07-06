@@ -58,7 +58,10 @@
       "Bash(SCRATCH=\"C:/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/cd399e44-07bf-4867-8c8f-3ef36ecb208b/scratchpad\" *)",
       "Bash(ls -la \"c:/Users/NoUse/OneDrive/Documents/GitHub/\" 2>/dev/null)",
       "Bash(railway --version)",
-      "Bash(railway whoami *)"
+      "Bash(railway whoami *)",
+      "Bash(find \"c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/src/handlers\" -maxdepth 1 2>/dev/null)",
+      "Bash(ls \"c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/src/utils\" 2>/dev/null)",
+      "Bash(find \"c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" -iname \"*.test.ts\" -not -path \"*/node_modules/*\" 2>/dev/null)"
     ]
   }
 }
