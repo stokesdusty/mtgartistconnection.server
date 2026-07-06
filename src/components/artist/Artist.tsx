@@ -532,10 +532,11 @@ const Artist = () => {
         <Box sx={artistStyles.contentWrapper}>
           <Box sx={artistStyles.buttonContainer}>
             <ExternalLinkCard
-              href={`/allcards/${artistByName.name}`}
+              href={`/allcards/${encodeURIComponent(artistByName.name)}`}
               label={`View all ${artistByName.name} cards`}
               logo={<Cards size={20} weight="duotone" />}
               variant="primary"
+              isInternal
             />
             {artistByName.omalink && (
               <ExternalLinkCard

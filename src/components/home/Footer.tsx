@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Box, Typography, Container, Link } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import { FaBluesky } from "react-icons/fa6";
 import { footerStyles } from "../../styles/footer-styles";
 import { colors, spacing } from "../../styles/design-tokens";
@@ -99,10 +100,10 @@ const Footer = () => {
           <Box sx={footerStyles.footerContent}>
             <Typography sx={footerStyles.footerText}>{copyrightText}</Typography>
             <Box sx={footerStyles.footerLinks}>
-              <Link href="/privacypolicy" sx={footerStyles.link}>Privacy Policy</Link>
-              <Link href="/termsofservice" sx={footerStyles.link}>Terms of Service</Link>
-              <Link href="/affiliate-disclosure" sx={footerStyles.link}>Affiliate Disclosure</Link>
-              <Link href="/contact" sx={footerStyles.link}>Contact</Link>
+              <Link component={RouterLink} to="/privacypolicy" sx={footerStyles.link}>Privacy Policy</Link>
+              <Link component={RouterLink} to="/termsofservice" sx={footerStyles.link}>Terms of Service</Link>
+              <Link component={RouterLink} to="/affiliate-disclosure" sx={footerStyles.link}>Affiliate Disclosure</Link>
+              <Link component={RouterLink} to="/contact" sx={footerStyles.link}>Contact</Link>
               <Link href="https://bsky.app/profile/mtgartistconnect.bsky.social" target="_blank" rel="noopener noreferrer" sx={footerStyles.iconLink}>
                 <FaBluesky size={20} />
               </Link>

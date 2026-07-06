@@ -11,6 +11,7 @@ import {
     ListItemText,
     IconButton,
   } from "@mui/material";
+  import { Link as RouterLink } from "react-router-dom";
   import { GET_ARTISTSBYEVENTID, GET_ARTIST_NAMES } from "../graphql/queries";
   import { useQuery } from "@apollo/client";
   import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ShareNetwork, CaretDown } from "@phosphor-icons/react";
@@ -302,7 +303,8 @@ import {
                 artistsWithImages.map((artist: { name: string; filename: string | null }) => (
                   <Link
                     key={artist.name}
-                    href={`/allcards/${artist.name}`}
+                    component={RouterLink}
+                    to={`/allcards/${encodeURIComponent(artist.name)}`}
                     sx={{
                       textDecoration: 'none',
                       display: 'flex',

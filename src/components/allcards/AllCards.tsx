@@ -8,7 +8,7 @@ import {
 } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams } from "react-router";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
@@ -1013,7 +1013,8 @@ const AllCards = () => {
             </Typography>
             <Box sx={{ flex: 1 }} />
             <Link
-              href={`/artist/${artist}`}
+              component={RouterLink}
+              to={`/artist/${encodeURIComponent(artist)}`}
               underline="none"
               sx={allCardsStyles.stickyCtaLink}
             >
@@ -1112,7 +1113,7 @@ const AllCards = () => {
                 sx={allCardsStyles.checkboxLabel}
               />
 
-              <Link href={`/artistcardbreakdown/${artist}`} underline="none">
+              <Link component={RouterLink} to={`/artistcardbreakdown/${encodeURIComponent(artist)}`} underline="none">
                 <Button sx={allCardsStyles.expandButton}>
                   Card Statistics
                 </Button>

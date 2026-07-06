@@ -1,4 +1,5 @@
-import { Box, Typography, Container, Paper } from "@mui/material";
+import { Box, Typography, Container, Paper, Link } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import PageMeta from "../shared/PageMeta";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { colors, themeColors, spacing } from "../../styles/design-tokens";
@@ -108,7 +109,7 @@ const AffiliateDisclosure = () => {
 
           <Typography sx={contentPageStyles.paragraph}>
             If you have any questions about our affiliate relationships or how we use affiliate
-            links, please don't hesitate to <a href="/contact" style={{ color: colors.primary.main }}>contact us</a>.
+            links, please don't hesitate to <Link component={RouterLink} to="/contact" sx={{ color: colors.primary.main }}>contact us</Link>.
           </Typography>
 
           <Typography sx={{

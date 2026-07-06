@@ -36,7 +36,26 @@
       "Bash(npm test *)",
       "Read(//c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/src/**)",
       "Bash(echo \"exit: $?\")",
-      "Bash(cd ../mtgartistconnection.webservice && cat package.json | grep -A2 '\"test\"')"
+      "Bash(cd ../mtgartistconnection.webservice && cat package.json | grep -A2 '\"test\"')",
+      "Bash(ls -la; echo \"---\"; find . -maxdepth 2 -iname \"*.webservice*\" -not -path \"*/node_modules/*\" 2>/dev/null; echo \"---parent---\"; ls ..)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(ls -la .env*)",
+      "Bash(cat .env)",
+      "Bash(cat .env.local)",
+      "Bash(cat .env.development)",
+      "Bash(BROWSER=none npm start)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(chromium-cli --help)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(find \"$HOME/AppData/Local/npm-cache/_npx\" -maxdepth 2 -type d 2>/dev/null)",
+      "Bash(export NODE_PATH=\"/c/Users/NoUse/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/node_modules\")",
+      "Bash(node -e \"const {chromium} = require\\('playwright'\\); console.log\\('ok', typeof chromium.launch\\)\")",
+      "Bash(node \"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server\\\\cd399e44-07bf-4867-8c8f-3ef36ecb208b\\\\scratchpad\\\\test-links.js\")",
+      "Bash(node -e ' *)",
+      "Bash(SCRATCH=\"C:/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/cd399e44-07bf-4867-8c8f-3ef36ecb208b/scratchpad\" *)"
     ]
   }
 }
