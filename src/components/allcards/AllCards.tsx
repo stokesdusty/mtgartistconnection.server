@@ -183,6 +183,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
     <Link
       href={`https://manapool.com/card/${card.set}/${card.collector_number}/${cardSlug}?ref=mtgartistconnection`}
       target="_blank"
+      rel="noopener noreferrer"
       onClick={() => {
         if ((window as any).gtag) {
           (window as any).gtag("event", "manapool_price_click", {
@@ -219,6 +220,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
     <Link
       href={`https://partner.tcgplayer.com/JkbQGE?u=https://www.tcgplayer.com/product/${card.tcgplayer_id}`}
       target="_blank"
+      rel="noopener noreferrer"
       onClick={() => {
         if ((window as any).gtag) {
           (window as any).gtag("event", "tcgplayer_price_click", {
@@ -257,6 +259,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
     <Link
       href={ckUrl}
       target="_blank"
+      rel="noopener noreferrer"
       onClick={() => {
         if ((window as any).gtag) {
           (window as any).gtag("event", "cardkingdom_price_click", {
@@ -330,7 +333,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{ position: 'relative', display: 'inline-block' }}>
-        <Link href={card?.scryfall_uri} target="_blank">
+        <Link href={card?.scryfall_uri} target="_blank" rel="noopener noreferrer">
           <Box
             component="img"
             alt={card.artist || "Card"}

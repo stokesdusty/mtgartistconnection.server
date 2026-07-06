@@ -70,6 +70,7 @@ import {
                 <Link
                   href="https://bsky.app/profile/mtgartistconnect.bsky.social"
                   target="_blank"
+                  rel="noopener noreferrer"
                   sx={contentPageStyles.contactLink}
                 >
                   @mtgartistconnect.bsky.social

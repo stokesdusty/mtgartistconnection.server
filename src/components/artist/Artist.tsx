@@ -610,6 +610,7 @@ const Artist = () => {
                               key={index}
                               href={link.url}
                               target="_blank"
+                              rel="noopener noreferrer"
                               sx={artistStyles.socialIcon}
                               onClick={() => trackClick(link.label.toLowerCase())}
                             >
@@ -722,6 +723,7 @@ const Artist = () => {
                       <Link
                         sx={artistStyles.serviceLink}
                         target="_blank"
+                        rel="noopener noreferrer"
                         href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"
                         onClick={() => trackClick('markssignatureservice')}
                       >
@@ -736,6 +738,7 @@ const Artist = () => {
                       <Link
                         sx={artistStyles.serviceLink}
                         target="_blank"
+                        rel="noopener noreferrer"
                         href={artistByName.mountainmage}
                         onClick={() => trackClick('mountainmage')}
                       >

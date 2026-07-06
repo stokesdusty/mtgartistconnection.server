@@ -223,7 +223,7 @@ there's no defense-in-depth if an admin session were ever compromised.
 > performing the update. This is defense-in-depth in case an admin session is
 > ever compromised via XSS or a leaked token. -->
 
-### 8. [webservice] PII (emails) written to plaintext logs
+<!-- ### 8. [webservice] PII (emails) written to plaintext logs
 
 **Files:** `src/jobs/dailyDigest.ts:86`, `src/jobs/dailyEventDigest.ts:138`,
 `src/jobs/dailyNewArtistDigest.ts:62,64`, `src/jobs/scryfallArtistSync.ts:127,129`,
@@ -241,7 +241,7 @@ provider's (Railway) plaintext operational logs.
 > each log line with the user's `_id` (or a redacted form like masking the
 > local part, e.g. `j***@example.com`) so PII doesn't end up in plaintext
 > operational logs. Keep the log messages otherwise informative (e.g. "Email
-> sent to user <id>" instead of "Email sent to <email>").
+> sent to user <id>" instead of "Email sent to <email>"). -->
 
 ### 9. [server] Missing `rel="noopener noreferrer"` on external links
 
