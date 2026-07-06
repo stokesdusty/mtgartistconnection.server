@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { REFRESH_TOKEN } from '../components/graphql/mutations';
 
 const GRAPHQL_URL = "https://mtgartistconnectionwebservice-production.up.railway.app/graphql";
 
@@ -64,7 +65,8 @@ export async function refreshAccessToken(): Promise<string | null> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query: `mutation { refreshToken(refreshToken: "${token}") { token } }`,
+        query: REFRESH_TOKEN.loc?.source.body,
+        variables: { refreshToken: token },
       }),
     });
     const json = await response.json();

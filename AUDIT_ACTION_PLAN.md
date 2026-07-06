@@ -317,7 +317,7 @@ ignore rules were added and never untracked — currently 12,645 files under
 > and confirm the app still builds/runs locally afterward since none of the
 > actual source files are touched. -->
 
-### 12. [webservice] Deprecated dependencies
+<!-- ### 12. [webservice] Deprecated dependencies
 
 **Issue:** `bcrypt-nodejs` (unmaintained since ~2015), `express-graphql`
 (deprecated by maintainers), and `graphql` v15 (current major is 16/17) are
@@ -336,7 +336,7 @@ all in use.
 > compatible across these libraries). Treat `express-graphql`/`graphql`
 > version upgrades as a separate, larger follow-up task since they may involve
 > breaking API changes — don't attempt them in the same change as the bcrypt
-> migration.
+> migration. -->
 
 ### 13. [server] Refresh-token mutation uses string interpolation instead of Apollo variables
 

@@ -73,7 +73,13 @@
       "Bash(xargs grep -l \"bcrypt\\\\|hashSync\\\\|compareSync\\\\|login\\\\|signup\\\\|password\")",
       "Bash(node -e \"console.log\\(require.resolve\\('bcryptjs'\\)\\)\")",
       "Bash(node -e \"console.log\\(require\\('./node_modules/bcryptjs/package.json'\\).types || require\\('./node_modules/bcryptjs/package.json'\\).typings\\)\")",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(curl -s -X POST https://mtgartistconnectionwebservice-production.up.railway.app/graphql -H 'Content-Type: application/json' -d '{\"query\":\"mutation refreshToken\\($refreshToken:String!\\){ refreshToken\\(refreshToken: $refreshToken\\){ token } }\",\"variables\":{\"refreshToken\":\"not-a-real-token\"}}')",
+      "Bash(npx playwright *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(node \"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server\\\\0dc9df9f-2ad7-4b8a-ae79-9da195f759be\\\\scratchpad\\\\verify-refresh.js\")",
+      "Bash(NODE_PATH=\"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\npm-cache/_npx/e41f203b7505f1fb/node_modules\" node -e \"require\\('module'\\).Module._initPaths\\(\\); const {chromium}=require\\('playwright'\\); console.log\\('ok', typeof chromium.launch\\)\")",
+      "Bash(NODE_PATH=\"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\npm-cache/_npx/e41f203b7505f1fb/node_modules\" node \"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server\\\\0dc9df9f-2ad7-4b8a-ae79-9da195f759be\\\\scratchpad\\\\verify-refresh.js\")"
     ]
   }
 }
