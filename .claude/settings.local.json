@@ -33,7 +33,10 @@
       "Bash(powershell -Command \"Get-Content src\\\\data\\\\set-artists.json | Select-Object -First 5\")",
       "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && ls src/middleware && ls src/schema)",
       "Read(//c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/**)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Read(//c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/src/**)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(cd ../mtgartistconnection.webservice && cat package.json | grep -A2 '\"test\"')"
     ]
   }
 }
