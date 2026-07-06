@@ -302,6 +302,8 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
             <IconButton
               size="small"
               onClick={() => onToggle(card, field)}
+              aria-label={tooltip}
+              aria-pressed={!!active}
               sx={{
                 color: active ? color : themeColors.text.disabled,
                 p: isTouch ? '5px 4px' : 0.5,

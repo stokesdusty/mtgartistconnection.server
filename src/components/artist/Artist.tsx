@@ -613,6 +613,7 @@ const Artist = () => {
                               rel="noopener noreferrer"
                               sx={artistStyles.socialIcon}
                               onClick={() => trackClick(link.label.toLowerCase())}
+                              aria-label={`Visit ${artistByName.name}'s ${link.label}`}
                             >
                               <link.icon
                                 size={20}

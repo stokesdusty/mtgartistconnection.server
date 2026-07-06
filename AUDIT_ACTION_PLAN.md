@@ -383,7 +383,7 @@ fixing.
 > name field and confirming it renders as literal text in the generated sheet
 > rather than being interpreted as HTML. -->
 
-### 15. [server] Search fields lack accessible labels
+<!-- ### 15. [server] Search fields lack accessible labels
 
 **Files:** `src/components/home/FiltersForm.tsx:80-95`,
 `src/components/home/Homepage.tsx:546-561`
@@ -400,7 +400,7 @@ isn't a reliable accessible-name substitute per WCAG.
 > prop with no `label` or `aria-label`. Add an `aria-label="Search artists"`
 > (or equivalent wording matching the field's purpose) to each `TextField` so
 > screen reader users get an accessible name that doesn't disappear once text
-> is typed. Keep the existing placeholder/visual styling unchanged.
+> is typed. Keep the existing placeholder/visual styling unchanged. -->
 
 ### 16. [server] Icon-only buttons missing `aria-label`
 
