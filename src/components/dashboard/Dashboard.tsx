@@ -2,13 +2,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useQuery } from "@apollo/client";
-import {
-  Box,
-  CircularProgress,
-  Container,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Container, Paper, Typography } from "@mui/material";
 import {
   ArrowRight,
   Cards,
@@ -31,6 +25,7 @@ import {
   typography,
 } from "../../styles/design-tokens";
 import { usePageTitle } from "../../hooks/usePageTitle";
+import { DashboardSkeleton } from "../shared/Skeletons";
 
 // ── Tool launcher items — mirrors the drawer in Header ────────────────────────
 
@@ -98,24 +93,43 @@ const Dashboard = () => {
     }
   }, [isLoggedIn, navigate]);
 
-  const { data: userData, loading: userLoading } = useQuery(GET_CURRENT_USER, {
+  const {
+    data: userData,
+    loading: userLoading,
+    error: userError,
+  } = useQuery(GET_CURRENT_USER, {
     skip: !isLoggedIn,
   });
 
-  const { data: collectionData, loading: collectionLoading } = useQuery(
-    GET_MY_CARD_COLLECTION,
-    { skip: !isLoggedIn }
-  );
+  const {
+    data: collectionData,
+    loading: collectionLoading,
+    error: collectionError,
+  } = useQuery(GET_MY_CARD_COLLECTION, { skip: !isLoggedIn });
 
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS, {
     skip: !isLoggedIn,
   });
 
   if (userLoading || collectionLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (userError || collectionError) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", pt: 10 }}>
-        <CircularProgress size={28} sx={{ color: colors.primary.main }} />
-      </Box>
+      <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
+        <Typography
+          sx={{
+            color: colors.accent.red,
+            textAlign: "center",
+            padding: 4,
+            backgroundColor: colors.accent.redLight,
+            borderRadius: borderRadius.md,
+          }}
+        >
+          Error loading dashboard: {(userError ?? collectionError)?.message}
+        </Typography>
+      </Container>
     );
   }
 

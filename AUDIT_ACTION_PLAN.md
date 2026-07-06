@@ -243,7 +243,7 @@ provider's (Railway) plaintext operational logs.
 > operational logs. Keep the log messages otherwise informative (e.g. "Email
 > sent to user <id>" instead of "Email sent to <email>"). -->
 
-### 9. [server] Missing `rel="noopener noreferrer"` on external links
+<!-- ### 9. [server] Missing `rel="noopener noreferrer"` on external links
 
 **Files:** `src/components/artist/Artist.tsx:608-619,721-729,735-744`,
 `src/components/home/Contact.tsx:70-76`,
@@ -266,7 +266,7 @@ rather than a systemic gap.
 > MountainMage link around 735-744), `src/components/home/Contact.tsx`
 > (Bluesky link around lines 70-76), and `src/components/allcards/AllCards.tsx`
 > (Manapool price link ~183-216, TCGPlayer link ~218-250, Card Kingdom link
-> ~256-288, and the Scryfall card-image link ~333).
+> ~256-288, and the Scryfall card-image link ~333). -->
 
 ### 10. [server] Dashboard swallows GraphQL errors, uses spinner instead of skeleton
 

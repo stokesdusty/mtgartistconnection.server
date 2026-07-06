@@ -345,6 +345,150 @@ export const AllCardsSkeleton = () => {
   );
 };
 
+// Dashboard skeleton — greeting, quick stats, next signings, recently followed, tools grid
+export const DashboardSkeleton = () => {
+  return (
+    <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
+      {/* Greeting */}
+      <Skeleton
+        variant="text"
+        sx={{ width: 220, height: 48, backgroundColor: themeColors.neutral[200], mb: 0.5 }}
+      />
+      <Skeleton
+        variant="text"
+        sx={{ width: 140, height: 20, backgroundColor: themeColors.neutral[200], mb: 4 }}
+      />
+
+      {/* Quick stats */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 1.5,
+          mb: 5,
+        }}
+      >
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Box
+            key={i}
+            sx={{
+              p: { xs: 1.5, sm: 2 },
+              border: `1px solid ${themeColors.neutral[200]}`,
+              borderRadius: borderRadius.md,
+              backgroundColor: themeColors.background.paper,
+            }}
+          >
+            <Skeleton
+              variant="text"
+              sx={{ width: '40%', height: 36, backgroundColor: themeColors.neutral[200] }}
+            />
+            <Skeleton
+              variant="text"
+              sx={{ width: '70%', height: 16, mt: 0.5, backgroundColor: themeColors.neutral[200] }}
+            />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Next signings */}
+      <Box sx={{ mb: 5 }}>
+        <Skeleton
+          variant="text"
+          sx={{ width: 130, height: 20, mb: 1, backgroundColor: themeColors.neutral[200] }}
+        />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Box
+            key={i}
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 1.5,
+              py: 1.25,
+              borderTop: i === 0 ? 'none' : `1px solid ${themeColors.neutral[200]}`,
+            }}
+          >
+            <Skeleton
+              variant="text"
+              sx={{ width: '55%', height: 22, backgroundColor: themeColors.neutral[200] }}
+            />
+            <Skeleton
+              variant="text"
+              sx={{ width: 60, height: 16, backgroundColor: themeColors.neutral[200] }}
+            />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Recently followed */}
+      <Box sx={{ mb: 5 }}>
+        <Skeleton
+          variant="text"
+          sx={{ width: 160, height: 20, mb: 1, backgroundColor: themeColors.neutral[200] }}
+        />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Box
+            key={i}
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 1.5,
+              py: 1.25,
+              borderTop: i === 0 ? 'none' : `1px solid ${themeColors.neutral[200]}`,
+            }}
+          >
+            <Skeleton
+              variant="text"
+              sx={{ width: '40%', height: 22, backgroundColor: themeColors.neutral[200] }}
+            />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Tool launcher */}
+      <Box>
+        <Skeleton
+          variant="text"
+          sx={{ width: 100, height: 20, mb: 1, backgroundColor: themeColors.neutral[200] }}
+        />
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)' },
+            gap: 1.5,
+          }}
+        >
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Box
+              key={i}
+              sx={{
+                p: { xs: 1.5, sm: 2 },
+                border: `1px solid ${themeColors.neutral[200]}`,
+                borderRadius: borderRadius.md,
+                backgroundColor: themeColors.background.paper,
+              }}
+            >
+              <Skeleton
+                variant="rounded"
+                sx={{ width: 22, height: 22, mb: 1, backgroundColor: themeColors.neutral[200] }}
+              />
+              <Skeleton
+                variant="text"
+                sx={{ width: '70%', height: 18, mb: 0.25, backgroundColor: themeColors.neutral[200] }}
+              />
+              <Skeleton
+                variant="text"
+                sx={{ width: '90%', height: 14, backgroundColor: themeColors.neutral[200] }}
+              />
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Container>
+  );
+};
+
 // Artist page skeleton
 export const ArtistPageSkeleton = () => {
   return (
