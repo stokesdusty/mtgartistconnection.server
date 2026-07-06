@@ -27,6 +27,15 @@ interface ArtistRecord {
 
 const SLOTS_PER_PAGE = 30;
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 
 // Shared MUI overrides so form fields adapt to dark mode
 const inputSx = {
@@ -133,9 +142,9 @@ const ArtistSheet = () => {
     const slotRows = filled.map(slot =>
       slot
         ? `<div class="slot filled">
-            <div><strong>Your Name:</strong> ${slot.name}</div>
-            <div><strong>Color:</strong> ${slot.color}</div>
-            <div><strong>Artist/Quantity:</strong> ${slot.artist} ×${slot.quantity}</div>
+            <div><strong>Your Name:</strong> ${escapeHtml(slot.name)}</div>
+            <div><strong>Color:</strong> ${escapeHtml(slot.color)}</div>
+            <div><strong>Artist/Quantity:</strong> ${escapeHtml(slot.artist)} ×${slot.quantity}</div>
            </div>`
         : `<div class="slot empty">
             <div><strong>Your Name:</strong></div>

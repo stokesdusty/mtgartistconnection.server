@@ -338,7 +338,7 @@ all in use.
 > breaking API changes — don't attempt them in the same change as the bcrypt
 > migration. -->
 
-### 13. [server] Refresh-token mutation uses string interpolation instead of Apollo variables
+<!-- ### 13. [server] Refresh-token mutation uses string interpolation instead of Apollo variables
 
 **File:** `src/store/auth-slice.ts:66-68`
 
@@ -358,7 +358,7 @@ mutation with variables already exists in `src/components/graphql/mutations.ts:3
 > function has access to the client instance) so the token is passed as a
 > proper GraphQL variable instead of being interpolated into the query string.
 > Confirm login/refresh flow still works after the change by logging in,
-> waiting for or forcing a token refresh, and confirming the session persists.
+> waiting for or forcing a token refresh, and confirming the session persists. -->
 
 ### 14. [server] Self-XSS via unescaped `document.write` in ArtistSheet
 
