@@ -402,7 +402,7 @@ isn't a reliable accessible-name substitute per WCAG.
 > screen reader users get an accessible name that doesn't disappear once text
 > is typed. Keep the existing placeholder/visual styling unchanged. -->
 
-### 16. [server] Icon-only buttons missing `aria-label`
+<!-- ### 16. [server] Icon-only buttons missing `aria-label`
 
 **Files:** `src/components/artist/Artist.tsx:604-621` (social media icon
 links), `src/components/allcards/AllCards.tsx:292-320` (collection-toggle
@@ -426,7 +426,7 @@ the button itself, which isn't reliably exposed to assistive tech.
 > (e.g. "Mark as signed", "Add to wishlist"), keeping the existing `title`
 > tooltip for sighted users. Follow the good pattern already used in
 > `src/components/home/DensityToggle.tsx:60-61`, which uses both `aria-label`
-> and `aria-pressed` correctly.
+> and `aria-pressed` correctly. -->
 
 ### 17. [server] Dead file `App.css`
 
