@@ -525,7 +525,7 @@ stale-closure bugs.
 > `eslint-disable` comment where it's no longer needed. If a suppression is
 > genuinely intentional, leave it but add a one-line comment explaining why. -->
 
-### 22. [server] No CI test gate before deploy
+<!-- ### 22. [server] No CI test gate before deploy
 
 **File:** `amplify.yml`
 
@@ -550,7 +550,7 @@ verification.
 > `Homepage.tsx`, `Artist.tsx`, and `AllCards.tsx` — that at minimum render
 > without crashing given mocked Apollo `MockedProvider` responses. Follow the
 > existing test style in `src/store/auth-slice.test.ts` for conventions used
-> in this repo.
+> in this repo. -->
 
 ### 23. [server] Google Analytics with no consent gate
 
