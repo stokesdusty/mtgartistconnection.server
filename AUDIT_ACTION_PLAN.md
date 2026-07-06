@@ -552,7 +552,7 @@ verification.
 > existing test style in `src/store/auth-slice.test.ts` for conventions used
 > in this repo. -->
 
-### 23. [server] Google Analytics with no consent gate
+<!-- ### 23. [server] Google Analytics with no consent gate
 
 **File:** `public/index.html:48-56`
 
@@ -571,7 +571,7 @@ than a hard bug.
 > `gtag('config', ...)` after the user has accepted, and don't load it at all
 > if they've declined or haven't yet responded. This is a compliance
 > improvement for GDPR/ePrivacy (EU) and CCPA (California) visitors, not a
-> functional bug fix, so scope it as its own PR.
+> functional bug fix, so scope it as its own PR. -->
 
 ### 24. [server] Empty `featureFlags.ts` scaffolding
 
