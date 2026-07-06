@@ -201,7 +201,7 @@ unauthenticated endpoint.
 > string containing regex special characters (e.g. `"Some (Artist)+"`) and
 > confirms it's treated as a literal match, not a pattern. -->
 
-### 7. [webservice] Arbitrary field mass-assignment in `updateArtist`
+<!-- ### 7. [webservice] Arbitrary field mass-assignment in `updateArtist`
 
 **File:** `src/handlers/handlers.ts:747-777`
 
@@ -221,7 +221,7 @@ there's no defense-in-depth if an admin session were ever compromised.
 > etc. — check `src/schema/schema.ts` or the Mongoose model for the full
 > field list) and throw a clear error if `fieldName` isn't in that set, before
 > performing the update. This is defense-in-depth in case an admin session is
-> ever compromised via XSS or a leaked token.
+> ever compromised via XSS or a leaked token. -->
 
 ### 8. [webservice] PII (emails) written to plaintext logs
 
