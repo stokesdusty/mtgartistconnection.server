@@ -24,7 +24,7 @@ priority order. Items tagged `[webservice]` must be run from the
 
 ## Critical
 
-### 1. [webservice] Unauthenticated `users` query leaks all user PII
+<!-- ### 1. [webservice] Unauthenticated `users` query leaks all user PII
 
 **File:** `src/handlers/handlers.ts:152-157`
 
@@ -151,7 +151,7 @@ for external ones.
 > and confirm the URL bar updates without a full page reload (check the
 > browser network tab shows no full document request) and that an artist name
 > containing a character like `&` or `/` (if one exists in the data) still
-> resolves correctly.
+> resolves correctly. -->
 
 ---
 

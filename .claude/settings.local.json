@@ -55,7 +55,10 @@
       "Bash(node -e \"const {chromium} = require\\('playwright'\\); console.log\\('ok', typeof chromium.launch\\)\")",
       "Bash(node \"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server\\\\cd399e44-07bf-4867-8c8f-3ef36ecb208b\\\\scratchpad\\\\test-links.js\")",
       "Bash(node -e ' *)",
-      "Bash(SCRATCH=\"C:/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/cd399e44-07bf-4867-8c8f-3ef36ecb208b/scratchpad\" *)"
+      "Bash(SCRATCH=\"C:/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/cd399e44-07bf-4867-8c8f-3ef36ecb208b/scratchpad\" *)",
+      "Bash(ls -la \"c:/Users/NoUse/OneDrive/Documents/GitHub/\" 2>/dev/null)",
+      "Bash(railway --version)",
+      "Bash(railway whoami *)"
     ]
   }
 }
