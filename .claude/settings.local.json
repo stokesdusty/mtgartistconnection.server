@@ -66,7 +66,14 @@
       "Bash(npx --prefix \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" tsc -p \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/tsconfig.json\" --noEmit)",
       "Bash(git remote *)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(find /c/Users/NoUse/OneDrive/Documents/GitHub -maxdepth 1 -iname \"*webservice*\" -o -maxdepth 1 -iname \"*mtgartist*\" 2>/dev/null)"
+      "Bash(find /c/Users/NoUse/OneDrive/Documents/GitHub -maxdepth 1 -iname \"*webservice*\" -o -maxdepth 1 -iname \"*mtgartist*\" 2>/dev/null)",
+      "Bash(grep -rn \"bcrypt\" package.json)",
+      "Bash(grep -rln \"bcrypt\" src)",
+      "Bash(ls \"/c/Users/NoUse/OneDrive/Documents/GitHub\" 2>/dev/null)",
+      "Bash(xargs grep -l \"bcrypt\\\\|hashSync\\\\|compareSync\\\\|login\\\\|signup\\\\|password\")",
+      "Bash(node -e \"console.log\\(require.resolve\\('bcryptjs'\\)\\)\")",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/bcryptjs/package.json'\\).types || require\\('./node_modules/bcryptjs/package.json'\\).typings\\)\")",
+      "Bash(npm uninstall *)"
     ]
   }
 }

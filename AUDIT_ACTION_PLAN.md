@@ -298,7 +298,7 @@ spinner instead of the app's skeleton-first loading pattern
 
 --- -->
 
-## Low
+<!-- ## Low
 
 ### 11. [webservice] `node_modules/`, `dist/`, `coverage/` tracked in git
 
@@ -315,7 +315,7 @@ ignore rules were added and never untracked — currently 12,645 files under
 > with a message like "Untrack node_modules/dist/coverage (already gitignored)".
 > Double check `git status` afterward shows a clean diff with only removals,
 > and confirm the app still builds/runs locally afterward since none of the
-> actual source files are touched.
+> actual source files are touched. -->
 
 ### 12. [webservice] Deprecated dependencies
 
