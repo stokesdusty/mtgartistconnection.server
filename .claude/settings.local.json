@@ -65,7 +65,8 @@
       "Bash(ls -la ..; echo \"---\"; cat package.json | head -30)",
       "Bash(npx --prefix \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" tsc -p \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/tsconfig.json\" --noEmit)",
       "Bash(git remote *)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(find /c/Users/NoUse/OneDrive/Documents/GitHub -maxdepth 1 -iname \"*webservice*\" -o -maxdepth 1 -iname \"*mtgartist*\" 2>/dev/null)"
     ]
   }
 }

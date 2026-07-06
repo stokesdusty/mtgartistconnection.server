@@ -268,7 +268,7 @@ rather than a systemic gap.
 > (Manapool price link ~183-216, TCGPlayer link ~218-250, Card Kingdom link
 > ~256-288, and the Scryfall card-image link ~333). -->
 
-### 10. [server] Dashboard swallows GraphQL errors, uses spinner instead of skeleton
+<!-- ### 10. [server] Dashboard swallows GraphQL errors, uses spinner instead of skeleton
 
 **File:** `src/components/dashboard/Dashboard.tsx:101-120`
 
@@ -296,7 +296,7 @@ spinner instead of the app's skeleton-first loading pattern
 > layout-matching skeleton from `src/components/shared/Skeletons.tsx`, matching
 > the skeleton-first pattern used on Homepage/Artist/AllCards/Calendar/News.
 
----
+--- -->
 
 ## Low
 
