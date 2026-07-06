@@ -504,7 +504,7 @@ coverage reports checked into source control.
 > by file and confirm each app flow still works after removal (e.g. admin
 > forms in the `blogs/` directory still submit correctly). -->
 
-### 21. [server] `eslint-disable` suppressions worth auditing
+<!-- ### 21. [server] `eslint-disable` suppressions worth auditing
 
 **Files:** `src/components/blogs/AddArtistToEvent.tsx:129`,
 `src/components/signingtracker/SigningTracker.tsx:796,830`
@@ -523,7 +523,7 @@ stale-closure bugs.
 > genuine bugs found by adding the missing dependency (and adjusting the
 > effect body if needed to avoid unwanted re-runs), and remove the
 > `eslint-disable` comment where it's no longer needed. If a suppression is
-> genuinely intentional, leave it but add a one-line comment explaining why.
+> genuinely intentional, leave it but add a one-line comment explaining why. -->
 
 ### 22. [server] No CI test gate before deploy
 
