@@ -550,6 +550,7 @@ const Homepage = () => {
             sx={{ ...homepageStyles.textField, "& .MuiInputBase-input": { fontSize: "0.875rem" } }}
             value={searchInputValue}
             placeholder="Search for an artist"
+            aria-label="Search artists"
             onChange={handleSearchChange}
             InputProps={{
               startAdornment: (

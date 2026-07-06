@@ -360,7 +360,7 @@ mutation with variables already exists in `src/components/graphql/mutations.ts:3
 > Confirm login/refresh flow still works after the change by logging in,
 > waiting for or forcing a token refresh, and confirming the session persists. -->
 
-### 14. [server] Self-XSS via unescaped `document.write` in ArtistSheet
+<!-- ### 14. [server] Self-XSS via unescaped `document.write` in ArtistSheet
 
 **File:** `src/components/artistsheet/ArtistSheet.tsx:135-149`
 
@@ -381,7 +381,7 @@ fixing.
 > `</div><script>...` typed into the name field can't execute as script in the
 > popup. Test by typing a string containing `<` and `>` characters into the
 > name field and confirming it renders as literal text in the generated sheet
-> rather than being interpreted as HTML.
+> rather than being interpreted as HTML. -->
 
 ### 15. [server] Search fields lack accessible labels
 

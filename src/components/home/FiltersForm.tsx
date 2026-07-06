@@ -83,6 +83,7 @@ const FiltersForm = ({
       sx={{ ...homepageStyles.textField, "& .MuiInputBase-input": { fontSize: "0.875rem" } }}
       value={userSearch}
       placeholder="Search for an artist"
+      aria-label="Search artists"
       onChange={onSearchChange}
       InputProps={{
         startAdornment: (
