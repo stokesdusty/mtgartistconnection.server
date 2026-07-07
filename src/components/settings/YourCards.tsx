@@ -12,7 +12,7 @@ import { RootState } from "../../store/store";
 import { useQuery } from "@apollo/client";
 import { GET_MY_CARD_COLLECTION } from "../graphql/queries";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { colors } from "../../styles/design-tokens";
+import { colors, themeColors } from "../../styles/design-tokens";
 
 interface CollectionItem {
   id: string;
@@ -37,23 +37,23 @@ interface ArtistSummary {
 
 const styles = {
   container: {
-    backgroundColor: colors.background.dark,
+    backgroundColor: themeColors.background.dark,
     minHeight: "100vh",
     padding: { xs: 2, md: 4 },
   },
   paper: {
     padding: { xs: 3, md: 4 },
-    backgroundColor: colors.neutral.white,
+    backgroundColor: themeColors.neutral.white,
     borderRadius: "12px",
     boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-    border: `1px solid ${colors.neutral[200]}`,
+    border: `1px solid ${themeColors.neutral[200]}`,
   },
   headerRow: {
     display: 'grid',
     gridTemplateColumns: '1fr 80px 80px 80px',
     px: 1.5,
     py: 0.75,
-    borderBottom: `1px solid ${colors.neutral[200]}`,
+    borderBottom: `1px solid ${themeColors.neutral[200]}`,
   },
   artistRow: {
     display: 'grid',
@@ -65,12 +65,12 @@ const styles = {
     transition: '150ms',
     textDecoration: 'none',
     color: 'inherit',
-    '&:hover': { backgroundColor: colors.background.dark },
+    '&:hover': { backgroundColor: themeColors.background.dark },
   },
   colLabel: {
     fontSize: '0.75rem',
     fontWeight: 600,
-    color: colors.text.hint,
+    color: themeColors.text.hint,
     textTransform: 'uppercase' as const,
     letterSpacing: '0.05em',
     textAlign: 'center' as const,
@@ -78,7 +78,7 @@ const styles = {
   artistName: {
     fontWeight: 500,
     fontSize: '0.8125rem',
-    color: colors.primary.main,
+    color: themeColors.primary.main,
     '&:hover': { textDecoration: 'underline' },
   },
   count: {
@@ -131,7 +131,7 @@ const YourCards = () => {
         <Container maxWidth="md">
           <Paper elevation={0} sx={styles.paper}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-              <CircularProgress sx={{ color: colors.primary.main }} />
+              <CircularProgress sx={{ color: themeColors.primary.main }} />
             </Box>
           </Paper>
         </Container>
@@ -151,13 +151,13 @@ const YourCards = () => {
         <Paper elevation={0} sx={styles.paper}>
           <Typography variant="h4" sx={{
             fontWeight: 700,
-            color: colors.primary.main,
+            color: themeColors.primary.main,
             mb: 0.5,
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
           }}>
             Your Cards
           </Typography>
-          <Typography sx={{ fontSize: '0.875rem', color: colors.text.hint, mb: 3 }}>
+          <Typography sx={{ fontSize: '0.875rem', color: themeColors.text.hint, mb: 3 }}>
             {artists.length} {artists.length === 1 ? 'artist' : 'artists'}, {items.length} {items.length === 1 ? 'card' : 'cards'}
           </Typography>
 
@@ -184,13 +184,13 @@ const YourCards = () => {
                     sx={styles.artistRow}
                   >
                     <Typography sx={styles.artistName}>{artist.name}</Typography>
-                    <Typography sx={{ ...styles.count, color: artist.proofs > 0 ? colors.primary.main : colors.neutral[400] }}>
+                    <Typography sx={{ ...styles.count, color: artist.proofs > 0 ? themeColors.primary.main : themeColors.text.disabled }}>
                       {artist.proofs > 0 ? artist.proofs : '—'}
                     </Typography>
-                    <Typography sx={{ ...styles.count, color: artist.signed > 0 ? colors.primary.main : colors.neutral[400] }}>
+                    <Typography sx={{ ...styles.count, color: artist.signed > 0 ? themeColors.primary.main : themeColors.text.disabled }}>
                       {artist.signed > 0 ? artist.signed : '—'}
                     </Typography>
-                    <Typography sx={{ ...styles.count, color: artist.wishlist > 0 ? colors.primary.main : colors.neutral[400] }}>
+                    <Typography sx={{ ...styles.count, color: artist.wishlist > 0 ? themeColors.primary.main : themeColors.text.disabled }}>
                       {artist.wishlist > 0 ? artist.wishlist : '—'}
                     </Typography>
                   </Box>

@@ -3,7 +3,7 @@ import { Link as MuiLink } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { GET_ARTIST_FILTER_FLAGS } from '../graphql/queries';
-import { colors, transitions } from '../../styles/design-tokens';
+import { themeColors, transitions } from '../../styles/design-tokens';
 
 interface ArtistLinkProps {
   name: string;
@@ -33,12 +33,11 @@ const ArtistLink = ({ name }: ArtistLinkProps) => {
       component={RouterLink}
       to={`/artist/${encodeURIComponent(canonicalName)}`}
       sx={{
-        color: colors.primary.main,
+        color: themeColors.primary.main,
         textDecoration: 'none',
         fontStyle: 'inherit',
         transition: transitions.fast,
         '&:hover': {
-          color: colors.primary.dark,
           textDecoration: 'underline',
         },
       }}

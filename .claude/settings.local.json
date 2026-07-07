@@ -120,7 +120,19 @@
       "Read(//c/Users/NoUse/AppData/Local/Temp/claude/c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server/c9cb0f2d-0255-4e04-ae4a-3731d94a93ed/scratchpad/pw-test/**)",
       "Bash(node test.js)",
       "Bash(node test-mobile.js)",
-      "Bash(pkill -f \"node.*react-scripts\")"
+      "Bash(pkill -f \"node.*react-scripts\")",
+      "Bash(ls -la \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\\" 2>/dev/null)",
+      "Bash(ls -la \"/c/Users/NoUse/OneDrive/Documents/GitHub/\")",
+      "Read(//c/Users/NoUse/AppData/Local/ms-playwright/**)",
+      "Read(//c/Users/NoUse/.cache/**)",
+      "Bash(node \"C:\\\\Users\\\\NoUse\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-NoUse-OneDrive-Documents-GitHub-mtgartistconnection-server\\\\bf7fc98c-d098-420a-854d-765027afe37a\\\\scratchpad\\\\check_yourcards.js\")",
+      "Bash(node check_yourcards.js)",
+      "Bash(taskkill //F //IM node.exe //FI \"WINDOWTITLE eq *react-scripts*\")",
+      "Bash(node check_following.js)",
+      "Bash(node check_autocomplete.js)",
+      "Bash(node check_autocomplete2.js)",
+      "Bash(node check_following2.js)",
+      "Bash(node check_following7.js)"
     ]
   }
 }

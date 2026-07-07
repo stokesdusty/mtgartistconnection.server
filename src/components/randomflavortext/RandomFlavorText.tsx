@@ -16,7 +16,7 @@ import { useQuery } from "@apollo/client";
 import axios from "axios";
 import { contentPageStyles } from "../../styles/content-page-styles";
 import { GET_ARTIST_FILTER_FLAGS } from "../graphql/queries";
-import { themeColors, transitions, colors } from "../../styles/design-tokens";
+import { themeColors, transitions } from "../../styles/design-tokens";
 import PageMeta from "../shared/PageMeta";
 import ArtistLink from "../shared/ArtistLink";
 
@@ -128,7 +128,6 @@ const RandomFlavorText = () => {
                       mt: "-0.25rem",
                       transition: transitions.fast,
                       "&:hover": {
-                        color: colors.primary.dark,
                         textDecoration: "underline",
                       },
                     }}

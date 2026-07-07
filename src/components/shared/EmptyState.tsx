@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { SxProps, Theme } from '@mui/material';
-import { colors } from '../../styles/design-tokens';
+import { colors, themeColors } from '../../styles/design-tokens';
 
 const CardDiamondMark: React.FC = () => (
   <svg
@@ -13,9 +13,9 @@ const CardDiamondMark: React.FC = () => (
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
-    <rect x="3" y="3" width="58" height="58" rx="5" stroke={colors.neutral[300]} strokeWidth="1.5" />
-    <ellipse cx="32" cy="32" rx="18" ry="22" stroke={colors.neutral[300]} strokeWidth="1.5" />
-    <path d="M32 14 L46 32 L32 50 L18 32 Z" fill={colors.neutral[200]} stroke={colors.neutral[300]} strokeWidth="1.5" />
+    <rect x="3" y="3" width="58" height="58" rx="5" stroke={themeColors.neutral[300]} strokeWidth="1.5" />
+    <ellipse cx="32" cy="32" rx="18" ry="22" stroke={themeColors.neutral[300]} strokeWidth="1.5" />
+    <path d="M32 14 L46 32 L32 50 L18 32 Z" fill={themeColors.neutral[200]} stroke={themeColors.neutral[300]} strokeWidth="1.5" />
     <circle cx="32" cy="32" r="4" fill={colors.neutral[400]} />
   </svg>
 );
@@ -50,7 +50,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ headline, body, action, sx }) =
       sx={{
         mt: 2,
         fontWeight: 500,
-        color: colors.neutral[700],
+        color: themeColors.text.primary,
         fontSize: '1rem',
       }}
     >
@@ -60,7 +60,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ headline, body, action, sx }) =
       <Typography
         sx={{
           mt: 0.5,
-          color: colors.neutral[500],
+          color: themeColors.text.secondary,
           fontSize: '0.875rem',
         }}
       >
@@ -76,15 +76,15 @@ const EmptyState: React.FC<EmptyStateProps> = ({ headline, body, action, sx }) =
           : { onClick: action.onClick })}
         sx={{
           mt: 2.5,
-          borderColor: colors.neutral[300],
-          color: colors.neutral[700],
+          borderColor: themeColors.neutral[300],
+          color: themeColors.text.primary,
           fontSize: '0.8125rem',
           textTransform: 'none',
           borderRadius: '6px',
           '&:hover': {
-            borderColor: colors.primary.main,
-            color: colors.primary.main,
-            backgroundColor: colors.primary.lighter,
+            borderColor: themeColors.primary.main,
+            color: themeColors.primary.main,
+            backgroundColor: themeColors.primary.lighter,
           },
         }}
       >
