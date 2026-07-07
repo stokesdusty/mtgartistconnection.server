@@ -587,7 +587,7 @@ const Artist = () => {
                     Artist Info
                   </Typography>
                   {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
-                    <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                    <Typography sx={{ fontSize: '0.875rem', color: themeColors.text.secondary }}>
                       Your collection: {[
                         signedCount > 0 && `${signedCount} signed`,
                         wishlistCount > 0 && `${wishlistCount} wishlisted`,
