@@ -20,7 +20,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, ShareNetwork, Newspaper } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, ShareNetwork, Newspaper, MagnifyingGlass } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
 import { shadows } from '../../styles/design-tokens';
@@ -174,6 +174,11 @@ const Header = () => {
   const handleAnalyticsClick = () => {
     setDrawerOpen(false);
     navigate('/analytics');
+  };
+
+  const handleScanEventArtistsClick = () => {
+    setDrawerOpen(false);
+    navigate('/scaneventartists');
   };
 
   const renderMenuItems = () => {
@@ -416,6 +421,14 @@ const Header = () => {
                     <GearSix size={20} />
                   </ListItemIcon>
                   <ListItemText primary="Analytics" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleScanEventArtistsClick} sx={headerStyles.drawerListItem}>
+                  <ListItemIcon>
+                    <MagnifyingGlass size={20} />
+                  </ListItemIcon>
+                  <ListItemText primary="Scan Event for Artists" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
                 </ListItemButton>
               </ListItem>
             </>}

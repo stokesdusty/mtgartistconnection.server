@@ -341,6 +341,22 @@ export const GENERATE_MANUAL_NEWS_ARTICLE = gql`
     }
 `;
 
+export const SCAN_URL_FOR_ARTISTS = gql`
+    mutation scanUrlForArtists($url: String!) {
+        scanUrlForArtists(url: $url) {
+            scannedTextLength
+            scannedUrl
+            matches {
+                artistId
+                name
+                matchedAlias
+                snippets
+                occurrences
+            }
+        }
+    }
+`;
+
 export const TOGGLE_CARD_COLLECTION_FIELD = gql`
     mutation toggleCardCollectionField(
         $scryfallId: String!,
