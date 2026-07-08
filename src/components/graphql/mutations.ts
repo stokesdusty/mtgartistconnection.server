@@ -351,6 +351,10 @@ export const SCAN_URL_FOR_ARTISTS = gql`
                 name
                 matchedAlias
                 snippets
+                imageMatches {
+                    imageUrl
+                    matchedText
+                }
                 occurrences
             }
         }

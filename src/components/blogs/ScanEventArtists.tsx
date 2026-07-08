@@ -6,11 +6,17 @@ import { RootState } from '../../store/store';
 import { SCAN_URL_FOR_ARTISTS } from '../graphql/mutations';
 import { colors, themeColors, typography, spacing, borderRadius, borders } from '../../styles/design-tokens';
 
+interface ImageMatch {
+    imageUrl: string;
+    matchedText: string;
+}
+
 interface ArtistMatch {
     artistId: string | null;
     name: string;
     matchedAlias: string;
     snippets: string[];
+    imageMatches: ImageMatch[];
     occurrences: number;
 }
 
@@ -51,10 +57,12 @@ export default function ScanEventArtists() {
                 color: themeColors.text.secondary,
                 margin: `0 0 ${spacing.xl}`,
             }}>
-                Paste an event or convention website's URL to check its page text for mentions of artists in the database.
-                This renders the page in a headless browser first, so it can also see content that loads via JavaScript —
-                scanning can take up to ~20 seconds. Results are a review list only; use the existing "Add Artist to Event"
-                page to confirm and add any matches.
+                Paste an event or convention website's URL to check its page for mentions of artists in the database —
+                both in the visible text and in guest photos whose alt text or filename names the artist (common on
+                sites where names are baked into images rather than typed out). This renders the page in a headless
+                browser first, so it can also see content that loads via JavaScript — scanning can take up to ~20
+                seconds. Results are a review list only; use the existing "Add Artist to Event" page to confirm and
+                add any matches.
             </p>
 
             <div style={{ display: 'flex', gap: spacing.sm, marginBottom: spacing.xl }}>
@@ -214,6 +222,32 @@ export default function ScanEventArtists() {
                                             "{snippet}"
                                         </div>
                                     ))}
+                                    {match.imageMatches.length > 0 && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: spacing.sm, marginTop: spacing.sm }}>
+                                            {match.imageMatches.map((img, i) => (
+                                                <a
+                                                    key={i}
+                                                    href={img.imageUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    title={`Matched via image: "${img.matchedText}" — click to view full size`}
+                                                    style={{ display: 'block' }}
+                                                >
+                                                    <img
+                                                        src={img.imageUrl}
+                                                        alt={img.matchedText}
+                                                        style={{
+                                                            width: 64,
+                                                            height: 64,
+                                                            objectFit: 'cover',
+                                                            borderRadius: borderRadius.sm,
+                                                            border: borders.thin,
+                                                        }}
+                                                    />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))
                     )}
