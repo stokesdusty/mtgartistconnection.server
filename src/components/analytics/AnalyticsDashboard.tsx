@@ -3,16 +3,17 @@ import { useSelector } from 'react-redux';
 import { Navigate, Link } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import { RootState } from '../../store/store';
-import { GET_CLICK_STATS, GET_TOP_ARTISTS_BY_CLICKS, GET_CLICK_TIMESERIES } from '../graphql/queries';
+import { GET_CLICK_STATS, GET_TOP_ARTISTS_BY_CLICKS, GET_CLICK_TIMESERIES, GET_PAGE_VIEW_COUNT, GET_PAGE_VIEW_TIMESERIES, GET_TOP_PAGES_BY_VIEWS } from '../graphql/queries';
 import { colors, themeColors, typography, spacing, borderRadius, borders } from '../../styles/design-tokens';
 
-type Range = '7d' | '30d' | '90d' | 'all';
+type Range = 'today' | '7d' | '30d' | '90d' | 'all';
 
 interface ClickStat { key: string; count: number; }
 interface TopArtist { artistName: string; artistId: string | null; count: number; }
 interface TimeseriesPoint { date: string; count: number; }
 
 const RANGES: { label: string; value: Range }[] = [
+    { label: 'Today', value: 'today' },
     { label: '7d',  value: '7d' },
     { label: '30d', value: '30d' },
     { label: '90d', value: '90d' },
@@ -134,6 +135,18 @@ export default function AnalyticsDashboard() {
         variables: { range: rangeVar },
         skip: !isAdmin,
     });
+    const { data: pageViewCountData } = useQuery(GET_PAGE_VIEW_COUNT, {
+        variables: { range: rangeVar },
+        skip: !isAdmin,
+    });
+    const { data: pageViewTimeseriesData } = useQuery(GET_PAGE_VIEW_TIMESERIES, {
+        variables: { range: rangeVar },
+        skip: !isAdmin,
+    });
+    const { data: topPagesData } = useQuery(GET_TOP_PAGES_BY_VIEWS, {
+        variables: { range: rangeVar, limit: 10 },
+        skip: !isAdmin,
+    });
 
     if (!isAdmin) return <Navigate to="/" replace />;
 
@@ -141,13 +154,17 @@ export default function AnalyticsDashboard() {
     const platformStats: ClickStat[]       = platformData?.clickStats ?? [];
     const topArtists: TopArtist[]          = artistData?.topArtistsByClicks ?? [];
     const timeseries: TimeseriesPoint[]    = timeseriesData?.clickTimeseries ?? [];
+    const topPages: ClickStat[]            = topPagesData?.topPagesByViews ?? [];
+    const pageViewTimeseries: TimeseriesPoint[] = pageViewTimeseriesData?.pageViewTimeseries ?? [];
 
     const totalPriceClicks    = vendorStats.reduce((s, r) => s + r.count, 0);
     const totalOutboundClicks = platformStats.reduce((s, r) => s + r.count, 0);
+    const totalPageViews      = pageViewCountData?.pageViewCount ?? 0;
     const topVendor           = vendorStats[0]?.key ?? '—';
     const topArtistName       = topArtists[0]?.artistName ?? '—';
 
     const maxTimeseries = Math.max(...timeseries.map(p => p.count), 1);
+    const maxPageViewTimeseries = Math.max(...pageViewTimeseries.map(p => p.count), 1);
 
     return (
         <div style={{ padding: spacing.xl, maxWidth: 1100, margin: '0 auto' }}>
@@ -192,10 +209,11 @@ export default function AnalyticsDashboard() {
             {/* Stat tiles */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
+                gridTemplateColumns: 'repeat(5, 1fr)',
                 gap: spacing.md,
                 marginBottom: spacing.xl,
             }}>
+                <StatTile label="Page loads"       value={totalPageViews.toLocaleString()} />
                 <StatTile label="Outbound clicks"  value={totalOutboundClicks.toLocaleString()} />
                 <StatTile label="Price clicks"     value={totalPriceClicks.toLocaleString()} />
                 <StatTile label="Top vendor"       value={topVendor} />
@@ -205,10 +223,11 @@ export default function AnalyticsDashboard() {
             {/* Bar lists */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                gridTemplateColumns: '1fr 1fr 1fr',
                 gap: spacing.xl,
                 marginBottom: spacing.xl,
             }}>
+                <BarList title="Top pages by loads"      stats={topPages} />
                 <BarList title="Price clicks by vendor"  stats={vendorStats} />
                 <BarList title="Outbound by platform"    stats={platformStats} />
             </div>
@@ -292,6 +311,50 @@ export default function AnalyticsDashboard() {
                             ))}
                         </tbody>
                     </table>
+                )}
+            </div>
+
+            {/* Daily page loads sparkline */}
+            <div style={{
+                background: themeColors.background.paper,
+                border: borders.thin,
+                borderRadius: borderRadius.md,
+                padding: spacing.lg,
+                marginBottom: spacing.xl,
+            }}>
+                <h3 style={{
+                    fontFamily: typography.fontFamily.heading,
+                    fontSize: typography.fontSize.lg,
+                    fontWeight: typography.fontWeight.medium,
+                    color: themeColors.text.primary,
+                    margin: `0 0 ${spacing.md}`,
+                }}>
+                    Daily page loads
+                </h3>
+                {pageViewTimeseries.length === 0 ? (
+                    <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>No data</div>
+                ) : (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        gap: 2,
+                        height: 80,
+                    }}>
+                        {pageViewTimeseries.map(({ date, count }) => (
+                            <div
+                                key={date}
+                                title={`${date}: ${count.toLocaleString()}`}
+                                style={{
+                                    flex: 1,
+                                    minWidth: 2,
+                                    height: `${Math.max((count / maxPageViewTimeseries) * 100, 2)}%`,
+                                    background: themeColors.primary.main,
+                                    borderRadius: `${borderRadius.sm} ${borderRadius.sm} 0 0`,
+                                    transition: 'height 300ms ease',
+                                }}
+                            />
+                        ))}
+                    </div>
                 )}
             </div>
 

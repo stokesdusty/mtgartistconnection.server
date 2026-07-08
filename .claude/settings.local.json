@@ -132,7 +132,9 @@
       "Bash(node check_autocomplete.js)",
       "Bash(node check_autocomplete2.js)",
       "Bash(node check_following2.js)",
-      "Bash(node check_following7.js)"
+      "Bash(node check_following7.js)",
+      "Bash(git -C /Users/dprime/Documents/GitHub/mtgartistconnection.server remote -v)",
+      "Bash(grep -n '\\\\$year\\\\|\\\\$month\\\\|\\\\$dayOfMonth\\\\|groupId' /Users/dprime/Documents/GitHub/mtgartistconnection.webservice/src/handlers/handlers.ts)"
     ]
   }
 }

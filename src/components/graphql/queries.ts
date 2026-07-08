@@ -363,3 +363,27 @@ export const GET_CLICK_TIMESERIES = gql`
         }
     }
 `;
+
+export const GET_PAGE_VIEW_COUNT = gql`
+    query pageViewCount($range: String) {
+        pageViewCount(range: $range)
+    }
+`;
+
+export const GET_PAGE_VIEW_TIMESERIES = gql`
+    query pageViewTimeseries($range: String) {
+        pageViewTimeseries(range: $range) {
+            date
+            count
+        }
+    }
+`;
+
+export const GET_TOP_PAGES_BY_VIEWS = gql`
+    query topPagesByViews($range: String, $limit: Int) {
+        topPagesByViews(range: $range, limit: $limit) {
+            key
+            count
+        }
+    }
+`;
