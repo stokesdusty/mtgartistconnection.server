@@ -470,6 +470,14 @@ export const LOG_LINK_CLICK = gql`
     }
 `;
 
+export const LOG_PAGE_VIEW = gql`
+    mutation logPageView($path: String!) {
+        logPageView(path: $path) {
+            success
+        }
+    }
+`;
+
 export const UPLOAD_NEWS_IMAGE = gql`
     mutation uploadNewsImage($base64Data: String!, $filename: String!, $contentType: String!) {
         uploadNewsImage(base64Data: $base64Data, filename: $filename, contentType: $contentType) {

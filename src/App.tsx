@@ -15,6 +15,7 @@ import Footer from "./components/home/Footer";
 import Homepage from "./components/home/Homepage";
 import Artist from "./components/artist/Artist";
 import ScrollToTop from "./components/shared/ScrollToTop";
+import PageViewTracker from "./components/shared/PageViewTracker";
 import CookieConsentBanner from "./components/shared/CookieConsentBanner";
 
 // ─── Lazy route chunks ───────────────────────────────────────────────────────
@@ -97,6 +98,7 @@ function App() {
         <LoadingProvider>
           <div>
             <ScrollToTop />
+            <PageViewTracker />
             <CookieConsentBanner />
             <header>
               <Header />
