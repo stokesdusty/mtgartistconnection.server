@@ -132,7 +132,17 @@
       "Bash(node check_autocomplete.js)",
       "Bash(node check_autocomplete2.js)",
       "Bash(node check_following2.js)",
-      "Bash(node check_following7.js)"
+      "Bash(node check_following7.js)",
+      "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && grep -n \"rangeToDate\\\\|PACIFIC_DAY_GROUP_ID\\\\|pageViewCount\\\\|pageViewTimeseries\\\\|'today'\\\\|\\\\\"today\\\\\"\" src/handlers/handlers.ts)",
+      "Bash(grep -rn \"gql\\\\`\" src/components/graphql/queries.ts)",
+      "Bash(git fetch *)",
+      "Bash(git show *)",
+      "Bash(cd \"c:\\\\Users\\\\NoUse\\\\OneDrive\\\\Documents\\\\GitHub\\\\mtgartistconnection.webservice\" && ls -la | grep -i env; find . -maxdepth 1 -iname \".env*\" 2>/dev/null; echo \"---\"; grep -rn \"MONGODB_URI\\\\|mongoose.connect\\\\|process.env.MONGO\" --include=\"*.ts\" -l . 2>/dev/null | grep -v node_modules)",
+      "Bash(node -e \"console.log\\(require.resolve\\('mongoose', {paths:['c:/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/node_modules']}\\)\\)\")",
+      "Bash(\"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/node_modules/.bin/tsc\" --noEmit -p \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice/tsconfig.json\")",
+      "Bash(npx --version)",
+      "Bash(ls -la \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" | grep -i env *)",
+      "Bash(git stash *)"
     ]
   }
 }

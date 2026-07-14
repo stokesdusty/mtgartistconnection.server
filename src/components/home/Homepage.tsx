@@ -98,6 +98,11 @@ const Homepage = () => {
   const letterFilter = searchParams.get('letter') || '';
   const setFilter = searchParams.get('set') || '';
 
+  // Whether any filter/search is active — the flags index already has everything
+  // needed to render matches in this case, so pagination should not keep fetching.
+  const hasActiveFilters = userSearch.length >= 2 || Boolean(locationFilter) || mountainMageFilter ||
+    marksSigServiceFilter || hasUpcomingEventFilter || sellsApsFilter || Boolean(letterFilter) || Boolean(setFilter);
+
   // Helper to update URL params
   const updateSearchParams = useCallback((key: string, value: string | boolean) => {
     setSearchParams((prev) => {
@@ -151,16 +156,18 @@ const Homepage = () => {
   }, [hasMore, isFetchingMore, loadedArtists.length, fetchMore]);
 
   // Infinite scroll — fire loadMore when the sentinel enters the viewport.
+  // Skipped while a filter/search is active: matches are already fully known
+  // from the flags index, so there's no need to keep paginating artistsPage.
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore) return;
+    if (!sentinel || !hasMore || hasActiveFilters) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMore(); },
       { rootMargin: '300px' },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loadMore]);
+  }, [hasMore, loadMore, hasActiveFilters]);
 
   // Get upcoming event IDs
   const upcomingEventIds = useMemo(() => {
@@ -294,10 +301,6 @@ const Homepage = () => {
     updateSearchParams('density', v === 'comfortable' ? '' : v);
   };
 
-  // Check if any filter is active
-  const hasActiveFilters = userSearch.length >= 2 || locationFilter || mountainMageFilter ||
-    marksSigServiceFilter || hasUpcomingEventFilter || sellsApsFilter || letterFilter || setFilter;
-
   // Clear all filters
   const handleClearAllFilters = () => {
     if (searchDebounceRef.current) {
@@ -430,13 +433,20 @@ const Homepage = () => {
       hasUpcomingEventFilter, sellsApsFilter, letterFilter, userSearch, artistsWithEvents,
       setFilter]);
 
-  // Join matching flags with loaded filenames to produce the display list.
-  // Artists whose page hasn't been fetched yet are omitted; they appear as the user scrolls.
+  // When a filter/search is active, the flags index already carries filename —
+  // render straight from it, no need to wait on artistsPage pagination.
+  // Otherwise (default browse view), join against loaded filenames so the grid
+  // only renders as many cards as have been paginated in via infinite scroll.
   const filteredData = useMemo<Artist[]>(() => {
+    if (hasActiveFilters) {
+      return matchingFlags
+        .filter((a) => !!a.filename)
+        .map((a) => ({ name: a.name, filename: a.filename as string, location: a.location, alternate_names: a.alternate_names }));
+    }
     return matchingFlags
       .map((a) => ({ name: a.name, filename: filenameMap.get(a.name) ?? '', location: a.location, alternate_names: a.alternate_names }))
       .filter((a) => a.filename !== '');
-  }, [matchingFlags, filenameMap]);
+  }, [matchingFlags, filenameMap, hasActiveFilters]);
 
   if (pageLoading && !pageData)
     return (

@@ -28,6 +28,7 @@ export const GET_ARTIST_FILTER_FLAGS = gql`
             flags
             location
             alternate_names
+            filename
         }
     }
 `;

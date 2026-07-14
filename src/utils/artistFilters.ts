@@ -3,6 +3,7 @@ export interface ArtistFlag {
   flags: number;
   location?: string;
   alternate_names?: string;
+  filename?: string;
 }
 
 export const FLAG_MARKSSIG     = 1 << 0;

@@ -356,7 +356,7 @@ import {
                       sx={{
                         fontSize: '0.7rem',
                         fontWeight: 500,
-                        color: colors.text.primary,
+                        color: themeColors.text.primary,
                         textAlign: 'center',
                         lineHeight: 1.2,
                       }}
