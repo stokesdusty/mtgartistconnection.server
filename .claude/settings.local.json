@@ -146,7 +146,8 @@
       "Bash(ls -la \"/c/Users/NoUse/OneDrive/Documents/GitHub/mtgartistconnection.webservice\" | grep -i env *)",
       "Bash(git stash *)",
       "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.claude/settings.local.json','utf8'\\)\\); console.log\\('valid JSON'\\)\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

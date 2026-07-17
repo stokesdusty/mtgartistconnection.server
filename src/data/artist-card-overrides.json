@@ -1,4 +1,10 @@
 {
+    "adriansmith": [
+        "3c4d8f36-461f-48a6-a4e4-9ddfb388de19"
+    ],
+    "alexboyd": [
+        "951cff7b-2b17-4903-be92-b9c066adfc83"
+    ],
     "badflipproductionsinc": [
         "b2f8d457-ca4d-4b7d-83ed-17c2ba11ec0e",
         "d20738d2-a159-4e3e-be7a-561a121bd447",
@@ -11,5 +17,57 @@
         "b3170b92-b4eb-4826-92ed-85deba4c4c88",
         "8733cd6f-37e1-4e3a-bb25-7a238f04657e",
         "687695ad-d212-4da4-a326-ce9876afdda2"
+    ],
+    "cheoljoolee": [
+        "4129cb0d-eefe-4971-9db8-1196201ef353",
+        "c57778d7-fbd7-482f-b895-c033592f7af6"
+    ],
+    "chunlo": [
+        "d7fbad75-725f-44fc-919a-6b07f2d54698"
+    ],
+    "daarken": [
+        "b931c7cb-ef83-440c-9195-ace311f4a601"
+    ],
+    "faresmaese": [
+        "7082df45-6c2f-4a92-8c73-a582e9ea1948"
+    ],
+    "grantgriffin": [
+        "72ce155e-af65-47f9-8967-6608bd69ee55"
+    ],
+    "igorsid": [
+        "84d1bcef-907c-4c3a-8b52-6e633fa19667",
+        "4c271a22-b659-4b22-9de6-738a5229d092",
+        "75958e64-6d12-4c80-b321-9bc0cceb17fd",
+        "4f15be08-085a-464a-aad5-e4305279e04a",
+        "9f07e21c-a775-43bb-90a2-545a5e1b909b"
+    ],
+    "jaimemartinez": [
+        "d3e5b091-2aa7-4aca-9855-bb802d3d563e",
+        "49dfee68-c242-4579-94b1-c23238f8c87d",
+        "0894d21c-d44c-4c7c-8693-f32dde67b336",
+        "b63fa88b-a177-49b7-a583-a0a041313f77",
+        "409560cb-ecf1-4df2-91b2-75464dc1fe7d"
+    ],
+    "jamesryman": [
+        "cc0aa0eb-dc26-49d8-bbff-74fb3d597a72"
+    ],
+    "johangrenier": [
+        "f9099d82-c13a-480d-b4bc-ecf8b810427c"
+    ],
+    "johnblanche": [
+        "fa515b78-f54d-4c65-a197-c860eaf2c780"
+    ],
+    "johnmichelbach": [
+        "196703b0-78bf-4f85-ae81-7335fe486982",
+        "4dca7b45-164d-4181-9585-5d0f3b6a6927"
+    ],
+    "leonidkozienko": [
+        "f3e7c0d1-4b6a-4f5e-8c9b-2f1d3e5a6b7c"
+    ],
+    "mathiaskollros": [
+        "9d44c3fb-0968-4eb6-899d-6c11ef111574"
+    ],
+    "raymondswanland": [
+        "8d787021-6a02-4394-875d-ef529fa3d38e"
     ]
 }
