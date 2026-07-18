@@ -121,7 +121,7 @@ const ArtistGridItem = ({
           {artistData.alternate_names && (
             <Typography
               component="span"
-              sx={{ fontSize: '0.75em', fontWeight: 400, color: 'text.secondary', ml: 0.5 }}
+              sx={{ fontSize: '0.75em', fontWeight: 400, color: 'inherit', opacity: 0.7, ml: 0.5 }}
             >
               ({artistData.alternate_names})
             </Typography>
