@@ -20,6 +20,98 @@ const RANGES: { label: string; value: Range }[] = [
     { label: 'All', value: 'all' },
 ];
 
+const PACIFIC_TZ = 'America/Los_Angeles';
+
+// "Today" as a pure calendar date (midnight UTC standing in for the Y/M/D) in Pacific time,
+// so range math stays on the same day boundary the backend uses for its Pacific-bucketed stats.
+function getPacificToday(): Date {
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: PACIFIC_TZ,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(new Date());
+    const get = (type: string) => parts.find(p => p.type === type)?.value ?? '0';
+    return new Date(Date.UTC(Number(get('year')), Number(get('month')) - 1, Number(get('day'))));
+}
+
+function formatPacificDate(d: Date): string {
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }).format(d);
+}
+
+function getRangeLabel(range: Range): string {
+    const today = getPacificToday();
+    if (range === 'all') return 'All time';
+    if (range === 'today') return `${formatPacificDate(today)} (PT)`;
+    const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
+    const start = new Date(today);
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    return `${formatPacificDate(start)} – ${formatPacificDate(today)} (PT)`;
+}
+
+function formatChartDate(dateStr: string): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d));
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' }).format(date);
+}
+
+function Sparkline({ data }: { data: TimeseriesPoint[] }) {
+    const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+    const max = Math.max(...data.map(p => p.count), 1);
+
+    if (data.length === 0) {
+        return <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>No data</div>;
+    }
+
+    const hovered = hoverIndex !== null ? data[hoverIndex] : null;
+
+    return (
+        <div style={{ position: 'relative' }}>
+            {hovered && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    left: `${((hoverIndex! + 0.5) / data.length) * 100}%`,
+                    transform: 'translate(-50%, -8px)',
+                    background: themeColors.primary.dark,
+                    color: colors.primary.contrast,
+                    borderRadius: borderRadius.sm,
+                    padding: `${spacing.xs} ${spacing.sm}`,
+                    fontFamily: typography.fontFamily.primary,
+                    fontSize: typography.fontSize.xs,
+                    whiteSpace: 'nowrap' as const,
+                    pointerEvents: 'none' as const,
+                    zIndex: 1,
+                }}>
+                    {formatChartDate(hovered.date)}: {hovered.count.toLocaleString()}
+                </div>
+            )}
+            <div style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                gap: 2,
+                height: 80,
+            }}>
+                {data.map(({ date, count }, i) => (
+                    <div
+                        key={date}
+                        onMouseEnter={() => setHoverIndex(i)}
+                        onMouseLeave={() => setHoverIndex(null)}
+                        style={{
+                            flex: 1,
+                            minWidth: 2,
+                            height: `${Math.max((count / max) * 100, 2)}%`,
+                            background: hoverIndex === i ? themeColors.primary.dark : themeColors.primary.main,
+                            opacity: hoverIndex === null || hoverIndex === i ? 1 : 0.6,
+                            borderRadius: `${borderRadius.sm} ${borderRadius.sm} 0 0`,
+                            transition: 'height 300ms ease, opacity 150ms ease, background 150ms ease',
+                            cursor: 'pointer',
+                        }}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function StatTile({ label, value }: { label: string; value: string }) {
     return (
         <div style={{
@@ -163,9 +255,6 @@ export default function AnalyticsDashboard() {
     const topVendor           = vendorStats[0]?.key ?? '—';
     const topArtistName       = topArtists[0]?.artistName ?? '—';
 
-    const maxTimeseries = Math.max(...timeseries.map(p => p.count), 1);
-    const maxPageViewTimeseries = Math.max(...pageViewTimeseries.map(p => p.count), 1);
-
     return (
         <div style={{ padding: spacing.xl, maxWidth: 1100, margin: '0 auto' }}>
 
@@ -180,30 +269,39 @@ export default function AnalyticsDashboard() {
             </h1>
 
             {/* Range switch */}
-            <div style={{ display: 'flex', gap: spacing.xs, marginBottom: spacing.xl }}>
-                {RANGES.map(({ label, value }) => {
-                    const active = range === value;
-                    return (
-                        <button
-                            key={value}
-                            onClick={() => setRange(value)}
-                            style={{
-                                padding: '6px 16px',
-                                borderRadius: borderRadius.full,
-                                border: `1px solid ${active ? themeColors.primary.main : themeColors.neutral[300]}`,
-                                background: active ? themeColors.primary.main : 'transparent',
-                                color: active ? colors.primary.contrast : themeColors.text.secondary,
-                                cursor: 'pointer',
-                                fontFamily: typography.fontFamily.primary,
-                                fontSize: typography.fontSize.sm,
-                                fontWeight: active ? typography.fontWeight.medium : typography.fontWeight.normal,
-                                transition: 'all 150ms ease',
-                            }}
-                        >
-                            {label}
-                        </button>
-                    );
-                })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xl, flexWrap: 'wrap' as const }}>
+                <div style={{ display: 'flex', gap: spacing.xs }}>
+                    {RANGES.map(({ label, value }) => {
+                        const active = range === value;
+                        return (
+                            <button
+                                key={value}
+                                onClick={() => setRange(value)}
+                                style={{
+                                    padding: '6px 16px',
+                                    borderRadius: borderRadius.full,
+                                    border: `1px solid ${active ? themeColors.primary.main : themeColors.neutral[300]}`,
+                                    background: active ? themeColors.primary.main : 'transparent',
+                                    color: active ? colors.primary.contrast : themeColors.text.secondary,
+                                    cursor: 'pointer',
+                                    fontFamily: typography.fontFamily.primary,
+                                    fontSize: typography.fontSize.sm,
+                                    fontWeight: active ? typography.fontWeight.medium : typography.fontWeight.normal,
+                                    transition: 'all 150ms ease',
+                                }}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
+                </div>
+                <span style={{
+                    fontFamily: typography.fontFamily.primary,
+                    fontSize: typography.fontSize.sm,
+                    color: themeColors.text.secondary,
+                }}>
+                    {getRangeLabel(range)}
+                </span>
             </div>
 
             {/* Stat tiles */}
@@ -327,35 +425,19 @@ export default function AnalyticsDashboard() {
                     fontSize: typography.fontSize.lg,
                     fontWeight: typography.fontWeight.medium,
                     color: themeColors.text.primary,
-                    margin: `0 0 ${spacing.md}`,
+                    margin: `0 0 ${spacing.xs}`,
                 }}>
                     Daily page loads
                 </h3>
-                {pageViewTimeseries.length === 0 ? (
-                    <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>No data</div>
-                ) : (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'flex-end',
-                        gap: 2,
-                        height: 80,
-                    }}>
-                        {pageViewTimeseries.map(({ date, count }) => (
-                            <div
-                                key={date}
-                                title={`${date}: ${count.toLocaleString()}`}
-                                style={{
-                                    flex: 1,
-                                    minWidth: 2,
-                                    height: `${Math.max((count / maxPageViewTimeseries) * 100, 2)}%`,
-                                    background: themeColors.primary.main,
-                                    borderRadius: `${borderRadius.sm} ${borderRadius.sm} 0 0`,
-                                    transition: 'height 300ms ease',
-                                }}
-                            />
-                        ))}
-                    </div>
-                )}
+                <p style={{
+                    fontFamily: typography.fontFamily.primary,
+                    fontSize: typography.fontSize.xs,
+                    color: themeColors.text.secondary,
+                    margin: `0 0 ${spacing.md}`,
+                }}>
+                    Every page navigation on the site, logged first-party (independent of Google Analytics/cookie consent).
+                </p>
+                <Sparkline data={pageViewTimeseries} />
             </div>
 
             {/* Daily sparkline */}
@@ -370,35 +452,19 @@ export default function AnalyticsDashboard() {
                     fontSize: typography.fontSize.lg,
                     fontWeight: typography.fontWeight.medium,
                     color: themeColors.text.primary,
-                    margin: `0 0 ${spacing.md}`,
+                    margin: `0 0 ${spacing.xs}`,
                 }}>
                     Daily clicks
                 </h3>
-                {timeseries.length === 0 ? (
-                    <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>No data</div>
-                ) : (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'flex-end',
-                        gap: 2,
-                        height: 80,
-                    }}>
-                        {timeseries.map(({ date, count }) => (
-                            <div
-                                key={date}
-                                title={`${date}: ${count.toLocaleString()}`}
-                                style={{
-                                    flex: 1,
-                                    minWidth: 2,
-                                    height: `${Math.max((count / maxTimeseries) * 100, 2)}%`,
-                                    background: themeColors.primary.main,
-                                    borderRadius: `${borderRadius.sm} ${borderRadius.sm} 0 0`,
-                                    transition: 'height 300ms ease',
-                                }}
-                            />
-                        ))}
-                    </div>
-                )}
+                <p style={{
+                    fontFamily: typography.fontFamily.primary,
+                    fontSize: typography.fontSize.xs,
+                    color: themeColors.text.secondary,
+                    margin: `0 0 ${spacing.md}`,
+                }}>
+                    Price-comparison vendor clicks plus outbound artist link clicks (social, store, etc.), combined.
+                </p>
+                <Sparkline data={timeseries} />
             </div>
 
         </div>
