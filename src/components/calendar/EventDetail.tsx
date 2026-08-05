@@ -15,7 +15,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTIST_NAMES } from "../graphql/queries";
 import { useQuery } from "@apollo/client";
 import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ArrowLeft } from "@phosphor-icons/react";
-import { colors } from "../../styles/design-tokens";
+import { colors, themeColors } from "../../styles/design-tokens";
 import { useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams, useNavigate } from "react-router-dom";
@@ -132,7 +132,7 @@ const EventDetail = () => {
             <Button
               startIcon={<ArrowLeft size={18} />}
               onClick={() => navigate('/calendar')}
-              sx={{ mt: 2, color: colors.primary.main }}
+              sx={{ mt: 2, color: themeColors.primary.main }}
             >
               Back to Calendar
             </Button>
@@ -192,7 +192,7 @@ const EventDetail = () => {
                 onClick={handleCalendarMenuOpen}
                 startIcon={<Calendar size={18} weight="duotone" />}
                 sx={{
-                  color: colors.primary.main,
+                  color: themeColors.primary.main,
                   textTransform: 'none',
                   fontSize: '0.875rem',
                   fontWeight: 500,
@@ -219,19 +219,19 @@ const EventDetail = () => {
           >
             <MenuItem onClick={handleAddToGoogle} sx={{ fontSize: '0.875rem', py: 1.5 }}>
               <ListItemIcon>
-                <Calendar size={18} weight="duotone" color={colors.primary.main} />
+                <Calendar size={18} weight="duotone" color={themeColors.primary.main} />
               </ListItemIcon>
               <ListItemText>Google Calendar</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleAddToOutlook} sx={{ fontSize: '0.875rem', py: 1.5 }}>
               <ListItemIcon>
-                <Calendar size={18} weight="duotone" color={colors.primary.main} />
+                <Calendar size={18} weight="duotone" color={themeColors.primary.main} />
               </ListItemIcon>
               <ListItemText>Outlook Calendar</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleDownloadICal} sx={{ fontSize: '0.875rem', py: 1.5 }}>
               <ListItemIcon>
-                <DownloadSimple size={18} color={colors.primary.main} />
+                <DownloadSimple size={18} color={themeColors.primary.main} />
               </ListItemIcon>
               <ListItemText>Apple/Other (.ics)</ListItemText>
             </MenuItem>
@@ -242,7 +242,7 @@ const EventDetail = () => {
             onClick={() => navigate('/calendar')}
             sx={{
               mb: 3,
-              color: colors.primary.main,
+              color: themeColors.primary.main,
               textTransform: 'none',
               fontWeight: 500,
               '&:hover': {
@@ -334,7 +334,7 @@ const EventDetail = () => {
                         sx={{
                           fontSize: '0.875rem',
                           fontWeight: 500,
-                          color: colors.text.primary,
+                          color: themeColors.text.primary,
                           textAlign: 'center',
                         }}
                       >

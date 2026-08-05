@@ -179,7 +179,7 @@ import {
             </Typography>
           )}
           {wishlistCount > 0 && (
-            <Typography sx={{ fontSize: '0.8rem', color: colors.primary.main, fontWeight: 500 }}>
+            <Typography sx={{ fontSize: '0.8rem', color: themeColors.primary.main, fontWeight: 500 }}>
               {wishlistCount} wishlist {wishlistCount === 1 ? 'card' : 'cards'} will be available
             </Typography>
           )}
@@ -207,7 +207,7 @@ import {
               onClick={handleCalendarMenuOpen}
               startIcon={<Calendar size={18} weight="duotone" />}
               sx={{
-                color: colors.primary.main,
+                color: themeColors.primary.main,
                 textTransform: 'none',
                 fontSize: '0.875rem',
                 fontWeight: 500,
@@ -223,10 +223,10 @@ import {
               onClick={handleShareClick}
               size="small"
               sx={{
-                color: colors.text.secondary,
+                color: themeColors.text.secondary,
                 '&:hover': {
                   backgroundColor: colors.neutral[50],
-                  color: colors.primary.main,
+                  color: themeColors.primary.main,
                 }
               }}
               title="Copy link to event"
@@ -249,19 +249,19 @@ import {
         >
           <MenuItem onClick={handleAddToGoogle} sx={{ fontSize: '0.875rem', py: 1.5 }}>
             <ListItemIcon>
-              <Calendar size={18} weight="duotone" color={colors.primary.main} />
+              <Calendar size={18} weight="duotone" color={themeColors.primary.main} />
             </ListItemIcon>
             <ListItemText>Google Calendar</ListItemText>
           </MenuItem>
           <MenuItem onClick={handleAddToOutlook} sx={{ fontSize: '0.875rem', py: 1.5 }}>
             <ListItemIcon>
-              <Calendar size={18} weight="duotone" color={colors.primary.main} />
+              <Calendar size={18} weight="duotone" color={themeColors.primary.main} />
             </ListItemIcon>
             <ListItemText>Outlook Calendar</ListItemText>
           </MenuItem>
           <MenuItem onClick={handleDownloadICal} sx={{ fontSize: '0.875rem', py: 1.5 }}>
             <ListItemIcon>
-              <DownloadSimple size={18} color={colors.primary.main} />
+              <DownloadSimple size={18} color={themeColors.primary.main} />
             </ListItemIcon>
             <ListItemText>Apple/Other (.ics)</ListItemText>
           </MenuItem>
