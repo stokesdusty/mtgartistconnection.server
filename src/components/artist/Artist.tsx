@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
 import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CURRENT_USER, GET_USER_CARD_COLLECTION } from "../graphql/queries";
 import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES, LOG_LINK_CLICK } from "../graphql/mutations";
@@ -648,7 +648,18 @@ const Artist = () => {
                 <Box sx={artistStyles.infoRow}>
                   <Typography variant="h5">Location</Typography>
                   <Typography>
-                    {artistByName.location || "Unknown"}
+                    {artistByName.location ? (
+                      <Link
+                        component={RouterLink}
+                        to={`/?location=${encodeURIComponent(artistByName.location)}`}
+                        underline="hover"
+                        sx={{ color: 'primary.main' }}
+                      >
+                        {artistByName.location}
+                      </Link>
+                    ) : (
+                      "Unknown"
+                    )}
                   </Typography>
                 </Box>
 
