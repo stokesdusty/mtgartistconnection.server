@@ -366,7 +366,7 @@ import {
                   </Link>
                 ))
               ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.85rem", gridColumn: '1 / -1' }}>
+                <Typography variant="body2" sx={{ fontSize: "0.85rem", gridColumn: '1 / -1', color: themeColors.text.secondary }}>
                   No artists confirmed yet
                 </Typography>
               )}
