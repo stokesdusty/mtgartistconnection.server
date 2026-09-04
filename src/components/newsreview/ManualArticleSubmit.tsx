@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { MEDIA_BASE_URL } from '../../config/media';
 import { useQuery, useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -290,7 +291,7 @@ const ManualArticleSubmit: React.FC = () => {
                 <li {...props} key={option.name}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <img
-                      src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${option.filename}.jpg`}
+                      src={`${MEDIA_BASE_URL}/grid/${option.filename}.jpg`}
                       alt={option.name}
                       style={{ width: 32, height: 32, borderRadius: 4, objectFit: 'cover' }}
                       onError={(e) => {

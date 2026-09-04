@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useMemo, useState } from "react";
+import { MEDIA_BASE_URL } from "../../config/media";
 import {
   AppBar,
   Box,
@@ -217,7 +218,7 @@ const Header = () => {
               component="img"
               sx={headerStyles.logoImage}
               alt="MtG Artist Connection Logo"
-              src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/logo.png"
+              src={`${MEDIA_BASE_URL}/logo.png`}
             />
           </Link>
         </Box>

@@ -13,6 +13,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { ArtistPageSkeleton } from "../shared/Skeletons";
+import { MEDIA_BASE_URL } from "../../config/media";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { colors, themeColors, spacing } from "../../styles/design-tokens";
 import { Question, CalendarBlank, MapPin, BellRinging, UserPlus, PencilSimple, Cards, GlobeSimple, FacebookLogo, InstagramLogo, TwitterLogo, PatreonLogo, YoutubeLogo } from "@phosphor-icons/react";
@@ -390,8 +391,8 @@ const Artist = () => {
 
   const signatureImage =
     artistByName.haveSignature === "true"
-      ? `https://mtgartistconnection.s3.us-west-1.amazonaws.com/signatures/${artistByName.filename}.jpg`
-      : `https://mtgartistconnection.s3.us-west-1.amazonaws.com/emptycardframe.jpg`;
+      ? `${MEDIA_BASE_URL}/signatures/${artistByName.filename}.jpg`
+      : `${MEDIA_BASE_URL}/emptycardframe.jpg`;
 
   const handleFollowToggle = async () => {
     if (!name) return;
@@ -448,13 +449,13 @@ const Artist = () => {
         title={artistByName.name}
         description={`Explore ${artistByName.name}'s Magic: The Gathering card art, signing events, and contact links on MtG Artist Connection.`}
         path={`/artist/${encodeURIComponent(artistByName.name)}`}
-        image={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`}
+        image={`${MEDIA_BASE_URL}/banner/${artistByName.filename}.jpeg`}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Person",
           "name": artistByName.name,
           "url": `https://www.mtgartistconnection.com/artist/${encodeURIComponent(artistByName.name)}`,
-          "image": `https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`,
+          "image": `${MEDIA_BASE_URL}/banner/${artistByName.filename}.jpeg`,
           "jobTitle": "Magic: The Gathering Artist",
           "worksFor": { "@id": "https://www.mtgartistconnection.com/#organization" },
         }}
@@ -462,7 +463,7 @@ const Artist = () => {
       {/* Full-bleed hero banner */}
       <Box sx={artistStyles.heroBanner}>
         <img
-          src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistByName.filename}.jpeg`}
+          src={`${MEDIA_BASE_URL}/banner/${artistByName.filename}.jpeg`}
           alt={`${artistByName.name} banner`}
         />
         <Box sx={artistStyles.bannerGradient} />
@@ -542,7 +543,7 @@ const Artist = () => {
               <ExternalLinkCard
                 href={artistByName.omalink}
                 label="Buy prints & playmats"
-                logo={<img src="https://mtgartistconnection.s3.us-west-1.amazonaws.com/OMALogo.png" alt="Original Magic Art" style={{ height: 20 }} />}
+                logo={<img src={`${MEDIA_BASE_URL}/OMALogo.png`} alt="Original Magic Art" style={{ height: 20 }} />}
                 external
                 onClick={() => {
                   if ((window as any).gtag) {

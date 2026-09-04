@@ -18,7 +18,7 @@ declare module 'react' {
   }
 }
 
-const S3 = 'https://mtgartistconnection.s3.us-west-1.amazonaws.com';
+import { MEDIA_BASE_URL as S3 } from "../../config/media";
 
 const ArtistGridItem = ({
   artistData,

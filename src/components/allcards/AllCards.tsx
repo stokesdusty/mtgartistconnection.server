@@ -10,6 +10,7 @@ import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams } from "react-router";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
+import { MEDIA_BASE_URL } from "../../config/media";
 import {
   Box,
   Checkbox,
@@ -990,7 +991,7 @@ const AllCards = () => {
       <Box sx={allCardsStyles.heroBanner}>
         {artistData?.artistByName?.filename && (
           <img
-            src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/banner/${artistData.artistByName.filename}.jpeg`}
+            src={`${MEDIA_BASE_URL}/banner/${artistData.artistByName.filename}.jpeg`}
             alt={`${artist} banner`}
           />
         )}

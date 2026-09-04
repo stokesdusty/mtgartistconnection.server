@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import EmptyState from '../shared/EmptyState';
+import { MEDIA_BASE_URL } from '../../config/media';
 import {
   Box,
   Container,
@@ -257,7 +258,7 @@ const ArtistNews: React.FC = () => {
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={styles.titleContainer}>
                     <Avatar
-                      src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${getArtistImageFilename(article.artistName)}.jpg`}
+                      src={`${MEDIA_BASE_URL}/grid/${getArtistImageFilename(article.artistName)}.jpg`}
                       alt={article.artistName}
                       variant="rounded"
                       sx={styles.artistAvatar}

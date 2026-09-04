@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTIST_NAMES } from "../graphql/queries";
+import { MEDIA_BASE_URL } from "../../config/media";
 import { useQuery } from "@apollo/client";
 import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ArrowLeft } from "@phosphor-icons/react";
 import { colors, themeColors } from "../../styles/design-tokens";
@@ -306,7 +307,7 @@ const EventDetail = () => {
                       >
                         {artist.filename ? (
                           <img
-                            src={`https://mtgartistconnection.s3.us-west-1.amazonaws.com/grid/${artist.filename}.jpg`}
+                            src={`${MEDIA_BASE_URL}/grid/${artist.filename}.jpg`}
                             alt={artist.name}
                             style={{
                               width: '100%',
