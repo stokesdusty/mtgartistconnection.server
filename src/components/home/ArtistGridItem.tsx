@@ -8,6 +8,7 @@ import {
 import { Link, Typography } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { GridDensity } from "./DensityToggle";
+import { MEDIA_BASE_URL as S3 } from "../../config/media";
 
 // React <19 doesn't recognize `fetchPriority` (camelCase) at runtime — it was only
 // added in React 19. Lowercase props are passed through to the DOM silently.
@@ -17,8 +18,6 @@ declare module 'react' {
     fetchpriority?: 'high' | 'low' | 'auto';
   }
 }
-
-import { MEDIA_BASE_URL as S3 } from "../../config/media";
 
 const ArtistGridItem = ({
   artistData,
