@@ -88,6 +88,7 @@ const Calendar = () => {
   const { data: eventArtistsData } = useQuery(GET_ARTISTS_BY_EVENT_IDS, {
     variables: { eventIds: upcomingEventIds },
     skip: upcomingEventIds.length === 0,
+    fetchPolicy: 'cache-and-network',
   });
 
   const { data: myCollectionData } = useQuery(GET_MY_CARD_COLLECTION, {

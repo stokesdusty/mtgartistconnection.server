@@ -25,6 +25,12 @@ import {
       const {data: artistData, error: artistDataError, loading: artistDataLoading}= useQuery(GET_ARTIST_NAMES);
       const [ addArtistToEvent ] = useMutation(ADD_ARTISTTOEVENT, {
           refetchQueries: [{ query: GET_SIGNINGEVENTS }],
+          // Drop cached artist-by-event lists so the calendar refetches them on next visit
+          update: (cache) => {
+              cache.evict({ id: 'ROOT_QUERY', fieldName: 'mapArtistToEventByEventId' });
+              cache.evict({ id: 'ROOT_QUERY', fieldName: 'artistsByEventIds' });
+              cache.gc();
+          },
       });
   
       const [filteredData, setFilteredData] = useState<any[]>([]);

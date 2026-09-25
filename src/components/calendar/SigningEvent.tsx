@@ -117,7 +117,8 @@ import {
     const { data: artistData, error, loading } = useQuery(GET_ARTISTSBYEVENTID, {
       variables: {
         eventId
-      }
+      },
+      fetchPolicy: 'cache-and-network',
     });
 
     const { data: allArtistsData } = useQuery(GET_ARTIST_NAMES);

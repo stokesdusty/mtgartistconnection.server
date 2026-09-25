@@ -33,6 +33,7 @@ const EventDetail = () => {
   const { data: artistData, error: artistError, loading: artistLoading } = useQuery(GET_ARTISTSBYEVENTID, {
     variables: { eventId },
     skip: !eventId,
+    fetchPolicy: 'cache-and-network',
   });
 
   const { data: allArtistsData } = useQuery(GET_ARTIST_NAMES);
