@@ -26,6 +26,7 @@ import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
 import { shadows } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
+import { useApolloClient } from '@apollo/client';
 import { RootState } from '../../store/store';
 import { logout } from '../../store/auth-slice';
 
@@ -51,6 +52,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const client = useApolloClient();
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === 'admin';
@@ -93,6 +95,10 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    // Drop the previous user's cached data (e.g. `me`) so the next login can't see or save it
+    client.clearStore();
+    // clearStore() isn't picked up by apollo3-cache-persist, so drop the persisted copy too (key from index.tsx)
+    localStorage.removeItem('apollo-cache');
     navigate('/');
     handleClose();
     setDrawerOpen(false);

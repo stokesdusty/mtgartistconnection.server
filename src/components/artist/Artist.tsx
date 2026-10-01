@@ -424,6 +424,8 @@ const Artist = () => {
                   localSigningEvents: userData.me.emailPreferences.localSigningEvents || false,
                   newArtistNotifications: userData.me.emailPreferences.newArtistNotifications || false,
                 },
+                // Keep the cached `me` in sync so Settings doesn't save the stale artistUpdates value
+                refetchQueries: [{ query: GET_CURRENT_USER }],
               });
             } catch (prefError) {
               console.error("Error updating email preferences:", prefError);

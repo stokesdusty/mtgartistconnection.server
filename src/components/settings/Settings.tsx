@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useMutation, useQuery } from "@apollo/client";
 import { UPDATE_PASSWORD, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
@@ -37,9 +38,13 @@ const Settings = () => {
     newArtistNotifications: false,
   });
   const [preferencesSuccess, setPreferencesSuccess] = useState("");
+  const [preferencesError, setPreferencesError] = useState("");
 
+  // network-only: the persisted Apollo cache can hold stale preferences, and saving
+  // stale values would overwrite the user's real settings on the backend
   const { data: userData, loading: userLoading, refetch } = useQuery(GET_CURRENT_USER, {
     skip: !isLoggedIn,
+    fetchPolicy: "network-only",
   });
 
   const [updatePassword] = useMutation(UPDATE_PASSWORD);
@@ -113,22 +118,7 @@ const Settings = () => {
   };
 
   if (!isLoggedIn) {
-    return (
-      <Box sx={styles.container}>
-        <Container maxWidth="md">
-          <Paper elevation={0} sx={styles.paper}>
-            <Typography sx={{
-              color: colors.accent.red,
-              textAlign: "center",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-            }}>
-              Error: You must be logged in to access settings
-            </Typography>
-          </Paper>
-        </Container>
-      </Box>
-    );
+    return <Navigate to="/auth?redirect=%2Fsettings" replace />;
   }
 
   if (userLoading) {
@@ -187,6 +177,7 @@ const Settings = () => {
 
   const handlePreferencesUpdate = async () => {
     setPreferencesSuccess("");
+    setPreferencesError("");
 
     try {
       const { data } = await updateEmailPreferences({
@@ -202,9 +193,11 @@ const Settings = () => {
         setPreferencesSuccess("Email preferences updated successfully");
         // Refetch user data to ensure UI is in sync with backend
         await refetch();
+      } else {
+        setPreferencesError(data?.updateEmailPreferences?.message || "Failed to update email preferences");
       }
     } catch (error: any) {
-      console.error("Failed to update preferences:", error);
+      setPreferencesError(error.message || "An error occurred while updating email preferences");
     }
   };
 
@@ -314,6 +307,20 @@ const Settings = () => {
 
           <Box sx={styles.section}>
             <Typography sx={styles.sectionTitle}>Email Preferences</Typography>
+
+            {preferencesError && (
+              <Alert
+                severity="error"
+                sx={{
+                  mb: 2,
+                  borderRadius: "8px",
+                  border: `1px solid ${colors.accent.red}`,
+                  backgroundColor: colors.accent.redLight,
+                }}
+              >
+                {preferencesError}
+              </Alert>
+            )}
 
             {preferencesSuccess && (
               <Alert

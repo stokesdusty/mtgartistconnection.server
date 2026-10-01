@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -116,6 +116,8 @@ function App() {
                   <Route path="/news/artist/:artistName" element={<ArtistNews />} />
                   <Route path="/news/:articleId" element={<NewsArticle />} />
                   <Route path="/artist/:name" element={<Artist />} />
+                  {/* Linked from the new-artist digest email; the homepage is the artist list */}
+                  <Route path="/artists" element={<Navigate to="/" replace />} />
                   <Route path="/allcards/:name" element={<AllCards />} />
                   <Route path="/artistcardbreakdown/:name" element={<ArtistCardAnalysis />} />                  
                   <Route path="/randomflavortext" element={<RandomFlavorText />} />

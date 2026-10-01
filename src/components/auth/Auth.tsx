@@ -73,7 +73,10 @@ const Auth = () => {
 
     const onResponseReceived = (authResponse: AuthResponse) => {
         dispatch(login({ token: authResponse.token, refreshToken: authResponse.refreshToken, user: authResponse.user }));
-        navigate("/dashboard");
+        // Only allow same-site paths ("/settings"), never "//evil.com" or absolute URLs
+        const redirect = searchParams.get('redirect');
+        const isSafeRedirect = !!redirect && redirect.startsWith('/') && !redirect.startsWith('//');
+        navigate(isSafeRedirect ? redirect : "/dashboard", { replace: true });
     };
 
     const onSubmit = async (inputData: Inputs) => {
