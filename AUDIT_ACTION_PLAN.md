@@ -594,6 +594,8 @@ than a hard bug.
 
 **Reference:** `BACKLOG.md`
 
+> **Note (2026-10):** `scripts/build-set-artists.js` and `src/data/set-artists.json` no longer exist — the set filter moved to the webservice (`artistsBySet` query, refreshed daily). See the update in `BACKLOG.md` before using this prompt.
+
 **Prompt:**
 > Read `BACKLOG.md` in this repo, which fully scopes a "Search by Card Name"
 > feature (search artists by the cards they've illustrated, since no

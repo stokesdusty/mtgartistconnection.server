@@ -5,38 +5,40 @@ import {
   useCallback,
   useRef,
   memo,
+  MouseEvent,
 } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams } from "react-router";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate, useSearchParams, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
-import { MEDIA_BASE_URL } from "../../config/media";
 import {
   Box,
-  Checkbox,
+  Divider,
   FormControlLabel,
-  Link,
-  Typography,
-  Container,
-  Paper,
-  Button,
   Fab,
   IconButton,
+  Menu,
+  MenuItem,
+  Switch,
   useMediaQuery,
   Snackbar,
   Alert,
 } from "@mui/material";
 import { AllCardsGridSkeleton } from "../shared/Skeletons";
-import { ArrowUp, ArrowsClockwise, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, ArrowUp, ArrowsClockwise, ArrowsDownUp, CaretDown, Check, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
 import { TOGGLE_CARD_COLLECTION_FIELD, LOG_PRICE_CLICK } from "../graphql/mutations";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
-import { allCardsStyles } from "../../styles/all-cards-styles";
+import { allCardsStyles, CARD_COL_MIN_WIDTH, CARD_METRICS, RAIL_HEIGHT } from "../../styles/all-cards-styles";
 import artistCardOverrides from "../../data/artist-card-overrides.json";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { colors, themeColors, spacing } from "../../styles/design-tokens";
+import { colors, themeColors, vault, vaultLayout } from "../../styles/design-tokens";
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import Slab from "../shared/Slab";
+import GlowPill from "../shared/GlowPill";
+import MonoLabel from "../shared/MonoLabel";
+import FilterChip from "../shared/FilterChip";
 
 interface Card {
   related_uris: any;
@@ -138,15 +140,87 @@ const COLLECTION_FIELDS = [
   { field: 'wishlistSigned', Icon: Heart,              label: 'Wishlist: want signed',   shortLabel: 'Wishlist', color: colors.accent.red },
 ] as const;
 
-const CARD_COL_MIN_WIDTH = 220; // px — narrowest column before adding another
-const GRID_GAP = 24;            // spacing.lg = 1.5rem
-const STICKY_TOP = 68;          // height of the sticky nav rail in px
+const ROW_TOP_PAD = 6;          // headroom so the slab hover lift isn't clipped by the list
+
+type FilterMode = 'all' | 'signed' | 'wishlisted' | 'artistProof';
+
+const COLLECTION_FILTERS: { mode: Exclude<FilterMode, 'all'>; label: string; title: string }[] = [
+  { mode: 'signed',      label: 'Signed',        title: 'Cards you have signed' },
+  { mode: 'artistProof', label: 'Artist proofs', title: 'Cards you have artist proofs of' },
+  { mode: 'wishlisted',  label: 'Wishlist',      title: 'Cards on your signing wishlist' },
+];
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
   const chunks: T[][] = [];
   for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
   return chunks;
 }
+
+// Everything below the slab has a fixed height so the virtualized list can use
+// one row height. Derived from the column width and viewport.
+interface CardLayout {
+  m: typeof CARD_METRICS.desktop;
+  /** Price chips stack the label above the value when three won't fit side by side. */
+  pricesStacked: boolean;
+  priceHeight: number;
+  cellHeight: number;
+  /** Touch devices can't hover for tooltips, so cells show a short text label. */
+  showCellLabels: boolean;
+  /** Mobile wraps the five toggles 3 + 2 for bigger tap targets. */
+  stripTwoRows: boolean;
+  rowHeight: number;
+}
+
+function getCardLayout(columnWidth: number, isMobile: boolean, isTouch: boolean): CardLayout {
+  const m = isMobile ? CARD_METRICS.mobile : CARD_METRICS.desktop;
+  const pricesStacked = (columnWidth - 12) / 3 < 72;
+  const priceHeight = pricesStacked ? m.priceHeightStacked : m.priceHeight;
+  const cellHeight = isTouch ? m.cellHeightTouch : m.cellHeight;
+  const stripTwoRows = isMobile;
+  const stripHeight = (stripTwoRows ? cellHeight * 2 + 1 : cellHeight) + 2;
+  // Slab = padding + 1px border on each side around a 63:88 art window.
+  const slabInner = columnWidth - 2 * m.slabPadding - 2;
+  const slabHeight = slabInner * (88 / 63) + 2 * m.slabPadding + 2;
+  const below = m.infoGap + m.nameHeight + m.metaHeight + m.pricesGap + priceHeight + m.stripGap + stripHeight;
+  return {
+    m,
+    pricesStacked,
+    priceHeight,
+    cellHeight,
+    showCellLabels: isTouch,
+    stripTwoRows,
+    rowHeight: Math.ceil(slabHeight + below) + m.rowGap + ROW_TOP_PAD,
+  };
+}
+
+interface PriceChipProps {
+  label: string;
+  value: string;
+  href: string;
+  title: string;
+  layout: CardLayout;
+  onClick: () => void;
+}
+
+const PriceChip = ({ label, value, href, title, layout, onClick }: PriceChipProps) => (
+  <Box
+    component="a"
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    title={title}
+    aria-label={`${title}: ${value}`}
+    onClick={onClick}
+    sx={[
+      allCardsStyles.priceChip,
+      layout.pricesStacked && allCardsStyles.priceChipStacked,
+      { height: layout.priceHeight },
+    ]}
+  >
+    <span className="price-label">{label}</span>
+    <span className="price-value">{value}</span>
+  </Box>
+);
 
 // ─── CardItem ────────────────────────────────────────────────────────────────
 // Defined outside AllCards so React.memo works correctly and getCardPrice/
@@ -158,13 +232,14 @@ interface CardItemProps {
   ckPrice: CardKingdomPrice | undefined;
   collectionItem: CollectionItem | undefined;
   isLoggedIn: boolean;
+  layout: CardLayout;
   onToggle: (card: Card, field: string) => void;
   onPriceClick: (platform: string, cardName: string, cardSet: string) => void;
 }
 
-const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onToggle, onPriceClick }: CardItemProps) => {
+const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, layout, onToggle, onPriceClick }: CardItemProps) => {
   const [showBack, setShowBack] = useState(false);
-  const isTouch = useMediaQuery('(hover: none)');
+  const { m } = layout;
 
   const formatPrice = (cents: number | null): string => {
     if (cents === null || cents === undefined) return '-';
@@ -181,10 +256,12 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
   const manapoolPrice = price?.price_cents_nm || price?.price_cents_lp_plus || price?.price_cents;
 
   const priceDisplay = cardSlug && (
-    <Link
+    <PriceChip
+      label="MP"
+      value={manapoolPrice ? formatPrice(manapoolPrice) : '-'}
+      title="Buy on Manapool"
+      layout={layout}
       href={`https://manapool.com/card/${card.set}/${card.collector_number}/${cardSlug}?ref=mtgartistconnection`}
-      target="_blank"
-      rel="noopener noreferrer"
       onClick={() => {
         if ((window as any).gtag) {
           (window as any).gtag("event", "manapool_price_click", {
@@ -195,33 +272,16 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
         }
         onPriceClick('manapool', card.name || '', card.set || '');
       }}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.5,
-        textDecoration: 'none',
-        padding: '2px 4px',
-        borderRadius: '4px',
-        transition: 'background-color 0.2s',
-        '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
-      }}
-    >
-      {manapoolPrice && (
-        <Typography sx={{ fontSize: '0.90rem', color: themeColors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
-          {formatPrice(manapoolPrice)}
-        </Typography>
-      )}
-      <Box sx={{ width: 20, height: 20, backgroundColor: themeColors.neutral.white, borderRadius: '3px', border: '1px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Box component="img" src="/manapool-icon.ico" alt="Manapool" sx={{ width: 14, height: 14, objectFit: 'contain' }} />
-      </Box>
-    </Link>
+    />
   );
 
   const tcgplayerDisplay = card.tcgplayer_id && card.prices?.usd && (
-    <Link
+    <PriceChip
+      label="TCG"
+      value={`$${card.prices.usd}`}
+      title="Buy on TCGplayer"
+      layout={layout}
       href={`https://partner.tcgplayer.com/JkbQGE?u=https://www.tcgplayer.com/product/${card.tcgplayer_id}`}
-      target="_blank"
-      rel="noopener noreferrer"
       onClick={() => {
         if ((window as any).gtag) {
           (window as any).gtag("event", "tcgplayer_price_click", {
@@ -232,24 +292,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
         }
         onPriceClick('tcgplayer', card.name || '', card.set || '');
       }}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.5,
-        textDecoration: 'none',
-        padding: '2px 4px',
-        borderRadius: '4px',
-        transition: 'background-color 0.2s',
-        '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
-      }}
-    >
-      <Typography sx={{ fontSize: '0.90rem', color: themeColors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
-        ${card.prices.usd}
-      </Typography>
-      <Box sx={{ width: 20, height: 20, backgroundColor: themeColors.neutral.white, borderRadius: '3px', border: '1px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-        <Box component="img" src="/tcgplayer.png" alt="TCGPlayer" sx={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} />
-      </Box>
-    </Link>
+    />
   );
 
   const ckUrl = ckPrice?.url
@@ -257,10 +300,12 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
     : `https://www.cardkingdom.com/mtg/${card.name?.toLowerCase().replace(/\s+/g, '-')}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`;
 
   const cardKingdomDisplay = ckPrice && (
-    <Link
+    <PriceChip
+      label="CK"
+      value={formatPrice(ckPrice.price)}
+      title="Buy on Card Kingdom"
+      layout={layout}
       href={ckUrl}
-      target="_blank"
-      rel="noopener noreferrer"
       onClick={() => {
         if ((window as any).gtag) {
           (window as any).gtag("event", "cardkingdom_price_click", {
@@ -271,57 +316,50 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
         }
         onPriceClick('cardkingdom', card.name || '', card.set || '');
       }}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.5,
-        textDecoration: 'none',
-        padding: '2px 4px',
-        borderRadius: '4px',
-        transition: 'background-color 0.2s',
-        '&:hover': { backgroundColor: 'rgba(45, 74, 54, 0.1)' },
-      }}
-    >
-      <Typography sx={{ fontSize: '0.90rem', color: themeColors.primary.main, fontWeight: 600, textDecoration: 'underline' }}>
-        {formatPrice(ckPrice.price)}
-      </Typography>
-      <Box sx={{ width: 20, height: 20, backgroundColor: themeColors.neutral.white, borderRadius: '3px', border: '1px solid rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Box component="img" src="/cardkingdom.jpg" alt="Card Kingdom" sx={{ width: 14, height: 14, objectFit: 'contain' }} />
-      </Box>
-    </Link>
+    />
   );
 
   // Use native title attribute instead of MUI Tooltip — zero JS overhead, no portals or event listeners per card.
-  // On touch devices (hover: none), show a short text label below each icon since hover tooltips are inaccessible.
+  // On touch devices (hover: none), show a short text label in each cell since hover tooltips are inaccessible.
   const collectionControls = (
-    <Box sx={{ display: 'flex', gap: 0.25, justifyContent: 'center', mt: 0.5 }}>
-      {COLLECTION_FIELDS.map(({ field, Icon, label, shortLabel, color }) => {
+    <Box
+      role="group"
+      aria-label="Your collection"
+      sx={[
+        allCardsStyles.strip,
+        {
+          mt: `${m.stripGap}px`,
+          gridTemplateColumns: layout.stripTwoRows ? 'repeat(6, minmax(0, 1fr))' : 'repeat(5, minmax(0, 1fr))',
+          gridAutoRows: `${layout.cellHeight}px`,
+        },
+      ]}
+    >
+      {COLLECTION_FIELDS.map(({ field, Icon, label, shortLabel, color }, i) => {
         const active = collectionItem ? (collectionItem as any)[field] : false;
         const tooltip = isLoggedIn ? label : "Log in to track your collection";
         return (
-          <span key={field} title={tooltip}>
-            <IconButton
-              size="small"
-              onClick={() => onToggle(card, field)}
-              aria-label={tooltip}
-              aria-pressed={!!active}
-              sx={{
-                color: active ? color : themeColors.text.disabled,
-                p: isTouch ? '5px 4px' : 0.5,
+          <Box
+            key={field}
+            component="button"
+            type="button"
+            title={tooltip}
+            onClick={() => onToggle(card, field)}
+            aria-label={tooltip}
+            aria-pressed={!!active}
+            sx={[
+              allCardsStyles.stripCell,
+              {
+                color: active ? color : vault.faint,
                 cursor: isLoggedIn ? 'pointer' : 'default',
-                flexDirection: 'column',
-                gap: '2px',
-                '&:hover': { backgroundColor: isLoggedIn ? themeColors.neutral[100] : 'transparent' },
-              }}
-            >
-              <Icon size={isTouch ? 20 : 18} weight={active ? 'fill' : 'regular'} />
-              {isTouch && (
-                <Typography component="span" sx={{ fontSize: '0.55rem', lineHeight: 1, color: 'inherit', userSelect: 'none' }}>
-                  {shortLabel}
-                </Typography>
-              )}
-            </IconButton>
-          </span>
+                gridColumn: layout.stripTwoRows ? `span ${i < 3 ? 2 : 3}` : undefined,
+              },
+            ]}
+          >
+            <Icon size={layout.showCellLabels ? 17 : 16} weight={active ? 'fill' : 'regular'} aria-hidden />
+            {layout.showCellLabels && (
+              <Box component="span" sx={allCardsStyles.stripLabel}>{shortLabel}</Box>
+            )}
+          </Box>
         );
       })}
     </Box>
@@ -333,43 +371,62 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
     : (card.image_uris?.border_crop ?? card.card_faces?.[0]?.image_uris?.border_crop ?? card.card_faces?.[0]?.image_uris?.normal);
   if (!imageSrc) return null;
 
+  const isSigned = !!(collectionItem?.signedNonfoil || collectionItem?.signedFoil);
+  const setLine = [card.set?.toUpperCase(), card.collector_number && `#${card.collector_number}`]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Box sx={{ position: 'relative', display: 'inline-block' }}>
-        <Link href={card?.scryfall_uri} target="_blank" rel="noopener noreferrer">
-          <Box
-            component="img"
-            alt={card.artist || "Card"}
+    <Box sx={allCardsStyles.card}>
+      <Box sx={allCardsStyles.artWrap}>
+        <Box
+          component="a"
+          href={card?.scryfall_uri}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${card.name ?? 'Card'} on Scryfall`}
+          sx={allCardsStyles.artLink}
+        >
+          <Slab
+            size="sm"
             src={imageSrc}
-            sx={allCardsStyles.cardImage}
+            alt={card.name || card.artist || "Card"}
+            aspectRatio="63 / 88"
+            interactive
+            topRight={isSigned ? (
+              <GlowPill variant="onArt" dot={false} sx={allCardsStyles.signedBadge}>SIGNED</GlowPill>
+            ) : undefined}
           />
-        </Link>
+        </Box>
         {isTwoFaced && (
           <IconButton
             size="small"
             title={showBack ? "Show front face" : "Show back face"}
+            aria-label={showBack ? "Show front face" : "Show back face"}
             onClick={(e) => { e.preventDefault(); setShowBack((prev) => !prev); }}
-            sx={{
-              position: 'absolute',
-              bottom: 10,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(0,0,0,0.70)',
-              color: colors.neutral.white,
-              p: '8px',
-              '&:hover': { backgroundColor: 'rgba(0,0,0,0.90)' },
-            }}
+            sx={allCardsStyles.flipButton}
           >
             <ArrowsClockwise size={20} />
           </IconButton>
         )}
       </Box>
-      {collectionControls}
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-        {priceDisplay}
-        {tcgplayerDisplay}
-        {cardKingdomDisplay}
+
+      <Box sx={{ mt: `${m.infoGap}px` }}>
+        <Box component="h3" title={card.name} sx={[allCardsStyles.name, { height: m.nameHeight, lineHeight: `${m.nameHeight}px` }]}>
+          {card.name}
+        </Box>
+        <MonoLabel size={11} tracking="tight" sx={[allCardsStyles.meta, { height: m.metaHeight, lineHeight: `${m.metaHeight}px` }]}>
+          {setLine}
+        </MonoLabel>
       </Box>
+
+      <Box sx={[allCardsStyles.prices, { mt: `${m.pricesGap}px`, height: layout.priceHeight }]}>
+        {priceDisplay}
+        {cardKingdomDisplay}
+        {tcgplayerDisplay}
+      </Box>
+
+      {collectionControls}
     </Box>
   );
 });
@@ -379,6 +436,7 @@ const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, onTog
 interface VirtualRowData {
   rows: Card[][];
   columnWidth: number;
+  layout: CardLayout;
   getCardPrice: (card: Card) => CardPrice | undefined;
   getCardKingdomPrice: (card: Card) => CardKingdomPrice | undefined;
   cardCollection: Map<string, CollectionItem>;
@@ -388,10 +446,10 @@ interface VirtualRowData {
 }
 
 const VirtualRow = memo(({ index, style, data }: ListChildComponentProps<VirtualRowData>) => {
-  const { rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, onToggle, onPriceClick } = data;
+  const { rows, columnWidth, layout, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, onToggle, onPriceClick } = data;
   const rowCards = rows[index] ?? [];
   return (
-    <div style={{ ...style, display: 'flex', gap: GRID_GAP, boxSizing: 'border-box', paddingBottom: GRID_GAP }}>
+    <div style={{ ...style, display: 'flex', gap: layout.m.columnGap, boxSizing: 'border-box', paddingBottom: layout.m.rowGap, paddingTop: ROW_TOP_PAD }}>
       {rowCards.map((card) => (
         <div key={card.id} style={{ flex: `0 0 ${columnWidth}px`, minWidth: 0 }}>
           <CardItem
@@ -400,6 +458,7 @@ const VirtualRow = memo(({ index, style, data }: ListChildComponentProps<Virtual
             ckPrice={getCardKingdomPrice(card)}
             collectionItem={cardCollection.get(card.id)}
             isLoggedIn={isLoggedIn}
+            layout={layout}
             onToggle={onToggle}
             onPriceClick={onPriceClick}
           />
@@ -408,6 +467,7 @@ const VirtualRow = memo(({ index, style, data }: ListChildComponentProps<Virtual
     </div>
   );
 });
+
 
 // ─── AllCards ─────────────────────────────────────────────────────────────────
 
@@ -420,7 +480,23 @@ const AllCards = () => {
     try { return localStorage.getItem('mtgac-hide-reprints') === 'true'; }
     catch { return false; }
   });
-  const [filterMode, setFilterMode] = useState<'all' | 'signed' | 'wishlisted' | 'artistProof'>('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showParam = searchParams.get('show');
+  // Collection filters only apply when logged in; ignore a stale ?show= otherwise.
+  const filterMode: FilterMode =
+    isLoggedIn && COLLECTION_FILTERS.some(f => f.mode === showParam) ? (showParam as FilterMode) : 'all';
+  const setFilterMode = useCallback((mode: FilterMode) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (mode === 'all') next.delete('show');
+      else next.set('show', mode);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+  const isMobile = useMediaQuery(`(max-width:${vaultLayout.mobileMax}px)`);
+  const isTouch = useMediaQuery('(hover: none)');
+  const stickyTop = isMobile ? RAIL_HEIGHT.mobile : RAIL_HEIGHT.desktop;
+  const [sortMenuAnchor, setSortMenuAnchor] = useState<HTMLElement | null>(null);
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [includeDigital, setIncludeDigital] = useState<boolean>(false);
   const [cardPrices, setCardPrices] = useState<Map<string, CardPrice>>(new Map());
@@ -437,17 +513,20 @@ const AllCards = () => {
   const [sortByNewest, setSortByNewest] = useState<boolean>(false);
   const [isFetchingCards, setIsFetchingCards] = useState<boolean>(false);
   const [overrideCards, setOverrideCards] = useState<Card[]>([]);
-  const [containerWidth, setContainerWidth] = useState<number>(() => window.innerWidth - 80);
-  const [viewportHeight, setViewportHeight] = useState<number>(() => Math.max(300, window.innerHeight - STICKY_TOP));
+  const [containerWidth, setContainerWidth] = useState<number>(
+    () => window.innerWidth - (window.innerWidth <= vaultLayout.mobileMax ? 36 : 80),
+  );
+  const [windowHeight, setWindowHeight] = useState<number>(() => window.innerHeight);
+  const viewportHeight = Math.max(300, windowHeight - stickyTop);
 
   // Measure how far the grid wrapper is from the top of the document so the
   // window-scroll handler knows when to start offsetting the list.
   const measureScrollStart = useCallback(() => {
     if (gridWrapperRef.current) {
       scrollStartRef.current =
-        gridWrapperRef.current.getBoundingClientRect().top + window.scrollY - STICKY_TOP;
+        gridWrapperRef.current.getBoundingClientRect().top + window.scrollY - stickyTop;
     }
-  }, []);
+  }, [stickyTop]);
 
   useEffect(() => {
     const el = gridWrapperRef.current;
@@ -460,7 +539,7 @@ const AllCards = () => {
   useEffect(() => {
     measureScrollStart();
     const onResize = () => {
-      setViewportHeight(Math.max(300, window.innerHeight - STICKY_TOP));
+      setWindowHeight(window.innerHeight);
       measureScrollStart();
     };
     window.addEventListener('resize', onResize);
@@ -551,9 +630,6 @@ const AllCards = () => {
     }
   }, [artist, navigate]);
 
-  useEffect(() => {
-    setFilterMode('all');
-  }, [artist]);
 
   usePageTitle(artist ? `All ${artist} Cards` : undefined);
 
@@ -901,22 +977,27 @@ const AllCards = () => {
     });
   }, [isLoggedIn, toggleCardCollectionField, artist]);
 
+  const columnGap = isMobile ? CARD_METRICS.mobile.columnGap : CARD_METRICS.desktop.columnGap;
+
+  // Mobile is always two columns; wider screens auto-fill at CARD_COL_MIN_WIDTH.
   const columnCount = useMemo(
-    () => Math.max(1, Math.floor((containerWidth + GRID_GAP) / (CARD_COL_MIN_WIDTH + GRID_GAP))),
-    [containerWidth]
+    () => isMobile
+      ? 2
+      : Math.max(1, Math.floor((containerWidth + columnGap) / (CARD_COL_MIN_WIDTH + columnGap))),
+    [containerWidth, columnGap, isMobile]
   );
 
   // Effective column width drives row height so images never clip on resize.
   const columnWidth = useMemo(
-    () => (containerWidth - (columnCount - 1) * GRID_GAP) / columnCount,
-    [containerWidth, columnCount]
+    () => (containerWidth - (columnCount - 1) * columnGap) / columnCount,
+    [containerWidth, columnCount, columnGap]
   );
 
-  // border_crop images are 480×680px (aspect ratio 480/680 ≈ 0.706).
-  const rowHeight = useMemo(
-    () => Math.ceil(columnWidth * (680 / 480)) + 80 + GRID_GAP,
-    [columnWidth]
+  const layout = useMemo(
+    () => getCardLayout(columnWidth, isMobile, isTouch),
+    [columnWidth, isMobile, isTouch]
   );
+  const rowHeight = layout.rowHeight;
 
   const rows = useMemo(
     () => chunkArray(displayedCards, columnCount),
@@ -927,6 +1008,7 @@ const AllCards = () => {
     () => ({
       rows,
       columnWidth,
+      layout,
       getCardPrice,
       getCardKingdomPrice,
       cardCollection,
@@ -934,7 +1016,7 @@ const AllCards = () => {
       onToggle: handleCollectionToggle,
       onPriceClick: handlePriceClick,
     }),
-    [rows, columnWidth, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, handleCollectionToggle, handlePriceClick]
+    [rows, columnWidth, layout, getCardPrice, getCardKingdomPrice, cardCollection, isLoggedIn, handleCollectionToggle, handlePriceClick]
   );
 
   const totalListHeight = rows.length * rowHeight;
@@ -956,252 +1038,222 @@ const AllCards = () => {
     setIncludeDigital(true);
   };
 
+  const handleSortSelect = (newest: boolean) => {
+    setSortByNewest(newest);
+    setSortMenuAnchor(null);
+  };
+
   if (!artist) return null;
   // Don't gate the whole page on the GraphQL artist query — Scryfall cards fetch in
   // parallel and should be visible as soon as the first page arrives.
   // Only block for definitive error states once the query has settled.
   if (error)
     return (
-      <Box sx={allCardsStyles.container}>
-        <Container maxWidth="lg">
-          <Paper elevation={0} sx={allCardsStyles.wrapper}>
-            <Typography sx={allCardsStyles.noCards}>
-              Error loading artist: {error.message}
-            </Typography>
-          </Paper>
-        </Container>
+      <Box sx={allCardsStyles.page}>
+        <Box component="p" sx={[allCardsStyles.statusMessage, { m: 0 }]}>
+          Error loading artist: {error.message}
+        </Box>
       </Box>
     );
   if (!loading && !artistData?.artistByName)
     return (
-      <Box sx={allCardsStyles.container}>
-        <Container maxWidth="lg">
-          <Paper elevation={0} sx={allCardsStyles.wrapper}>
-            <Typography sx={allCardsStyles.noCards}>
-              Artist not found
-            </Typography>
-          </Paper>
-        </Container>
+      <Box sx={allCardsStyles.page}>
+        <Box component="p" sx={[allCardsStyles.statusMessage, { m: 0 }]}>
+          Artist not found
+        </Box>
       </Box>
     );
 
-  return (
-    <Box sx={allCardsStyles.container}>
-      {/* Full-bleed hero banner — image fades in once GraphQL resolves */}
-      <Box sx={allCardsStyles.heroBanner}>
-        {artistData?.artistByName?.filename && (
-          <img
-            src={`${MEDIA_BASE_URL}/banner/${artistData.artistByName.filename}.jpeg`}
-            alt={`${artist} banner`}
-          />
-        )}
-        <Box sx={allCardsStyles.bannerGradient} />
-        <Box sx={allCardsStyles.bannerNameOverlay}>
-          <Container maxWidth="lg" disableGutters>
-            <Box sx={{ px: { xs: spacing.lg, md: spacing.xxl }, pb: { xs: spacing.lg, md: spacing.xl } }}>
-              <Typography sx={allCardsStyles.bannerHeroName}>
-                {artist}
-              </Typography>
-              <Typography sx={allCardsStyles.bannerAltName}>
-                All Cards
-              </Typography>
+  const displayName = artistData?.artistByName?.name ?? artist;
+  const sortLabel = sortByNewest ? 'Newest first' : 'Name (A–Z)';
+  const isFiltered = filterMode !== 'all';
+
+  let gridContent;
+  if (!cardData) {
+    gridContent = <AllCardsGridSkeleton count={12} />;
+  } else if (totalCards === 0) {
+    gridContent = (
+      <Box sx={allCardsStyles.emptyMessage}>
+        No results found. This artist may have only done digital cards for Arena or MTG-related artwork such as Vanguard.
+        {!includeDigital && (
+          <Box>
+            <Box component="button" type="button" onClick={handleExpandSearch} sx={allCardsStyles.expandButton}>
+              Expand search to include digital cards
             </Box>
-          </Container>
+          </Box>
+        )}
+      </Box>
+    );
+  } else if (displayedCards.length === 0) {
+    gridContent = (
+      <Box sx={allCardsStyles.emptyMessage}>
+        No cards match this filter.
+        <Box>
+          <Box component="button" type="button" onClick={() => setFilterMode('all')} sx={allCardsStyles.expandButton}>
+            Show all cards
+          </Box>
+        </Box>
+      </Box>
+    );
+  } else {
+    gridContent = (
+      <div style={{ position: 'sticky', top: stickyTop, height: viewportHeight }}>
+        <FixedSizeList
+          ref={listRef}
+          height={viewportHeight}
+          itemCount={rows.length}
+          itemSize={rowHeight}
+          itemData={itemData}
+          width={containerWidth}
+          overscanCount={3}
+          style={{ overflow: 'hidden', outline: 'none' }}
+        >
+          {VirtualRow}
+        </FixedSizeList>
+      </div>
+    );
+  }
+  const showList = !!cardData && displayedCards.length > 0;
+
+  return (
+    <Box sx={allCardsStyles.page}>
+      <Box component="header" sx={allCardsStyles.header}>
+        <Box sx={{ minWidth: 0 }}>
+          <Box sx={allCardsStyles.backRow}>
+            <Box
+              component={RouterLink}
+              to={`/artist/${encodeURIComponent(artist)}`}
+              sx={allCardsStyles.backLink}
+            >
+              <ArrowLeft size={14} aria-hidden />
+              {displayName}
+            </Box>
+            <Box
+              component={RouterLink}
+              to={`/artistcardbreakdown/${encodeURIComponent(artist)}`}
+              sx={allCardsStyles.backLink}
+            >
+              Card statistics
+              <ArrowRight size={14} aria-hidden />
+            </Box>
+          </Box>
+          <Box component="h1" sx={allCardsStyles.title}>
+            All cards{' '}
+            {cardData && <Box component="span" sx={allCardsStyles.titleCount}>{totalCards}</Box>}
+          </Box>
+          <Box component="p" sx={allCardsStyles.blurb}>
+            Prices shown are nonfoil, from three top online marketplaces: Mana Pool, Card Kingdom and TCGplayer.
+            Use the icons under each card to track your artist proofs <DeviceMobileCamera size={14} aria-hidden />,
+            signed copies <PenNib size={14} aria-hidden /> and signing wishlist <Heart size={14} aria-hidden />.
+          </Box>
+        </Box>
+
+        <Box sx={allCardsStyles.headerAside}>
+          {isLoggedIn && (
+            <Box component="p" sx={allCardsStyles.summary}>
+              Your collection: <strong>{signedCount} signed</strong> · <strong>{wishlistCount} wishlisted</strong>
+              {artistProofCount > 0 && <> · <strong>{artistProofCount} artist {artistProofCount === 1 ? 'proof' : 'proofs'}</strong></>}
+            </Box>
+          )}
+          <Box
+            component="button"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={Boolean(sortMenuAnchor)}
+            aria-controls="all-cards-sort-menu"
+            aria-label={`Sort: ${sortLabel}`}
+            disabled={!cardData}
+            onClick={(e: MouseEvent<HTMLButtonElement>) => setSortMenuAnchor(e.currentTarget)}
+            sx={allCardsStyles.sortButton}
+          >
+            {sortLabel}
+            <CaretDown size={11} weight="bold" aria-hidden />
+          </Box>
         </Box>
       </Box>
 
-      {/* Sticky navigation rail */}
-      <Box sx={allCardsStyles.stickyRail}>
-        <Container maxWidth="lg">
-          <Box sx={allCardsStyles.stickyRailInner}>
-            <Typography sx={allCardsStyles.stickyName}>
-              All {artist} Cards
-            </Typography>
-            <Box sx={{ flex: 1 }} />
-            <Link
-              component={RouterLink}
-              to={`/artist/${encodeURIComponent(artist)}`}
-              underline="none"
-              sx={allCardsStyles.stickyCtaLink}
-            >
-              View Artist Details
-            </Link>
-          </Box>
-        </Container>
+      {/* Sticky filter rail */}
+      <Box sx={allCardsStyles.rail}>
+        <Box sx={allCardsStyles.railChips} role="group" aria-label="Show cards">
+          <MonoLabel size={11} sx={allCardsStyles.showLabel}>Show</MonoLabel>
+          <FilterChip active={!isFiltered} onClick={() => setFilterMode('all')}>All</FilterChip>
+          {isLoggedIn ? (
+            COLLECTION_FILTERS.map(({ mode, label, title }) => (
+              <FilterChip
+                key={mode}
+                title={title}
+                active={filterMode === mode}
+                onClick={() => setFilterMode(filterMode === mode ? 'all' : mode)}
+              >
+                {label}
+              </FilterChip>
+            ))
+          ) : (
+            <Box component={RouterLink} to="/auth" sx={allCardsStyles.signInHint}>
+              Log in to track signed cards, artist proofs and wishlists
+            </Box>
+          )}
+          <FilterChip
+            icon={<ArrowsDownUp size={14} aria-hidden />}
+            aria-haspopup="menu"
+            aria-expanded={Boolean(sortMenuAnchor)}
+            aria-label={`Sort: ${sortLabel}`}
+            disabled={!cardData}
+            onClick={(e) => setSortMenuAnchor(e.currentTarget)}
+            sx={allCardsStyles.mobileOnly}
+          >
+            Sort
+          </FilterChip>
+        </Box>
+        <Box sx={allCardsStyles.railSpacer} />
+        <FormControlLabel
+          labelPlacement="start"
+          label="Hide reprints"
+          disabled={!cardData}
+          sx={allCardsStyles.reprintsToggle}
+          control={<Switch checked={hideReprints} onChange={handleCheck} sx={allCardsStyles.switch} />}
+        />
       </Box>
 
-      <Container maxWidth="lg" sx={{ pt: spacing.xl }}>
-        <Paper elevation={0} sx={allCardsStyles.wrapper}>
-          <Box sx={allCardsStyles.controlsSection}>
-            <Box>
-              <Typography sx={allCardsStyles.cardCount}>
-                {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'} found
-              </Typography>
-              {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
-                <Typography sx={{ fontSize: '0.85rem', color: themeColors.text.secondary, mt: 0.5 }}>
-                  {signedCount > 0 && (
-                    <Box
-                      component="span"
-                      onClick={() => setFilterMode(f => f === 'signed' ? 'all' : 'signed')}
-                      sx={{
-                        cursor: 'pointer',
-                        textDecoration: filterMode === 'signed' ? 'underline' : 'none',
-                        fontWeight: filterMode === 'signed' ? 600 : 400,
-                      }}
-                    >
-                      {signedCount} signed
-                    </Box>
-                  )}
-                  {signedCount > 0 && wishlistCount > 0 && ' · '}
-                  {wishlistCount > 0 && (
-                    <Box
-                      component="span"
-                      onClick={() => setFilterMode(f => f === 'wishlisted' ? 'all' : 'wishlisted')}
-                      sx={{
-                        cursor: 'pointer',
-                        textDecoration: filterMode === 'wishlisted' ? 'underline' : 'none',
-                        fontWeight: filterMode === 'wishlisted' ? 600 : 400,
-                      }}
-                    >
-                      {wishlistCount} wishlisted
-                    </Box>
-                  )}
-                  {(signedCount > 0 || wishlistCount > 0) && artistProofCount > 0 && ' · '}
-                  {artistProofCount > 0 && (
-                    <Box
-                      component="span"
-                      onClick={() => setFilterMode(f => f === 'artistProof' ? 'all' : 'artistProof')}
-                      sx={{
-                        cursor: 'pointer',
-                        textDecoration: filterMode === 'artistProof' ? 'underline' : 'none',
-                        fontWeight: filterMode === 'artistProof' ? 600 : 400,
-                      }}
-                    >
-                      {artistProofCount} artist proof
-                    </Box>
-                  )}
-                  {filterMode !== 'all' && (
-                    <Box
-                      component="span"
-                      onClick={() => setFilterMode('all')}
-                      sx={{ cursor: 'pointer', fontSize: '0.75rem', ml: 1, opacity: 0.6, '&:hover': { opacity: 1 } }}
-                    >
-                      × clear filter
-                    </Box>
-                  )}
-                </Typography>
-              )}
-            </Box>
+      <Menu
+        id="all-cards-sort-menu"
+        anchorEl={sortMenuAnchor}
+        open={Boolean(sortMenuAnchor)}
+        onClose={() => setSortMenuAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{ sx: allCardsStyles.menuPaper }}
+      >
+        <MenuItem selected={!sortByNewest} onClick={() => handleSortSelect(false)} sx={allCardsStyles.menuItem}>
+          Name (A–Z)
+          {!sortByNewest && <Check size={16} aria-hidden />}
+        </MenuItem>
+        <MenuItem selected={sortByNewest} onClick={() => handleSortSelect(true)} sx={allCardsStyles.menuItem}>
+          Newest first
+          {sortByNewest && <Check size={16} aria-hidden />}
+        </MenuItem>
+        {/* On phones the switch lives here instead of the rail. */}
+        {isMobile && <Divider />}
+        {isMobile && (
+          <MenuItem onClick={handleCheck} sx={allCardsStyles.menuItem} role="menuitemcheckbox" aria-checked={hideReprints}>
+            Hide reprints
+            <Switch checked={hideReprints} tabIndex={-1} sx={allCardsStyles.switch} inputProps={{ 'aria-hidden': true, readOnly: true }} />
+          </MenuItem>
+        )}
+      </Menu>
 
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={sortByNewest}
-                    onChange={() => setSortByNewest(!sortByNewest)}
-                    sx={allCardsStyles.checkbox}
-                    disabled={!cardData}
-                  />
-                }
-                label="Sort by Release (Newest)"
-                sx={allCardsStyles.checkboxLabel}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={hideReprints}
-                    onChange={handleCheck}
-                    sx={allCardsStyles.checkbox}
-                    disabled={!cardData}
-                  />
-                }
-                label="Hide Reprints"
-                sx={allCardsStyles.checkboxLabel}
-              />
-
-              <Link component={RouterLink} to={`/artistcardbreakdown/${encodeURIComponent(artist)}`} underline="none">
-                <Button sx={allCardsStyles.expandButton}>
-                  Card Statistics
-                </Button>
-              </Link>
-            </Box>
-          </Box>
-
-          {/* Icon legend */}
-          <Box sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: { xs: 1, sm: 1.5 },
-            px: 0.5,
-            pt: 1.5,
-            pb: 0.5,
-            mt: 1,
-            borderTop: `1px solid ${themeColors.neutral[200]}`,
-          }}>
-            <Typography sx={{ fontSize: '0.8rem', color: themeColors.text.secondary, mr: 0.5 }}>
-              {isLoggedIn
-                ? 'Click the icons below each card to track your collection:'
-                : 'Log in to track signed cards, artist proofs, and wishlists:'}
-            </Typography>
-            {COLLECTION_FIELDS.map(({ Icon, label, color }) => (
-              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Icon size={14} weight="fill" color={color} />
-                <Typography component="span" sx={{ fontSize: '0.75rem', color: themeColors.text.secondary }}>
-                  {label.replace('Wishlist: want signed', 'Wishlist')}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-
-          {totalCards === 0 && cardData && (
-            <Typography sx={allCardsStyles.noCards}>
-              No results found. This artist may have only done digital cards for Arena or MTG-related artwork such as Vanguard.
-              {!includeDigital && (
-                <>
-                  {" "}
-                  <Button
-                    onClick={handleExpandSearch}
-                    sx={{ ...allCardsStyles.expandButton, ml: 1 }}
-                  >
-                    Expand search to include digital cards
-                  </Button>
-                </>
-              )}
-            </Typography>
-          )}
-
-          <Box
-            ref={gridWrapperRef}
-            sx={{
-              mt: spacing.xl,
-              width: '100%',
-              // Reserve the full virtual scroll height so the page is scrollable.
-              height: cardData ? totalListHeight : 'auto',
-            }}
-          >
-            {!cardData ? (
-              <AllCardsGridSkeleton count={12} />
-            ) : (
-              <div style={{ position: 'sticky', top: STICKY_TOP, height: viewportHeight }}>
-                <FixedSizeList
-                  ref={listRef}
-                  height={viewportHeight}
-                  itemCount={rows.length}
-                  itemSize={rowHeight}
-                  itemData={itemData}
-                  width={containerWidth}
-                  overscanCount={3}
-                  style={{ overflow: 'hidden', outline: 'none' }}
-                >
-                  {VirtualRow}
-                </FixedSizeList>
-              </div>
-            )}
-          </Box>
-        </Paper>
-      </Container>
+      <Box component="section" aria-label="Cards" sx={allCardsStyles.gridSection}>
+        <Box
+          ref={gridWrapperRef}
+          sx={{
+            width: '100%',
+            // Reserve the full virtual scroll height so the page is scrollable.
+            height: showList ? totalListHeight : 'auto',
+          }}
+        >
+          {gridContent}
+        </Box>
+      </Box>
 
       <Snackbar
         open={!!toastError}
@@ -1216,19 +1268,11 @@ const AllCards = () => {
 
       {showScrollTop && (
         <Fab
-          color="primary"
           onClick={scrollToTop}
-          size="medium"
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 96,
-            bgcolor: colors.primary.main,
-            '&:hover': { bgcolor: colors.primary.dark },
-            zIndex: 999,
-          }}
+          aria-label="Scroll to top"
+          sx={allCardsStyles.scrollToTopFab}
         >
-          <ArrowUp size={24} />
+          <ArrowUp size={20} />
         </Fab>
       )}
     </Box>

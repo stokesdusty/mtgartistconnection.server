@@ -23,7 +23,7 @@ import {
 import { Trash, CheckCircle, PencilSimple, UploadSimple, ArrowSquareOut, Plus } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { UPDATE_NEWS_REVIEW, DELETE_NEWS_REVIEW } from '../graphql/mutations';
-import { colors } from '../../styles/design-tokens';
+import { colors, typography } from '../../styles/design-tokens';
 
 interface NewsArticle {
   id: string;
@@ -184,7 +184,7 @@ const NewsReview: React.FC = () => {
       fontWeight: 700,
       color: colors.primary.main,
       mb: 0.5,
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: typography.fontFamily.display,
     },
     subtitle: {
       color: colors.neutral[700],

@@ -13,10 +13,10 @@ import {
   Tooltip,
   ButtonGroup,
 } from '@mui/material';
-import { Trash, CheckCircle, ArrowSquareOut, Article } from "@phosphor-icons/react";
+import { Trash, CheckCircle, ArrowSquareOut } from "@phosphor-icons/react";
 import { GET_ARTIST_POSTS } from '../graphql/queries';
-import { UPDATE_ARTIST_POST, DELETE_ARTIST_POST, DELETE_REVIEWED_ARTIST_POSTS, GENERATE_NEWS_ARTICLE } from '../graphql/mutations';
-import { colors, platformColors } from '../../styles/design-tokens';
+import { UPDATE_ARTIST_POST, DELETE_ARTIST_POST, DELETE_REVIEWED_ARTIST_POSTS } from '../graphql/mutations';
+import { colors, platformColors, typography } from '../../styles/design-tokens';
 
 interface ArtistPost {
   id: string;
@@ -44,10 +44,8 @@ const AdminPostReview: React.FC = () => {
   const [updateArtistPost] = useMutation(UPDATE_ARTIST_POST);
   const [deleteArtistPost] = useMutation(DELETE_ARTIST_POST);
   const [deleteReviewedPosts] = useMutation(DELETE_REVIEWED_ARTIST_POSTS);
-  const [generateNewsArticle] = useMutation(GENERATE_NEWS_ARTICLE);
 
   const posts: ArtistPost[] = data?.artistPosts || [];
-  const [generatingArticle, setGeneratingArticle] = useState<string | null>(null);
 
   const handleReview = async (id: string) => {
     try {
@@ -103,28 +101,6 @@ const AdminPostReview: React.FC = () => {
     }
   };
 
-  const handleGenerateArticle = async (id: string) => {
-    if (!window.confirm('Generate a news article from this post using AI?')) return;
-
-    try {
-      setGeneratingArticle(id);
-      const result = await generateNewsArticle({
-        variables: { artistPostId: id },
-      });
-
-      if (result.data?.generateNewsArticle) {
-        alert('News article generated successfully! You can review it in the News Review section.');
-      } else {
-        alert('Failed to generate news article.');
-      }
-    } catch (err: any) {
-      console.error('Error generating article:', err);
-      alert(err.message || 'An error occurred while generating the article.');
-    } finally {
-      setGeneratingArticle(null);
-    }
-  };
-
   const styles = {
     container: {
       backgroundColor: colors.background.dark,
@@ -146,7 +122,7 @@ const AdminPostReview: React.FC = () => {
       fontWeight: 700,
       color: colors.primary.main,
       mb: 0.5,
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: typography.fontFamily.display,
     },
     subtitle: {
       color: colors.text.secondary,
@@ -372,21 +348,6 @@ const AdminPostReview: React.FC = () => {
                     </Box>
 
                     <Box sx={{ display: 'flex', gap: 1, flexShrink: 0, flexWrap: 'wrap' }}>
-                      <Tooltip title="Generate news article with AI">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => handleGenerateArticle(post.id)}
-                          startIcon={generatingArticle === post.id ? <CircularProgress size={16} /> : <Article size={16} weight="duotone" />}
-                          disabled={generatingArticle === post.id}
-                          sx={{
-                            ...styles.outlineButton,
-                            minWidth: '140px',
-                          }}
-                        >
-                          {generatingArticle === post.id ? 'Generating...' : 'Generate Article'}
-                        </Button>
-                      </Tooltip>
                       {!post.isReviewed && (
                         <Tooltip title="Mark as reviewed">
                           <Button

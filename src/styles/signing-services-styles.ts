@@ -1,41 +1,236 @@
+import { Theme } from '@mui/material';
 import { SystemStyleObject } from '@mui/system';
+import { typography, vault, vaultEffects, vaultLayout, vaultMedia, vaultRadii } from './design-tokens';
 
-export const signingServicesStyles:Record<string, SystemStyleObject> = {
-    container: {
-        padding: 10,
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-        minHeight: "75vh",
-        paddingTop: "125px"
-    },
-    text: {
-        fontSize: "1.2rem",
-    },
-    serviceGroupContainer: {
-        display: "flex",
-        flexDirection: "column",
-        padding: 2,
-        gap: 1,
-    },
-    serviceContainer: {
-        display: "flex",
-        gap: 1,
-        padding: 2,
-    },
-    serviceStats: {
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        justifyContent: "space-around",
-        gap: 2,
-    },
-    serviceInfo: {
-        display: "flex",
-        flexDirection: "column",
-        flex: 3,
-    },
-    link: {
-        color: "blue"
-    },
+const focusRing = {
+  '&:focus-visible': { outline: `2px solid ${vault.accent}`, outlineOffset: 2 },
+};
+
+// Service panels and the how-it-works columns stack here.
+const stack = '@media (max-width: 900px)';
+
+export const signingServicesStyles: Record<string, SystemStyleObject<Theme>> = {
+  page: {
+    minHeight: '100vh',
+    backgroundColor: vault.bg,
+    color: vault.fg,
+  },
+
+  // ─── Hero ──────────────────────────────────────────────────────────────────
+  hero: {
+    padding: `64px ${vaultLayout.gutter} 40px`,
+    background: `radial-gradient(ellipse 50% 90% at 0% 0%, ${vault.glow}, transparent 70%)`,
+    [vaultMedia.mobile]: { padding: `40px ${vaultLayout.gutterMobile} 28px` },
+  },
+  eyebrow: {
+    marginBottom: '16px',
+    [vaultMedia.mobile]: { marginBottom: '12px' },
+  },
+  title: {
+    margin: 0,
+    fontSize: 60,
+    lineHeight: 1,
+    fontWeight: 600,
+    letterSpacing: '-0.035em',
+    color: vault.fg,
+    [vaultMedia.mobile]: { fontSize: 40 },
+  },
+  lede: {
+    margin: '20px 0 0',
+    maxWidth: 640,
+    fontSize: 16,
+    lineHeight: 1.55,
+    color: vault.muted,
+    [vaultMedia.mobile]: { marginTop: '14px', fontSize: 15 },
+  },
+
+  // ─── Service panels ────────────────────────────────────────────────────────
+  services: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '20px',
+    padding: `0 ${vaultLayout.gutter}`,
+    [stack]: { gridTemplateColumns: 'minmax(0, 1fr)' },
+    [vaultMedia.mobile]: { gap: '14px', padding: `0 ${vaultLayout.gutterMobile}` },
+  },
+  panel: {
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+    padding: '28px',
+    borderRadius: vaultRadii.panel,
+    backgroundColor: vault.surface,
+    border: `1px solid ${vault.line}`,
+    boxShadow: `0 12px 30px ${vault.shadow}`,
+    [vaultMedia.mobile]: { padding: '20px 18px' },
+  },
+  panelHead: {
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: '12px',
+    marginBottom: '10px',
+  },
+  serviceName: {
+    margin: 0,
+    fontSize: 28,
+    lineHeight: 1.1,
+    fontWeight: 600,
+    letterSpacing: '-0.025em',
+    color: vault.fg,
+    [vaultMedia.mobile]: { fontSize: 24 },
+  },
+  stats: {
+    margin: '18px 0 0',
+    borderTop: `1px solid ${vault.line}`,
+  },
+  statRow: {
+    display: 'grid',
+    gridTemplateColumns: '150px minmax(0, 1fr)',
+    gap: '16px',
+    alignItems: 'center',
+    padding: '13px 0',
+    borderBottom: `1px solid ${vault.line}`,
+    fontSize: 15,
+    [vaultMedia.mobile]: { gridTemplateColumns: 'minmax(0, 1fr)', gap: '6px', padding: '12px 0' },
+  },
+  statLabel: {
+    color: vault.muted,
+    [vaultMedia.mobile]: { fontSize: 12 },
+  },
+  statValue: {
+    margin: 0,
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '6px',
+    minWidth: 0,
+    color: vault.fg,
+    [vaultMedia.mobile]: { fontSize: 16 },
+  },
+  statBig: {
+    fontSize: 22,
+    fontWeight: 600,
+    letterSpacing: '-0.02em',
+    lineHeight: 1.2,
+  },
+  tag: {
+    display: 'inline-flex',
+    padding: '4px 10px',
+    borderRadius: vaultRadii.input,
+    backgroundColor: vault.chip,
+    border: `1px solid ${vault.line}`,
+    fontSize: 13,
+    lineHeight: 1.4,
+    color: vault.fg,
+  },
+  description: {
+    margin: '20px 0 0',
+    fontSize: 15,
+    lineHeight: 1.6,
+    color: vault.muted,
+    flex: 1,
+  },
+  actions: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    marginTop: '24px',
+    [vaultMedia.mobile]: { display: 'grid', gridTemplateColumns: '1fr 1fr' },
+  },
+  button: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    minHeight: vaultLayout.tapTarget,
+    padding: '9px 16px',
+    borderRadius: '9px',
+    fontSize: 13,
+    fontWeight: 600,
+    lineHeight: 1.3,
+    textDecoration: 'none',
+    whiteSpace: 'nowrap',
+    transition: `background-color ${vaultEffects.transition}, border-color ${vaultEffects.transition}, opacity ${vaultEffects.transition}`,
+    '& svg': { flex: 'none' },
+    ...focusRing,
+    [vaultMedia.mobile]: { fontSize: 14 },
+  },
+  buttonPrimary: {
+    backgroundColor: vault.accent,
+    color: vault.onAccent,
+    border: `1px solid ${vault.accent}`,
+    '&:hover': { opacity: 0.9 },
+    [vaultMedia.mobile]: { gridColumn: '1 / -1', padding: '13px 16px', fontSize: 15 },
+  },
+  buttonSecondary: {
+    backgroundColor: 'transparent',
+    color: vault.fg,
+    border: `1px solid ${vault.lineStrong}`,
+    '&:hover': { backgroundColor: vault.chip, borderColor: vault.accent },
+  },
+
+  // ─── How it works ──────────────────────────────────────────────────────────
+  howItWorks: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.4fr)',
+    gap: '48px',
+    alignItems: 'start',
+    margin: `64px ${vaultLayout.gutter} 0`,
+    padding: '40px 0 72px',
+    borderTop: `1px solid ${vault.line}`,
+    [stack]: { gridTemplateColumns: 'minmax(0, 1fr)', gap: '28px' },
+    [vaultMedia.mobile]: { margin: `40px ${vaultLayout.gutterMobile} 0`, padding: '28px 0 48px' },
+  },
+  sectionTitle: {
+    margin: '10px 0 0',
+    fontSize: 22,
+    fontWeight: 600,
+    letterSpacing: '-0.02em',
+    lineHeight: 1.25,
+    color: vault.fg,
+  },
+  paragraph: {
+    margin: '14px 0 0',
+    fontSize: 15,
+    lineHeight: 1.6,
+    color: vault.muted,
+  },
+  steps: {
+    listStyle: 'none',
+    margin: 0,
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  step: {
+    display: 'grid',
+    gridTemplateColumns: '48px minmax(0, 1fr)',
+    gap: '16px',
+    padding: '20px',
+    borderRadius: vaultRadii.card,
+    backgroundColor: vault.surface,
+    border: `1px solid ${vault.line}`,
+    [vaultMedia.mobile]: { gridTemplateColumns: '36px minmax(0, 1fr)', gap: '12px', padding: '16px' },
+  },
+  stepNumber: {
+    fontFamily: typography.fontFamily.mono,
+    fontSize: 22,
+    lineHeight: 1.2,
+    color: vault.accentText,
+    [vaultMedia.mobile]: { fontSize: 18 },
+  },
+  stepTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 600,
+    lineHeight: 1.35,
+    color: vault.fg,
+  },
+  stepBody: {
+    margin: '6px 0 0',
+    fontSize: 14,
+    lineHeight: 1.6,
+    color: vault.muted,
+  },
 };

@@ -5,107 +5,113 @@ import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CU
 import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES, LOG_LINK_CLICK } from "../graphql/mutations";
 import {
   Box,
-  Link,
-  Typography,
-  Container,
   Button,
-  Chip,
   Tooltip,
 } from "@mui/material";
 import { ArtistPageSkeleton } from "../shared/Skeletons";
 import { MEDIA_BASE_URL } from "../../config/media";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { colors, themeColors, spacing } from "../../styles/design-tokens";
-import { Question, CalendarBlank, MapPin, BellRinging, UserPlus, PencilSimple, Cards, GlobeSimple, FacebookLogo, InstagramLogo, TwitterLogo, PatreonLogo, YoutubeLogo } from "@phosphor-icons/react";
+import { Question, BellRinging, PencilSimple, GlobeSimple, FacebookLogo, InstagramLogo, TwitterLogo, PatreonLogo, YoutubeLogo } from "@phosphor-icons/react";
 import { FaArtstation } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
+import { formatDateRange } from "../../utils/eventDates";
 import { artistStyles } from "../../styles/artist-styles";
+import { vault } from "../../styles/design-tokens";
 import PageMeta from "../shared/PageMeta";
+import MonoLabel from "../shared/MonoLabel";
+import GlowPill from "../shared/GlowPill";
+import Slab from "../shared/Slab";
 
-import { alpha } from '@mui/material/styles';
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import ArtistNewsSection from './ArtistNewsSection';
 import ExternalLinkCard from './ExternalLinkCard';
 
 interface ArtistSocialLink {
   label: string;
   url: string;
   icon: React.ComponentType<{ size?: number | string; color?: string }>;
-  color: string;
 }
+
+const InfoRow = ({ label, children }: { label: ReactNode; children: ReactNode }) => (
+  <Box sx={artistStyles.infoRow}>
+    <Box component="dt" sx={artistStyles.infoLabel}>{label}</Box>
+    <Box component="dd" sx={artistStyles.infoValue}>{children}</Box>
+  </Box>
+);
 
 const ArtistEventCard = ({ event }: { event: any }) => {
   const navigate = useNavigate();
-  const startDateFormatted = new Date(event.startDate).toLocaleDateString();
-  const endDateFormatted = new Date(event.endDate).toLocaleDateString();
+  const start = new Date(event.startDate);
+  const open = () => navigate(`/calendar/${event.id}`);
 
   return (
-    <Box sx={artistStyles.eventCard} onClick={() => navigate(`/calendar/${event.id}`)}>
-      {event.url ? (
-        <Link
-          href={event.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          underline="hover"
-          sx={{ textDecoration: 'none' }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Typography variant="h6" sx={artistStyles.eventName}>
-            {event.name}
-          </Typography>
-        </Link>
-      ) : (
-        <Typography variant="h6" sx={artistStyles.eventName}>
-          {event.name}
-        </Typography>
-      )}
-      <Box sx={artistStyles.eventDetails}>
-        <Box sx={artistStyles.eventDetail}>
-          <CalendarBlank size={16} weight="duotone" color={colors.primary.main} />
-          <Typography variant="body2">
-            {startDateFormatted}{startDateFormatted !== endDateFormatted && ` - ${endDateFormatted}`}
-          </Typography>
+    <Box
+      sx={artistStyles.eventCard}
+      role="link"
+      tabIndex={0}
+      aria-label={`${event.name}, ${formatDateRange(event.startDate, event.endDate)}`}
+      onClick={open}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') open();
+      }}
+    >
+      <Box sx={artistStyles.dateBlock} aria-hidden>
+        <Box sx={artistStyles.dateBlockMonth}>
+          {start.toLocaleDateString('en-US', { month: 'short' })}
         </Box>
-        <Box sx={artistStyles.eventDetail}>
-          <MapPin size={16} weight="duotone" color={colors.primary.main} />
-          <Typography variant="body2">{event.city}</Typography>
+        <Box sx={artistStyles.dateBlockDay}>{start.getDate()}</Box>
+      </Box>
+      <Box sx={artistStyles.eventText}>
+        {event.url ? (
+          <Box
+            component="a"
+            href={event.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={artistStyles.eventName}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+          >
+            {event.name}
+          </Box>
+        ) : (
+          <Box component="span" sx={artistStyles.eventName}>{event.name}</Box>
+        )}
+        <Box component="span" sx={artistStyles.eventMeta}>
+          {formatDateRange(event.startDate, event.endDate)}
+          {event.city && ` · ${event.city}`}
         </Box>
       </Box>
     </Box>
   );
 };
 
-const UpcomingEventsSection = ({ artistEvents }: { artistEvents: any[] }) => {
-  if (artistEvents.length === 0) return null;
-  return (
-    <Box sx={artistStyles.infoRow}>
-      <Typography variant="h5">Upcoming Events</Typography>
-      <Box sx={artistStyles.eventsListContainer}>
+const EventsSection = ({ artistEvents, lastEvent }: { artistEvents: any[]; lastEvent: any | null }) => (
+  <Box component="section" aria-labelledby="artist-events-label">
+    <MonoLabel component="h2" id="artist-events-label">
+      {artistEvents.length > 0 ? 'Upcoming events' : 'Events'}
+    </MonoLabel>
+    {artistEvents.length > 0 && (
+      <Box sx={artistStyles.eventsGrid}>
         {artistEvents.map((event: any) => (
           <ArtistEventCard key={event.id} event={event} />
         ))}
       </Box>
-    </Box>
-  );
-};
-
-const LastEventAttendedSection = ({ event }: { event: any | null }) => {
-  return (
-    <Box sx={artistStyles.infoRow}>
-      <Typography variant="h5">Last Event Attended</Typography>
-      {event ? (
-        <Box sx={artistStyles.eventsListContainer}>
-          <ArtistEventCard event={event} />
-        </Box>
+    )}
+    <Box sx={artistStyles.lastAttended}>
+      Last attended:{' '}
+      {lastEvent ? (
+        <RouterLink to={`/calendar/${lastEvent.id}`}>
+          {lastEvent.name} · {new Date(lastEvent.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+        </RouterLink>
       ) : (
-        <Typography>Unknown</Typography>
+        <Box component="span" sx={{ color: vault.fg }}>Unknown</Box>
       )}
     </Box>
-  );
-};
+  </Box>
+);
 
 const SCRYFALL_CACHE_TTL = 24 * 60 * 60 * 1000;
 
@@ -138,6 +144,9 @@ const Artist = () => {
   const [signedCount, setSignedCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [artistProofCount, setArtistProofCount] = useState(0);
+  // Total printings, known once the Scryfall ids are cached; the catalog card falls back to "View all cards".
+  const [cardCount, setCardCount] = useState<number | null>(null);
+  const [bannerFailed, setBannerFailed] = useState(false);
 
   usePageTitle(name);
 
@@ -181,7 +190,14 @@ const Artist = () => {
     setSignedCount(0);
     setWishlistCount(0);
     setArtistProofCount(0);
+    setBannerFailed(false);
   }, [name]);
+
+  useEffect(() => {
+    const artistName = data?.artistByName?.name;
+    const cached = artistName ? getCachedScryfallIds(artistName) : null;
+    setCardCount(cached && cached.length > 0 ? cached.length : null);
+  }, [data?.artistByName?.name]);
 
   useEffect(() => {
     if (!isLoggedIn || !data?.artistByName?.name) return;
@@ -216,10 +232,15 @@ const Artist = () => {
       }
     };
 
+    let active = true;
     fetchAllIds(baseUrl).then(ids => {
       setCachedScryfallIds(artistName, ids);
+      if (active && ids.length > 0) setCardCount(ids.length);
       runCollectionQuery(ids);
     });
+    return () => {
+      active = false;
+    };
   }, [isLoggedIn, data?.artistByName?.name, fetchUserCardCollection]);
 
   // Check if user is following this artist
@@ -302,35 +323,27 @@ const Artist = () => {
     return Math.ceil((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, [nextSigningEvent]);
 
-  if (!name) return <Typography sx={{ textAlign: "center", p: 4 }}>No artist provided</Typography>;
+  if (!name) return <Box sx={[artistStyles.page, artistStyles.statusMessage]}>No artist provided</Box>;
   if (loading)
     return (
-      <Box sx={artistStyles.container}>
-        <Container maxWidth="lg">
-          <Box sx={artistStyles.contentWrapper}>
-            <ArtistPageSkeleton />
-          </Box>
-        </Container>
+      <Box sx={artistStyles.page}>
+        <ArtistPageSkeleton />
       </Box>
     );
   if (error)
     return (
-      <Box sx={artistStyles.container}>
-        <Box sx={artistStyles.contentWrapper}>
-          <Typography sx={artistStyles.errorMessage}>
-            Error loading artist: {error.message}
-          </Typography>
+      <Box sx={artistStyles.page}>
+        <Box sx={artistStyles.statusMessage} role="alert">
+          Error loading artist: {error.message}
         </Box>
       </Box>
     );
 
   if (!data?.artistByName) {
     return (
-      <Box sx={artistStyles.container}>
-        <Box sx={artistStyles.contentWrapper}>
-          <Typography sx={artistStyles.errorMessage}>
-            No artist found with the name "{name}"
-          </Typography>
+      <Box sx={artistStyles.page}>
+        <Box sx={artistStyles.statusMessage}>
+          No artist found with the name "{name}"
         </Box>
       </Box>
     );
@@ -339,54 +352,14 @@ const Artist = () => {
   const { artistByName } = data;
 
   const socialMediaLinks: ArtistSocialLink[] = [
-    {
-      label: "Website",
-      url: artistByName.url,
-      icon: GlobeSimple,
-      color: themeColors.primary.main,
-    },
-    {
-      label: "Facebook",
-      url: artistByName.facebook,
-      icon: FacebookLogo,
-      color: themeColors.primary.main,
-    },
-    {
-      label: "Instagram",
-      url: artistByName.instagram,
-      icon: InstagramLogo,
-      color: themeColors.primary.main,
-    },
-    {
-      label: "Twitter",
-      url: artistByName.twitter,
-      icon: TwitterLogo,
-      color: themeColors.primary.main,
-    },
-    {
-      label: "Patreon",
-      url: artistByName.patreon,
-      icon: PatreonLogo,
-      color: themeColors.primary.main,
-    },
-    {
-      label: "YouTube",
-      url: artistByName.youtube,
-      icon: YoutubeLogo,
-      color: themeColors.primary.main,
-    },
-    {
-      label: "Artstation",
-      url: artistByName.artstation,
-      icon: FaArtstation,
-      color: themeColors.primary.main,
-    },
-    {
-      label: "Bluesky",
-      url: artistByName.bluesky,
-      icon: FaBluesky,
-      color: themeColors.primary.main,
-    },
+    { label: "Website", url: artistByName.url, icon: GlobeSimple },
+    { label: "Facebook", url: artistByName.facebook, icon: FacebookLogo },
+    { label: "Instagram", url: artistByName.instagram, icon: InstagramLogo },
+    { label: "Twitter", url: artistByName.twitter, icon: TwitterLogo },
+    { label: "Patreon", url: artistByName.patreon, icon: PatreonLogo },
+    { label: "YouTube", url: artistByName.youtube, icon: YoutubeLogo },
+    { label: "Artstation", url: artistByName.artstation, icon: FaArtstation },
+    { label: "Bluesky", url: artistByName.bluesky, icon: FaBluesky },
   ];
 
   const signatureImage =
@@ -445,8 +418,23 @@ const Artist = () => {
     ? `Signing at ${nextSigningEvent?.name} — today!`
     : `Signing at ${nextSigningEvent?.name} in ${daysUntilEvent} day${daysUntilEvent === 1 ? '' : 's'}`;
 
+  const isSigning = !(!artistByName.signing || artistByName.signing === "false" || artistByName.signing === "unknown" || artistByName.signing === "no");
+  const hasMarks = artistByName.markssignatureservice && artistByName.markssignatureservice !== "false";
+  const hasMountainMage = artistByName.mountainmage && artistByName.mountainmage !== "false";
+  const visibleSocialLinks = socialMediaLinks.filter(link => link.url);
+
+  const collectionSummary = isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0)
+    ? [
+        signedCount > 0 && `${signedCount} signed`,
+        wishlistCount > 0 && `${wishlistCount} wishlisted`,
+        artistProofCount > 0 && `${artistProofCount} artist proof`,
+      ].filter(Boolean).join(', ')
+    : null;
+
+  const followLabel = !isLoggedIn ? 'Sign in to follow' : isFollowing ? 'Following' : '+ Follow';
+
   return (
-    <Box sx={artistStyles.container}>
+    <Box sx={artistStyles.page}>
       <PageMeta
         title={artistByName.name}
         description={`Explore ${artistByName.name}'s Magic: The Gathering card art, signing events, and contact links on MtG Artist Connection.`}
@@ -462,319 +450,263 @@ const Artist = () => {
           "worksFor": { "@id": "https://www.mtgartistconnection.com/#organization" },
         }}
       />
-      {/* Full-bleed hero banner */}
-      <Box sx={artistStyles.heroBanner}>
-        <img
-          src={`${MEDIA_BASE_URL}/banner/${artistByName.filename}.jpeg`}
-          alt={`${artistByName.name} banner`}
-        />
-        <Box sx={artistStyles.bannerGradient} />
-        <Box sx={artistStyles.bannerNameOverlay}>
-          <Container maxWidth="lg" disableGutters>
-            <Box sx={{ px: { xs: spacing.lg, md: spacing.xxl }, pb: { xs: spacing.lg, md: spacing.xl } }}>
-              <Typography sx={artistStyles.bannerHeroName}>
-                {artistByName.name}
-              </Typography>
-              {artistByName.alternate_names && (
-                <Typography sx={artistStyles.bannerAltName}>
-                  {artistByName.alternate_names}
-                </Typography>
-              )}
+
+      {/* Full-bleed banner; striped placeholder shows while loading or if missing */}
+      <Box sx={artistStyles.banner}>
+        {!bannerFailed && (
+          <Box
+            component="img"
+            src={`${MEDIA_BASE_URL}/banner/${artistByName.filename}.jpeg`}
+            alt={`${artistByName.name} banner`}
+            onError={() => setBannerFailed(true)}
+            sx={artistStyles.bannerImage}
+          />
+        )}
+        <Box sx={artistStyles.bannerFade} />
+        <Box sx={artistStyles.bannerOverlay}>
+          <MonoLabel tone="accent" size={12} tracking="wide">
+            Illustrator{artistByName.location && ` · ${artistByName.location}`}
+          </MonoLabel>
+          <Box component="h1" sx={artistStyles.bannerName}>
+            {artistByName.name}
+          </Box>
+          {artistByName.alternate_names && (
+            <Box sx={artistStyles.bannerAltName}>
+              Also credited as {artistByName.alternate_names}
             </Box>
-          </Container>
+          )}
         </Box>
       </Box>
 
-      {/* Sticky action rail */}
-      <Box sx={artistStyles.stickyRail}>
-        <Container maxWidth="lg">
-          <Box sx={artistStyles.stickyRailInner}>
-            <Typography sx={artistStyles.stickyName}>
-              {artistByName.name}
-            </Typography>
+      {/* Sticky action rail; stacks into full-width items on mobile */}
+      <Box sx={artistStyles.rail}>
+        <Box component="span" sx={artistStyles.railName}>{artistByName.name}</Box>
+        <Box sx={artistStyles.railSpacer} />
 
-            {/* Spacer pushes pill + follow to the right */}
-            <Box sx={{ flex: 1 }} />
+        {nextSigningEvent && (
+          <GlowPill to={`/calendar/${nextSigningEvent.id}`} size="md" sx={artistStyles.signingPill}>
+            <Box component="span" sx={artistStyles.signingPillLabel}>{signingPillLabel}</Box>
+            {' '}<span aria-hidden>→</span>
+          </GlowPill>
+        )}
 
-            {nextSigningEvent && (
-              <Chip
-                label={signingPillLabel}
-                size="small"
-                sx={artistStyles.signingPill}
-                onClick={() => navigate(`/calendar/${nextSigningEvent.id}`)}
-              />
-            )}
+        {userData?.me?.role === 'admin' && (
+          <Button
+            startIcon={<PencilSimple size={16} />}
+            onClick={() => navigate(`/editartist/${artistByName.id}`)}
+            sx={[artistStyles.railButton, artistStyles.editButton]}
+          >
+            Edit artist
+          </Button>
+        )}
 
-            {userData?.me?.role === 'admin' && (
-              <Button
-                variant="outlined"
-                size="medium"
-                startIcon={<PencilSimple size={18} />}
-                onClick={() => navigate(`/editartist/${artistByName.id}`)}
-                sx={{ ...artistStyles.editButton, display: { xs: 'none', md: 'flex' } }}
-              >
-                Edit Artist
-              </Button>
-            )}
-
-            <Button
-              variant={isFollowing ? 'contained' : 'outlined'}
-              size="medium"
-              onClick={handleFollowToggle}
-              startIcon={isFollowing ? <BellRinging size={18} weight="duotone" /> : <UserPlus size={18} />}
-              sx={isFollowing ? artistStyles.followButtonActive : artistStyles.followButtonInactive}
-            >
-              {!isLoggedIn ? 'Sign in to follow' : isFollowing ? 'Following' : 'Follow'}
-            </Button>
-          </Box>
-        </Container>
+        <Button
+          onClick={handleFollowToggle}
+          aria-pressed={isLoggedIn ? isFollowing : undefined}
+          startIcon={isLoggedIn && isFollowing ? <BellRinging size={16} weight="duotone" /> : undefined}
+          sx={[artistStyles.railButton, isLoggedIn && isFollowing ? artistStyles.followingButton : artistStyles.followButton]}
+        >
+          {followLabel}
+        </Button>
       </Box>
 
-      {/* Main content card */}
-      <Container maxWidth="lg" sx={{ pt: spacing.sm }}>
-        <Box sx={artistStyles.contentWrapper}>
-          <Box sx={artistStyles.buttonContainer}>
-            <ExternalLinkCard
-              href={`/allcards/${encodeURIComponent(artistByName.name)}`}
-              label={`View all ${artistByName.name} cards`}
-              logo={<Cards size={20} weight="duotone" />}
-              variant="primary"
-              isInternal
-            />
-            {artistByName.omalink && (
-              <ExternalLinkCard
-                href={artistByName.omalink}
-                label="Buy prints & playmats"
-                logo={<img src={`${MEDIA_BASE_URL}/OMALogo.png`} alt="Original Magic Art" style={{ height: 20 }} />}
-                external
-                onClick={() => {
-                  if ((window as any).gtag) {
-                    (window as any).gtag("event", "oma_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
-                  }
-                  trackClick('oma');
-                }}
-              />
-            )}
-            {artistByName.inprnt && (
-              <ExternalLinkCard
-                href={artistByName.inprnt}
-                label="Buy prints"
-                logo={<Box component="span" sx={{ fontWeight: 700, fontSize: 14, letterSpacing: '0.05em', fontFamily: 'Arial, sans-serif' }}>INPRNT</Box>}
-                external
-                onClick={() => {
-                  if ((window as any).gtag) {
-                    (window as any).gtag("event", "inprnt_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
-                  }
-                  trackClick('inprnt');
-                }}
-              />
-            )}
-            <ExternalLinkCard
-              href={ebayHref}
-              label={`Search for signed ${artistByName.name} cards`}
-              logo={<img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/EBay_logo.svg" alt="eBay" style={{ height: 18 }} />}
-              external
-              onClick={() => {
-                if ((window as any).gtag) {
-                  (window as any).gtag("event", "ebay_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
-                }
-                trackClick('ebay');
-              }}
-            />
-          </Box>
+      {/* Link cards */}
+      <Box component="nav" aria-label={`${artistByName.name} links`} sx={artistStyles.linkCards}>
+        <ExternalLinkCard
+          href={`/allcards/${encodeURIComponent(artistByName.name)}`}
+          eyebrow="Catalog"
+          title={cardCount ? `View all ${cardCount} cards` : 'View all cards'}
+          mobileTitle={cardCount ? `${cardCount} cards` : 'All cards'}
+          ariaLabel={`View all ${artistByName.name} cards`}
+          variant="primary"
+          isInternal
+        />
+        {artistByName.omalink && (
+          <ExternalLinkCard
+            href={artistByName.omalink}
+            eyebrow="Original Magic Art"
+            mobileEyebrow="OMA"
+            title="Prints & playmats"
+            mobileTitle="Playmats"
+            ariaLabel="Buy prints & playmats on Original Magic Art"
+            external
+            onClick={() => {
+              if ((window as any).gtag) {
+                (window as any).gtag("event", "oma_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
+              }
+              trackClick('oma');
+            }}
+          />
+        )}
+        {artistByName.inprnt && (
+          <ExternalLinkCard
+            href={artistByName.inprnt}
+            eyebrow="INPRNT"
+            title="Buy prints"
+            mobileTitle="Prints"
+            ariaLabel="Buy prints on INPRNT"
+            external
+            onClick={() => {
+              if ((window as any).gtag) {
+                (window as any).gtag("event", "inprnt_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
+              }
+              trackClick('inprnt');
+            }}
+          />
+        )}
+        <ExternalLinkCard
+          href={ebayHref}
+          eyebrow="eBay"
+          title="Signed cards"
+          mobileTitle="Signed"
+          ariaLabel={`Search eBay for signed ${artistByName.name} cards`}
+          external
+          onClick={() => {
+            if ((window as any).gtag) {
+              (window as any).gtag("event", "ebay_link_click", { event_category: "artist_page", event_label: artistByName.name, artist_name: artistByName.name });
+            }
+            trackClick('ebay');
+          }}
+        />
+      </Box>
 
-          <Box sx={artistStyles.infoSection}>
-              <Box sx={artistStyles.artistInfo}>
-                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, flexWrap: 'wrap' }}>
-                  <Typography sx={artistStyles.sectionHeader} variant="h4">
-                    Artist Info
-                  </Typography>
-                  {isLoggedIn && (signedCount > 0 || wishlistCount > 0 || artistProofCount > 0) && (
-                    <Typography sx={{ fontSize: '0.875rem', color: themeColors.text.secondary }}>
-                      Your collection: {[
-                        signedCount > 0 && `${signedCount} signed`,
-                        wishlistCount > 0 && `${wishlistCount} wishlisted`,
-                        artistProofCount > 0 && `${artistProofCount} artist proof`,
-                      ].filter(Boolean).join(', ')}
-                    </Typography>
-                  )}
+      <Box sx={artistStyles.columns}>
+        <Box sx={artistStyles.mainColumn}>
+          <Box component="section" aria-labelledby="artist-info-label">
+            <Box sx={artistStyles.sectionHead}>
+              <MonoLabel component="h2" id="artist-info-label">Artist info</MonoLabel>
+              {collectionSummary && (
+                <Box component="span" sx={artistStyles.collectionSummary}>
+                  Your collection: {collectionSummary}
                 </Box>
+              )}
+            </Box>
 
-                <Box sx={artistStyles.infoRow}>
-                  <Typography variant="h5">
-                    Website/Social Media Links
-                  </Typography>
-                  {socialMediaLinks.some(link => link.url) ? (
-                    <Box sx={artistStyles.socialMedia}>
-                      {socialMediaLinks.map(
-                        (link, index) =>
-                          link.url && (
-                            <Link
-                              key={index}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              sx={artistStyles.socialIcon}
-                              onClick={() => trackClick(link.label.toLowerCase())}
-                              aria-label={`Visit ${artistByName.name}'s ${link.label}`}
-                            >
-                              <link.icon
-                                size={20}
-                                color={link.color}
-                              />
-                            </Link>
-                          )
-                      )}
-                    </Box>
-                  ) : (
-                    <Typography>Unknown</Typography>
-                  )}
-                </Box>
-
-                <Box sx={artistStyles.infoRow}>
-                  <Typography variant="h5">Artist Email</Typography>
-                  <Typography>
-                    {artistByName.email ? (
-                      <Link
-                        href={`mailto:${artistByName.email}`}
-                        underline="hover"
-                        sx={{ color: 'primary.main' }}
+            <Box component="dl" sx={artistStyles.infoList}>
+              <InfoRow label="Links">
+                {visibleSocialLinks.length > 0
+                  ? visibleSocialLinks.map(link => (
+                      <Box
+                        component="a"
+                        key={link.label}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={artistStyles.tagChip}
+                        onClick={() => trackClick(link.label.toLowerCase())}
+                        aria-label={`Visit ${artistByName.name}'s ${link.label}`}
                       >
-                        {artistByName.email}
-                      </Link>
-                    ) : (
-                      "Unknown"
-                    )}
-                  </Typography>
-                </Box>
+                        <link.icon size={14} />
+                        {link.label}
+                      </Box>
+                    ))
+                  : 'Unknown'}
+              </InfoRow>
 
-                <Box sx={artistStyles.infoRow}>
-                  <Typography variant="h5">Location</Typography>
-                  <Typography>
-                    {artistByName.location ? (
-                      <Link
-                        component={RouterLink}
-                        to={`/?location=${encodeURIComponent(artistByName.location)}`}
-                        underline="hover"
-                        sx={{ color: 'primary.main' }}
-                      >
-                        {artistByName.location}
-                      </Link>
-                    ) : (
-                      "Unknown"
-                    )}
-                  </Typography>
-                </Box>
+              <InfoRow label="Email">
+                {artistByName.email ? (
+                  <Box component="a" href={`mailto:${artistByName.email}`} sx={artistStyles.infoLink}>
+                    {artistByName.email}
+                  </Box>
+                ) : (
+                  "Unknown"
+                )}
+              </InfoRow>
 
-                <Box sx={artistStyles.infoRow}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="h5" sx={{ lineHeight: 1 }}>Currently Signing?</Typography>
+              <InfoRow label="Location">
+                {artistByName.location ? (
+                  <Box
+                    component={RouterLink}
+                    to={`/?location=${encodeURIComponent(artistByName.location)}`}
+                    sx={artistStyles.infoLink}
+                  >
+                    {artistByName.location}
+                  </Box>
+                ) : (
+                  "Unknown"
+                )}
+              </InfoRow>
+
+              <InfoRow
+                label={
+                  <>
+                    Currently signing
                     <Tooltip
                       title="Signing status is being verified for all artists. Unconfirmed statuses may change as we gather more information."
                       arrow
                       placement="top"
                     >
-                      <Question
-                        size={16}
-                        style={{ cursor: 'help', verticalAlign: 'middle', marginBottom: '5px' }}
-                      />
+                      <Box component="span" sx={artistStyles.helpIcon} tabIndex={0} aria-label="About signing status">
+                        <Question size={15} />
+                      </Box>
                     </Tooltip>
+                  </>
+                }
+              >
+                {isSigning ? (
+                  <Box component="span" sx={artistStyles.okChip}>
+                    {capitalizeFirstLetter(artistByName.signing)}
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {(!artistByName.signing || artistByName.signing === "false" || artistByName.signing === "unknown" || artistByName.signing === "no") ? (
-                      <Chip
-                        label="Not confirmed"
-                        size="small"
-                        sx={{
-                          backgroundColor: alpha(colors.neutral[600], 0.12),
-                          color: themeColors.text.secondary,
-                          fontSize: '0.8rem',
-                          fontWeight: 500,
-                        }}
-                      />
-                    ) : (
-                      <Chip
-                        label={capitalizeFirstLetter(artistByName.signing)}
-                        size="small"
-                        sx={{
-                          backgroundColor: colors.accent.greenLight,
-                          color: colors.accent.greenDark,
-                          border: `1px solid ${colors.accent.green}`,
-                          fontSize: '0.8rem',
-                          fontWeight: 600,
-                          'html[data-dark] &': {
-                            backgroundColor: 'rgba(39, 174, 96, 0.15)',
-                            color: colors.accent.greenOnDark,
-                            borderColor: 'rgba(39, 174, 96, 0.5)',
-                          },
-                        }}
-                      />
-                    )}
-                  </Box>
-                </Box>
-
-                <Box sx={artistStyles.infoRow}>
-                  <Typography variant="h5">
-                    Artist Proofs on website?
-                  </Typography>
-                  <Typography>
-                    {capitalizeFirstLetter(artistByName.artistProofs) ||
-                      "Unknown"}
-                  </Typography>
-                </Box>
-
-                {artistByName.signingComment && (
-                  <Box sx={artistStyles.infoRow}>
-                    <Typography variant="h5">Notes</Typography>
-                    <Typography>
-                      {artistByName.signingComment}
-                    </Typography>
-                  </Box>
+                ) : (
+                  <Box component="span" sx={artistStyles.neutralChip}>Not confirmed</Box>
                 )}
+              </InfoRow>
 
-                {artistByName.markssignatureservice &&
-                  artistByName.markssignatureservice !== "false" && (
-                    <Box sx={artistStyles.infoRow}>
-                      <Link
-                        sx={artistStyles.serviceLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"
-                        onClick={() => trackClick('markssignatureservice')}
-                      >
-                        Services offered via Marks Signature Service
-                      </Link>
+              <InfoRow label="Artist proofs on site">
+                {capitalizeFirstLetter(artistByName.artistProofs) || "Unknown"}
+              </InfoRow>
+
+              {artistByName.signingComment && (
+                <InfoRow label="Notes">{artistByName.signingComment}</InfoRow>
+              )}
+
+              {(hasMarks || hasMountainMage) && (
+                <InfoRow label="Services">
+                  {hasMarks && (
+                    <Box
+                      component="a"
+                      sx={artistStyles.tagChip}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share"
+                      onClick={() => trackClick('markssignatureservice')}
+                    >
+                      Marks Signature Service
                     </Box>
                   )}
-
-                {artistByName.mountainmage &&
-                  artistByName.mountainmage !== "false" && (
-                    <Box sx={artistStyles.infoRow}>
-                      <Link
-                        sx={artistStyles.serviceLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={artistByName.mountainmage}
-                        onClick={() => trackClick('mountainmage')}
-                      >
-                        Services offered via MountainMage Service
-                      </Link>
+                  {hasMountainMage && (
+                    <Box
+                      component="a"
+                      sx={artistStyles.tagChip}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={artistByName.mountainmage}
+                      onClick={() => trackClick('mountainmage')}
+                    >
+                      MountainMage
                     </Box>
                   )}
-
-                <UpcomingEventsSection artistEvents={artistEvents} />
-                <LastEventAttendedSection event={lastEventAttended} />
-              </Box>
-              <Box sx={artistStyles.signatureSection}>
-                <ArtistNewsSection artistName={artistByName.name} />
-                <Typography sx={artistStyles.sectionHeader} variant="h4">
-                  Example Signature
-                </Typography>
-                <img src={signatureImage} alt={`${artistByName.name} signature example`} />
-              </Box>
+                </InfoRow>
+              )}
             </Box>
           </Box>
-        </Container>
+
+          <EventsSection artistEvents={artistEvents} lastEvent={lastEventAttended} />
+        </Box>
+
+        <Box sx={artistStyles.sideColumn}>
+          <Box component="section" aria-labelledby="artist-signature-label" sx={artistStyles.signature}>
+            <MonoLabel component="h2" id="artist-signature-label">Example signature</MonoLabel>
+            <Slab
+              src={signatureImage}
+              alt={`${artistByName.name} signature example`}
+              aspectRatio="63 / 88"
+              size="lg"
+              sx={artistStyles.signatureSlab}
+            />
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 };

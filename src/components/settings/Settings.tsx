@@ -1,25 +1,27 @@
 import {
   Box,
-  Container,
-  Paper,
-  Typography,
   TextField,
   Button,
   Switch,
   FormControlLabel,
-  FormGroup,
-  Divider,
-  Alert,
-  CircularProgress,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useMutation, useQuery } from "@apollo/client";
 import { UPDATE_PASSWORD, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
 import { GET_CURRENT_USER } from "../graphql/queries";
-import { colors } from "../../styles/design-tokens";
+import { settingsStyles as styles } from "../../styles/settings-styles";
+import MonoLabel from "../shared/MonoLabel";
+import { SettingsSkeleton } from "../shared/Skeletons";
+
+const PREFERENCE_LABELS = {
+  siteUpdates: "Receive site update emails",
+  artistUpdates: "Receive artist update emails",
+  localSigningEvents: "Receive local signing event notifications",
+  newArtistNotifications: "Receive new artist notifications",
+} as const;
 
 const Settings = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -62,77 +64,12 @@ const Settings = () => {
     }
   }, [userData]);
 
-  const styles = {
-    container: {
-      backgroundColor: colors.background.dark,
-      minHeight: "100vh",
-      padding: { xs: 2, md: 4 },
-    },
-    paper: {
-      padding: { xs: 3, md: 4 },
-      backgroundColor: colors.neutral.white,
-      borderRadius: "12px",
-      boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      border: `1px solid ${colors.neutral[200]}`,
-    },
-    section: {
-      mb: 4,
-    },
-    sectionTitle: {
-      fontSize: { xs: "1.25rem", md: "1.5rem" },
-      fontWeight: 600,
-      color: colors.primary.main,
-      mb: 2,
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    },
-    field: {
-      mb: 2,
-      "& .MuiOutlinedInput-root": {
-        borderRadius: "8px",
-        transition: "200ms cubic-bezier(0.4, 0, 0.2, 1)",
-        "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: colors.primary.main,
-        },
-        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-          borderColor: colors.primary.main,
-        },
-      },
-      "& .MuiInputLabel-root.Mui-focused": {
-        color: colors.primary.main,
-      },
-    },
-    button: {
-      backgroundColor: colors.primary.main,
-      color: colors.primary.contrast,
-      textTransform: "none",
-      fontWeight: 600,
-      padding: "10px 24px",
-      borderRadius: "8px",
-      transition: "200ms cubic-bezier(0.4, 0, 0.2, 1)",
-      "&:hover": {
-        backgroundColor: colors.primary.dark,
-        transform: "translateY(-1px)",
-        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-      },
-    },
-  };
-
   if (!isLoggedIn) {
     return <Navigate to="/auth?redirect=%2Fsettings" replace />;
   }
 
   if (userLoading) {
-    return (
-      <Box sx={styles.container}>
-        <Container maxWidth="md">
-          <Paper elevation={0} sx={styles.paper}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-              <CircularProgress sx={{ color: colors.primary.main }} />
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-    );
+    return <SettingsSkeleton />;
   }
 
   const handlePasswordUpdate = async () => {
@@ -209,242 +146,166 @@ const Settings = () => {
   };
 
   return (
-    <Box sx={styles.container}>
-      <Container maxWidth="md">
-        <Paper elevation={0} sx={styles.paper}>
-          <Typography variant="h4" sx={{
-            fontWeight: 700,
-            color: colors.primary.main,
-            mb: 4,
-            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-          }}>
-            Account Settings
-          </Typography>
+    <Box sx={styles.page}>
+      <Box sx={styles.inner}>
+        <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+          Account
+        </MonoLabel>
+        <Box component="h1" sx={styles.title}>
+          Settings
+        </Box>
 
-          <Box sx={styles.section}>
-            <Typography sx={styles.sectionTitle}>Account Information</Typography>
-            <Typography sx={{
-              mb: 1,
-              color: colors.text.secondary,
-              fontSize: "0.875rem",
-              lineHeight: 1.75,
-            }}>
-              <strong style={{ color: colors.text.primary }}>Email:</strong> {user?.email}
-            </Typography>
-            <Typography sx={{
-              color: colors.text.secondary,
-              fontSize: "0.875rem",
-              lineHeight: 1.75,
-            }}>
-              <strong style={{ color: colors.text.primary }}>Name:</strong> {user?.name}
-            </Typography>
+        <Box sx={styles.sections}>
+          {/* ── Account information ─────────────────────────────────────── */}
+          <Box component="section" aria-labelledby="settings-account" sx={styles.panel}>
+            <Box component="h2" id="settings-account" sx={styles.sectionTitle}>
+              Account information
+            </Box>
+            <Box component="dl" sx={styles.infoList}>
+              <Box sx={styles.infoRow}>
+                <MonoLabel component="dt" tracking="tight">Email</MonoLabel>
+                <Box component="dd" sx={styles.infoValue}>{user?.email}</Box>
+              </Box>
+              <Box sx={styles.infoRow}>
+                <MonoLabel component="dt" tracking="tight">Name</MonoLabel>
+                <Box component="dd" sx={styles.infoValue}>{user?.name}</Box>
+              </Box>
+            </Box>
           </Box>
 
-          <Divider sx={{ my: 3, borderColor: colors.neutral[300] }} />
+          {/* ── Email preferences ───────────────────────────────────────── */}
+          <Box component="section" aria-labelledby="settings-email" sx={styles.panel}>
+            <Box component="h2" id="settings-email" sx={styles.sectionTitle}>
+              Email preferences
+            </Box>
+            <Box component="p" sx={styles.sectionIntro}>
+              Choose which emails you get from MtG Artist Connection.
+            </Box>
 
-          <Box sx={styles.section}>
-            <Typography sx={styles.sectionTitle}>Change Password</Typography>
+            <Message error={preferencesError} success={preferencesSuccess} />
 
-            {passwordError && (
-              <Alert
-                severity="error"
-                sx={{
-                  mb: 2,
-                  borderRadius: "8px",
-                  border: `1px solid ${colors.accent.red}`,
-                  backgroundColor: colors.accent.redLight,
-                }}
-              >
-                {passwordError}
-              </Alert>
-            )}
+            <Box sx={styles.prefList}>
+              {(Object.keys(PREFERENCE_LABELS) as (keyof typeof PREFERENCE_LABELS)[]).map((key) => (
+                <FormControlLabel
+                  key={key}
+                  labelPlacement="start"
+                  control={
+                    <Switch
+                      checked={emailPreferences[key]}
+                      onChange={() => handlePreferenceChange(key)}
+                      sx={styles.switch}
+                    />
+                  }
+                  label={PREFERENCE_LABELS[key]}
+                  sx={styles.prefRow}
+                />
+              ))}
+            </Box>
 
-            {passwordSuccess && (
-              <Alert
-                severity="success"
-                sx={{
-                  mb: 2,
-                  borderRadius: "8px",
-                  border: `1px solid ${colors.accent.green}`,
-                  backgroundColor: colors.primary.lighter,
-                }}
-              >
-                {passwordSuccess}
-              </Alert>
-            )}
-
-            <TextField
-              label="Current Password"
-              type="password"
-              fullWidth
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              sx={styles.field}
-            />
-            <TextField
-              label="New Password"
-              type="password"
-              fullWidth
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              sx={styles.field}
-              helperText="Must be at least 8 characters"
-            />
-            <TextField
-              label="Confirm New Password"
-              type="password"
-              fullWidth
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              sx={styles.field}
-            />
-            <Button variant="contained" sx={styles.button} onClick={handlePasswordUpdate}>
-              Update Password
-            </Button>
-          </Box>
-
-          <Divider sx={{ my: 3, borderColor: colors.neutral[300] }} />
-
-          <Box sx={styles.section}>
-            <Typography sx={styles.sectionTitle}>Email Preferences</Typography>
-
-            {preferencesError && (
-              <Alert
-                severity="error"
-                sx={{
-                  mb: 2,
-                  borderRadius: "8px",
-                  border: `1px solid ${colors.accent.red}`,
-                  backgroundColor: colors.accent.redLight,
-                }}
-              >
-                {preferencesError}
-              </Alert>
-            )}
-
-            {preferencesSuccess && (
-              <Alert
-                severity="success"
-                sx={{
-                  mb: 2,
-                  borderRadius: "8px",
-                  border: `1px solid ${colors.accent.green}`,
-                  backgroundColor: colors.primary.lighter,
-                }}
-              >
-                {preferencesSuccess}
-              </Alert>
-            )}
-
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={emailPreferences.siteUpdates}
-                    onChange={() => handlePreferenceChange("siteUpdates")}
-                    sx={{
-                      "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: colors.primary.main,
-                      },
-                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: colors.primary.main,
-                      },
-                    }}
-                  />
-                }
-                label="Receive site update emails"
-                sx={{
-                  mb: 1,
-                  "& .MuiFormControlLabel-label": {
-                    fontSize: "0.875rem",
-                    color: colors.text.primary,
-                  },
-                }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={emailPreferences.artistUpdates}
-                    onChange={() => handlePreferenceChange("artistUpdates")}
-                    sx={{
-                      "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: colors.primary.main,
-                      },
-                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: colors.primary.main,
-                      },
-                    }}
-                  />
-                }
-                label="Receive artist update emails"
-                sx={{
-                  mb: 1,
-                  "& .MuiFormControlLabel-label": {
-                    fontSize: "0.875rem",
-                    color: colors.text.primary,
-                  },
-                }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={emailPreferences.localSigningEvents}
-                    onChange={() => handlePreferenceChange("localSigningEvents")}
-                    sx={{
-                      "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: colors.primary.main,
-                      },
-                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: colors.primary.main,
-                      },
-                    }}
-                  />
-                }
-                label="Receive local signing event notifications"
-                sx={{
-                  mb: 1,
-                  "& .MuiFormControlLabel-label": {
-                    fontSize: "0.875rem",
-                    color: colors.text.primary,
-                  },
-                }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={emailPreferences.newArtistNotifications}
-                    onChange={() => handlePreferenceChange("newArtistNotifications")}
-                    sx={{
-                      "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: colors.primary.main,
-                      },
-                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                        backgroundColor: colors.primary.main,
-                      },
-                    }}
-                  />
-                }
-                label="Receive new artist notifications"
-                sx={{
-                  "& .MuiFormControlLabel-label": {
-                    fontSize: "0.875rem",
-                    color: colors.text.primary,
-                  },
-                }}
-              />
-            </FormGroup>
-            <Button
-              variant="contained"
-              sx={{ ...styles.button, mt: 2 }}
-              onClick={handlePreferencesUpdate}
-            >
+            <Button sx={styles.button} onClick={handlePreferencesUpdate}>
               Save Preferences
             </Button>
           </Box>
-        </Paper>
-      </Container>
+
+          {/* ── Password ────────────────────────────────────────────────── */}
+          <Box component="section" aria-labelledby="settings-password" sx={styles.panel}>
+            <Box component="h2" id="settings-password" sx={styles.sectionTitle}>
+              Change password
+            </Box>
+            <Box component="p" sx={styles.sectionIntro}>
+              Enter your current password, then choose a new one.
+            </Box>
+
+            <Message error={passwordError} success={passwordSuccess} />
+
+            <Box sx={styles.fields}>
+              <PasswordField
+                id="settings-current-password"
+                label="Current password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={setCurrentPassword}
+              />
+              <PasswordField
+                id="settings-new-password"
+                label="New password"
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={setNewPassword}
+                helperText="Must be at least 8 characters"
+              />
+              <PasswordField
+                id="settings-confirm-password"
+                label="Confirm new password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+              />
+            </Box>
+
+            <Button sx={styles.button} onClick={handlePasswordUpdate}>
+              Update Password
+            </Button>
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 };
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function Message({ error, success }: { error: string; success: string }) {
+  if (error) {
+    return (
+      <Box role="alert" sx={[styles.message, styles.messageError]}>
+        {error}
+      </Box>
+    );
+  }
+  if (success) {
+    return (
+      <Box role="status" sx={[styles.message, styles.messageSuccess]}>
+        {success}
+      </Box>
+    );
+  }
+  return null;
+}
+
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  autoComplete,
+  helperText,
+}: {
+  id: string;
+  label: ReactNode;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: string;
+  helperText?: string;
+}) {
+  return (
+    <Box sx={styles.field}>
+      <Box component="label" htmlFor={id} sx={styles.fieldLabel}>
+        <MonoLabel tracking="tight">{label}</MonoLabel>
+      </Box>
+      <TextField
+        id={id}
+        type="password"
+        fullWidth
+        size="small"
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        helperText={helperText}
+        sx={styles.input}
+      />
+    </Box>
+  );
+}
 
 export default Settings;

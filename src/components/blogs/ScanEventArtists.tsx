@@ -2,9 +2,13 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
+import { Box } from '@mui/material';
+import { Globe, MagnifyingGlass } from '@phosphor-icons/react';
 import { RootState } from '../../store/store';
 import { SCAN_URL_FOR_ARTISTS } from '../graphql/mutations';
-import { colors, themeColors, typography, spacing, borderRadius, borders } from '../../styles/design-tokens';
+import { scanEventArtistsStyles as styles } from '../../styles/scan-event-artists-styles';
+import MonoLabel from '../shared/MonoLabel';
+import { LiveDot } from '../shared/GlowPill';
 
 interface ImageMatch {
     imageUrl: string;
@@ -41,218 +45,149 @@ export default function ScanEventArtists() {
     const lowText = !!result && result.scannedTextLength < LOW_TEXT_THRESHOLD;
 
     return (
-        <div style={{ padding: spacing.xl, maxWidth: 800, margin: '0 auto' }}>
-            <h1 style={{
-                fontFamily: typography.fontFamily.heading,
-                fontSize: typography.fontSize['3xl'],
-                fontWeight: typography.fontWeight.normal,
-                color: themeColors.text.primary,
-                margin: `0 0 ${spacing.sm}`,
-            }}>
-                Scan Event URL for Artists
-            </h1>
-            <p style={{
-                fontFamily: typography.fontFamily.primary,
-                fontSize: typography.fontSize.sm,
-                color: themeColors.text.secondary,
-                margin: `0 0 ${spacing.xl}`,
-            }}>
-                Paste an event or convention website's URL to check its page for mentions of artists in the database —
-                both in the visible text and in guest photos whose alt text or filename names the artist (common on
-                sites where names are baked into images rather than typed out). This renders the page in a headless
-                browser first, so it can also see content that loads via JavaScript — scanning can take up to ~20
-                seconds. Results are a review list only; use the existing "Add Artist to Event" page to confirm and
-                add any matches.
-            </p>
+        <Box sx={styles.page}>
+            <Box sx={styles.inner}>
+                <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+                    Admin
+                </MonoLabel>
+                <Box component="h1" sx={styles.title}>
+                    Scan event for artists
+                </Box>
+                <Box component="p" sx={styles.intro}>
+                    Paste an event or convention website's URL to check its page for mentions of artists in the database —
+                    both in the visible text and in guest photos whose alt text or filename names the artist (common on
+                    sites where names are baked into images rather than typed out). This renders the page in a headless
+                    browser first, so it can also see content that loads via JavaScript — scanning can take up to ~20
+                    seconds. Results are a review list only; use the existing "Add Artist to Event" page to confirm and
+                    add any matches.
+                </Box>
 
-            <div style={{ display: 'flex', gap: spacing.sm, marginBottom: spacing.xl }}>
-                <input
-                    type="url"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleScan(); }}
-                    placeholder="https://example.com/event-page"
-                    disabled={loading}
-                    style={{
-                        flex: 1,
-                        padding: `${spacing.sm} ${spacing.md}`,
-                        borderRadius: borderRadius.sm,
-                        border: borders.thin,
-                        fontFamily: typography.fontFamily.primary,
-                        fontSize: typography.fontSize.base,
-                        color: themeColors.text.primary,
-                        background: themeColors.background.paper,
-                    }}
-                />
-                <button
-                    onClick={handleScan}
-                    disabled={loading || !url.trim()}
-                    style={{
-                        padding: `${spacing.sm} ${spacing.lg}`,
-                        borderRadius: borderRadius.sm,
-                        border: 'none',
-                        background: themeColors.primary.main,
-                        color: colors.primary.contrast,
-                        fontFamily: typography.fontFamily.primary,
-                        fontSize: typography.fontSize.base,
-                        fontWeight: typography.fontWeight.medium,
-                        cursor: loading || !url.trim() ? 'default' : 'pointer',
-                        opacity: loading || !url.trim() ? 0.6 : 1,
-                        whiteSpace: 'nowrap' as const,
-                    }}
+                <Box
+                    component="form"
+                    role="search"
+                    noValidate
+                    onSubmit={(e: React.FormEvent) => { e.preventDefault(); handleScan(); }}
+                    sx={styles.scanBar}
                 >
-                    {loading ? 'Scanning…' : 'Scan'}
-                </button>
-            </div>
+                    <Globe size={18} aria-hidden />
+                    <Box
+                        component="input"
+                        type="url"
+                        value={url}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
+                        placeholder="https://example.com/event-page"
+                        aria-label="Event page URL"
+                        disabled={loading}
+                        sx={styles.scanInput}
+                    />
+                    <Box
+                        component="button"
+                        type="submit"
+                        disabled={loading || !url.trim()}
+                        sx={styles.scanButton}
+                    >
+                        <MagnifyingGlass size={16} weight="bold" aria-hidden />
+                        {loading ? 'Scanning…' : 'Scan'}
+                    </Box>
+                </Box>
 
-            {loading && (
-                <div style={{
-                    color: themeColors.text.secondary,
-                    fontFamily: typography.fontFamily.primary,
-                    fontSize: typography.fontSize.sm,
-                    marginBottom: spacing.xl,
-                }}>
-                    Rendering the page and checking it against every artist in the database — this can take up to ~20 seconds.
-                </div>
-            )}
+                {loading && (
+                    <Box role="status" sx={styles.scanning}>
+                        <Box component="span" sx={styles.pulse}><LiveDot /></Box>
+                        Rendering the page and checking it against every artist in the database — this can take up to ~20 seconds.
+                    </Box>
+                )}
 
-            {error && (
-                <div style={{
-                    padding: spacing.lg,
-                    marginBottom: spacing.xl,
-                    borderRadius: borderRadius.md,
-                    border: `1px solid ${colors.accent.red}`,
-                    background: themeColors.neutral[50],
-                    color: colors.accent.red,
-                    fontFamily: typography.fontFamily.primary,
-                    fontSize: typography.fontSize.sm,
-                }}>
-                    {error.message}
-                </div>
-            )}
+                {error && (
+                    <Box role="alert" sx={styles.errorNotice}>
+                        {error.message}
+                    </Box>
+                )}
 
-            {result && lowText && (
-                <div style={{
-                    padding: spacing.lg,
-                    marginBottom: spacing.xl,
-                    borderRadius: borderRadius.md,
-                    border: `1px solid ${colors.accent.orange}`,
-                    background: colors.accent.orangeLight,
-                    color: colors.accent.orangeDark,
-                    fontFamily: typography.fontFamily.primary,
-                    fontSize: typography.fontSize.sm,
-                }}>
-                    Rendered page text looks very short ({result.scannedTextLength} characters) — the site may not have
-                    finished rendering, or its content may be behind an interaction (scrolling, clicking) this tool
-                    doesn't perform. Consider checking the page manually.
-                </div>
-            )}
+                {result && lowText && (
+                    <Box role="status" sx={styles.warnNotice}>
+                        Rendered page text looks very short ({result.scannedTextLength} characters) — the site may not have
+                        finished rendering, or its content may be behind an interaction (scrolling, clicking) this tool
+                        doesn't perform. Consider checking the page manually.
+                    </Box>
+                )}
 
-            {result && (
-                <div>
-                    <h2 style={{
-                        fontFamily: typography.fontFamily.heading,
-                        fontSize: typography.fontSize.xl,
-                        fontWeight: typography.fontWeight.medium,
-                        color: themeColors.text.primary,
-                        margin: `0 0 ${spacing.md}`,
-                    }}>
-                        {matches.length === 0
-                            ? 'No matching artists found'
-                            : `${matches.length} matching artist${matches.length === 1 ? '' : 's'} found`}
-                    </h2>
+                {result && (
+                    <Box component="section" aria-labelledby="scan-results">
+                        <Box sx={styles.resultsHeader}>
+                            <Box component="h2" id="scan-results" sx={styles.resultsTitle}>
+                                {matches.length === 0
+                                    ? 'No matching artists found'
+                                    : `${matches.length} matching artist${matches.length === 1 ? '' : 's'} found`}
+                            </Box>
+                            <MonoLabel tracking="tight">
+                                {(result.scannedTextLength ?? 0).toLocaleString()} characters scanned
+                            </MonoLabel>
+                        </Box>
 
-                    {matches.length === 0 ? (
-                        <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>
-                            Nothing in the database matched the scanned page text.
-                        </div>
-                    ) : (
-                        matches
-                            .slice()
-                            .sort((a, b) => b.occurrences - a.occurrences)
-                            .map((match) => (
-                                <div
-                                    key={match.artistId ?? match.name}
-                                    style={{
-                                        background: themeColors.background.paper,
-                                        border: borders.thin,
-                                        borderRadius: borderRadius.md,
-                                        padding: spacing.lg,
-                                        marginBottom: spacing.md,
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: spacing.sm, marginBottom: spacing.xs }}>
-                                        <span style={{
-                                            fontFamily: typography.fontFamily.primary,
-                                            fontSize: typography.fontSize.base,
-                                            fontWeight: typography.fontWeight.semibold,
-                                            color: themeColors.text.primary,
-                                        }}>
-                                            {match.name}
-                                        </span>
-                                        {match.matchedAlias !== match.name && (
-                                            <span style={{
-                                                fontFamily: typography.fontFamily.primary,
-                                                fontSize: typography.fontSize.xs,
-                                                color: themeColors.text.secondary,
-                                            }}>
-                                                matched via "{match.matchedAlias}"
-                                            </span>
-                                        )}
-                                        <span style={{
-                                            fontFamily: typography.fontFamily.primary,
-                                            fontSize: typography.fontSize.xs,
-                                            color: themeColors.text.secondary,
-                                            marginLeft: 'auto',
-                                        }}>
-                                            {match.occurrences} occurrence{match.occurrences === 1 ? '' : 's'}
-                                        </span>
-                                    </div>
-                                    {match.snippets.map((snippet, i) => (
-                                        <div
-                                            key={i}
-                                            style={{
-                                                fontFamily: typography.fontFamily.primary,
-                                                fontSize: typography.fontSize.sm,
-                                                color: themeColors.text.secondary,
-                                                fontStyle: 'italic',
-                                                marginTop: spacing.xs,
-                                            }}
-                                        >
-                                            "{snippet}"
-                                        </div>
+                        {matches.length === 0 ? (
+                            <Box sx={styles.empty}>
+                                Nothing in the database matched the scanned page text.
+                            </Box>
+                        ) : (
+                            <Box component="ul" sx={styles.matchList}>
+                                {matches
+                                    .slice()
+                                    .sort((a, b) => b.occurrences - a.occurrences)
+                                    .map((match) => (
+                                        <Box component="li" key={match.artistId ?? match.name} sx={styles.match}>
+                                            <Box sx={styles.matchHead}>
+                                                <Box component="h3" sx={styles.matchName}>{match.name}</Box>
+                                                {match.matchedAlias !== match.name && (
+                                                    <Box component="span" sx={styles.alias}>
+                                                        via "{match.matchedAlias}"
+                                                    </Box>
+                                                )}
+                                                <MonoLabel tracking="tight" sx={styles.occurrences}>
+                                                    {match.occurrences} occurrence{match.occurrences === 1 ? '' : 's'}
+                                                </MonoLabel>
+                                            </Box>
+
+                                            {match.snippets.length > 0 && (
+                                                <Box sx={styles.snippets}>
+                                                    {match.snippets.map((snippet, i) => (
+                                                        <Box component="blockquote" key={i} sx={styles.snippet}>
+                                                            "{snippet}"
+                                                        </Box>
+                                                    ))}
+                                                </Box>
+                                            )}
+
+                                            {match.imageMatches.length > 0 && (
+                                                <Box sx={styles.images}>
+                                                    {match.imageMatches.map((img, i) => (
+                                                        <Box
+                                                            component="a"
+                                                            key={i}
+                                                            href={img.imageUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            title={`Matched via image: "${img.matchedText}" — click to view full size`}
+                                                            sx={styles.imageLink}
+                                                        >
+                                                            <Box
+                                                                component="img"
+                                                                src={img.imageUrl}
+                                                                alt={img.matchedText}
+                                                                loading="lazy"
+                                                                sx={styles.image}
+                                                            />
+                                                        </Box>
+                                                    ))}
+                                                </Box>
+                                            )}
+                                        </Box>
                                     ))}
-                                    {match.imageMatches.length > 0 && (
-                                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: spacing.sm, marginTop: spacing.sm }}>
-                                            {match.imageMatches.map((img, i) => (
-                                                <a
-                                                    key={i}
-                                                    href={img.imageUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    title={`Matched via image: "${img.matchedText}" — click to view full size`}
-                                                    style={{ display: 'block' }}
-                                                >
-                                                    <img
-                                                        src={img.imageUrl}
-                                                        alt={img.matchedText}
-                                                        style={{
-                                                            width: 64,
-                                                            height: 64,
-                                                            objectFit: 'cover',
-                                                            borderRadius: borderRadius.sm,
-                                                            border: borders.thin,
-                                                        }}
-                                                    />
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))
-                    )}
-                </div>
-            )}
-        </div>
+                            </Box>
+                        )}
+                    </Box>
+                )}
+            </Box>
+        </Box>
     );
 }

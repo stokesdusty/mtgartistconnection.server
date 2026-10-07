@@ -23,7 +23,7 @@ import {
 } from '@mui/material';
 import { X, User, CalendarBlank, ArrowSquareOut, ArrowLeft } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEW, GET_ARTIST_FILTER_FLAGS } from '../graphql/queries';
-import { colors } from '../../styles/design-tokens';
+import { colors, typography } from '../../styles/design-tokens';
 import ArtistLink from '../shared/ArtistLink';
 import PageMeta from '../shared/PageMeta';
 
@@ -107,7 +107,7 @@ const NewsArticle: React.FC = () => {
     articleTitle: {
       fontWeight: 700,
       color: colors.neutral[900],
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: typography.fontFamily.display,
       fontSize: '1.75rem',
       flex: 1,
     },

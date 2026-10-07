@@ -20,7 +20,7 @@ import { GET_ARTIST_NAMES } from '../graphql/queries';
 import { GENERATE_MANUAL_NEWS_ARTICLE, UPLOAD_NEWS_IMAGE } from '../graphql/mutations';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
-import { colors } from '../../styles/design-tokens';
+import { colors, typography } from '../../styles/design-tokens';
 
 interface Artist {
   name: string;
@@ -178,7 +178,7 @@ const ManualArticleSubmit: React.FC = () => {
     title: {
       fontWeight: 700,
       color: colors.primary.main,
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: typography.fontFamily.display,
     },
     subtitle: {
       color: colors.neutral[700],

@@ -24,9 +24,6 @@ const Auth = lazy(() => import(/* webpackChunkName: "auth" */ "./components/auth
 const Calendar = lazy(() => import(/* webpackChunkName: "calendar" */ "./components/calendar/Calendar"));
 const EventDetail = lazy(() => import(/* webpackChunkName: "event-detail" */ "./components/calendar/EventDetail"));
 const SigningServices = lazy(() => import(/* webpackChunkName: "signing-services" */ "./components/signingservices/SigningServices"));
-const News = lazy(() => import(/* webpackChunkName: "news" */ "./components/news/News"));
-const NewsArticle = lazy(() => import(/* webpackChunkName: "news-article" */ "./components/news/NewsArticle"));
-const ArtistNews = lazy(() => import(/* webpackChunkName: "artist-news" */ "./components/news/ArtistNews"));
 const AllCards = lazy(() => import(/* webpackChunkName: "all-cards", webpackPrefetch: true */ "./components/allcards/AllCards"));
 const ArtistCardAnalysis = lazy(() => import(/* webpackChunkName: "artist-card-breakdown" */ "./components/artist/ArtistCardBreakdown"));
 const RandomFlavorText = lazy(() => import(/* webpackChunkName: "random-flavor-text" */ "./components/randomflavortext/RandomFlavorText"));
@@ -44,9 +41,8 @@ const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ "./compo
 // Admin-only — routes absent for non-admin sessions so chunks are never fetched
 const AddArtist = lazy(() => import(/* webpackChunkName: "admin-add-artist" */ "./components/blogs/AddArtist"));
 const EditArtist = lazy(() => import(/* webpackChunkName: "admin-edit-artist" */ "./components/blogs/EditArtist"));
-const AdminPostReview = lazy(() => import(/* webpackChunkName: "admin-post-review" */ "./components/socialpostreview/AdminPostReview"));
-const NewsReview = lazy(() => import(/* webpackChunkName: "admin-news-review" */ "./components/newsreview/NewsReview"));
-const ManualArticleSubmit = lazy(() => import(/* webpackChunkName: "admin-manual-article" */ "./components/newsreview/ManualArticleSubmit"));
+// Hidden while the Bluesky post sync is off (webservice commit 7284679)
+// const AdminPostReview = lazy(() => import(/* webpackChunkName: "admin-post-review" */ "./components/socialpostreview/AdminPostReview"));
 const AddEvent = lazy(() => import(/* webpackChunkName: "admin-add-event" */ "./components/blogs/AddEvent"));
 const AddArtistToEvent = lazy(() => import(/* webpackChunkName: "admin-add-artist-to-event" */ "./components/blogs/AddArtistToEvent"));
 const AnalyticsDashboard = lazy(() => import(/* webpackChunkName: "admin-analytics" */ "./components/analytics/AnalyticsDashboard"));
@@ -112,9 +108,8 @@ function App() {
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/calendar/:eventId" element={<EventDetail />} />
                   <Route path="/signingservices" element={<SigningServices />} />
-                  <Route path="/news" element={<News />} />
-                  <Route path="/news/artist/:artistName" element={<ArtistNews />} />
-                  <Route path="/news/:articleId" element={<NewsArticle />} />
+                  {/* News is hidden for now; send old links and indexed URLs home */}
+                  <Route path="/news/*" element={<Navigate to="/" replace />} />
                   <Route path="/artist/:name" element={<Artist />} />
                   {/* Linked from the new-artist digest email; the homepage is the artist list */}
                   <Route path="/artists" element={<Navigate to="/" replace />} />
@@ -133,9 +128,7 @@ function App() {
                   {isAdmin && <>
                     <Route path="/add" element={<AddArtist />} />
                     <Route path="/editartist/:artistId" element={<EditArtist />} />
-                    <Route path="/reviewsocial" element={<AdminPostReview />} />
-                    <Route path="/reviewnews" element={<NewsReview />} />
-                    <Route path="/submitarticle" element={<ManualArticleSubmit />} />
+                    {/* <Route path="/reviewsocial" element={<AdminPostReview />} /> */}
                     <Route path="/addevent" element={<AddEvent />} />
                     <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
                     <Route path="/analytics" element={<AnalyticsDashboard />} />

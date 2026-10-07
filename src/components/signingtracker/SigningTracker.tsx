@@ -6,9 +6,6 @@ import { GET_SIGNING_BATCHES } from '../graphql/queries';
 import { SAVE_SIGNING_BATCH, DELETE_SIGNING_BATCH, REORDER_SIGNING_BATCHES } from '../graphql/mutations';
 import {
   Box,
-  Container,
-  Paper,
-  Typography,
   Button,
   IconButton,
   TextField,
@@ -46,7 +43,15 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { colors, statusColors } from '../../styles/design-tokens';
+import { vault } from '../../styles/design-tokens';
+import {
+  signingTrackerStyles,
+  toneChip,
+  trackerInput,
+  trackerMenuItem,
+  trackerSelect,
+} from '../../styles/signing-tracker-styles';
+import MonoLabel from '../shared/MonoLabel';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -88,18 +93,18 @@ interface SigningBatch {
 const STORAGE_KEY = 'mtgac-signing-tracker';
 
 const STATUS_CONFIG: Record<CardStatus, { label: string; color: string; bg: string }> = {
-  collecting:         { label: 'Collecting',      color: colors.neutral[600],       bg: colors.neutral[100]          },
-  sent:               { label: 'Sent',             color: statusColors.sent.text,    bg: statusColors.sent.bg         },
-  'artist-received':  { label: 'Artist Received',  color: colors.accent.orange,      bg: colors.accent.orangeLight    },
-  signed:             { label: 'Signed',           color: colors.primary.main,       bg: colors.primary.lighter       },
-  'shipped-back':     { label: 'Shipped Back',     color: statusColors.shippedBack.text, bg: statusColors.shippedBack.bg },
-  complete:           { label: 'Complete',         color: statusColors.complete.text, bg: statusColors.complete.bg   },
+  collecting:         { label: 'Collecting',      color: vault.muted,      bg: vault.chipStrong },
+  sent:               { label: 'Sent',            color: vault.info,       bg: vault.infoBg     },
+  'artist-received':  { label: 'Artist Received', color: vault.warn,       bg: vault.warnBg     },
+  signed:             { label: 'Signed',          color: vault.accentText, bg: vault.glow       },
+  'shipped-back':     { label: 'Shipped Back',    color: vault.violet,     bg: vault.violetBg   },
+  complete:           { label: 'Complete',        color: vault.ok,         bg: vault.okBg       },
 };
 
 const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; color: string; bg: string }> = {
-  unpaid:  { label: 'Unpaid',  color: statusColors.unpaidText,    bg: colors.accent.redLight    },
-  partial: { label: 'Partial', color: colors.accent.orange,       bg: colors.accent.orangeLight },
-  paid:    { label: 'Paid',    color: statusColors.complete.text, bg: statusColors.complete.bg  },
+  unpaid:  { label: 'Unpaid',  color: vault.danger, bg: vault.dangerBg },
+  partial: { label: 'Partial', color: vault.warn,   bg: vault.warnBg   },
+  paid:    { label: 'Paid',    color: vault.ok,     bg: vault.okBg     },
 };
 
 const STATUS_ORDER: CardStatus[] = ['collecting', 'sent', 'artist-received', 'signed', 'shipped-back', 'complete'];
@@ -197,30 +202,10 @@ const toDbRows = (rows: CardRow[]) => rows.map(r => ({
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
 
-const smallInput = {
-  '& .MuiInputBase-root': { height: 28, fontSize: '0.75rem', backgroundColor: colors.background.default },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.neutral[200] },
-  '& .MuiInputBase-input': { py: '3px', px: '7px' },
-  '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.neutral[400] },
-};
-
-const smallSelect = {
-  height: 28, fontSize: '0.75rem', width: '100%',
-  backgroundColor: colors.background.default,
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.neutral[200] },
-  '& .MuiSelect-select': { py: '3px', px: '7px', display: 'flex', alignItems: 'center' },
-  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.neutral[400] },
-};
-
-const chipSx = (cfg: { label: string; color: string; bg: string }) => ({
-  backgroundColor: cfg.bg,
-  color: cfg.color,
-  fontSize: '0.65rem',
-  fontWeight: 600,
-  height: 18,
-  cursor: 'pointer',
-  '& .MuiChip-label': { px: '6px' },
-});
+const styles = signingTrackerStyles;
+const smallInput = trackerInput;
+const smallSelect = trackerSelect;
+const chipSx = toneChip;
 
 // ── CardRowEditor ──────────────────────────────────────────────────────────────
 
@@ -249,18 +234,10 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, index, disabled, onChang
   const isEven = index % 2 === 0;
 
   return (
-    <Box sx={{
-      display: 'grid',
-      gridTemplateColumns: GRID_COLS,
-      alignItems: 'center',
-      px: 1, py: 0.35,
-      borderBottom: `1px solid ${colors.neutral[100]}`,
-      backgroundColor: isEven ? colors.accent.greenRow : colors.background.default,
-      '&:hover': { backgroundColor: colors.accent.greenRowHover },
-    }}>
-      <Box sx={{ px: 0.5 }}>{txt('cardName')}</Box>
+    <Box sx={[styles.row, { display: 'grid', gridTemplateColumns: GRID_COLS }, isEven ? styles.rowStriped : {}]}>
+      <Box sx={styles.cell}>{txt('cardName')}</Box>
 
-      <Box sx={{ px: 0.5 }}>
+      <Box sx={styles.cell}>
         <TextField
           type="number"
           value={row.quantity}
@@ -268,27 +245,27 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, index, disabled, onChang
           disabled={disabled}
           size="small"
           fullWidth
-          inputProps={{ min: 1, style: { padding: '3px 4px', fontSize: '0.75rem', textAlign: 'center' } }}
-          sx={{ '& .MuiOutlinedInput-root': { height: 28, backgroundColor: colors.background.default, '& fieldset': { borderColor: colors.neutral[200] } } }}
+          inputProps={{ min: 1, style: { padding: '4px', textAlign: 'center' } }}
+          sx={smallInput}
         />
       </Box>
 
-      <Box sx={{ px: 0.5 }}>{txt('set')}</Box>
+      <Box sx={styles.cell}>{txt('set')}</Box>
 
-      <Box sx={{ px: 0.5 }}>
+      <Box sx={styles.cell}>
         <Select value={row.foil} onChange={e => onChange({ foil: e.target.value as FoilType })}
           disabled={disabled} size="small" sx={smallSelect}>
-          <MenuItem value="non-foil" sx={{ fontSize: '0.75rem' }}>Non-Foil</MenuItem>
-          <MenuItem value="foil" sx={{ fontSize: '0.75rem' }}>Foil</MenuItem>
+          <MenuItem value="non-foil" sx={trackerMenuItem}>Non-Foil</MenuItem>
+          <MenuItem value="foil" sx={trackerMenuItem}>Foil</MenuItem>
         </Select>
       </Box>
 
-      <Box sx={{ px: 0.5 }}>{txt('owner')}</Box>
-      <Box sx={{ px: 0.5 }}>{txt('artist')}</Box>
-      <Box sx={{ px: 0.5 }}>{txt('signatureType')}</Box>
-      <Box sx={{ px: 0.5 }}>{txt('sigNotes')}</Box>
+      <Box sx={styles.cell}>{txt('owner')}</Box>
+      <Box sx={styles.cell}>{txt('artist')}</Box>
+      <Box sx={styles.cell}>{txt('signatureType')}</Box>
+      <Box sx={styles.cell}>{txt('sigNotes')}</Box>
 
-      <Box sx={{ px: 0.5 }}>
+      <Box sx={styles.cell}>
         <TextField
           type="number"
           value={row.pricePerSig || ''}
@@ -296,18 +273,14 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, index, disabled, onChang
           disabled={disabled}
           size="small"
           fullWidth
-          inputProps={{ min: 0, step: 0.01, style: { padding: '3px 7px', fontSize: '0.75rem' } }}
-          sx={{ '& .MuiOutlinedInput-root': { height: 28, backgroundColor: colors.background.default, '& fieldset': { borderColor: colors.neutral[200] } } }}
+          inputProps={{ min: 0, step: 0.01, style: { padding: '4px 8px' } }}
+          sx={smallInput}
         />
       </Box>
 
-      <Box sx={{ px: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-        <Typography sx={{ fontSize: '0.75rem', color: colors.neutral[800], fontWeight: 500, pr: 0.5 }}>
-          ${total}
-        </Typography>
-      </Box>
+      <Box sx={styles.totalCell}>${total}</Box>
 
-      <Box sx={{ px: 0.5 }}>
+      <Box sx={styles.cell}>
         <Select value={row.paymentStatus}
           onChange={e => onChange({ paymentStatus: e.target.value as PaymentStatus })}
           disabled={disabled} size="small"
@@ -317,15 +290,14 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, index, disabled, onChang
           )}
           sx={smallSelect}>
           {(Object.keys(PAYMENT_CONFIG) as PaymentStatus[]).map(s => (
-            <MenuItem key={s} value={s} sx={{ fontSize: '0.75rem' }}>
-              <Chip label={PAYMENT_CONFIG[s].label} size="small"
-                sx={{ ...chipSx(PAYMENT_CONFIG[s]), cursor: 'pointer' }} />
+            <MenuItem key={s} value={s} sx={trackerMenuItem}>
+              <Chip label={PAYMENT_CONFIG[s].label} size="small" sx={chipSx(PAYMENT_CONFIG[s])} />
             </MenuItem>
           ))}
         </Select>
       </Box>
 
-      <Box sx={{ px: 0.5 }}>
+      <Box sx={styles.cell}>
         <Select value={row.status}
           onChange={e => onChange({ status: e.target.value as CardStatus })}
           disabled={disabled} size="small"
@@ -335,42 +307,40 @@ const CardRowEditor: React.FC<RowEditorProps> = ({ row, index, disabled, onChang
           )}
           sx={smallSelect}>
           {(Object.keys(STATUS_CONFIG) as CardStatus[]).map(s => (
-            <MenuItem key={s} value={s} sx={{ fontSize: '0.75rem' }}>
-              <Chip label={STATUS_CONFIG[s].label} size="small"
-                sx={{ ...chipSx(STATUS_CONFIG[s]), cursor: 'pointer' }} />
+            <MenuItem key={s} value={s} sx={trackerMenuItem}>
+              <Chip label={STATUS_CONFIG[s].label} size="small" sx={chipSx(STATUS_CONFIG[s])} />
             </MenuItem>
           ))}
         </Select>
       </Box>
 
-      <Box sx={{ px: 0.5 }}>
+      <Box sx={styles.cell}>
         <Select value={row.signingMethod}
           onChange={e => onChange({ signingMethod: e.target.value as SigningMethod })}
           disabled={disabled} size="small" sx={smallSelect}>
           {(Object.keys(SIGNING_METHOD_LABELS) as SigningMethod[]).map(m => (
-            <MenuItem key={m} value={m} sx={{ fontSize: '0.75rem' }}>
+            <MenuItem key={m} value={m} sx={trackerMenuItem}>
               {SIGNING_METHOD_LABELS[m]}
             </MenuItem>
           ))}
         </Select>
       </Box>
 
-      <Box sx={{ px: 0.5 }}>
+      <Box sx={styles.cell}>
         {row.signingMethod !== 'mail-to-artist'
           ? txt('signingMethodLabel')
-          : <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[400], px: 0.5 }}>—</Typography>
+          : <Box component="span" sx={styles.dash}>—</Box>
         }
       </Box>
 
-      <Box sx={{ px: 0.5 }}>{txt('outboundTracking')}</Box>
-      <Box sx={{ px: 0.5 }}>{txt('inboundTracking')}</Box>
+      <Box sx={styles.cell}>{txt('outboundTracking')}</Box>
+      <Box sx={styles.cell}>{txt('inboundTracking')}</Box>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={styles.removeCell}>
         {!disabled && (
           <Tooltip title="Remove row">
-            <IconButton size="small" onClick={onDelete}
-              sx={{ p: 0.4, color: colors.neutral[400], '&:hover': { color: colors.accent.red, backgroundColor: colors.accent.redLight } }}>
-              <Trash size={13} />
+            <IconButton size="small" onClick={onDelete} aria-label="Remove row" sx={styles.iconButtonDanger}>
+              <Trash size={14} />
             </IconButton>
           </Tooltip>
         )}
@@ -444,33 +414,18 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
     setTimeout(() => setBulkPayment(''), 80);
   };
 
-  const bulkSelectSx = {
-    ...smallSelect, height: 26,
-    '& .MuiSelect-select': { py: '2px', px: '8px', display: 'flex', alignItems: 'center' },
-  };
+  const bulkSelectSx = { ...smallSelect, height: 28 };
+  const bulkPlaceholder = <Box component="span" sx={styles.bulkPlaceholder}>— pick —</Box>;
 
   return (
-    <Paper elevation={0} sx={{
-      border: `1px solid ${colors.neutral[200]}`,
-      borderRadius: '12px',
-      overflow: 'hidden',
-      backgroundColor: batch.archived ? colors.neutral[50] : colors.background.default,
-    }}>
+    <Box sx={[styles.panel, batch.archived ? styles.panelArchived : {}]}>
       {/* Batch header */}
-      <Box sx={{
-        display: 'flex', alignItems: 'center', gap: 0.75,
-        px: 1.5, py: 1.25,
-        backgroundColor: batch.archived ? colors.neutral[100] : colors.background.default,
-        borderBottom: batch.expanded ? `1px solid ${colors.neutral[200]}` : 'none',
-      }}>
+      <Box sx={[styles.panelHeader, batch.expanded ? styles.panelHeaderOpen : {}]}>
         {!batch.archived && dragListeners && (
           <Box
             {...(dragListeners as React.HTMLAttributes<HTMLDivElement>)}
-            sx={{
-              color: colors.neutral[400], display: 'flex', alignItems: 'center',
-              cursor: 'grab', touchAction: 'none', px: 0.25,
-              '&:active': { cursor: 'grabbing', color: colors.neutral[500] },
-            }}
+            aria-label="Drag to reorder batch"
+            sx={styles.dragHandle}
           >
             <DotsSixVertical size={16} />
           </Box>
@@ -478,7 +433,9 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
 
         <IconButton size="small"
           onClick={() => onUpdateBatch(batch.id, { expanded: !batch.expanded })}
-          sx={{ color: colors.neutral[500], p: 0.4 }}>
+          aria-label={batch.expanded ? 'Collapse batch' : 'Expand batch'}
+          aria-expanded={batch.expanded}
+          sx={styles.iconButton}>
           {batch.expanded ? <CaretDown size={15} /> : <CaretRight size={15} />}
         </IconButton>
 
@@ -492,60 +449,54 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
               if (e.key === 'Escape') { setNameVal(batch.name); setEditingName(false); }
             }}
             autoFocus size="small"
-            sx={{ ...smallInput, width: 250 }}
+            sx={styles.batchNameInput}
           />
         ) : (
-          <Typography
+          <Box
+            component="span"
             onClick={() => !batch.archived && setEditingName(true)}
-            sx={{
-              fontWeight: 600, fontSize: '0.875rem', color: colors.neutral[900],
-              cursor: batch.archived ? 'default' : 'text',
-              '&:hover': batch.archived ? {} : { color: colors.primary.main },
-            }}
+            sx={[styles.batchName, batch.archived ? {} : styles.batchNameEditable]}
           >
             {batch.name}
-          </Typography>
+          </Box>
         )}
 
-        <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[500], ml: 0.25 }}>
+        <Box component="span" sx={styles.batchMeta}>
           {new Date(batch.createdAt).toLocaleDateString()} · {batch.rows.length} row{batch.rows.length !== 1 ? 's' : ''}
-        </Typography>
+        </Box>
 
         {allComplete && !batch.archived && (
-          <Chip label="All Complete" size="small"
-            sx={{ ml: 0.5, backgroundColor: statusColors.complete.bg, color: statusColors.complete.text, fontSize: '0.65rem', fontWeight: 600, height: 18 }} />
+          <Chip label="All Complete" size="small" sx={chipSx(STATUS_CONFIG.complete)} />
         )}
 
         {!allComplete && batch.rows.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, ml: 0.5 }}>
+          <Box sx={styles.statusChips}>
             {STATUS_ORDER.filter(s => statusCounts[s]).map(s => (
               <Chip key={s} size="small"
                 label={`${statusCounts[s]} ${STATUS_CONFIG[s].label}`}
-                sx={{ backgroundColor: STATUS_CONFIG[s].bg, color: STATUS_CONFIG[s].color, fontSize: '0.65rem', fontWeight: 600, height: 18 }}
+                sx={[chipSx(STATUS_CONFIG[s]), { cursor: 'default' }]}
               />
             ))}
           </Box>
         )}
 
-        <Box sx={{ flex: 1 }} />
+        <Box sx={styles.spacer} />
 
         {batchTotal > 0 && (
-          <Typography sx={{ fontSize: '0.75rem', color: colors.neutral[600], fontWeight: 500, mr: 0.5 }}>
+          <Box component="span" sx={styles.batchTotal}>
             ${batchTotal.toFixed(2)}
-          </Typography>
+          </Box>
         )}
 
         {!batch.archived ? (
           <Tooltip title="Archive batch">
-            <IconButton size="small" onClick={() => onArchive(batch.id)}
-              sx={{ color: colors.neutral[400], '&:hover': { color: colors.primary.main } }}>
+            <IconButton size="small" onClick={() => onArchive(batch.id)} aria-label="Archive batch" sx={styles.iconButton}>
               <Archive size={15} />
             </IconButton>
           </Tooltip>
         ) : onUnarchive ? (
           <Tooltip title="Restore batch">
-            <IconButton size="small" onClick={() => onUnarchive(batch.id)}
-              sx={{ color: colors.neutral[400], '&:hover': { color: colors.primary.main } }}>
+            <IconButton size="small" onClick={() => onUnarchive(batch.id)} aria-label="Restore batch" sx={styles.iconButton}>
               <ArrowCounterClockwise size={15} />
             </IconButton>
           </Tooltip>
@@ -556,7 +507,8 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
             onClick={() => {
               if (window.confirm(`Delete "${batch.name}"? This cannot be undone.`)) onDelete(batch.id);
             }}
-            sx={{ color: colors.neutral[400], '&:hover': { color: colors.accent.red } }}>
+            aria-label="Delete batch"
+            sx={styles.iconButtonDanger}>
             <Trash size={15} />
           </IconButton>
         </Tooltip>
@@ -565,76 +517,63 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
       <Collapse in={batch.expanded} unmountOnExit>
         {/* Bulk-set bar */}
         {!batch.archived && batch.rows.length > 0 && (
-          <Box sx={{
-            display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5,
-            px: 2, py: 0.9,
-            backgroundColor: colors.primary.lighter,
-            borderBottom: `1px solid ${statusColors.primaryMutedBorder}`,
-          }}>
-            <Typography sx={{
-              fontSize: '0.65rem', fontWeight: 700, color: colors.primary.main,
-              textTransform: 'uppercase', letterSpacing: '0.06em', mr: 0.5,
-            }}>
-              Set all rows:
-            </Typography>
+          <Box sx={styles.bulkBar}>
+            <MonoLabel tone="accent" tracking="tight">Set all rows</MonoLabel>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[600] }}>Status</Typography>
+            <Box sx={styles.bulkGroup}>
+              <Box component="span" sx={styles.bulkLabel}>Status</Box>
               <Select value={bulkStatus} displayEmpty
                 onChange={e => applyBulkStatus(e.target.value as string)}
                 size="small"
+                inputProps={{ 'aria-label': 'Set status for all rows' }}
                 renderValue={val =>
                   val
                     ? <Chip label={STATUS_CONFIG[val as CardStatus].label} size="small"
-                        sx={{ ...chipSx(STATUS_CONFIG[val as CardStatus]), cursor: 'pointer' }} />
-                    : <Typography sx={{ fontSize: '0.72rem', color: colors.neutral[500] }}>— pick —</Typography>
+                        sx={chipSx(STATUS_CONFIG[val as CardStatus])} />
+                    : bulkPlaceholder
                 }
-                sx={{ ...bulkSelectSx, width: 136 }}>
+                sx={{ ...bulkSelectSx, width: 140 }}>
                 {(Object.keys(STATUS_CONFIG) as CardStatus[]).map(s => (
-                  <MenuItem key={s} value={s} sx={{ fontSize: '0.75rem' }}>
-                    <Chip label={STATUS_CONFIG[s].label} size="small"
-                      sx={{ ...chipSx(STATUS_CONFIG[s]), cursor: 'pointer' }} />
+                  <MenuItem key={s} value={s} sx={trackerMenuItem}>
+                    <Chip label={STATUS_CONFIG[s].label} size="small" sx={chipSx(STATUS_CONFIG[s])} />
                   </MenuItem>
                 ))}
               </Select>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[600] }}>Payment</Typography>
+            <Box sx={styles.bulkGroup}>
+              <Box component="span" sx={styles.bulkLabel}>Payment</Box>
               <Select value={bulkPayment} displayEmpty
                 onChange={e => applyBulkPayment(e.target.value as string)}
                 size="small"
+                inputProps={{ 'aria-label': 'Set payment for all rows' }}
                 renderValue={val =>
                   val
                     ? <Chip label={PAYMENT_CONFIG[val as PaymentStatus].label} size="small"
-                        sx={{ ...chipSx(PAYMENT_CONFIG[val as PaymentStatus]), cursor: 'pointer' }} />
-                    : <Typography sx={{ fontSize: '0.72rem', color: colors.neutral[500] }}>— pick —</Typography>
+                        sx={chipSx(PAYMENT_CONFIG[val as PaymentStatus])} />
+                    : bulkPlaceholder
                 }
-                sx={{ ...bulkSelectSx, width: 110 }}>
+                sx={{ ...bulkSelectSx, width: 112 }}>
                 {(Object.keys(PAYMENT_CONFIG) as PaymentStatus[]).map(s => (
-                  <MenuItem key={s} value={s} sx={{ fontSize: '0.75rem' }}>
-                    <Chip label={PAYMENT_CONFIG[s].label} size="small"
-                      sx={{ ...chipSx(PAYMENT_CONFIG[s]), cursor: 'pointer' }} />
+                  <MenuItem key={s} value={s} sx={trackerMenuItem}>
+                    <Chip label={PAYMENT_CONFIG[s].label} size="small" sx={chipSx(PAYMENT_CONFIG[s])} />
                   </MenuItem>
                 ))}
               </Select>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[600] }}>Method</Typography>
+            <Box sx={styles.bulkGroup}>
+              <Box component="span" sx={styles.bulkLabel}>Method</Box>
               <Select value={bulkMethod} displayEmpty
                 onChange={e => applyBulkMethod(e.target.value as string)}
                 size="small"
+                inputProps={{ 'aria-label': 'Set method for all rows' }}
                 renderValue={val =>
-                  val
-                    ? <Typography sx={{ fontSize: '0.72rem', color: colors.neutral[800] }}>
-                        {SIGNING_METHOD_LABELS[val as SigningMethod]}
-                      </Typography>
-                    : <Typography sx={{ fontSize: '0.72rem', color: colors.neutral[500] }}>— pick —</Typography>
+                  val ? SIGNING_METHOD_LABELS[val as SigningMethod] : bulkPlaceholder
                 }
-                sx={{ ...bulkSelectSx, width: 130 }}>
+                sx={{ ...bulkSelectSx, width: 134 }}>
                 {(Object.keys(SIGNING_METHOD_LABELS) as SigningMethod[]).map(m => (
-                  <MenuItem key={m} value={m} sx={{ fontSize: '0.75rem' }}>
+                  <MenuItem key={m} value={m} sx={trackerMenuItem}>
                     {SIGNING_METHOD_LABELS[m]}
                   </MenuItem>
                 ))}
@@ -644,40 +583,26 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
         )}
 
         {/* Scrollable table */}
-        <Box sx={{ overflowX: 'auto' }}>
-          <Box sx={{ minWidth: 1540 }}>
-            <Box sx={{
-              display: 'grid', gridTemplateColumns: GRID_COLS,
-              px: 1, py: 0.75,
-              backgroundColor: colors.neutral[50],
-              borderBottom: `1px solid ${colors.neutral[200]}`,
-            }}>
+        <Box sx={styles.tableScroll}>
+          <Box sx={styles.tableInner}>
+            <Box sx={[styles.headerRow, { display: 'grid', gridTemplateColumns: GRID_COLS }]}>
               {COL_HEADERS.map((h, i) => (
                 i === 0 ? (
-                  <Box key={i} onClick={toggleSort} sx={{
-                    px: 0.5, display: 'flex', alignItems: 'center', gap: 0.25,
-                    cursor: 'pointer', userSelect: 'none',
-                    '&:hover .sort-label': { color: colors.primary.main },
-                  }}>
-                    <Typography className="sort-label" sx={{
-                      fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.05em',
-                      textTransform: 'uppercase',
-                      color: sortDir ? colors.primary.main : colors.neutral[500],
-                    }}>
-                      {h}
-                    </Typography>
-                    {sortDir === 'asc' && <CaretUp size={10} color={colors.primary.main} />}
-                    {sortDir === 'desc' && <CaretDown size={10} color={colors.primary.main} />}
-                    {sortDir === null && <CaretDown size={10} color={colors.neutral[400]} />}
+                  <Box
+                    key={i}
+                    component="button"
+                    type="button"
+                    onClick={toggleSort}
+                    aria-label={`Sort by card name${sortDir ? ` (${sortDir === 'asc' ? 'ascending' : 'descending'})` : ''}`}
+                    sx={[styles.sortHeader, sortDir ? styles.sortHeaderActive : {}]}
+                  >
+                    <MonoLabel tone="inherit" size={10} tracking="tight">{h}</MonoLabel>
+                    {sortDir === 'desc' ? <CaretDown size={10} /> : sortDir === 'asc' ? <CaretUp size={10} /> : <CaretDown size={10} />}
                   </Box>
                 ) : (
-                  <Typography key={i} sx={{
-                    px: 0.5, fontSize: '0.65rem', fontWeight: 600,
-                    color: colors.neutral[500], textTransform: 'uppercase', letterSpacing: '0.05em',
-                    userSelect: 'none',
-                  }}>
+                  <MonoLabel key={i} size={10} tracking="tight" sx={styles.colHeader}>
                     {h}
-                  </Typography>
+                  </MonoLabel>
                 )
               ))}
             </Box>
@@ -694,38 +619,27 @@ const BatchPanel: React.FC<BatchPanelProps> = ({
             ))}
 
             {batch.rows.length === 0 && (
-              <Box sx={{ px: 2, py: 2 }}>
-                <Typography sx={{ fontSize: '0.8rem', color: colors.neutral[500], fontStyle: 'italic' }}>
-                  No cards in this batch.
-                </Typography>
-              </Box>
+              <Box sx={styles.emptyRows}>No cards in this batch.</Box>
             )}
           </Box>
         </Box>
 
-        <Box sx={{
-          px: 2, py: 1.25, borderTop: `1px solid ${colors.neutral[200]}`,
-          display: 'flex', alignItems: 'center',
-        }}>
+        <Box sx={styles.panelFooter}>
           {!batch.archived && (
-            <Button startIcon={<Plus size={13} />} onClick={() => onAddRow(batch.id)} size="small"
-              sx={{
-                color: colors.primary.main, textTransform: 'none', fontSize: '0.8rem',
-                fontWeight: 600, px: 1.5, py: 0.5,
-                '&:hover': { backgroundColor: colors.primary.lighter },
-              }}>
-              Add Card
+            <Button startIcon={<Plus size={13} weight="bold" />} onClick={() => onAddRow(batch.id)} size="small"
+              sx={styles.addCardButton}>
+              Add card
             </Button>
           )}
-          <Box sx={{ flex: 1 }} />
+          <Box sx={styles.spacer} />
           {batchTotal > 0 && (
-            <Typography sx={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
+            <Box component="span" sx={styles.footerTotal}>
               Batch total: <strong>${batchTotal.toFixed(2)}</strong>
-            </Typography>
+            </Box>
           )}
         </Box>
       </Collapse>
-    </Paper>
+    </Box>
   );
 };
 
@@ -986,89 +900,60 @@ const SigningTracker: React.FC = () => {
 
   if (!dbInitialized) {
     return (
-      <Box sx={{ backgroundColor: colors.neutral[100], minHeight: '100vh', py: 4 }}>
-        <Container maxWidth={false} sx={{ maxWidth: 1680, px: { xs: 1, sm: 2, md: 3 } }}>
-          <Typography sx={{ color: colors.neutral[500], fontSize: '0.875rem' }}>Loading…</Typography>
-        </Container>
+      <Box sx={styles.page}>
+        <Box sx={styles.inner}>
+          <Box role="status" sx={styles.loading}>Loading…</Box>
+        </Box>
       </Box>
     );
   }
 
+  const activeCardCount = active.reduce((sum, b) => sum + b.rows.length, 0);
+
   return (
-    <Box sx={{ backgroundColor: colors.neutral[100], minHeight: '100vh', py: 4 }}>
-      <Container maxWidth={false} sx={{ maxWidth: 1680, px: { xs: 1, sm: 2, md: 3 } }}>
+    <Box sx={styles.page}>
+      <Box sx={styles.inner}>
 
         {/* Page header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={styles.hero}>
           <Box>
-            <Typography variant="h4" sx={{
-              fontWeight: 700, color: colors.primary.main,
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-            }}>
-              Signing Tracker
-            </Typography>
-            <Typography sx={{ fontSize: '0.875rem', color: colors.neutral[500], mt: 0.5 }}>
+            <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+              {active.length} active {active.length === 1 ? 'batch' : 'batches'} · {activeCardCount} {activeCardCount === 1 ? 'card' : 'cards'}
+            </MonoLabel>
+            <Box component="h1" sx={styles.title}>
+              Signing tracker
+            </Box>
+            <Box component="p" sx={styles.subtitle}>
               Track cards sent out for signatures
-            </Typography>
+            </Box>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+          <Box sx={styles.actions}>
             {active.length > 0 && (
-              <Button
-                onClick={toggleAllExpanded}
-                variant="outlined"
-                size="small"
-                sx={{
-                  color: colors.primary.main,
-                  borderColor: statusColors.primaryMutedBorder,
-                  textTransform: 'none',
-                  fontWeight: 600, fontSize: '0.8rem', borderRadius: '8px', px: 2,
-                  '&:hover': { borderColor: colors.primary.main, backgroundColor: colors.primary.lighter },
-                }}
-              >
-                {anyExpanded ? 'Collapse All' : 'Expand All'}
+              <Button onClick={toggleAllExpanded} sx={styles.secondaryButton}>
+                {anyExpanded ? 'Collapse all' : 'Expand all'}
               </Button>
             )}
-            <Button
-              startIcon={<Plus size={16} />}
-              onClick={createBatch}
-              sx={{
-                backgroundColor: colors.primary.main, color: colors.primary.contrast,
-                textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
-                borderRadius: '8px', px: 2.5, py: 1,
-                '&:hover': { backgroundColor: colors.primary.dark },
-              }}
-            >
-              New Batch
+            <Button startIcon={<Plus size={16} weight="bold" />} onClick={createBatch} sx={styles.primaryButton}>
+              New batch
             </Button>
           </Box>
         </Box>
 
         {!isLoggedIn && (
-          <Paper elevation={0} sx={{
-            p: 1.5, mb: 2.5, borderRadius: '8px',
-            border: `1px solid ${colors.neutral[300]}`,
-            backgroundColor: colors.neutral[50],
-          }}>
-            <Typography sx={{ fontSize: '0.8rem', color: colors.neutral[600] }}>
-              You're not logged in — data is saved in your browser only. Log in to sync across devices.
-            </Typography>
-          </Paper>
+          <Box sx={styles.notice}>
+            You're not logged in — data is saved in your browser only. Log in to sync across devices.
+          </Box>
         )}
 
         {/* Active batches — sortable */}
         {active.length === 0 ? (
-          <Paper elevation={0} sx={{
-            p: 5, borderRadius: '12px', border: `1px solid ${colors.neutral[200]}`,
-            textAlign: 'center', backgroundColor: colors.background.default,
-          }}>
-            <Typography sx={{ color: colors.neutral[500], fontSize: '0.875rem', fontStyle: 'italic' }}>
-              No active batches. Click "New Batch" to start tracking.
-            </Typography>
-          </Paper>
+          <Box sx={styles.emptyPanel}>
+            No active batches. Click "New batch" to start tracking.
+          </Box>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={active.map(b => b.id)} strategy={verticalListSortingStrategy}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={styles.batchList}>
                 {active.map(batch => (
                   <SortableBatchPanel
                     key={batch.id}
@@ -1084,20 +969,20 @@ const SigningTracker: React.FC = () => {
 
         {/* Archived batches */}
         {archived.length > 0 && (
-          <Box sx={{ mt: 4 }}>
-            <Button disableRipple
-              startIcon={showArchived ? <CaretDown size={14} /> : <CaretRight size={14} />}
+          <Box component="section" sx={styles.archivedSection}>
+            <Box
+              component="button"
+              type="button"
               onClick={() => setShowArchived(v => !v)}
-              sx={{
-                color: colors.neutral[600], textTransform: 'none', fontSize: '0.875rem',
-                fontWeight: 600, px: 0, mb: 1.5, minWidth: 0,
-                '&:hover': { backgroundColor: 'transparent', color: colors.neutral[800] },
-              }}
+              aria-expanded={showArchived}
+              sx={styles.archivedToggle}
             >
-              Archived Batches ({archived.length})
-            </Button>
+              {showArchived ? <CaretDown size={14} /> : <CaretRight size={14} />}
+              Archived batches
+              <MonoLabel tone="faint" tracking="tight">{archived.length}</MonoLabel>
+            </Box>
             <Collapse in={showArchived}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={styles.batchList}>
                 {archived.map(batch => (
                   <BatchPanel
                     key={batch.id}
@@ -1111,7 +996,7 @@ const SigningTracker: React.FC = () => {
           </Box>
         )}
 
-      </Container>
+      </Box>
     </Box>
   );
 };

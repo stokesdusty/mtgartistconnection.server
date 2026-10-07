@@ -1,31 +1,31 @@
-import {
-  Box,
-  Typography,
-  Link,
-  Paper,
-  LinearProgress,
-  Button,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Container,
-} from "@mui/material";
+import { Box, Menu, MenuItem } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTIST_NAMES } from "../graphql/queries";
 import { MEDIA_BASE_URL } from "../../config/media";
 import { useQuery } from "@apollo/client";
-import { CalendarBlank, MapPin, UsersThree, Calendar, DownloadSimple, ArrowLeft } from "@phosphor-icons/react";
-import { colors, themeColors } from "../../styles/design-tokens";
+import { ArrowLeft, ArrowUpRight, CaretDown, Calendar, DownloadSimple } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { useParams, useNavigate } from "react-router-dom";
-import { contentPageStyles } from "../../styles/content-page-styles";
+import { useParams } from "react-router-dom";
 import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
+import { daysUntil, eventStatusLabel, formatDateRangeWithYear } from "../../utils/eventDates";
+import { eventDetailStyles as styles } from "../../styles/event-detail-styles";
+import MonoLabel from "../shared/MonoLabel";
+import Slab from "../shared/Slab";
+import { SkeletonBar } from "../shared/Skeletons";
+import { LiveDot } from "../shared/GlowPill";
+
+const backLink = (
+  <Box sx={styles.backRow}>
+    <Box component={RouterLink} to="/calendar" sx={styles.backLink}>
+      <ArrowLeft size={14} aria-hidden />
+      Signing calendar
+    </Box>
+  </Box>
+);
 
 const EventDetail = () => {
   const { eventId } = useParams<{ eventId: string }>();
-  const navigate = useNavigate();
   const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<null | HTMLElement>(null);
 
   const { data: eventsData, error: eventError, loading: eventLoading } = useQuery(GET_SIGNINGEVENTS);
@@ -43,19 +43,21 @@ const EventDetail = () => {
     return eventsData.signingEvent.find((e: any) => e.id === eventId);
   }, [eventsData, eventId]);
 
-  // Map artist names to their full data (including filename for images)
+  // Map artist names to their full data (including filename for images), A–Z
   const artistsWithImages = useMemo(() => {
     if (!artistData?.mapArtistToEventByEventId || !allArtistsData?.artistNames) return [];
 
-    return artistData.mapArtistToEventByEventId.map((eventArtist: any) => {
-      const fullArtist = allArtistsData.artistNames.find(
-        (a: any) => a.name === eventArtist.artistName
-      );
-      return {
-        name: eventArtist.artistName,
-        filename: fullArtist?.filename || null,
-      };
-    });
+    return artistData.mapArtistToEventByEventId
+      .map((eventArtist: any) => {
+        const fullArtist = allArtistsData.artistNames.find(
+          (a: any) => a.name === eventArtist.artistName
+        );
+        return {
+          name: eventArtist.artistName as string,
+          filename: (fullArtist?.filename || null) as string | null,
+        };
+      })
+      .sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
   }, [artistData, allArtistsData]);
 
   usePageTitle(event?.name ?? "Event");
@@ -111,249 +113,175 @@ const EventDetail = () => {
 
   if (eventLoading) {
     return (
-      <Box sx={contentPageStyles.container}>
-        <Container maxWidth="lg">
-          <Paper elevation={0} sx={contentPageStyles.wrapper}>
-            <Box sx={contentPageStyles.loadingContainer}>
-              <LinearProgress />
-            </Box>
-          </Paper>
-        </Container>
+      <Box sx={styles.page} aria-busy="true">
+        {backLink}
+        <Box sx={styles.hero}>
+          <Box>
+            <SkeletonBar width={110} height={14} sx={{ mb: 2 }} />
+            <SkeletonBar width="min(520px, 70%)" height={64} radius="8px" />
+          </Box>
+          <Box sx={[styles.panel, { height: 216 }]} />
+        </Box>
+        <Box sx={styles.artistsSection}>
+          <Box sx={styles.grid}>
+            {Array.from({ length: 8 }, (_, i) => (
+              <Slab key={i} aspectRatio="5 / 6" mobileAspectRatio="4 / 5" />
+            ))}
+          </Box>
+        </Box>
       </Box>
     );
   }
 
   if (eventError || !event) {
     return (
-      <Box sx={contentPageStyles.container}>
-        <Container maxWidth="lg">
-          <Paper elevation={0} sx={contentPageStyles.wrapper}>
-            <Typography sx={contentPageStyles.errorMessage}>
-              {eventError ? `Error loading event: ${eventError.message}` : 'Event not found'}
-            </Typography>
-            <Button
-              startIcon={<ArrowLeft size={18} />}
-              onClick={() => navigate('/calendar')}
-              sx={{ mt: 2, color: themeColors.primary.main }}
-            >
-              Back to Calendar
-            </Button>
-          </Paper>
-        </Container>
+      <Box sx={styles.page}>
+        {backLink}
+        <Box component="p" sx={styles.statusMessage}>
+          {eventError ? `Error loading event: ${eventError.message}` : 'Event not found'}
+        </Box>
       </Box>
     );
   }
 
-  const startDateFormatted = new Date(event.startDate).toLocaleDateString();
-  const endDateFormatted = new Date(event.endDate).toLocaleDateString();
+  const status = eventStatusLabel(event.startDate, event.endDate);
+  const isPast = daysUntil(event.endDate) < 0;
+  const confirmedCount = artistData?.mapArtistToEventByEventId?.length;
 
   return (
-    <Box sx={contentPageStyles.container}>
-      <Container maxWidth="lg">
-        <Paper elevation={0} sx={contentPageStyles.wrapper}>
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            {event.url ? (
-              <Link
-                href={event.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                underline="hover"
-                sx={{ textDecoration: 'none' }}
-              >
-                <Typography variant="h1" sx={contentPageStyles.pageTitle}>
-                  {event.name}
-                </Typography>
-              </Link>
-            ) : (
-              <Typography variant="h1" sx={contentPageStyles.pageTitle}>
-                {event.name}
-              </Typography>
-            )}
+    <Box sx={styles.page}>
+      {backLink}
 
-            <Box sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 3,
-              alignItems: 'center',
-              justifyContent: 'center',
-              mt: 3,
-            }}>
-              <Box sx={contentPageStyles.infoItem}>
-                <CalendarBlank size={18} weight="duotone" />
-                <Typography>
-                  {startDateFormatted}{startDateFormatted !== endDateFormatted && ` - ${endDateFormatted}`}
-                </Typography>
+      <Box sx={styles.hero}>
+        <Box>
+          <MonoLabel tone={isPast ? 'faint' : 'accent'} size={12} tracking="wide" sx={styles.eyebrow}>
+            {!isPast && <LiveDot />}
+            {status}
+          </MonoLabel>
+          <Box component="h1" sx={styles.title}>{event.name}</Box>
+          {event.url && (
+            <Box
+              component="a"
+              href={event.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={styles.siteLink}
+            >
+              Visit event site
+              <ArrowUpRight size={13} aria-hidden />
+            </Box>
+          )}
+        </Box>
+
+        <Box sx={styles.panel}>
+          <Box component="dl" sx={{ m: 0 }}>
+            <Box sx={styles.panelRow}>
+              <Box component="dt" sx={styles.panelLabel}>Dates</Box>
+              <Box component="dd" sx={styles.panelValue}>
+                {formatDateRangeWithYear(event.startDate, event.endDate)}
               </Box>
-
-              <Box sx={contentPageStyles.infoItem}>
-                <MapPin size={18} weight="duotone" />
-                <Typography>{event.city}</Typography>
+            </Box>
+            <Box sx={styles.panelRow}>
+              <Box component="dt" sx={styles.panelLabel}>City</Box>
+              <Box component="dd" sx={styles.panelValue}>{event.city}</Box>
+            </Box>
+            <Box sx={styles.panelRow}>
+              <Box component="dt" sx={styles.panelLabel}>Artists</Box>
+              <Box component="dd" sx={styles.panelValue}>
+                {confirmedCount === undefined ? '—' : `${confirmedCount} confirmed`}
               </Box>
-
-              <Button
-                onClick={handleCalendarMenuOpen}
-                startIcon={<Calendar size={18} weight="duotone" />}
-                sx={{
-                  color: themeColors.primary.main,
-                  textTransform: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  '&:hover': {
-                    backgroundColor: colors.neutral[50],
-                  }
-                }}
-              >
-                Add to Calendar
-              </Button>
             </Box>
           </Box>
-
-          <Menu
-            anchorEl={calendarMenuAnchor}
-            open={Boolean(calendarMenuAnchor)}
-            onClose={handleCalendarMenuClose}
-            PaperProps={{
-              sx: {
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              }
-            }}
-          >
-            <MenuItem onClick={handleAddToGoogle} sx={{ fontSize: '0.875rem', py: 1.5 }}>
-              <ListItemIcon>
-                <Calendar size={18} weight="duotone" color={themeColors.primary.main} />
-              </ListItemIcon>
-              <ListItemText>Google Calendar</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleAddToOutlook} sx={{ fontSize: '0.875rem', py: 1.5 }}>
-              <ListItemIcon>
-                <Calendar size={18} weight="duotone" color={themeColors.primary.main} />
-              </ListItemIcon>
-              <ListItemText>Outlook Calendar</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleDownloadICal} sx={{ fontSize: '0.875rem', py: 1.5 }}>
-              <ListItemIcon>
-                <DownloadSimple size={18} color={themeColors.primary.main} />
-              </ListItemIcon>
-              <ListItemText>Apple/Other (.ics)</ListItemText>
-            </MenuItem>
-          </Menu>
-
-          <Button
-            startIcon={<ArrowLeft size={18} />}
-            onClick={() => navigate('/calendar')}
-            sx={{
-              mb: 3,
-              color: themeColors.primary.main,
-              textTransform: 'none',
-              fontWeight: 500,
-              '&:hover': {
-                backgroundColor: colors.neutral[50],
-              }
-            }}
-          >
-            Back to Calendar
-          </Button>
-
-          <Box sx={contentPageStyles.artistsContainer}>
-            <Box sx={{ ...contentPageStyles.artistsHeaderLeft, mb: 2 }}>
-              <UsersThree size={18} weight="duotone" />
-              <Typography variant="subtitle1" sx={contentPageStyles.artistsHeaderText}>
-                Artists
-                {artistsWithImages.length > 0 && ` (${artistsWithImages.length})`}
-              </Typography>
+          <Box sx={styles.panelAction}>
+            <Box
+              component="button"
+              type="button"
+              onClick={handleCalendarMenuOpen}
+              aria-haspopup="menu"
+              aria-expanded={Boolean(calendarMenuAnchor)}
+              aria-controls={calendarMenuAnchor ? 'add-to-calendar-menu' : undefined}
+              sx={styles.calendarButton}
+            >
+              Add to calendar
+              <CaretDown size={12} weight="fill" aria-hidden />
             </Box>
+          </Box>
+        </Box>
+      </Box>
 
-            {artistLoading ? (
-              <LinearProgress />
-            ) : artistError ? (
-              <Typography color="error">Error loading artists</Typography>
+      <Menu
+        id="add-to-calendar-menu"
+        anchorEl={calendarMenuAnchor}
+        open={Boolean(calendarMenuAnchor)}
+        onClose={handleCalendarMenuClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{ sx: styles.menuPaper }}
+      >
+        <MenuItem onClick={handleAddToGoogle} sx={styles.menuItem}>
+          <Calendar size={18} weight="duotone" aria-hidden />
+          Google Calendar
+        </MenuItem>
+        <MenuItem onClick={handleAddToOutlook} sx={styles.menuItem}>
+          <Calendar size={18} weight="duotone" aria-hidden />
+          Outlook Calendar
+        </MenuItem>
+        <MenuItem onClick={handleDownloadICal} sx={styles.menuItem}>
+          <DownloadSimple size={18} aria-hidden />
+          Apple/Other (.ics)
+        </MenuItem>
+      </Menu>
+
+      <Box component="section" aria-labelledby="artists-attending" sx={styles.artistsSection}>
+        <Box sx={styles.sectionHeader}>
+          <Box component="h2" id="artists-attending" sx={styles.sectionTitle}>Artists attending</Box>
+          {artistsWithImages.length > 1 && (
+            <MonoLabel size={11} tracking="tight" sx={styles.sortHint}>A–Z</MonoLabel>
+          )}
+        </Box>
+
+        {artistLoading && artistsWithImages.length === 0 ? (
+          <Box sx={styles.grid} aria-busy="true">
+            {Array.from({ length: 4 }, (_, i) => (
+              <Slab key={i} aspectRatio="5 / 6" mobileAspectRatio="4 / 5" />
+            ))}
+          </Box>
+        ) : artistError ? (
+          <Box component="p" sx={styles.errorMessage}>Error loading artists</Box>
+        ) : (
+          <Box sx={styles.grid}>
+            {artistsWithImages.length > 0 ? (
+              artistsWithImages.map((artist: { name: string; filename: string | null }) => (
+                <Box
+                  key={artist.name}
+                  component={RouterLink}
+                  to={`/allcards/${encodeURIComponent(artist.name)}`}
+                  sx={styles.artistLink}
+                >
+                  <Slab
+                    src={artist.filename ? `${MEDIA_BASE_URL}/grid/${artist.filename}.jpg` : undefined}
+                    alt={artist.name}
+                    aspectRatio="5 / 6"
+                    mobileAspectRatio="4 / 5"
+                    title={artist.name}
+                    interactive
+                    imgProps={{
+                      srcSet: `${MEDIA_BASE_URL}/grid/${artist.filename}.jpg 300w`,
+                      sizes: '(max-width: 720px) calc(50vw - 24px), (max-width: 1100px) calc(33vw - 40px), calc(25vw - 40px)',
+                      width: 300,
+                      height: 300,
+                    }}
+                  />
+                </Box>
+              ))
             ) : (
-              <Box sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: 'repeat(2, 1fr)',
-                  sm: 'repeat(3, 1fr)',
-                  md: 'repeat(4, 1fr)',
-                  lg: 'repeat(5, 1fr)',
-                },
-                gap: 2,
-              }}>
-                {artistsWithImages.length > 0 ? (
-                  artistsWithImages.map((artist: { name: string; filename: string | null }) => (
-                    <Link
-                      key={artist.name}
-                      component={RouterLink}
-                      to={`/allcards/${encodeURIComponent(artist.name)}`}
-                      sx={{
-                        textDecoration: 'none',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        transition: 'transform 0.2s',
-                        '&:hover': {
-                          transform: 'scale(1.05)',
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: '100%',
-                          aspectRatio: '1',
-                          borderRadius: '8px',
-                          overflow: 'hidden',
-                          backgroundColor: colors.neutral[100],
-                          mb: 1,
-                        }}
-                      >
-                        {artist.filename ? (
-                          <img
-                            src={`${MEDIA_BASE_URL}/grid/${artist.filename}.jpg`}
-                            alt={artist.name}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                            }}
-                            loading="lazy"
-                          />
-                        ) : (
-                          <Box
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            backgroundColor: colors.neutral[200],
-                            }}
-                          >
-                            <UsersThree size={40} weight="duotone" color={colors.neutral[500]} />
-                          </Box>
-                        )}
-                      </Box>
-                      <Typography
-                        sx={{
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: themeColors.text.primary,
-                          textAlign: 'center',
-                        }}
-                      >
-                        {artist.name}
-                      </Typography>
-                    </Link>
-                  ))
-                ) : (
-                  <Typography variant="body2" sx={{ fontSize: "0.85rem", gridColumn: '1 / -1', color: themeColors.text.secondary }}>
-                    No artists confirmed yet
-                  </Typography>
-                )}
+              <Box component="p" sx={styles.emptyMessage}>
+                No artists confirmed yet
               </Box>
             )}
           </Box>
-        </Paper>
-      </Container>
+        )}
+      </Box>
     </Box>
   );
 };

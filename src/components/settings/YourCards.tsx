@@ -1,18 +1,15 @@
 import EmptyState from "../shared/EmptyState";
-import {
-  Box,
-  Container,
-  Paper,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
+import { Box } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { ArrowRight } from "@phosphor-icons/react";
 import { RootState } from "../../store/store";
 import { useQuery } from "@apollo/client";
 import { GET_MY_CARD_COLLECTION } from "../graphql/queries";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { colors, themeColors } from "../../styles/design-tokens";
+import { yourCardsStyles as styles } from "../../styles/your-cards-styles";
+import MonoLabel from "../shared/MonoLabel";
+import { YourCardsSkeleton } from "../shared/Skeletons";
 
 interface CollectionItem {
   id: string;
@@ -35,58 +32,6 @@ interface ArtistSummary {
   wishlist: number;
 }
 
-const styles = {
-  container: {
-    backgroundColor: themeColors.background.dark,
-    minHeight: "100vh",
-    padding: { xs: 2, md: 4 },
-  },
-  paper: {
-    padding: { xs: 3, md: 4 },
-    backgroundColor: themeColors.neutral.white,
-    borderRadius: "12px",
-    boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-    border: `1px solid ${themeColors.neutral[200]}`,
-  },
-  headerRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 80px 80px 80px',
-    px: 1.5,
-    py: 0.75,
-    borderBottom: `1px solid ${themeColors.neutral[200]}`,
-  },
-  artistRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 80px 80px 80px',
-    alignItems: 'center',
-    px: 1.5,
-    py: 0.75,
-    borderRadius: '6px',
-    transition: '150ms',
-    textDecoration: 'none',
-    color: 'inherit',
-    '&:hover': { backgroundColor: themeColors.background.dark },
-  },
-  colLabel: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: themeColors.text.hint,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.05em',
-    textAlign: 'center' as const,
-  },
-  artistName: {
-    fontWeight: 500,
-    fontSize: '0.8125rem',
-    color: themeColors.primary.main,
-    '&:hover': { textDecoration: 'underline' },
-  },
-  count: {
-    fontSize: '0.8125rem',
-    textAlign: 'center' as const,
-  },
-};
-
 function buildArtistSummaries(items: CollectionItem[]): ArtistSummary[] {
   const map = new Map<string, ArtistSummary>();
   for (const item of items) {
@@ -102,6 +47,20 @@ function buildArtistSummaries(items: CollectionItem[]): ArtistSummary[] {
   );
 }
 
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+
+const Count = ({ n }: { n: number }) => (
+  <Box component="span" sx={[styles.count, n > 0 ? styles.countActive : {}]}>
+    {n > 0 ? n : "—"}
+  </Box>
+);
+
 const YourCards = () => {
   usePageTitle("Your Cards");
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
@@ -113,30 +72,18 @@ const YourCards = () => {
 
   if (!isLoggedIn) {
     return (
-      <Box sx={styles.container}>
-        <Container maxWidth="md">
-          <Paper elevation={0} sx={styles.paper}>
-            <Typography sx={{ color: colors.accent.red, textAlign: "center", fontSize: "0.875rem", fontWeight: 500 }}>
-              Error: You must be logged in to access this page
-            </Typography>
-          </Paper>
-        </Container>
+      <Box sx={styles.page}>
+        <Box sx={styles.inner}>
+          <Box role="alert" sx={styles.statusPanel}>
+            Error: You must be logged in to access this page
+          </Box>
+        </Box>
       </Box>
     );
   }
 
   if (loading) {
-    return (
-      <Box sx={styles.container}>
-        <Container maxWidth="md">
-          <Paper elevation={0} sx={styles.paper}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-              <CircularProgress sx={{ color: themeColors.primary.main }} />
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-    );
+    return <YourCardsSkeleton />;
   }
 
   const items: CollectionItem[] = data?.myCardCollection ?? [];
@@ -146,60 +93,70 @@ const YourCards = () => {
   const totalWishlist = artists.reduce((sum, a) => sum + a.wishlist, 0);
 
   return (
-    <Box sx={styles.container}>
-      <Container maxWidth="md">
-        <Paper elevation={0} sx={styles.paper}>
-          <Typography variant="h4" sx={{
-            fontWeight: 700,
-            color: themeColors.primary.main,
-            mb: 0.5,
-            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-          }}>
-            Your Cards
-          </Typography>
-          <Typography sx={{ fontSize: '0.875rem', color: themeColors.text.hint, mb: 3 }}>
-            {artists.length} {artists.length === 1 ? 'artist' : 'artists'}, {items.length} {items.length === 1 ? 'card' : 'cards'}
-          </Typography>
+    <Box sx={styles.page}>
+      <Box sx={styles.inner}>
+        <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+          {artists.length} {artists.length === 1 ? 'artist' : 'artists'} · {items.length} {items.length === 1 ? 'card' : 'cards'}
+        </MonoLabel>
+        <Box component="h1" sx={styles.title}>
+          Your cards
+        </Box>
 
-          {artists.length === 0 ? (
-            <EmptyState
-              headline="No cards tracked yet"
-              body="Visit an artist's page and mark cards as signed, wishlisted, or artist proofs."
-              action={{ label: 'Browse artists', href: '/' }}
-            />
-          ) : (
+        {artists.length === 0 ? (
+          <EmptyState
+            headline="No cards tracked yet"
+            body="Visit an artist's page and mark cards as signed, wishlisted, or artist proofs."
+            action={{ label: 'Browse artists', href: '/' }}
+            sx={{ mt: '36px' }}
+          />
+        ) : (
+          <>
+            <Box sx={styles.stats}>
+              {[
+                { n: totalSigned, label: 'Signed' },
+                { n: totalWishlist, label: 'Wishlist' },
+                { n: totalProofs, label: 'Artist proofs' },
+              ].map(({ n, label }) => (
+                <Box key={label} sx={styles.stat}>
+                  <Box component="span" sx={styles.statValue}>{n}</Box>
+                  <MonoLabel tracking="tight">{label}</MonoLabel>
+                </Box>
+              ))}
+            </Box>
+
             <Box>
               <Box sx={styles.headerRow}>
-                <Typography sx={{ ...styles.colLabel, textAlign: 'left' }}>Artist</Typography>
-                <Typography sx={styles.colLabel}>Proofs {totalProofs > 0 && `(${totalProofs})`}</Typography>
-                <Typography sx={styles.colLabel}>Signed {totalSigned > 0 && `(${totalSigned})`}</Typography>
-                <Typography sx={styles.colLabel}>Wishlist {totalWishlist > 0 && `(${totalWishlist})`}</Typography>
+                <MonoLabel tracking="tight">Artist</MonoLabel>
+                <MonoLabel tracking="tight" sx={styles.colLabel}>Proofs</MonoLabel>
+                <MonoLabel tracking="tight" sx={styles.colLabel}>Signed</MonoLabel>
+                <MonoLabel tracking="tight" sx={styles.colLabel}>Wishlist</MonoLabel>
+                <Box sx={styles.arrowSpacer} />
               </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                {artists.map((artist) => (
-                  <Box
-                    key={artist.name}
-                    component={RouterLink}
-                    to={`/allcards/${artist.name.replace(/\./g, '')}`}
-                    sx={styles.artistRow}
-                  >
-                    <Typography sx={styles.artistName}>{artist.name}</Typography>
-                    <Typography sx={{ ...styles.count, color: artist.proofs > 0 ? themeColors.primary.main : themeColors.text.disabled }}>
-                      {artist.proofs > 0 ? artist.proofs : '—'}
-                    </Typography>
-                    <Typography sx={{ ...styles.count, color: artist.signed > 0 ? themeColors.primary.main : themeColors.text.disabled }}>
-                      {artist.signed > 0 ? artist.signed : '—'}
-                    </Typography>
-                    <Typography sx={{ ...styles.count, color: artist.wishlist > 0 ? themeColors.primary.main : themeColors.text.disabled }}>
-                      {artist.wishlist > 0 ? artist.wishlist : '—'}
-                    </Typography>
+              {artists.map((artist) => (
+                <Box
+                  key={artist.name}
+                  component={RouterLink}
+                  to={`/allcards/${artist.name.replace(/\./g, '')}`}
+                  sx={styles.row}
+                >
+                  <Box sx={styles.artist}>
+                    <Box component="span" sx={styles.avatar} aria-hidden>
+                      {initials(artist.name)}
+                    </Box>
+                    <Box component="span" sx={styles.artistName}>{artist.name}</Box>
                   </Box>
-                ))}
-              </Box>
+                  <Box sx={{ display: 'grid' }}><Count n={artist.proofs} /></Box>
+                  <Box sx={{ display: 'grid' }}><Count n={artist.signed} /></Box>
+                  <Box sx={{ display: 'grid' }}><Count n={artist.wishlist} /></Box>
+                  <Box className="your-cards-arrow" sx={styles.arrow} aria-hidden>
+                    <ArrowRight size={16} />
+                  </Box>
+                </Box>
+              ))}
             </Box>
-          )}
-        </Paper>
-      </Container>
+          </>
+        )}
+      </Box>
     </Box>
   );
 };

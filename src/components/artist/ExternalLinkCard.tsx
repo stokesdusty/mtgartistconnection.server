@@ -1,61 +1,91 @@
-import { Link, Box } from "@mui/material";
+import { ReactNode } from "react";
+import { Box } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { CaretRight } from "@phosphor-icons/react";
+import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react";
 import { artistStyles } from "../../styles/artist-styles";
+import { vault } from "../../styles/design-tokens";
 
 interface ExternalLinkCardProps {
   href: string;
-  label: string;
-  logo?: React.ReactNode;
+  /** Mono source label, e.g. "Original Magic Art". */
+  eyebrow: string;
+  /** Shorter eyebrow for ≤600px, e.g. "OMA". */
+  mobileEyebrow?: string;
+  title: ReactNode;
+  /** Shorter title for ≤600px, e.g. "Playmats". */
+  mobileTitle?: ReactNode;
+  /** Accessible name when the visible text is terse. */
+  ariaLabel?: string;
   variant?: 'primary' | 'secondary';
   external?: boolean;
   isInternal?: boolean;
   onClick?: () => void;
 }
 
+/** Desktop and mobile copies of a label; CSS shows one of them. */
+const Responsive = ({ full, short }: { full: ReactNode; short?: ReactNode }) =>
+  short === undefined ? (
+    <>{full}</>
+  ) : (
+    <>
+      <Box component="span" sx={artistStyles.desktopOnly}>{full}</Box>
+      <Box component="span" sx={artistStyles.mobileOnly}>{short}</Box>
+    </>
+  );
+
 const ExternalLinkCard = ({
   href,
-  label,
-  logo,
+  eyebrow,
+  mobileEyebrow,
+  title,
+  mobileTitle,
+  ariaLabel,
   variant = 'secondary',
   external = false,
   isInternal = false,
   onClick,
 }: ExternalLinkCardProps) => {
-  const sx = variant === 'primary' ? artistStyles.linkCardPrimary : artistStyles.linkCardSecondary;
+  const Arrow = isInternal ? ArrowRight : ArrowUpRight;
+  const sx = [
+    artistStyles.linkCard,
+    variant === 'primary' ? artistStyles.linkCardPrimary : artistStyles.linkCardSecondary,
+  ];
+
   const content = (
     <>
-      {logo && (
-        <Box component="span" sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          {logo}
-        </Box>
-      )}
-      <Box component="span" sx={{ flex: 1 }}>
-        {label}
+      <Box
+        component="span"
+        sx={[artistStyles.linkCardEyebrow, { opacity: variant === 'primary' ? 0.85 : 1, color: variant === 'primary' ? 'inherit' : vault.faint }]}
+      >
+        <Responsive full={eyebrow} short={mobileEyebrow} />
       </Box>
-      <CaretRight size={20} style={{ opacity: 0.6, flexShrink: 0 }} />
+      <Box component="span" sx={artistStyles.linkCardTitle}>
+        <span><Responsive full={title} short={mobileTitle} /></span>
+        <Arrow size={16} weight="bold" aria-hidden />
+      </Box>
     </>
   );
 
   if (isInternal) {
     return (
-      <Link component={RouterLink} to={href} underline="none" onClick={onClick} sx={sx}>
+      <Box component={RouterLink} to={href} onClick={onClick} aria-label={ariaLabel} sx={sx}>
         {content}
-      </Link>
+      </Box>
     );
   }
 
   return (
-    <Link
+    <Box
+      component="a"
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      underline="none"
       onClick={onClick}
+      aria-label={ariaLabel}
       sx={sx}
     >
       {content}
-    </Link>
+    </Box>
   );
 };
 

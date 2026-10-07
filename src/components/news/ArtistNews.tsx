@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { User, CalendarBlank, ArrowRight, ArrowLeft } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS_BY_ARTIST } from '../graphql/queries';
-import { colors } from '../../styles/design-tokens';
+import { colors, typography } from '../../styles/design-tokens';
 
 interface NewsArticle {
   id: string;
@@ -74,7 +74,7 @@ const ArtistNews: React.FC = () => {
       fontWeight: 700,
       color: colors.primary.main,
       mb: 1,
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: typography.fontFamily.display,
     },
     subtitle: {
       color: colors.neutral[700],
@@ -109,7 +109,7 @@ const ArtistNews: React.FC = () => {
     articleTitle: {
       fontWeight: 700,
       color: colors.neutral[900],
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+      fontFamily: typography.fontFamily.display,
       fontSize: '1.25rem',
       flex: 1,
     },

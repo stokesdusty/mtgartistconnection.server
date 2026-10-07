@@ -4,7 +4,6 @@ import { renderWithProviders } from '../../test-utils';
 import {
   GET_ARTIST_BY_NAME,
   GET_SIGNINGEVENTS,
-  GET_NEWS_REVIEWS,
 } from '../graphql/queries';
 
 describe('Artist', () => {
@@ -43,13 +42,6 @@ describe('Artist', () => {
       {
         request: { query: GET_SIGNINGEVENTS },
         result: { data: { signingEvent: [] } },
-      },
-      {
-        request: {
-          query: GET_NEWS_REVIEWS,
-          variables: { isPublished: true, limit: 100 },
-        },
-        result: { data: { newsReviews: [] } },
       },
     ];
 

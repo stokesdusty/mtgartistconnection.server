@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { KeyboardEvent, ReactNode, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Link } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
+import { Box } from '@mui/material';
 import { RootState } from '../../store/store';
 import { GET_CLICK_STATS, GET_TOP_ARTISTS_BY_CLICKS, GET_CLICK_TIMESERIES, GET_PAGE_VIEW_COUNT, GET_PAGE_VIEW_TIMESERIES, GET_TOP_PAGES_BY_VIEWS } from '../graphql/queries';
-import { colors, themeColors, typography, spacing, borderRadius, borders } from '../../styles/design-tokens';
+import { analyticsStyles as styles } from '../../styles/analytics-styles';
+import MonoLabel from '../shared/MonoLabel';
+import SegmentedControl, { SegmentOption } from '../shared/SegmentedControl';
 
 type Range = 'today' | '7d' | '30d' | '90d' | 'all';
 
@@ -20,7 +23,21 @@ const RANGES: { label: string; value: Range }[] = [
     { label: 'All', value: 'all' },
 ];
 
+const RANGE_OPTIONS: SegmentOption<Range>[] = RANGES.map(({ label, value }) => ({ label, value }));
+
 const PACIFIC_TZ = 'America/Los_Angeles';
+
+const srOnly = {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: 'hidden',
+    clip: 'rect(0 0 0 0)',
+    whiteSpace: 'nowrap',
+    border: 0,
+} as const;
 
 // "Today" as a pure calendar date (midnight UTC standing in for the Y/M/D) in Pacific time,
 // so range math stays on the same day boundary the backend uses for its Pacific-bucketed stats.
@@ -53,156 +70,195 @@ function formatChartDate(dateStr: string): string {
     return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' }).format(date);
 }
 
-function Sparkline({ data }: { data: TimeseriesPoint[] }) {
-    const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-    const max = Math.max(...data.map(p => p.count), 1);
+function formatAxisDate(dateStr: string): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }).format(new Date(Date.UTC(y, m - 1, d)));
+}
+
+/** Round up to a clean axis maximum: 1, 2, 2.5, 5 or 10 × 10ⁿ. */
+function niceMax(value: number): number {
+    if (value <= 1) return 1;
+    const magnitude = 10 ** Math.floor(Math.log10(value));
+    const step = [1, 2, 2.5, 5, 10].find(s => s * magnitude >= value) ?? 10;
+    return step * magnitude;
+}
+
+/** 1,284 / 12.9K / 4.2M — for stat tiles. */
+function compact(n: number): string {
+    return n < 10000
+        ? n.toLocaleString()
+        : new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+}
+
+// ── Charts ─────────────────────────────────────────────────────────────────────
+
+/** Single-series daily column chart with a hover/keyboard tooltip and a table view. */
+function ColumnChart({ data, label }: { data: TimeseriesPoint[]; label: string }) {
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
     if (data.length === 0) {
-        return <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>No data</div>;
+        return <Box sx={styles.noData}>No data</Box>;
     }
 
-    const hovered = hoverIndex !== null ? data[hoverIndex] : null;
+    const axisMax = niceMax(Math.max(...data.map(p => p.count)));
+    const active = activeIndex !== null ? data[activeIndex] : null;
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        const last = data.length - 1;
+        const current = activeIndex ?? (e.key === 'ArrowLeft' || e.key === 'End' ? last + 1 : -1);
+        const next =
+            e.key === 'ArrowRight' ? Math.min(current + 1, last)
+            : e.key === 'ArrowLeft' ? Math.max(current - 1, 0)
+            : e.key === 'Home' ? 0
+            : e.key === 'End' ? last
+            : null;
+        if (next === null) return;
+        e.preventDefault();
+        setActiveIndex(next);
+    };
 
     return (
-        <div style={{ position: 'relative' }}>
-            {hovered && (
-                <div style={{
-                    position: 'absolute',
-                    bottom: '100%',
-                    left: `${((hoverIndex! + 0.5) / data.length) * 100}%`,
-                    transform: 'translate(-50%, -8px)',
-                    background: themeColors.primary.dark,
-                    color: colors.primary.contrast,
-                    borderRadius: borderRadius.sm,
-                    padding: `${spacing.xs} ${spacing.sm}`,
-                    fontFamily: typography.fontFamily.primary,
-                    fontSize: typography.fontSize.xs,
-                    whiteSpace: 'nowrap' as const,
-                    pointerEvents: 'none' as const,
-                    zIndex: 1,
-                }}>
-                    {formatChartDate(hovered.date)}: {hovered.count.toLocaleString()}
-                </div>
-            )}
-            <div style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                gap: 2,
-                height: 80,
-            }}>
-                {data.map(({ date, count }, i) => (
-                    <div
-                        key={date}
-                        onMouseEnter={() => setHoverIndex(i)}
-                        onMouseLeave={() => setHoverIndex(null)}
-                        style={{
-                            flex: 1,
-                            minWidth: 2,
-                            height: `${Math.max((count / max) * 100, 2)}%`,
-                            background: hoverIndex === i ? themeColors.primary.dark : themeColors.primary.main,
-                            opacity: hoverIndex === null || hoverIndex === i ? 1 : 0.6,
-                            borderRadius: `${borderRadius.sm} ${borderRadius.sm} 0 0`,
-                            transition: 'height 300ms ease, opacity 150ms ease, background 150ms ease',
-                            cursor: 'pointer',
-                        }}
-                    />
-                ))}
-            </div>
-        </div>
+        <>
+            <Box sx={styles.chartWrap}>
+                <Box sx={styles.yAxis} aria-hidden>
+                    <span>{axisMax.toLocaleString()}</span>
+                    <span>0</span>
+                </Box>
+                <Box
+                    role="group"
+                    tabIndex={0}
+                    aria-label={`${label} chart. Use the arrow keys to read each day.`}
+                    onKeyDown={handleKeyDown}
+                    onBlur={() => setActiveIndex(null)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                    sx={styles.plot}
+                >
+                    {data.map(({ date, count }, i) => (
+                        <Box
+                            key={date}
+                            onMouseEnter={() => setActiveIndex(i)}
+                            sx={[styles.slot, activeIndex === i ? styles.slotActive : {}]}
+                        >
+                            <Box
+                                sx={[
+                                    styles.bar,
+                                    { height: `${(count / axisMax) * 100}%` },
+                                    activeIndex !== null && activeIndex !== i ? styles.barDimmed : {},
+                                ]}
+                            />
+                        </Box>
+                    ))}
+
+                    {active && (
+                        <Box sx={[styles.tooltip, { left: `${((activeIndex! + 0.5) / data.length) * 100}%` }]} aria-hidden>
+                            <Box sx={styles.tooltipDate}>{formatChartDate(active.date)}</Box>
+                            <Box sx={styles.tooltipValue}>{active.count.toLocaleString()}</Box>
+                        </Box>
+                    )}
+                    <Box component="span" aria-live="polite" sx={srOnly}>
+                        {active ? `${formatChartDate(active.date)}: ${active.count.toLocaleString()}` : ''}
+                    </Box>
+                </Box>
+                <Box sx={styles.xAxis} aria-hidden>
+                    <span>{formatAxisDate(data[0].date)}</span>
+                    {data.length > 1 && <span>{formatAxisDate(data[data.length - 1].date)}</span>}
+                </Box>
+            </Box>
+
+            <Box component="details" sx={styles.tableToggle}>
+                <summary>Show as table</summary>
+                <Box sx={styles.tableScroll}>
+                    <Box component="table" sx={[styles.table, { mt: 0 }]}>
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col" className="num">{label}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map(({ date, count }) => (
+                                <tr key={date}>
+                                    <td>{formatChartDate(date)}</td>
+                                    <td className="num">{count.toLocaleString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Box>
+                </Box>
+            </Box>
+        </>
     );
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatTile({ label, value, text = false }: { label: string; value: string; text?: boolean }) {
     return (
-        <div style={{
-            background: themeColors.background.paper,
-            border: borders.thin,
-            borderRadius: borderRadius.md,
-            padding: `${spacing.md} ${spacing.lg}`,
-        }}>
-            <div style={{
-                fontFamily: typography.fontFamily.display,
-                fontSize: typography.fontSize['2xl'],
-                fontWeight: typography.fontWeight.semibold,
-                color: themeColors.text.primary,
-                marginBottom: spacing.xs,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap' as const,
-            }}>
+        <Box sx={styles.tile}>
+            <Box component="span" title={value} sx={[styles.tileValue, text ? styles.tileValueText : {}]}>
                 {value}
-            </div>
-            <div style={{
-                fontFamily: typography.fontFamily.primary,
-                fontSize: typography.fontSize.xs,
-                textTransform: 'uppercase' as const,
-                letterSpacing: '0.08em',
-                color: themeColors.text.secondary,
-            }}>
-                {label}
-            </div>
-        </div>
+            </Box>
+            <MonoLabel tracking="tight">{label}</MonoLabel>
+        </Box>
+    );
+}
+
+function Panel({ title, note, aside, children }: { title: string; note?: string; aside?: ReactNode; children: ReactNode }) {
+    return (
+        <Box component="section" sx={styles.panel}>
+            <Box sx={styles.panelHeader}>
+                <Box component="h2" sx={styles.panelTitle}>{title}</Box>
+                {aside}
+            </Box>
+            {note && <Box component="p" sx={styles.panelNote}>{note}</Box>}
+            {children}
+        </Box>
+    );
+}
+
+function TimeseriesPanel({ title, note, data }: { title: string; note: string; data: TimeseriesPoint[] }) {
+    const total = data.reduce((s, p) => s + p.count, 0);
+    const peak = data.reduce<TimeseriesPoint | null>((best, p) => (!best || p.count > best.count ? p : best), null);
+    return (
+        <Panel
+            title={title}
+            note={note}
+            aside={data.length > 0 && (
+                <MonoLabel tracking="tight" sx={styles.peak}>
+                    {total.toLocaleString()} total
+                    {peak && peak.count > 0 && ` · peak ${peak.count.toLocaleString()} on ${formatAxisDate(peak.date)}`}
+                </MonoLabel>
+            )}
+        >
+            <ColumnChart data={data} label={title} />
+        </Panel>
     );
 }
 
 function BarList({ title, stats }: { title: string; stats: ClickStat[] }) {
     const max = Math.max(...stats.map(s => s.count), 1);
     return (
-        <div style={{
-            background: themeColors.background.paper,
-            border: borders.thin,
-            borderRadius: borderRadius.md,
-            padding: spacing.lg,
-        }}>
-            <h3 style={{
-                fontFamily: typography.fontFamily.heading,
-                fontSize: typography.fontSize.lg,
-                fontWeight: typography.fontWeight.medium,
-                color: themeColors.text.primary,
-                margin: `0 0 ${spacing.md}`,
-            }}>
-                {title}
-            </h3>
+        <Panel title={title}>
             {stats.length === 0 ? (
-                <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>No data</div>
+                <Box sx={styles.noData}>No data</Box>
             ) : (
-                stats.map(({ key, count }) => (
-                    <div key={key} style={{ marginBottom: spacing.sm }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                            <span style={{
-                                fontFamily: typography.fontFamily.primary,
-                                fontSize: typography.fontSize.sm,
-                                color: themeColors.text.primary,
-                            }}>
-                                {key}
-                            </span>
-                            <span style={{
-                                fontFamily: typography.fontFamily.primary,
-                                fontSize: typography.fontSize.sm,
-                                color: themeColors.text.secondary,
-                            }}>
-                                {count.toLocaleString()}
-                            </span>
-                        </div>
-                        <div style={{
-                            background: themeColors.neutral[200],
-                            borderRadius: borderRadius.full,
-                            height: 6,
-                        }}>
-                            <div style={{
-                                width: `${(count / max) * 100}%`,
-                                height: '100%',
-                                background: themeColors.primary.main,
-                                borderRadius: borderRadius.full,
-                                transition: 'width 300ms ease',
-                            }} />
-                        </div>
-                    </div>
-                ))
+                <Box component="ul" sx={styles.barList}>
+                    {stats.map(({ key, count }) => (
+                        <li key={key}>
+                            <Box sx={styles.barRowHead}>
+                                <Box component="span" title={key} sx={styles.barLabel}>{key}</Box>
+                                <Box component="span" sx={styles.barCount}>{count.toLocaleString()}</Box>
+                            </Box>
+                            <Box sx={styles.track} aria-hidden>
+                                <Box sx={[styles.fill, { width: `${(count / max) * 100}%` }]} />
+                            </Box>
+                        </li>
+                    ))}
+                </Box>
             )}
-        </div>
+        </Panel>
     );
 }
+
+// ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function AnalyticsDashboard() {
     const authUser = useSelector((state: RootState) => state.auth.user);
@@ -256,217 +312,86 @@ export default function AnalyticsDashboard() {
     const topArtistName       = topArtists[0]?.artistName ?? '—';
 
     return (
-        <div style={{ padding: spacing.xl, maxWidth: 1100, margin: '0 auto' }}>
+        <Box sx={styles.page}>
+            <Box sx={styles.inner}>
 
-            <h1 style={{
-                fontFamily: typography.fontFamily.heading,
-                fontSize: typography.fontSize['3xl'],
-                fontWeight: typography.fontWeight.normal,
-                color: themeColors.text.primary,
-                margin: `0 0 ${spacing.xl}`,
-            }}>
-                Click Analytics
-            </h1>
+                {/* Header + range switch */}
+                <Box sx={styles.hero}>
+                    <Box>
+                        <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+                            Admin
+                        </MonoLabel>
+                        <Box component="h1" sx={styles.title}>Analytics</Box>
+                        <MonoLabel tracking="tight" uppercase={false} size={12} sx={styles.rangeLabel}>
+                            {getRangeLabel(range)}
+                        </MonoLabel>
+                    </Box>
+                    <SegmentedControl
+                        options={RANGE_OPTIONS}
+                        value={range}
+                        onChange={setRange}
+                        aria-label="Date range"
+                    />
+                </Box>
 
-            {/* Range switch */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xl, flexWrap: 'wrap' as const }}>
-                <div style={{ display: 'flex', gap: spacing.xs }}>
-                    {RANGES.map(({ label, value }) => {
-                        const active = range === value;
-                        return (
-                            <button
-                                key={value}
-                                onClick={() => setRange(value)}
-                                style={{
-                                    padding: '6px 16px',
-                                    borderRadius: borderRadius.full,
-                                    border: `1px solid ${active ? themeColors.primary.main : themeColors.neutral[300]}`,
-                                    background: active ? themeColors.primary.main : 'transparent',
-                                    color: active ? colors.primary.contrast : themeColors.text.secondary,
-                                    cursor: 'pointer',
-                                    fontFamily: typography.fontFamily.primary,
-                                    fontSize: typography.fontSize.sm,
-                                    fontWeight: active ? typography.fontWeight.medium : typography.fontWeight.normal,
-                                    transition: 'all 150ms ease',
-                                }}
-                            >
-                                {label}
-                            </button>
-                        );
-                    })}
-                </div>
-                <span style={{
-                    fontFamily: typography.fontFamily.primary,
-                    fontSize: typography.fontSize.sm,
-                    color: themeColors.text.secondary,
-                }}>
-                    {getRangeLabel(range)}
-                </span>
-            </div>
+                {/* Stat tiles */}
+                <Box sx={styles.tiles}>
+                    <StatTile label="Page loads"      value={compact(totalPageViews)} />
+                    <StatTile label="Outbound clicks" value={compact(totalOutboundClicks)} />
+                    <StatTile label="Price clicks"    value={compact(totalPriceClicks)} />
+                    <StatTile label="Top vendor"      value={topVendor} text />
+                    <StatTile label="Top artist"      value={topArtistName} text />
+                </Box>
 
-            {/* Stat tiles */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(5, 1fr)',
-                gap: spacing.md,
-                marginBottom: spacing.xl,
-            }}>
-                <StatTile label="Page loads"       value={totalPageViews.toLocaleString()} />
-                <StatTile label="Outbound clicks"  value={totalOutboundClicks.toLocaleString()} />
-                <StatTile label="Price clicks"     value={totalPriceClicks.toLocaleString()} />
-                <StatTile label="Top vendor"       value={topVendor} />
-                <StatTile label="Top artist"       value={topArtistName} />
-            </div>
+                <Box sx={styles.stack}>
+                    <TimeseriesPanel
+                        title="Daily page loads"
+                        note="Every page navigation on the site, logged first-party (independent of Google Analytics/cookie consent)."
+                        data={pageViewTimeseries}
+                    />
+                    <TimeseriesPanel
+                        title="Daily clicks"
+                        note="Price-comparison vendor clicks plus outbound artist link clicks (social, store, etc.), combined."
+                        data={timeseries}
+                    />
 
-            {/* Bar lists */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: spacing.xl,
-                marginBottom: spacing.xl,
-            }}>
-                <BarList title="Top pages by loads"      stats={topPages} />
-                <BarList title="Price clicks by vendor"  stats={vendorStats} />
-                <BarList title="Outbound by platform"    stats={platformStats} />
-            </div>
+                    <Box sx={styles.threeUp}>
+                        <BarList title="Top pages by loads"     stats={topPages} />
+                        <BarList title="Price clicks by vendor" stats={vendorStats} />
+                        <BarList title="Outbound by platform"   stats={platformStats} />
+                    </Box>
 
-            {/* Top artists table */}
-            <div style={{
-                background: themeColors.background.paper,
-                border: borders.thin,
-                borderRadius: borderRadius.md,
-                padding: spacing.lg,
-                marginBottom: spacing.xl,
-            }}>
-                <h3 style={{
-                    fontFamily: typography.fontFamily.heading,
-                    fontSize: typography.fontSize.lg,
-                    fontWeight: typography.fontWeight.medium,
-                    color: themeColors.text.primary,
-                    margin: `0 0 ${spacing.md}`,
-                }}>
-                    Top artists by clicks
-                </h3>
-                {topArtists.length === 0 ? (
-                    <div style={{ color: themeColors.text.secondary, fontSize: typography.fontSize.sm }}>No data</div>
-                ) : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr>
-                                {['#', 'Artist', 'Clicks'].map(h => (
-                                    <th key={h} style={{
-                                        textAlign: 'left',
-                                        padding: `${spacing.xs} ${spacing.sm}`,
-                                        fontFamily: typography.fontFamily.primary,
-                                        fontSize: typography.fontSize.xs,
-                                        textTransform: 'uppercase' as const,
-                                        letterSpacing: '0.08em',
-                                        color: themeColors.text.secondary,
-                                        borderBottom: `1px solid ${themeColors.neutral[200]}`,
-                                    }}>
-                                        {h}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {topArtists.map(({ artistName, count }, i) => (
-                                <tr
-                                    key={artistName}
-                                    style={{ borderBottom: `1px solid ${themeColors.neutral[200]}` }}
-                                >
-                                    <td style={{
-                                        padding: `${spacing.xs} ${spacing.sm}`,
-                                        fontFamily: typography.fontFamily.primary,
-                                        fontSize: typography.fontSize.sm,
-                                        color: themeColors.text.secondary,
-                                        width: 40,
-                                    }}>
-                                        {i + 1}
-                                    </td>
-                                    <td style={{
-                                        padding: `${spacing.xs} ${spacing.sm}`,
-                                        fontFamily: typography.fontFamily.primary,
-                                        fontSize: typography.fontSize.sm,
-                                    }}>
-                                        <Link
-                                            to={`/artist/${encodeURIComponent(artistName)}`}
-                                            style={{ color: themeColors.primary.main, textDecoration: 'none' }}
-                                        >
-                                            {artistName}
-                                        </Link>
-                                    </td>
-                                    <td style={{
-                                        padding: `${spacing.xs} ${spacing.sm}`,
-                                        fontFamily: typography.fontFamily.primary,
-                                        fontSize: typography.fontSize.sm,
-                                        fontWeight: typography.fontWeight.medium,
-                                        color: themeColors.text.primary,
-                                    }}>
-                                        {count.toLocaleString()}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+                    <Panel title="Top artists by clicks">
+                        {topArtists.length === 0 ? (
+                            <Box sx={styles.noData}>No data</Box>
+                        ) : (
+                            <Box component="table" sx={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Artist</th>
+                                        <th scope="col" className="num">Clicks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {topArtists.map(({ artistName, count }, i) => (
+                                        <tr key={artistName}>
+                                            <td className="rank">{i + 1}</td>
+                                            <td>
+                                                <Link to={`/artist/${encodeURIComponent(artistName)}`}>
+                                                    {artistName}
+                                                </Link>
+                                            </td>
+                                            <td className="num">{count.toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Box>
+                        )}
+                    </Panel>
+                </Box>
 
-            {/* Daily page loads sparkline */}
-            <div style={{
-                background: themeColors.background.paper,
-                border: borders.thin,
-                borderRadius: borderRadius.md,
-                padding: spacing.lg,
-                marginBottom: spacing.xl,
-            }}>
-                <h3 style={{
-                    fontFamily: typography.fontFamily.heading,
-                    fontSize: typography.fontSize.lg,
-                    fontWeight: typography.fontWeight.medium,
-                    color: themeColors.text.primary,
-                    margin: `0 0 ${spacing.xs}`,
-                }}>
-                    Daily page loads
-                </h3>
-                <p style={{
-                    fontFamily: typography.fontFamily.primary,
-                    fontSize: typography.fontSize.xs,
-                    color: themeColors.text.secondary,
-                    margin: `0 0 ${spacing.md}`,
-                }}>
-                    Every page navigation on the site, logged first-party (independent of Google Analytics/cookie consent).
-                </p>
-                <Sparkline data={pageViewTimeseries} />
-            </div>
-
-            {/* Daily sparkline */}
-            <div style={{
-                background: themeColors.background.paper,
-                border: borders.thin,
-                borderRadius: borderRadius.md,
-                padding: spacing.lg,
-            }}>
-                <h3 style={{
-                    fontFamily: typography.fontFamily.heading,
-                    fontSize: typography.fontSize.lg,
-                    fontWeight: typography.fontWeight.medium,
-                    color: themeColors.text.primary,
-                    margin: `0 0 ${spacing.xs}`,
-                }}>
-                    Daily clicks
-                </h3>
-                <p style={{
-                    fontFamily: typography.fontFamily.primary,
-                    fontSize: typography.fontSize.xs,
-                    color: themeColors.text.secondary,
-                    margin: `0 0 ${spacing.md}`,
-                }}>
-                    Price-comparison vendor clicks plus outbound artist link clicks (social, store, etc.), combined.
-                </p>
-                <Sparkline data={timeseries} />
-            </div>
-
-        </div>
+            </Box>
+        </Box>
     );
 }

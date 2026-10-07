@@ -2,38 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <script>try{if(localStorage.getItem('color-mode')==='dark'){document.documentElement.dataset.dark=''}}catch(e){}</script>
+    <!-- Dark is the default theme; only an explicit 'light' opts out (keep in sync with ColorModeContext.tsx) -->
+    <script>try{if(localStorage.getItem('color-mode')!=='light'){document.documentElement.dataset.dark=''}}catch(e){document.documentElement.dataset.dark=''}</script>
+    <!-- Pre-paint background only; the full token set is injected from src/styles/design-tokens.ts -->
     <style>
-      :root {
-        --c-bg-default: #ffffff; --c-bg-paper: #faf9f7; --c-bg-dark: #f5f3f0;
-        --c-text-primary: #201e1b; --c-text-secondary: #736d67;
-        --c-text-disabled: #b9b4ae; --c-text-hint: #9c9690;
-        --c-neutral-white: #ffffff; --c-neutral-50: #faf9f7;
-        --c-neutral-100: #f5f3f0; --c-neutral-200: #ebe8e3; --c-neutral-300: #dedad4;
-        --c-primary-main: #2d4a36; --c-primary-lighter: #f0f9f4;
-        --c-primary-main-rgb: 45, 74, 54;
-      }
-      html[data-dark] {
-        --c-bg-default: #1a1917; --c-bg-paper: #201e1b; --c-bg-dark: #2a2724;
-        --c-text-primary: #f5f3f0; --c-text-secondary: #9c9690;
-        --c-text-disabled: #5f5a54; --c-text-hint: #736d67;
-        --c-neutral-white: #1a1917; --c-neutral-50: #201e1b;
-        --c-neutral-100: #2a2724; --c-neutral-200: #3a3733; --c-neutral-300: #4a4743;
-        --c-primary-main: #6ea880; --c-primary-lighter: #1e3328;
-        --c-primary-main-rgb: 110, 168, 128;
-      }
-      html, body { background-color: var(--c-bg-default); }
+      html, body { background-color: #f5f2ed; color: #1a1714; }
+      html[data-dark], html[data-dark] body { background-color: #0f0e0d; color: #f3efe9; }
     </style>
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, card art, and news." />
+    <meta name="theme-color" content="#0f0e0d" />
+    <meta name="description" content="Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, and card art." />
     <meta name="impact-site-verification" value="e3c981f6-4b01-41cf-8f5b-e7815b2c30ec" />
     <!-- Canonical fallback (overridden per-page by PageMeta / react-helmet-async) -->
     <link rel="canonical" href="https://www.mtgartistconnection.com/" />
     <!-- Open Graph defaults (overridden per-page by PageMeta / react-helmet-async) -->
     <meta property="og:title" content="MtG Artist Connection | Magic: The Gathering Artists" />
-    <meta property="og:description" content="Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, card art, and news." />
+    <meta property="og:description" content="Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, and card art." />
     <meta property="og:url" content="https://www.mtgartistconnection.com" />
     <meta property="og:image" content="https://www.mtgartistconnection.com/logo.png" />
     <meta property="og:type" content="website" />
@@ -42,7 +27,7 @@
     <!-- X (Twitter) Card defaults (overridden per-page by PageMeta / react-helmet-async) -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MtG Artist Connection | Magic: The Gathering Artists" />
-    <meta name="twitter:description" content="Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, card art, and news." />
+    <meta name="twitter:description" content="Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, and card art." />
     <meta name="twitter:image" content="https://www.mtgartistconnection.com/logo.png" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!-- Google tag (gtag.js) is loaded at runtime by CookieConsentBanner only after the user accepts analytics cookies -->
@@ -67,15 +52,12 @@
     <link rel="preconnect" href="https://mtgartistconnectionwebservice-production.up.railway.app" />
     <link rel="dns-prefetch" href="https://api.scryfall.com" />
 
-    <!-- Fonts: Fraunces (headings) + Inter (UI) — loaded async to avoid render-blocking -->
+    <!-- Fonts: Geist (UI + headings) + Geist Mono (labels) — loaded async to avoid render-blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" /></noscript>
 
-    <!-- Preload CSS Files -->
-    <link rel="preload" href="%PUBLIC_URL%/index.css" as="style" />
-    <link rel="stylesheet" href="%PUBLIC_URL%/index.css" />
     <!-- Structured Data: Organization + WebSite -->
     <script type="application/ld+json">
     {
@@ -90,7 +72,7 @@
             "@type": "ImageObject",
             "url": "https://www.mtgartistconnection.com/logo.png"
           },
-          "description": "Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, card art, and news.",
+          "description": "Connecting fans with their favorite Magic: The Gathering artists. Browse artist profiles, signing events, and card art.",
           "sameAs": [
             "https://bsky.app/profile/mtgartistconnect.bsky.social"
           ],

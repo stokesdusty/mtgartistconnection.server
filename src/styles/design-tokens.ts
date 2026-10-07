@@ -122,10 +122,13 @@ export const shadows = {
 };
 
 export const typography = {
+  // Geist for all UI and headings, Geist Mono for eyebrows, counts and metadata.
+  // Loaded in public/index.html. primary/display/heading are kept as aliases.
   fontFamily: {
-    primary: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
-    display: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    heading: '"Fraunces", Georgia, serif',
+    primary: '"Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    display: '"Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    heading: '"Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    mono: '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
   },
   fontSize: {
     xs: '0.75rem',     // 12px
@@ -216,4 +219,271 @@ export const statusColors = {
   complete:    { text: '#1b5e20', bg: '#e8f5e9' },
   unpaidText:  '#c62828',
   primaryMutedBorder: '#b5ceba',
+};
+
+// ─── Vault redesign tokens ───────────────────────────────────────────────────
+// Single source of truth for the "Vault" palettes. ColorModeContext turns these
+// into CSS custom properties on <html> (switched by html[data-dark]) and builds
+// the MUI theme from the same values. Use `vault` (var refs) in sx/styles.
+
+export type ColorMode = 'light' | 'dark';
+
+export interface VaultPalette {
+  bg: string;
+  surface: string;
+  slab1: string;
+  slab2: string;
+  line: string;
+  lineStrong: string;
+  fg: string;
+  muted: string;
+  faint: string;
+  chip: string;
+  chipStrong: string;
+  stripe1: string;
+  stripe2: string;
+  shadow: string;
+  ok: string;
+  okBg: string;
+}
+
+export interface VaultAccent {
+  accent: string;
+  accentText: string;
+  onAccent: string;
+  glow: string;
+  glowStrong: string;
+}
+
+export const vaultPalettes: Record<ColorMode, VaultPalette> = {
+  dark: {
+    bg: '#0f0e0d',
+    surface: '#1a1816',
+    slab1: '#2b2825',
+    slab2: '#151312',
+    line: 'rgba(255,255,255,.07)',
+    lineStrong: 'rgba(255,255,255,.12)',
+    fg: '#f3efe9',
+    muted: '#a39d95',
+    faint: '#7d776f',
+    chip: 'rgba(255,255,255,.04)',
+    chipStrong: 'rgba(255,255,255,.10)',
+    stripe1: '#1d1b19',
+    stripe2: '#252220',
+    shadow: 'rgba(0,0,0,.45)',
+    ok: '#6fd39a',
+    okBg: 'rgba(111,211,154,.1)',
+  },
+  light: {
+    bg: '#f5f2ed',
+    surface: '#ffffff',
+    slab1: '#ffffff',
+    slab2: '#ebe6de',
+    line: 'rgba(30,22,14,.09)',
+    lineStrong: 'rgba(30,22,14,.15)',
+    fg: '#1a1714',
+    muted: '#5f5850',
+    faint: '#8a8279',
+    chip: 'rgba(30,22,14,.04)',
+    chipStrong: 'rgba(30,22,14,.09)',
+    stripe1: '#e9e4dc',
+    stripe2: '#f1ede7',
+    shadow: 'rgba(70,50,25,.10)',
+    ok: '#1f7a47',
+    okBg: 'rgba(31,122,71,.08)',
+  },
+};
+
+export const vaultAccents: Record<'emerald' | 'amber' | 'violet', Record<ColorMode, VaultAccent>> = {
+  emerald: {
+    dark:  { accent: '#5fc08a', accentText: '#7fd4a3', onAccent: '#06170d', glow: 'rgba(95,192,138,.12)', glowStrong: 'rgba(95,192,138,.28)' },
+    light: { accent: '#2d6a46', accentText: '#245638', onAccent: '#ffffff', glow: 'rgba(45,106,70,.08)', glowStrong: 'rgba(45,106,70,.2)' },
+  },
+  amber: {
+    dark:  { accent: '#e8a060', accentText: '#f0b47c', onAccent: '#1a1208', glow: 'rgba(232,160,96,.12)', glowStrong: 'rgba(232,160,96,.28)' },
+    light: { accent: '#c27026', accentText: '#9a520f', onAccent: '#ffffff', glow: 'rgba(194,112,38,.09)', glowStrong: 'rgba(194,112,38,.22)' },
+  },
+  violet: {
+    dark:  { accent: '#a98bf0', accentText: '#c0a9f7', onAccent: '#140b28', glow: 'rgba(169,139,240,.13)', glowStrong: 'rgba(169,139,240,.3)' },
+    light: { accent: '#6b4fc4', accentText: '#553aa8', onAccent: '#ffffff', glow: 'rgba(107,79,196,.08)', glowStrong: 'rgba(107,79,196,.2)' },
+  },
+};
+
+export const VAULT_ACCENT = vaultAccents.emerald;
+
+// Workflow status tones (signing tracker chips, error text). Not in the handoff;
+// tuned to read on `surface` in both modes, mirroring the accent's fg/bg pairing.
+export interface VaultStatusPalette {
+  info: string;
+  infoBg: string;
+  warn: string;
+  warnBg: string;
+  danger: string;
+  dangerBg: string;
+  violet: string;
+  violetBg: string;
+}
+
+export const vaultStatusPalettes: Record<ColorMode, VaultStatusPalette> = {
+  dark: {
+    info: '#8dbbea',
+    infoBg: 'rgba(127,178,229,.12)',
+    warn: '#f0b47c',
+    warnBg: 'rgba(232,160,96,.12)',
+    danger: '#f39a8f',
+    dangerBg: 'rgba(240,138,126,.12)',
+    violet: '#c0a9f7',
+    violetBg: 'rgba(169,139,240,.13)',
+  },
+  light: {
+    info: '#2f6497',
+    infoBg: 'rgba(47,100,151,.08)',
+    warn: '#9a520f',
+    warnBg: 'rgba(194,112,38,.09)',
+    danger: '#b3362a',
+    dangerBg: 'rgba(179,54,42,.08)',
+    violet: '#553aa8',
+    violetBg: 'rgba(107,79,196,.08)',
+  },
+};
+
+// Badges and text sitting on top of artwork always use the dark treatment.
+export const onArt = {
+  badgeBg: 'rgba(15,14,13,.78)',
+  badgeBlur: 'blur(8px)',
+  text: '#f3efe9',
+  textSecondary: '#c9c3bb',
+  scrim: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(10,9,8,.88) 100%)',
+};
+
+// Legacy --c-* variables, remapped onto the Vault palettes so screens that
+// still use `themeColors` pick up the new look until they are restyled.
+const legacyVars: Record<ColorMode, Record<string, string>> = {
+  dark: {
+    '--c-bg-default': '#0f0e0d',
+    '--c-bg-paper': '#1a1816',
+    '--c-bg-dark': '#221f1d',
+    '--c-text-primary': '#f3efe9',
+    '--c-text-secondary': '#a39d95',
+    '--c-text-disabled': '#5a554f',
+    '--c-text-hint': '#7d776f',
+    '--c-neutral-white': '#0f0e0d',
+    '--c-neutral-50': '#1a1816',
+    '--c-neutral-100': '#221f1d',
+    '--c-neutral-200': '#2e2b28',
+    '--c-neutral-300': '#3d3935',
+    '--c-primary-main': '#5fc08a',
+    '--c-primary-lighter': '#16291e',
+    '--c-primary-main-rgb': '95, 192, 138',
+  },
+  light: {
+    '--c-bg-default': '#f5f2ed',
+    '--c-bg-paper': '#ffffff',
+    '--c-bg-dark': '#ebe6de',
+    '--c-text-primary': '#1a1714',
+    '--c-text-secondary': '#5f5850',
+    '--c-text-disabled': '#b5aea5',
+    '--c-text-hint': '#8a8279',
+    '--c-neutral-white': '#ffffff',
+    '--c-neutral-50': '#faf8f4',
+    '--c-neutral-100': '#efebe5',
+    '--c-neutral-200': '#e4dfd7',
+    '--c-neutral-300': '#d6d0c6',
+    '--c-primary-main': '#2d6a46',
+    '--c-primary-lighter': '#eaf3ee',
+    '--c-primary-main-rgb': '45, 106, 70',
+  },
+};
+
+const toKebab = (key: string) => key.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase();
+
+/** CSS custom properties for one mode, e.g. { '--bg': '#0f0e0d', '--slab-1': … }. */
+export const vaultCssVars = (mode: ColorMode): Record<string, string> => {
+  const vars: Record<string, string> = { ...legacyVars[mode] };
+  const tokens = { ...vaultPalettes[mode], ...VAULT_ACCENT[mode], ...vaultStatusPalettes[mode] };
+  Object.entries(tokens).forEach(([key, value]) => {
+    vars[`--${toKebab(key)}`] = value;
+  });
+  return vars;
+};
+
+// var() references for use in sx / style objects. Values flip with the mode.
+export const vault = {
+  bg: 'var(--bg)',
+  surface: 'var(--surface)',
+  slab1: 'var(--slab-1)',
+  slab2: 'var(--slab-2)',
+  line: 'var(--line)',
+  lineStrong: 'var(--line-strong)',
+  fg: 'var(--fg)',
+  muted: 'var(--muted)',
+  faint: 'var(--faint)',
+  chip: 'var(--chip)',
+  chipStrong: 'var(--chip-strong)',
+  stripe1: 'var(--stripe-1)',
+  stripe2: 'var(--stripe-2)',
+  shadow: 'var(--shadow)',
+  ok: 'var(--ok)',
+  okBg: 'var(--ok-bg)',
+  accent: 'var(--accent)',
+  accentText: 'var(--accent-text)',
+  onAccent: 'var(--on-accent)',
+  glow: 'var(--glow)',
+  glowStrong: 'var(--glow-strong)',
+  info: 'var(--info)',
+  infoBg: 'var(--info-bg)',
+  warn: 'var(--warn)',
+  warnBg: 'var(--warn-bg)',
+  danger: 'var(--danger)',
+  dangerBg: 'var(--danger-bg)',
+  violet: 'var(--violet)',
+  violetBg: 'var(--violet-bg)',
+};
+
+export const vaultRadii = {
+  pill: '999px',
+  slab: '14px',
+  slabSignature: '16px',
+  slabInner: '10px',
+  card: '12px',
+  panel: '14px',
+  input: '8px',
+  search: '14px',
+  segmented: '10px',
+  segmentedInner: '7px',
+};
+
+export const vaultEffects = {
+  slabFrame: `linear-gradient(160deg, ${vault.slab1}, ${vault.slab2})`,
+  slabShadow: `0 12px 30px ${vault.shadow}`,
+  slabHoverShadow: `0 18px 50px ${vault.glowStrong}`,
+  searchShadow: `0 0 0 4px ${vault.glow}, 0 20px 60px ${vault.shadow}`,
+  heroGlow: `radial-gradient(ellipse 60% 70% at 50% 0%, ${vault.glow}, transparent 70%)`,
+  heroGlowLeft: `radial-gradient(ellipse 60% 70% at 0% 0%, ${vault.glow}, transparent 70%)`,
+  liveDotShadow: `0 0 8px ${vault.accent}`,
+  stripes: `repeating-linear-gradient(135deg, ${vault.stripe1} 0 8px, ${vault.stripe2} 8px 16px)`,
+  transition: '.25s ease',
+};
+
+// Gutter is 40px on desktop, 18px at ≤600px (mobile spec).
+export const vaultLayout = {
+  gutter: '40px',
+  gutterMobile: '18px',
+  tapTarget: '40px',
+  mobileMax: 600,
+  tabletMax: 1100,
+};
+
+// Media queries for sx objects, e.g. { [vaultMedia.mobile]: { padding: 4 } }.
+export const vaultMedia = {
+  mobile: '@media (max-width: 600px)',
+  tablet: '@media (max-width: 1100px)',
+  reducedMotion: '@media (prefers-reduced-motion: reduce)',
+};
+
+// The on-art treatment always uses the dark accent, regardless of mode.
+export const onArtAccent = {
+  border: 'rgba(95,192,138,.5)',
+  text: VAULT_ACCENT.dark.accentText,
+  dot: VAULT_ACCENT.dark.accent,
 };

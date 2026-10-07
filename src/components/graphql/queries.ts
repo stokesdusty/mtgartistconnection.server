@@ -84,6 +84,13 @@ export const GET_ARTISTSBYEVENTID = gql`
     }
 `;
 
+// Our artists credited in a set (null if the set isn't indexed yet).
+export const GET_ARTISTS_BY_SET = gql`
+    query artistsBySet($code: String!) {
+        artistsBySet(code: $code)
+    }
+`;
+
 export const GET_ARTISTS_BY_EVENT_IDS = gql`
     query artistsByEventIds($eventIds: [String!]!) {
         artistsByEventIds(eventIds: $eventIds) {

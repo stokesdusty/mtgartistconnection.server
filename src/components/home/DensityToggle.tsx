@@ -1,6 +1,4 @@
-import { Box, Tooltip } from '@mui/material';
-import { SquaresFour, GridNine, Images } from '@phosphor-icons/react';
-import { colors, themeColors, borderRadius, transitions } from '../../styles/design-tokens';
+import SegmentedControl, { SegmentOption } from '../shared/SegmentedControl';
 
 export type GridDensity = 'comfortable' | 'compact' | 'gallery';
 
@@ -22,10 +20,10 @@ export function saveDensityPreference(value: GridDensity): void {
   } catch {}
 }
 
-const MODES: { value: GridDensity; Icon: React.ComponentType<any>; label: string }[] = [
-  { value: 'comfortable', Icon: SquaresFour, label: 'Comfortable' },
-  { value: 'compact',     Icon: GridNine,    label: 'Compact rows' },
-  { value: 'gallery',     Icon: Images,      label: 'Gallery'     },
+const MODES: SegmentOption<GridDensity>[] = [
+  { value: 'comfortable', label: 'Grid' },
+  { value: 'compact', label: 'Dense' },
+  { value: 'gallery', label: 'Banner' },
 ];
 
 const DensityToggle = ({
@@ -34,54 +32,17 @@ const DensityToggle = ({
 }: {
   value: GridDensity;
   onChange: (v: GridDensity) => void;
-}) => {
-  const handleClick = (v: GridDensity) => {
-    onChange(v);
-    saveDensityPreference(v);
-  };
-
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: '2px',
-        border: `1px solid ${themeColors.neutral[200]}`,
-        borderRadius: borderRadius.md,
-        padding: '2px',
-        backgroundColor: themeColors.neutral[50],
-        flexShrink: 0,
-      }}
-    >
-      {MODES.map(({ value: v, Icon, label }) => (
-        <Tooltip key={v} title={label} placement="top" arrow>
-          <Box
-            component="button"
-            onClick={() => handleClick(v)}
-            aria-label={label}
-            aria-pressed={value === v}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 32,
-              height: 28,
-              border: 'none',
-              borderRadius: `calc(${borderRadius.md} - 2px)`,
-              cursor: 'pointer',
-              transition: transitions.fast,
-              backgroundColor: value === v ? colors.primary.main : 'transparent',
-              color: value === v ? colors.neutral.white : themeColors.text.secondary,
-              '&:hover': {
-                backgroundColor: value === v ? colors.primary.dark : themeColors.neutral[200],
-              },
-            }}
-          >
-            <Icon size={16} weight={value === v ? 'fill' : 'regular'} />
-          </Box>
-        </Tooltip>
-      ))}
-    </Box>
-  );
-};
+}) => (
+  <SegmentedControl
+    size="sm"
+    aria-label="Grid layout"
+    options={MODES}
+    value={value}
+    onChange={(v) => {
+      onChange(v);
+      saveDensityPreference(v);
+    }}
+  />
+);
 
 export default DensityToggle;

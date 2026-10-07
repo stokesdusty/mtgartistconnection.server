@@ -1,29 +1,26 @@
 import {
   Box,
-  Typography,
   Button,
   Chip,
-  Collapse,
-  TextField,
-  InputAdornment,
 } from "@mui/material";
-import setArtistsData from "../../data/set-artists.json";
-import { ArtistGridSkeleton } from "../shared/Skeletons";
-import { Eraser, Funnel, MagnifyingGlass, Shuffle, ArrowUp, CaretDown, CaretUp } from "@phosphor-icons/react";
+import { Eraser, MagnifyingGlass, ArrowUp, ArrowsClockwise, Quotes } from "@phosphor-icons/react";
 import { useQuery, NetworkStatus } from "@apollo/client";
-import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS } from "../graphql/queries";
-import ArtistGridItem from "./ArtistGridItem";
+import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_ARTISTS_BY_SET } from "../graphql/queries";
+import ArtistGridItem, { TileEvent } from "./ArtistGridItem";
 import DensityToggle, { GridDensity, getDensityPreference, saveDensityPreference } from "./DensityToggle";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
-import { SelectChangeEvent } from '@mui/material/Select';
-import FiltersForm, { ScryfallSet } from "./FiltersForm";
+import FiltersForm, { LocationChip, ScryfallSet, SetChip, TOGGLE_FILTERS, ToggleKey, locationLabel } from "./FiltersForm";
 import EmptyState from "../shared/EmptyState";
+import FilterChip from "../shared/FilterChip";
+import MonoLabel from "../shared/MonoLabel";
+import Slab from "../shared/Slab";
+import { ArtistGridSkeleton } from "../shared/Skeletons";
 import { homepageStyles } from "../../styles/homepage-styles";
-import { themeColors } from "../../styles/design-tokens";
+import { artistGridStyles } from "../../styles/artist-grid-styles";
 import axios from "axios";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import Fab from "@mui/material/Fab";
 import Fade from "@mui/material/Fade";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
@@ -48,9 +45,26 @@ const MAJOR_SET_TYPES = new Set(['core', 'expansion', 'masters', 'draft_innovati
 
 const PAGE_SIZE = 60;
 
+const LETTERS = ['A','B','C','D','E','F','G','H','I','J','K','L','M',
+  'N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0-9','Other'];
+
+// Tiles show a signing badge for events starting within this window.
+const BADGE_WINDOW_DAYS = 30;
+
+const GRID_STYLE: Record<GridDensity, keyof typeof artistGridStyles> = {
+  comfortable: 'grid',
+  compact: 'gridDense',
+  gallery: 'gridBanner',
+};
+
+const isTypingTarget = (el: EventTarget | null) =>
+  el instanceof HTMLElement &&
+  (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
+
 const Homepage = () => {
   usePageTitle();
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Page query — display fields only, paginated.
   const {
@@ -80,7 +94,6 @@ const Homepage = () => {
     }
     return getDensityPreference();
   });
-  const [showAbout, setShowAbout] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [scryfallSets, setScryfallSets] = useState<ScryfallSet[]>([]);
   const [setsLoading, setSetsLoading] = useState(false);
@@ -97,6 +110,13 @@ const Homepage = () => {
   const sellsApsFilter = searchParams.get('sellsAps') === 'true';
   const letterFilter = searchParams.get('letter') || '';
   const setFilter = searchParams.get('set') || '';
+
+  const toggles = useMemo<Record<ToggleKey, boolean>>(() => ({
+    hasEvent: hasUpcomingEventFilter,
+    sellsAps: sellsApsFilter,
+    marksSig: marksSigServiceFilter,
+    mountainMage: mountainMageFilter,
+  }), [hasUpcomingEventFilter, sellsApsFilter, marksSigServiceFilter, mountainMageFilter]);
 
   // Whether any filter/search is active — the flags index already has everything
   // needed to render matches in this case, so pagination should not keep fetching.
@@ -169,16 +189,20 @@ const Homepage = () => {
     return () => observer.disconnect();
   }, [hasMore, loadMore, hasActiveFilters]);
 
-  // Get upcoming event IDs
-  const upcomingEventIds = useMemo(() => {
-    if (!eventsData?.signingEvent) return [];
+  // Upcoming (not yet ended) events, by id
+  const upcomingEvents = useMemo(() => {
+    const map = new Map<string, any>();
+    if (!eventsData?.signingEvent) return map;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return eventsData.signingEvent
+    eventsData.signingEvent
       .filter((event: any) => new Date(event.endDate) >= today)
-      .map((event: any) => event.id);
+      .forEach((event: any) => map.set(event.id, event));
+    return map;
   }, [eventsData]);
+
+  const upcomingEventIds = useMemo(() => Array.from(upcomingEvents.keys()), [upcomingEvents]);
 
   // Single batched query to fetch all artists for upcoming events
   const { data: eventArtistsData } = useQuery(GET_ARTISTS_BY_EVENT_IDS, {
@@ -191,6 +215,40 @@ const Homepage = () => {
     if (!eventArtistsData?.artistsByEventIds) return new Set<string>();
     return new Set<string>(eventArtistsData.artistsByEventIds.map((a: any) => a.artistName as string));
   }, [eventArtistsData]);
+
+  // Each artist's soonest event starting within the badge window → tile badge.
+  const tileEvents = useMemo(() => {
+    const result = new Map<string, TileEvent & { start: number }>();
+    if (!eventArtistsData?.artistsByEventIds) return result;
+
+    const cutoff = Date.now() + BADGE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+    eventArtistsData.artistsByEventIds.forEach(({ eventId, artistName }: any) => {
+      const event = upcomingEvents.get(eventId);
+      if (!event) return;
+      const start = new Date(event.startDate);
+      if (start.getTime() > cutoff) return;
+      const existing = result.get(artistName);
+      if (existing && existing.start <= start.getTime()) return;
+      result.set(artistName, {
+        name: event.name,
+        date: start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        start: start.getTime(),
+      });
+    });
+    return result;
+  }, [eventArtistsData, upcomingEvents]);
+
+  // Artists credited in the selected set — kept fresh daily by the webservice's set sync.
+  // null = not loaded yet, or the set hasn't been indexed.
+  const { data: setArtistsData, loading: setArtistsLoading } = useQuery(GET_ARTISTS_BY_SET, {
+    variables: { code: setFilter },
+    skip: !setFilter,
+  });
+  const setArtistNames = useMemo<ReadonlySet<string> | null>(() => {
+    const names: string[] | null | undefined = setArtistsData?.artistsBySet;
+    return names ? new Set(names) : null;
+  }, [setArtistsData]);
+  const setNotIndexed = Boolean(setFilter) && !setArtistsLoading && setArtistsData !== undefined && setArtistNames === null;
 
   // Fetch major MTG sets from Scryfall once on mount for the set filter dropdown.
   useEffect(() => {
@@ -214,6 +272,17 @@ const Homepage = () => {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // "/" focuses the search box (unless the user is already typing somewhere).
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey || isTypingTarget(e.target)) return;
+      e.preventDefault();
+      searchInputRef.current?.focus();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const scrollToTop = () => {
@@ -252,40 +321,34 @@ const Homepage = () => {
     }, 300);
   };
 
-  const handleLocationChange = (event: SelectChangeEvent) => {
-    updateSearchParams('location', event.target.value);
+  const handleLocationChange = (value: string) => {
+    updateSearchParams('location', value);
   };
 
-  const handleMountainMageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateSearchParams('mountainMage', event.target.checked);
+  const handleToggle = (key: ToggleKey, value: boolean) => {
+    updateSearchParams(key, value);
   };
 
-  const handleMarksSigServiceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateSearchParams('marksSig', event.target.checked);
-  };
-
-  const handleHasUpcomingEventChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateSearchParams('hasEvent', event.target.checked);
-  };
-
-  const handleSellsApsChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateSearchParams('sellsAps', event.target.checked);
-  };
-
-  const handleLetterFilter = (letter: string) => {
+  // Set (or clear, with '') the letter filter. Clears search, as before.
+  const applyLetter = (letter: string) => {
     if (searchDebounceRef.current) {
       clearTimeout(searchDebounceRef.current);
       searchDebounceRef.current = null;
     }
     const newParams = new URLSearchParams(searchParams);
-    if (letterFilter === letter) {
-      newParams.delete('letter');
-    } else {
+    if (letter) {
       newParams.set('letter', letter);
+    } else {
+      newParams.delete('letter');
     }
     // Clear search when filtering by letter
     newParams.delete('search');
     setSearchParams(newParams, { replace: true });
+  };
+
+  // Rail buttons toggle: clicking the active letter clears it.
+  const handleLetterFilter = (letter: string) => {
+    applyLetter(letterFilter === letter ? '' : letter);
   };
 
   const handleRandomArtist = () => {
@@ -328,10 +391,9 @@ const Homepage = () => {
       });
     }
     if (locationFilter) {
-      const locationLabel = locationFilter === 'US' ? 'Anywhere in the US' : locationFilter.split(',')[0];
       chips.push({
         key: 'location',
-        label: `Location: ${locationLabel}`,
+        label: `Location: ${locationLabel(locationFilter)}`,
         onDelete: () => updateSearchParams('location', ''),
       });
     }
@@ -342,34 +404,11 @@ const Homepage = () => {
         onDelete: () => updateSearchParams('letter', ''),
       });
     }
-    if (marksSigServiceFilter) {
-      chips.push({
-        key: 'marksSig',
-        label: 'Marks Signature Service',
-        onDelete: () => updateSearchParams('marksSig', false),
-      });
-    }
-    if (mountainMageFilter) {
-      chips.push({
-        key: 'mountainMage',
-        label: 'Mountain Mage',
-        onDelete: () => updateSearchParams('mountainMage', false),
-      });
-    }
-    if (hasUpcomingEventFilter) {
-      chips.push({
-        key: 'hasEvent',
-        label: 'Has Upcoming Event',
-        onDelete: () => updateSearchParams('hasEvent', false),
-      });
-    }
-    if (sellsApsFilter) {
-      chips.push({
-        key: 'sellsAps',
-        label: 'Sells APs',
-        onDelete: () => updateSearchParams('sellsAps', false),
-      });
-    }
+    TOGGLE_FILTERS.forEach(({ key, label }) => {
+      if (toggles[key]) {
+        chips.push({ key, label, onDelete: () => updateSearchParams(key, false) });
+      }
+    });
     if (setFilter) {
       const setObj = scryfallSets.find(s => s.code === setFilter);
       chips.push({
@@ -380,7 +419,7 @@ const Homepage = () => {
     }
 
     return chips;
-  }, [userSearch, locationFilter, letterFilter, marksSigServiceFilter, mountainMageFilter, hasUpcomingEventFilter, sellsApsFilter, setFilter, scryfallSets, updateSearchParams]);
+  }, [userSearch, locationFilter, letterFilter, toggles, setFilter, scryfallSets, updateSearchParams]);
 
   const locations = useMemo(() => {
     if (!allFlags.length) return { US: [], Other: [] };
@@ -428,10 +467,10 @@ const Homepage = () => {
     userSearch,
     artistsWithEvents,
     setFilter,
-    setArtistsData: setArtistsData as Record<string, string[]>,
+    setArtistNames,
   }), [allFlags, locationFilter, mountainMageFilter, marksSigServiceFilter,
       hasUpcomingEventFilter, sellsApsFilter, letterFilter, userSearch, artistsWithEvents,
-      setFilter]);
+      setFilter, setArtistNames]);
 
   // When a filter/search is active, the flags index already carries filename —
   // render straight from it, no need to wait on artistsPage pagination.
@@ -448,205 +487,205 @@ const Homepage = () => {
       .filter((a) => a.filename !== '');
   }, [matchingFlags, filenameMap, hasActiveFilters]);
 
+  const artistCount = (allFlags.length || totalArtists).toLocaleString();
+
+  const hero = (eyebrow: React.ReactNode, controls?: React.ReactNode) => (
+    <Box component="section" sx={homepageStyles.hero}>
+      <MonoLabel tone="accent" size={12} tracking="wide" component="div" sx={homepageStyles.eyebrow}>
+        {eyebrow}
+      </MonoLabel>
+      <Box component="h1" sx={homepageStyles.title}>
+        Every Magic artist. <Box component="span" sx={homepageStyles.titleMuted}>One vault.</Box>
+      </Box>
+      {controls}
+    </Box>
+  );
+
   if (pageLoading && !pageData)
     return (
-      <Box sx={homepageStyles.container}>
-        <Box sx={homepageStyles.wrapper}>
-          <Box sx={homepageStyles.headerSection}>
-            <Box component="span" sx={homepageStyles.count}>
-              Loading artists...
-            </Box>
-          </Box>
-          <Box sx={homepageStyles.artistsGrid}>
-            <ArtistGridSkeleton count={10} />
-          </Box>
+      <Box sx={homepageStyles.page}>
+        {hero('Loading artists...')}
+        <Box sx={{ ...(homepageStyles.gridSection as object), pt: 3 }}>
+          <ArtistGridSkeleton count={8} />
         </Box>
       </Box>
     );
 
   if (error)
     return (
-      <Box sx={homepageStyles.container}>
-        <Box sx={homepageStyles.wrapper}>
-          <Typography variant="h5" sx={homepageStyles.errorMessage}>
-            Error loading artists. Please try again later.
-          </Typography>
+      <Box sx={homepageStyles.page}>
+        <Box sx={homepageStyles.statusMessage}>
+          Error loading artists. Please try again later.
         </Box>
       </Box>
     );
 
   if (!pageData?.artistsPage)
     return (
-      <Box sx={homepageStyles.container}>
-        <Box sx={homepageStyles.wrapper}>
-          <Typography variant="h5" sx={homepageStyles.noResults}>
-            No artists found
-          </Typography>
+      <Box sx={homepageStyles.page}>
+        <Box sx={homepageStyles.statusMessage}>
+          No artists found
         </Box>
       </Box>
     );
 
+  const [signingSoonToggle, ...otherToggles] = TOGGLE_FILTERS;
+  const renderToggle = ({ key, label, live }: typeof TOGGLE_FILTERS[number]) => (
+    <FilterChip
+      key={key}
+      active={toggles[key]}
+      live={live}
+      onClick={() => handleToggle(key, !toggles[key])}
+      // Marks / Mountain Mage live in the filter sheet on mobile
+      sx={key === 'marksSig' || key === 'mountainMage' ? homepageStyles.desktopOnly : undefined}
+    >
+      {label}
+    </FilterChip>
+  );
+
+  const resultSummary = hasActiveFilters
+    ? `${filteredData.length.toLocaleString()} of ${matchingFlags.length.toLocaleString()}`
+    : `${artistCount} artists`;
+
   return (
-    <Box sx={homepageStyles.container}>
+    <Box sx={homepageStyles.page}>
       <PageMeta
         title="MtG Artist Connection"
-        description="Discover Magic: The Gathering artists. Browse profiles, signing events, card art, and news on MtG Artist Connection."
+        description="Discover Magic: The Gathering artists. Browse profiles, signing events, and card art on MtG Artist Connection."
         path="/"
       />
-      <Box sx={homepageStyles.wrapper}>
-        <Box sx={homepageStyles.headerSection}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-            <Typography component="h1" sx={{ ...(homepageStyles.description as object), margin: 0 }}>
-              Your go-to hub for discovering Magic: The Gathering artists
-            </Typography>
-            <Box component="span" sx={{ ...(homepageStyles.count as object), margin: 0 }}>
-              Proudly indexing {allFlags.length || totalArtists} artists
-            </Box>
-            <Button
-              size="small"
-              variant="text"
-              onClick={() => setShowAbout((v) => !v)}
-              endIcon={showAbout ? <CaretUp size={14} /> : <CaretDown size={14} />}
-              sx={homepageStyles.aboutButton}
-            >
-              About
+
+      {hero(`${artistCount} artists indexed`, (
+        <>
+          <Box component="form" role="search" onSubmit={(e: React.FormEvent) => e.preventDefault()} sx={homepageStyles.search}>
+            <MagnifyingGlass size={18} aria-hidden />
+            <Box
+              component="input"
+              ref={searchInputRef}
+              type="search"
+              value={searchInputValue}
+              onChange={handleSearchChange}
+              placeholder="Search for an artist"
+              aria-label="Search artists"
+              autoComplete="off"
+              sx={homepageStyles.searchInput}
+            />
+            <Box component="kbd" sx={homepageStyles.kbd} title="Press / to search">/</Box>
+            <Button onClick={handleRandomArtist} sx={homepageStyles.randomButton} aria-label="Random artist">
+              <Box component="span" sx={homepageStyles.randomLabel}>Random</Box>
+              <ArrowsClockwise size={16} weight="bold" aria-hidden />
             </Button>
           </Box>
-          <Collapse in={showAbout}>
-            <Box sx={{ mt: 1.5, maxWidth: '700px', mx: 'auto', textAlign: 'left' }}>
-              <Typography variant="body2" sx={{ ...(homepageStyles.descriptionList as object), margin: 0, mb: 0.5 }}>
-                <b>Artist Profiles</b> – Find official sites, social media pages, and portfolios for hundreds of MTG artists.
-              </Typography>
-              <Typography variant="body2" sx={{ ...(homepageStyles.descriptionList as object), margin: 0, mb: 0.5 }}>
-                <b>Where to Buy</b> – Easily locate artist stores for playmats, prints, tokens, and signed cards.
-              </Typography>
-              <Typography variant="body2" sx={{ ...(homepageStyles.descriptionList as object), margin: 0 }}>
-                <b>Upcoming Events</b> – See which conventions, signings, or streams your favorite artists will be attending.
-              </Typography>
+
+          {/* Desktop: Signing soon · Sells APs · Marks · Mountain Mage · Location · Set.
+              Mobile (one scrolling row): Signing soon · Filters · n · Sells APs · Location. */}
+          <Box sx={homepageStyles.chipRow}>
+            {renderToggle(signingSoonToggle)}
+            <FilterChip
+              count={activeFilterChips.length}
+              active={activeFilterChips.length > 0}
+              aria-haspopup="dialog"
+              onClick={() => setFilterSheetOpen(true)}
+              sx={homepageStyles.mobileOnly}
+            >
+              Filters
+            </FilterChip>
+            {otherToggles.map(renderToggle)}
+            <LocationChip locations={locations} value={locationFilter} onChange={handleLocationChange} />
+            <Box sx={homepageStyles.desktopOnly}>
+              <SetChip scryfallSets={scryfallSets} setsLoading={setsLoading} value={setFilter} onChange={(code) => updateSearchParams('set', code)} />
             </Box>
-          </Collapse>
-        </Box>
+          </Box>
 
-        <Box sx={{ ...homepageStyles.filtersSection, py: 1.5, display: { xs: 'none', sm: 'block' } }}>
-          <FiltersForm
-            layout="grid"
-            idSuffix=""
-            userSearch={searchInputValue}
-            locationFilter={locationFilter}
-            setFilter={setFilter}
-            locations={locations}
-            scryfallSets={scryfallSets}
-            setsLoading={setsLoading}
-            marksSigServiceFilter={marksSigServiceFilter}
-            mountainMageFilter={mountainMageFilter}
-            hasUpcomingEventFilter={hasUpcomingEventFilter}
-            sellsApsFilter={sellsApsFilter}
-            onSearchChange={handleSearchChange}
-            onLocationChange={handleLocationChange}
-            onSetChange={(code) => updateSearchParams('set', code)}
-            onMarksSigServiceChange={handleMarksSigServiceChange}
-            onMountainMageChange={handleMountainMageChange}
-            onHasUpcomingEventChange={handleHasUpcomingEventChange}
-            onSellsApsChange={handleSellsApsChange}
-            onRandomArtist={handleRandomArtist}
-          />
-        </Box>
+          <Box component={RouterLink} to="/randomflavortext" sx={homepageStyles.flavorLink}>
+            <Quotes size={14} weight="fill" aria-hidden />
+            <span>Read a random piece of flavor text</span>
+            <Box component="span" aria-hidden className="flavor-link-arrow" sx={homepageStyles.flavorLinkArrow}>→</Box>
+          </Box>
+        </>
+      ))}
 
-        {/* Mobile persistent search bar — hidden on sm+ where the full filter panel shows */}
-        <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 1 }}>
-          <TextField
-            fullWidth
-            size="small"
-            sx={{ ...homepageStyles.textField, "& .MuiInputBase-input": { fontSize: "0.875rem" } }}
-            value={searchInputValue}
-            placeholder="Search for an artist"
-            aria-label="Search artists"
-            onChange={handleSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <MagnifyingGlass size={20} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-
-        {/* Mobile filter trigger — hidden on sm+ where the full filter panel shows */}
-        <Box sx={homepageStyles.mobileFilterRow}>
-          <Button
-            variant={activeFilterChips.length > 0 ? 'contained' : 'outlined'}
-            size="small"
-            onClick={() => setFilterSheetOpen(true)}
-            startIcon={<Funnel size={16} weight={activeFilterChips.length > 0 ? 'fill' : 'regular'} />}
-            sx={activeFilterChips.length > 0 ? homepageStyles.mobileFilterButtonActive : homepageStyles.mobileFilterButton}
-          >
-            {activeFilterChips.length > 0 ? `Filters (${activeFilterChips.length})` : 'Filters'}
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleRandomArtist}
-            startIcon={<Shuffle size={16} />}
-            sx={{ ...homepageStyles.randomButton, flex: 1, fontSize: '0.8125rem', py: '5px' }}
-          >
-            Random
-          </Button>
-        </Box>
-
-        <Box sx={homepageStyles.alphabetBar}>
-          {['A','B','C','D','E','F','G','H','I','J','K','L','M',
-            'N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0-9','Other'].map((letter) => (
+      <Box sx={homepageStyles.toolbar}>
+        <Box component="nav" aria-label="Filter by first letter" sx={homepageStyles.letterRail}>
+          {LETTERS.map((letter) => (
             <Box
               key={letter}
               component="button"
+              type="button"
+              aria-pressed={letterFilter === letter}
               onClick={() => handleLetterFilter(letter)}
-              sx={letterFilter === letter ? homepageStyles.alphabetLinkActive : homepageStyles.alphabetLink}
+              sx={homepageStyles.letterButton}
             >
               {letter}
             </Box>
           ))}
         </Box>
-
-        {/* Filter Summary Strip */}
-        <Box sx={{ ...homepageStyles.filterStrip as object, backgroundColor: hasActiveFilters ? themeColors.neutral[100] : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, flex: 1 }}>
-            <Typography sx={homepageStyles.filterStripCount}>
-              {hasActiveFilters
-                ? `Showing ${filteredData.length} of ${matchingFlags.length} artists`
-                : `${allFlags.length || totalArtists} artists`
-              }
-            </Typography>
-
-            {activeFilterChips.map((chip) => (
-              <Chip
-                key={chip.key}
-                label={chip.label}
-                size="small"
-                onDelete={chip.onDelete}
-                sx={chip.key === 'hasEvent' ? homepageStyles.filterChipAmber : homepageStyles.filterChip}
-              />
-            ))}
-
-            {hasActiveFilters && activeFilterChips.length > 1 && (
-              <Button
-                size="small"
-                startIcon={<Eraser size={16} />}
-                onClick={handleClearAllFilters}
-                sx={homepageStyles.clearAllButton}
-              >
-                Clear all
-              </Button>
-            )}
+        <MonoLabel uppercase={false} size={12} sx={homepageStyles.resultCount}>{resultSummary}</MonoLabel>
+        <Box sx={homepageStyles.toolbarRight}>
+          <Box
+            component="select"
+            aria-label="Filter by first letter"
+            value={letterFilter}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => applyLetter(e.target.value)}
+            sx={homepageStyles.letterSelect}
+          >
+            <option value="">A–Z</option>
+            {LETTERS.map((letter) => <option key={letter} value={letter}>{letter}</option>)}
           </Box>
-
           <DensityToggle value={density} onChange={handleDensityChange} />
         </Box>
+      </Box>
 
-        <Box sx={density === 'compact' ? homepageStyles.artistsGridCompact : density === 'gallery' ? homepageStyles.artistsGridGallery : homepageStyles.artistsGrid}>
-          {filteredData.length > 0 ? (
+      {hasActiveFilters && (
+        <Box sx={homepageStyles.activeRow}>
+          <MonoLabel uppercase={false} size={12} sx={homepageStyles.activeCount}>
+            Showing {resultSummary} artists
+          </MonoLabel>
+          {activeFilterChips.map((chip) => (
+            <Chip
+              key={chip.key}
+              label={chip.label}
+              size="small"
+              onDelete={chip.onDelete}
+              sx={homepageStyles.activeChip}
+            />
+          ))}
+          {activeFilterChips.length > 1 && (
+            <Button
+              size="small"
+              startIcon={<Eraser size={14} />}
+              onClick={handleClearAllFilters}
+              sx={homepageStyles.clearAll}
+            >
+              Clear all
+            </Button>
+          )}
+        </Box>
+      )}
+
+      <Box sx={homepageStyles.gridSection}>
+        <Box sx={artistGridStyles[GRID_STYLE[density]]}>
+          {setFilter && setArtistsLoading ? (
+            // Selected set's artist list is in flight — placeholders, not "no matches"
+            Array.from({ length: 8 }).map((_, i) => (
+              <Slab key={i} aspectRatio="5 / 6" mobileAspectRatio="4 / 5" />
+            ))
+          ) : setNotIndexed ? (
+            <EmptyState
+              headline="This set hasn't been indexed yet"
+              body="New sets are added to the filter daily. Check back soon."
+              action={{ label: 'Clear set filter', onClick: () => updateSearchParams('set', '') }}
+              sx={{ gridColumn: '1 / -1' }}
+            />
+          ) : filteredData.length > 0 ? (
             filteredData.map((artist: Artist, index: number) => (
-              <ArtistGridItem artistData={artist} key={artist.name} eager={index < 8} hasEvent={artistsWithEvents.has(artist.name)} density={density} />
+              <ArtistGridItem
+                artistData={artist}
+                key={artist.name}
+                eager={index < 8}
+                event={tileEvents.get(artist.name)}
+                density={density}
+              />
             ))
           ) : (userSearch.length >= 2 ||
             locationFilter !== "" ||
@@ -674,20 +713,20 @@ const Homepage = () => {
         onClose={() => setFilterSheetOpen(false)}
         onOpen={() => setFilterSheetOpen(true)}
         disableSwipeToOpen
-        PaperProps={{ sx: homepageStyles.filterSheetPaper }}
+        PaperProps={{ sx: homepageStyles.filterSheetPaper, 'aria-label': 'Filters' } as object}
       >
         <Box sx={{ overflowY: 'auto' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1.5, pb: 0.5 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1.5, pb: 1 }}>
             <Box sx={homepageStyles.filterSheetHandle} />
           </Box>
           <Box sx={homepageStyles.filterSheetHeader}>
-            <Typography sx={homepageStyles.filterSheetTitle}>Filters</Typography>
+            <Box component="h2" sx={{ ...(homepageStyles.filterSheetTitle as object), m: 0 }}>Filters</Box>
             {hasActiveFilters && (
               <Button
                 size="small"
                 startIcon={<Eraser size={14} />}
                 onClick={handleClearAllFilters}
-                sx={homepageStyles.clearAllButton}
+                sx={homepageStyles.clearAll}
               >
                 Clear all
               </Button>
@@ -695,35 +734,20 @@ const Homepage = () => {
           </Box>
           <Box sx={homepageStyles.filterSheetContent}>
             <FiltersForm
-              layout="stack"
               idSuffix="-m"
-              hideSearch={true}
-              userSearch={userSearch}
               locationFilter={locationFilter}
               setFilter={setFilter}
               locations={locations}
               scryfallSets={scryfallSets}
               setsLoading={setsLoading}
-              marksSigServiceFilter={marksSigServiceFilter}
-              mountainMageFilter={mountainMageFilter}
-              hasUpcomingEventFilter={hasUpcomingEventFilter}
-              sellsApsFilter={sellsApsFilter}
-              onSearchChange={handleSearchChange}
+              toggles={toggles}
+              onToggle={handleToggle}
               onLocationChange={handleLocationChange}
               onSetChange={(code) => updateSearchParams('set', code)}
-              onMarksSigServiceChange={handleMarksSigServiceChange}
-              onMountainMageChange={handleMountainMageChange}
-              onHasUpcomingEventChange={handleHasUpcomingEventChange}
-              onSellsApsChange={handleSellsApsChange}
             />
           </Box>
           <Box sx={homepageStyles.filterSheetActions}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => setFilterSheetOpen(false)}
-              sx={{ ...homepageStyles.randomButton, py: 1.25 }}
-            >
+            <Button onClick={() => setFilterSheetOpen(false)} sx={homepageStyles.doneButton}>
               Done
             </Button>
           </Box>
@@ -737,7 +761,7 @@ const Homepage = () => {
           onClick={scrollToTop}
           sx={homepageStyles.scrollToTop}
         >
-          <ArrowUp size={24} />
+          <ArrowUp size={22} />
         </Fab>
       </Fade>
     </Box>

@@ -1,13 +1,6 @@
 import {
   Box,
-  Container,
-  Paper,
-  Typography,
-  IconButton,
   Pagination,
-  CircularProgress,
-  Tabs,
-  Tab,
   Autocomplete,
   TextField,
   Alert,
@@ -15,13 +8,16 @@ import {
 import { X, Plus } from "@phosphor-icons/react";
 import { Link as RouterLink } from "react-router-dom";
 import EmptyState from "../shared/EmptyState";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useMutation, useQuery } from "@apollo/client";
 import { UNFOLLOW_ARTIST, FOLLOW_ARTIST, MONITOR_STATE, UNMONITOR_STATE } from "../graphql/mutations";
 import { GET_CURRENT_USER, GET_ARTIST_NAMES } from "../graphql/queries";
-import { colors, themeColors } from "../../styles/design-tokens";
+import { followingStyles as styles } from "../../styles/following-styles";
+import MonoLabel from "../shared/MonoLabel";
+import SegmentedControl, { SegmentOption } from "../shared/SegmentedControl";
+import { FollowingSkeleton } from "../shared/Skeletons";
 
 const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
@@ -34,9 +30,24 @@ const US_STATES = [
   "Wisconsin", "Wyoming"
 ];
 
+type FollowingTab = "artists" | "events";
+
+const TAB_OPTIONS: SegmentOption<FollowingTab>[] = [
+  { value: "artists", label: "Artists" },
+  { value: "events", label: "Events" },
+];
+
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+
 const Following = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState<FollowingTab>("artists");
   const [artistsPage, setArtistsPage] = useState(1);
   const artistsPerPage = 20;
   const [selectedState, setSelectedState] = useState<string | null>(null);
@@ -58,31 +69,6 @@ const Following = () => {
   const [followArtist] = useMutation(FOLLOW_ARTIST);
   const [monitorState] = useMutation(MONITOR_STATE);
   const [unmonitorState] = useMutation(UNMONITOR_STATE);
-
-  const styles = {
-    container: {
-      backgroundColor: themeColors.background.dark,
-      minHeight: "100vh",
-      padding: { xs: 2, md: 4 },
-    },
-    paper: {
-      padding: { xs: 3, md: 4 },
-      backgroundColor: themeColors.neutral.white,
-      borderRadius: "12px",
-      boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      border: `1px solid ${themeColors.neutral[200]}`,
-    },
-    section: {
-      mb: 4,
-    },
-    sectionTitle: {
-      fontSize: { xs: "1.25rem", md: "1.5rem" },
-      fontWeight: 600,
-      color: themeColors.primary.main,
-      mb: 2,
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    },
-  };
 
   const handleUnfollow = async (artistName: string) => {
     try {
@@ -146,381 +132,246 @@ const Following = () => {
 
   if (!isLoggedIn) {
     return (
-      <Box sx={styles.container}>
-        <Container maxWidth="md">
-          <Paper elevation={0} sx={styles.paper}>
-            <Typography sx={{
-              color: colors.accent.red,
-              textAlign: "center",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-            }}>
-              Error: You must be logged in to access this page
-            </Typography>
-          </Paper>
-        </Container>
+      <Box sx={styles.page}>
+        <Box sx={styles.inner}>
+          <Box role="alert" sx={styles.statusPanel}>
+            Error: You must be logged in to access this page
+          </Box>
+        </Box>
       </Box>
     );
   }
 
   if (userLoading) {
-    return (
-      <Box sx={styles.container}>
-        <Container maxWidth="md">
-          <Paper elevation={0} sx={styles.paper}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-              <CircularProgress sx={{ color: themeColors.primary.main }} />
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-    );
+    return <FollowingSkeleton />;
   }
 
+  const followedArtists: string[] = userData?.me?.followedArtists ?? [];
+  const monitoredStates: string[] = userData?.me?.monitoredStates ?? [];
+
   return (
-    <Box sx={styles.container}>
-      <Container maxWidth="md">
-        <Paper elevation={0} sx={styles.paper}>
-          <Typography variant="h4" sx={{
-            fontWeight: 700,
-            color: themeColors.primary.main,
-            mb: 3,
-            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-          }}>
-            Following
-          </Typography>
-
-          <Tabs
+    <Box sx={styles.page}>
+      <Box sx={styles.inner}>
+        <Box sx={styles.hero}>
+          <Box>
+            <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+              {followedArtists.length} {followedArtists.length === 1 ? "artist" : "artists"} · {monitoredStates.length} {monitoredStates.length === 1 ? "state" : "states"}
+            </MonoLabel>
+            <Box component="h1" sx={styles.title}>
+              Following
+            </Box>
+          </Box>
+          <SegmentedControl
+            options={TAB_OPTIONS}
             value={activeTab}
-            onChange={(_, newValue) => setActiveTab(newValue)}
-            sx={{
-              mb: 4,
-              borderBottom: `1px solid ${themeColors.neutral[300]}`,
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 500,
-                fontSize: '0.875rem',
-                color: themeColors.text.secondary,
-                '&.Mui-selected': {
-                  color: themeColors.primary.main,
-                  fontWeight: 600,
-                },
-              },
-              '& .MuiTabs-indicator': {
-                backgroundColor: themeColors.primary.main,
-              },
-            }}
-          >
-            <Tab label="Artists" />
-            <Tab label="Events" />
-          </Tabs>
+            onChange={setActiveTab}
+            aria-label="Following section"
+          />
+        </Box>
 
-          {activeTab === 0 && (
-            <Box sx={styles.section}>
-              <Typography sx={styles.sectionTitle}>
-                Followed Artists
-                {userData?.me?.followedArtists?.length > 0 && (
-                  <Typography component="span" sx={{ ml: 1, fontSize: '0.875rem', fontWeight: 400, color: themeColors.text.secondary }}>
-                    ({userData.me.followedArtists.length} total)
-                  </Typography>
+        {activeTab === "artists" && (
+          <Box component="section">
+            <SectionHeader title="Followed artists" count={followedArtists.length} />
+
+            {followSuccess && (
+              <Alert severity="success" sx={[styles.alert, styles.alertSuccess]}>
+                {followSuccess}
+              </Alert>
+            )}
+            {followError && (
+              <Alert severity="error" sx={styles.alert}>
+                {followError}
+              </Alert>
+            )}
+
+            <Box sx={styles.addRow}>
+              <Autocomplete
+                options={(allArtistsData?.artistNames ?? [])
+                  .map((a: { name: string }) => a.name)
+                  .filter((name: string) => !followedArtists.includes(name))
+                  .sort()}
+                value={selectedFollowArtist}
+                onChange={(_, newValue) => setSelectedFollowArtist(newValue)}
+                size="small"
+                sx={styles.field}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Search for an artist to follow"
+                    inputProps={{ ...params.inputProps, "aria-label": "Follow an artist" }}
+                  />
                 )}
-              </Typography>
-
-              {followSuccess && (
-                <Alert severity="success" sx={{ mb: 2, borderRadius: '8px', border: `1px solid ${colors.accent.green}`, backgroundColor: themeColors.primary.lighter }}>
-                  {followSuccess}
-                </Alert>
-              )}
-              {followError && (
-                <Alert severity="error" sx={{ mb: 2, borderRadius: '8px', border: `1px solid ${colors.accent.red}`, backgroundColor: colors.accent.redLight }}>
-                  {followError}
-                </Alert>
-              )}
-
-              <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                <Autocomplete
-                  options={(allArtistsData?.artistNames ?? [])
-                    .map((a: { name: string }) => a.name)
-                    .filter((name: string) => !userData?.me?.followedArtists?.includes(name))
-                    .sort()}
-                  value={selectedFollowArtist}
-                  onChange={(_, newValue) => setSelectedFollowArtist(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Follow an artist"
-                      size="small"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '8px',
-                          backgroundColor: themeColors.neutral.white,
-                          color: themeColors.text.primary,
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.neutral[300] },
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.primary.main },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.primary.main },
-                        },
-                        '& .MuiInputLabel-root': {
-                          color: themeColors.text.secondary,
-                          '&.Mui-focused': { color: themeColors.primary.main },
-                        },
-                        '& .MuiSvgIcon-root': {
-                          color: themeColors.text.secondary,
-                        },
-                      }}
-                    />
-                  )}
-                  sx={{ flex: 1 }}
-                />
-                <IconButton
-                  onClick={handleFollowArtist}
-                  disabled={!selectedFollowArtist}
-                  sx={{
-                    backgroundColor: colors.primary.main,
-                    color: colors.neutral.white,
-                    borderRadius: '8px',
-                    width: '40px',
-                    height: '40px',
-                    '&:hover': { backgroundColor: colors.primary.dark },
-                    '&:disabled': { backgroundColor: colors.neutral[300], color: colors.neutral[500] },
-                  }}
-                >
-                  <Plus size={20} />
-                </IconButton>
+              />
+              <Box
+                component="button"
+                type="button"
+                onClick={handleFollowArtist}
+                disabled={!selectedFollowArtist}
+                sx={styles.addButton}
+              >
+                <Plus size={16} weight="bold" />
+                Follow
               </Box>
+            </Box>
 
-              {userData?.me?.followedArtists?.length > 0 ? (
-                <>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                    {userData.me.followedArtists
-                      .slice((artistsPage - 1) * artistsPerPage, artistsPage * artistsPerPage)
-                      .map((artistName: string) => (
+            {followedArtists.length > 0 ? (
+              <>
+                <Box sx={styles.list}>
+                  {followedArtists
+                    .slice((artistsPage - 1) * artistsPerPage, artistsPage * artistsPerPage)
+                    .map((artistName: string) => (
+                      <Box key={artistName} sx={styles.row}>
                         <Box
-                          key={artistName}
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: '6px',
-                            transition: '150ms',
-                            '&:hover': { backgroundColor: themeColors.neutral[100] },
-                          }}
+                          component={RouterLink}
+                          to={`/artist/${artistName.replace(/\./g, '')}`}
+                          sx={styles.rowLink}
                         >
-                          <Typography
-                            component={RouterLink}
-                            to={`/artist/${artistName.replace(/\./g, '')}`}
-                            sx={{
-                              textDecoration: 'none',
-                              color: themeColors.primary.main,
-                              fontWeight: 500,
-                              fontSize: '0.8125rem',
-                              '&:hover': { textDecoration: 'underline' },
-                            }}
-                          >
+                          <Box component="span" sx={styles.avatar} aria-hidden>
+                            {initials(artistName)}
+                          </Box>
+                          <Box component="span" className="following-name" sx={styles.name}>
                             {artistName}
-                          </Typography>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleUnfollow(artistName)}
-                            sx={{
-                              color: themeColors.text.disabled,
-                              padding: '2px',
-                              '&:hover': { color: colors.accent.red, backgroundColor: 'transparent' },
-                            }}
-                            aria-label={`Unfollow ${artistName}`}
-                          >
-                            <X size={14} />
-                          </IconButton>
+                          </Box>
                         </Box>
-                      ))}
-                  </Box>
-
-                  {userData.me.followedArtists.length > artistsPerPage && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                      <Pagination
-                        count={Math.ceil(userData.me.followedArtists.length / artistsPerPage)}
-                        page={artistsPage}
-                        onChange={(_, page) => setArtistsPage(page)}
-                        size="small"
-                        color="primary"
-                        sx={{
-                          '& .MuiPaginationItem-root': {
-                            '&.Mui-selected': {
-                              backgroundColor: colors.primary.main,
-                              '&:hover': { backgroundColor: colors.primary.dark },
-                            },
-                          },
-                        }}
-                      />
-                    </Box>
-                  )}
-                </>
-              ) : (
-                <EmptyState
-                  headline="You're not following any artists yet"
-                  body="Search for an artist in the field above to start following them."
-                  action={{ label: 'Browse artists', href: '/' }}
-                />
-              )}
-            </Box>
-          )}
-
-          {activeTab === 1 && (
-            <Box sx={styles.section}>
-              <Typography sx={styles.sectionTitle}>
-                Event Location Monitoring
-              </Typography>
-
-              <Typography sx={{
-                mb: 3,
-                color: themeColors.text.secondary,
-                fontSize: '0.875rem',
-                lineHeight: 1.75,
-              }}>
-                Select the states where you'd like to receive notifications about new signing events.
-                We'll send you an email whenever a new event is announced in one of your monitored locations.
-                Adding a state will automatically enable event email notifications in your settings.
-              </Typography>
-
-              {stateSuccess && (
-                <Alert
-                  severity="success"
-                  sx={{
-                    mb: 2,
-                    borderRadius: "8px",
-                    border: `1px solid ${colors.accent.green}`,
-                    backgroundColor: themeColors.primary.lighter,
-                  }}
-                >
-                  {stateSuccess}
-                </Alert>
-              )}
-
-              {stateError && (
-                <Alert
-                  severity="error"
-                  sx={{
-                    mb: 2,
-                    borderRadius: "8px",
-                    border: `1px solid ${colors.accent.red}`,
-                    backgroundColor: colors.accent.redLight,
-                  }}
-                >
-                  {stateError}
-                </Alert>
-              )}
-
-              <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                <Autocomplete
-                  options={US_STATES.filter(state => !userData?.me?.monitoredStates?.includes(state))}
-                  value={selectedState}
-                  onChange={(_, newValue) => setSelectedState(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Select a state"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '8px',
-                          backgroundColor: themeColors.neutral.white,
-                          color: themeColors.text.primary,
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: themeColors.neutral[300],
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: themeColors.primary.main,
-                          },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: themeColors.primary.main,
-                          },
-                        },
-                        '& .MuiInputLabel-root': {
-                          color: themeColors.text.secondary,
-                          '&.Mui-focused': {
-                            color: themeColors.primary.main,
-                          },
-                        },
-                        '& .MuiSvgIcon-root': {
-                          color: themeColors.text.secondary,
-                        },
-                      }}
-                    />
-                  )}
-                  sx={{ flex: 1 }}
-                />
-                <IconButton
-                  onClick={handleAddState}
-                  disabled={!selectedState}
-                  sx={{
-                    backgroundColor: colors.primary.main,
-                    color: colors.neutral.white,
-                    borderRadius: '8px',
-                    width: '48px',
-                    height: '48px',
-                    '&:hover': {
-                      backgroundColor: colors.primary.dark,
-                    },
-                    '&:disabled': {
-                      backgroundColor: colors.neutral[300],
-                      color: colors.neutral[500],
-                    },
-                  }}
-                >
-                  <Plus size={24} />
-                </IconButton>
-              </Box>
-
-              {userData?.me?.monitoredStates?.length > 0 ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                  {[...userData.me.monitoredStates].sort().map((state: string) => (
-                    <Box
-                      key={state}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: '6px',
-                        transition: '150ms',
-                        '&:hover': { backgroundColor: themeColors.neutral[100] },
-                      }}
-                    >
-                      <Typography sx={{ color: themeColors.primary.main, fontWeight: 500, fontSize: '0.8125rem' }}>
-                        {state}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveState(state)}
-                        sx={{
-                          color: themeColors.text.disabled,
-                          padding: '2px',
-                          '&:hover': { color: colors.accent.red, backgroundColor: 'transparent' },
-                        }}
-                        aria-label={`Stop monitoring ${state}`}
-                      >
-                        <X size={14} />
-                      </IconButton>
-                    </Box>
-                  ))}
+                        <RemoveButton
+                          label="Unfollow"
+                          ariaLabel={`Unfollow ${artistName}`}
+                          onClick={() => handleUnfollow(artistName)}
+                        />
+                      </Box>
+                    ))}
                 </Box>
-              ) : (
-                <Typography sx={{
-                  color: themeColors.text.secondary,
-                  fontSize: '0.875rem',
-                  fontStyle: 'italic',
-                  py: 2,
-                }}>
-                  You are not monitoring any states yet. Select a state above to start receiving event notifications.
-                </Typography>
-              )}
+
+                {followedArtists.length > artistsPerPage && (
+                  <Box sx={styles.pagination}>
+                    <Pagination
+                      count={Math.ceil(followedArtists.length / artistsPerPage)}
+                      page={artistsPage}
+                      onChange={(_, page) => setArtistsPage(page)}
+                      size="small"
+                    />
+                  </Box>
+                )}
+              </>
+            ) : (
+              <EmptyState
+                headline="You're not following any artists yet"
+                body="Search for an artist in the field above to start following them."
+                action={{ label: 'Browse artists', href: '/' }}
+              />
+            )}
+          </Box>
+        )}
+
+        {activeTab === "events" && (
+          <Box component="section">
+            <SectionHeader title="Event location monitoring" count={monitoredStates.length} />
+
+            <Box component="p" sx={styles.intro}>
+              Select the states where you'd like to receive notifications about new signing events.
+              We'll send you an email whenever a new event is announced in one of your monitored locations.
+              Adding a state will automatically enable event email notifications in your settings.
             </Box>
-          )}
-        </Paper>
-      </Container>
+
+            {stateSuccess && (
+              <Alert severity="success" sx={[styles.alert, styles.alertSuccess]}>
+                {stateSuccess}
+              </Alert>
+            )}
+            {stateError && (
+              <Alert severity="error" sx={styles.alert}>
+                {stateError}
+              </Alert>
+            )}
+
+            <Box sx={styles.addRow}>
+              <Autocomplete
+                options={US_STATES.filter(state => !monitoredStates.includes(state))}
+                value={selectedState}
+                onChange={(_, newValue) => setSelectedState(newValue)}
+                size="small"
+                sx={styles.field}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Select a state"
+                    inputProps={{ ...params.inputProps, "aria-label": "Select a state" }}
+                  />
+                )}
+              />
+              <Box
+                component="button"
+                type="button"
+                onClick={handleAddState}
+                disabled={!selectedState}
+                sx={styles.addButton}
+              >
+                <Plus size={16} weight="bold" />
+                Add
+              </Box>
+            </Box>
+
+            {monitoredStates.length > 0 ? (
+              <Box sx={styles.list}>
+                {[...monitoredStates].sort().map((state: string) => (
+                  <Box key={state} sx={styles.row}>
+                    <Box component="span" sx={styles.name}>
+                      {state}
+                    </Box>
+                    <RemoveButton
+                      label="Remove"
+                      ariaLabel={`Stop monitoring ${state}`}
+                      onClick={() => handleRemoveState(state)}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Box sx={styles.empty}>
+                You are not monitoring any states yet. Select a state above to start receiving event notifications.
+              </Box>
+            )}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function SectionHeader({ title, count }: { title: ReactNode; count: number }) {
+  return (
+    <Box sx={styles.sectionHeader}>
+      <Box component="h2" sx={styles.sectionTitle}>
+        {title}
+      </Box>
+      {count > 0 && <MonoLabel tracking="tight">{count} total</MonoLabel>}
+    </Box>
+  );
+}
+
+function RemoveButton({
+  label,
+  ariaLabel,
+  onClick,
+}: {
+  label: string;
+  ariaLabel: string;
+  onClick: () => void;
+}) {
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      sx={styles.removeButton}
+    >
+      <X size={12} weight="bold" />
+      <span className="following-remove-label">{label}</span>
+    </Box>
+  );
+}
 
 export default Following;

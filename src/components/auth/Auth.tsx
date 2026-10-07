@@ -2,21 +2,19 @@ import {
     Box,
     Button,
     TextField,
-    Typography,
-    Container,
-    Alert,
     CircularProgress,
-    Tabs,
-    Tab,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
+import { Check } from "@phosphor-icons/react";
 import { USER_LOGIN, USER_SIGNUP } from "../graphql/mutations";
 import { useDispatch } from "react-redux";
 import { login } from "../../store/auth-slice";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { authStyles } from "../../styles/auth-styles";
+import { authStyles as styles } from "../../styles/auth-styles";
+import MonoLabel from "../shared/MonoLabel";
+import SegmentedControl, { SegmentOption } from "../shared/SegmentedControl";
 
 interface Inputs {
     name?: string;
@@ -38,6 +36,21 @@ interface AuthResponse {
 }
 
 const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+const TAB_OPTIONS: SegmentOption<'login' | 'signup'>[] = [
+    { value: 'login', label: 'Sign in' },
+    { value: 'signup', label: 'Sign up' },
+];
+
+/** Mono label stacked above a form control. */
+const Field = ({ id, label, children }: { id: string; label: string; children: ReactNode }) => (
+    <Box sx={styles.field}>
+        <Box component="label" htmlFor={id} sx={styles.fieldLabel}>
+            <MonoLabel tracking="tight">{label}</MonoLabel>
+        </Box>
+        {children}
+    </Box>
+);
 
 const Auth = () => {
     const dispatch = useDispatch();
@@ -104,115 +117,141 @@ const Auth = () => {
         }
     };
 
+    const switchTab = (tab: 'login' | 'signup') => handleTabChange({} as React.SyntheticEvent, tab);
+    const isSignup = activeTab === 'signup';
+    const busy = isSubmitting || isLoading;
+
     return (
-        <Box sx={authStyles.container}>
-            <Container maxWidth="sm">
-                <Box sx={authStyles.contentWrapper}>
-                    <Box sx={authStyles.header}>
-                        <Typography variant="h4" sx={authStyles.title}>
-                            Welcome to MTG Artist Connection
-                        </Typography>
-                        <Typography sx={authStyles.subtitle}>
-                            {activeTab === 'login'
-                                ? 'Sign in to your account to continue'
-                                : 'Create an account to get started'}
-                        </Typography>
+        <Box sx={styles.page}>
+            <Box sx={styles.inner}>
+                <Box sx={styles.header}>
+                    <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+                        MTG Artist Connection
+                    </MonoLabel>
+                    <Box component="h1" sx={styles.title}>
+                        {isSignup ? (
+                            <>Join the <Box component="span" sx={styles.titleMuted}>vault.</Box></>
+                        ) : (
+                            <>Welcome <Box component="span" sx={styles.titleMuted}>back.</Box></>
+                        )}
                     </Box>
-
-                    <Tabs
-                        value={activeTab}
-                        onChange={handleTabChange}
-                        sx={authStyles.tabs}
-                        centered
-                    >
-                        <Tab label="Login" value="login" sx={authStyles.tab} />
-                        <Tab label="Sign Up" value="signup" sx={authStyles.tab} />
-                    </Tabs>
-
-                    <Box sx={authStyles.form}>
-                        {activeTab === 'signup' && (
-                            <Box sx={authStyles.signupInfoBox}>
-                                <Typography sx={authStyles.signupInfoText}>
-                                    Create an account to receive optional email updates about:
-                                </Typography>
-                                <Box component="ul" sx={authStyles.signupInfoList}>
-                                    <li>Your favorite artists (when they have new events or information added)</li>
-                                    <li>Signing events happening near you</li>
-                                    <li>Site updates and new features</li>
-                                </Box>
-                                <Typography sx={authStyles.signupInfoFootnote}>
-                                    All notifications are opt-in. We will never sell your data or share your email address with anyone.
-                                </Typography>
-                            </Box>
-                        )}
-
-                        {error && (
-                            <Alert severity="error" sx={authStyles.errorAlert}>
-                                {error}
-                            </Alert>
-                        )}
-
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            {activeTab === 'signup' && (
-                                <TextField
-                                    label="Name"
-                                    fullWidth
-                                    error={Boolean(errors.name)}
-                                    helperText={errors.name ? "Name is required" : ""}
-                                    {...register("name", { required: activeTab === 'signup' })}
-                                    disabled={isSubmitting || isLoading}
-                                    sx={authStyles.textField}
-                                />
-                            )}
-
-                            <TextField
-                                label="Email"
-                                type="email"
-                                fullWidth
-                                error={Boolean(errors.email)}
-                                helperText={errors.email ? "Valid email is required" : ""}
-                                {...register("email", {
-                                    required: true,
-                                    validate: (val: string) => emailRegex.test(val),
-                                })}
-                                disabled={isSubmitting || isLoading}
-                                sx={authStyles.textField}
-                            />
-
-                            <TextField
-                                label="Password"
-                                type="password"
-                                fullWidth
-                                error={Boolean(errors.password)}
-                                helperText={
-                                    errors.password
-                                        ? "Password must be at least 6 characters"
-                                        : ""
-                                }
-                                {...register("password", { required: true, minLength: 6 })}
-                                disabled={isSubmitting || isLoading}
-                                sx={authStyles.textField}
-                            />
-
-                            {isLoading ? (
-                                <Box sx={authStyles.loadingContainer}>
-                                    <CircularProgress sx={authStyles.spinner} />
-                                </Box>
-                            ) : (
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    fullWidth
-                                    disabled={isSubmitting}
-                                    sx={authStyles.submitButton}
-                                >
-                                    {activeTab === 'signup' ? 'Create Account' : 'Sign In'}
-                                </Button>
-                            )}
-                        </form>
+                    <Box component="p" sx={styles.subtitle}>
+                        {isSignup
+                            ? 'Create an account to get started'
+                            : 'Sign in to your account to continue'}
                     </Box>
                 </Box>
-            </Container>
+
+                <Box sx={styles.card}>
+                    <SegmentedControl
+                        options={TAB_OPTIONS}
+                        value={activeTab}
+                        onChange={switchTab}
+                        fullWidth
+                        aria-label="Sign in or sign up"
+                        sx={styles.tabs}
+                    />
+
+                    {isSignup && (
+                        <Box sx={styles.signupInfo}>
+                            <Box component="p" sx={styles.signupInfoText}>
+                                Create an account to receive optional email updates about:
+                            </Box>
+                            <Box component="ul" sx={styles.signupInfoList}>
+                                <li><Check size={14} weight="bold" aria-hidden />Your favorite artists (when they have new events or information added)</li>
+                                <li><Check size={14} weight="bold" aria-hidden />Signing events happening near you</li>
+                                <li><Check size={14} weight="bold" aria-hidden />Site updates and new features</li>
+                            </Box>
+                            <Box component="p" sx={styles.signupInfoFootnote}>
+                                All notifications are opt-in. We will never sell your data or share your email address with anyone.
+                            </Box>
+                        </Box>
+                    )}
+
+                    {error && (
+                        <Box role="alert" sx={styles.error}>
+                            {error}
+                        </Box>
+                    )}
+
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <Box sx={styles.fields}>
+                            {isSignup && (
+                                <Field id="auth-name" label="Name">
+                                    <TextField
+                                        id="auth-name"
+                                        fullWidth
+                                        autoComplete="name"
+                                        error={Boolean(errors.name)}
+                                        helperText={errors.name ? "Name is required" : ""}
+                                        {...register("name", { required: activeTab === 'signup' })}
+                                        disabled={busy}
+                                        sx={styles.input}
+                                    />
+                                </Field>
+                            )}
+
+                            <Field id="auth-email" label="Email">
+                                <TextField
+                                    id="auth-email"
+                                    type="email"
+                                    fullWidth
+                                    autoComplete="email"
+                                    error={Boolean(errors.email)}
+                                    helperText={errors.email ? "Valid email is required" : ""}
+                                    {...register("email", {
+                                        required: true,
+                                        validate: (val: string) => emailRegex.test(val),
+                                    })}
+                                    disabled={busy}
+                                    sx={styles.input}
+                                />
+                            </Field>
+
+                            <Field id="auth-password" label="Password">
+                                <TextField
+                                    id="auth-password"
+                                    type="password"
+                                    fullWidth
+                                    autoComplete={isSignup ? "new-password" : "current-password"}
+                                    error={Boolean(errors.password)}
+                                    helperText={
+                                        errors.password
+                                            ? "Password must be at least 6 characters"
+                                            : ""
+                                    }
+                                    {...register("password", { required: true, minLength: 6 })}
+                                    disabled={busy}
+                                    sx={styles.input}
+                                />
+                            </Field>
+                        </Box>
+
+                        <Button
+                            type="submit"
+                            disabled={busy}
+                            startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
+                            sx={styles.submitButton}
+                        >
+                            {isLoading
+                                ? (isSignup ? 'Creating account…' : 'Signing in…')
+                                : (isSignup ? 'Create Account' : 'Sign In')}
+                        </Button>
+                    </form>
+
+                    <Box component="p" sx={styles.switchPrompt}>
+                        {isSignup ? 'Already have an account? ' : 'New here? '}
+                        <Box
+                            component="button"
+                            type="button"
+                            onClick={() => switchTab(isSignup ? 'login' : 'signup')}
+                            sx={styles.switchLink}
+                        >
+                            {isSignup ? 'Sign in' : 'Create an account'}
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
         </Box>
     );
 };

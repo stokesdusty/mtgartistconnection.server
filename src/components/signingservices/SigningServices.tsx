@@ -1,25 +1,10 @@
-import {
-  Box,
-  Link,
-  Typography,
-  Container,
-  Paper,
-  Divider,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from "@mui/material";
-import { CaretDown } from "@phosphor-icons/react";
+import { ReactNode } from "react";
+import { Box } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
+import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { contentPageStyles } from "../../styles/content-page-styles";
-import { themeColors } from "../../styles/design-tokens";
+import { signingServicesStyles as styles } from "../../styles/signing-services-styles";
+import MonoLabel from "../shared/MonoLabel";
 import PageMeta from "../shared/PageMeta";
 
 interface Service {
@@ -31,6 +16,8 @@ interface Service {
   website?: string;
   facebookGroup: string;
   upcomingSignings?: string;
+  /** Homepage filter param that lists this service's artists. */
+  homepageFilter: "marksSig" | "mountainMage";
 }
 
 const services: Service[] = [
@@ -45,6 +32,7 @@ const services: Service[] = [
       "https://www.facebook.com/groups/545759985597960/?multi_permalinks=1257167887790496&ref=share",
     upcomingSignings:
       "https://docs.google.com/spreadsheets/d/10_KH9fDQjElcnk4AmYnkY3siuKBLz4jbhb_wtvKiHAc/edit?gid=1645026839#gid=1645026839",
+    homepageFilter: "marksSig",
   },
   {
     name: "MountainMage MTG Signature Service",
@@ -58,6 +46,7 @@ const services: Service[] = [
       "https://www.facebook.com/groups/313741109039074",
     upcomingSignings:
       "https://docs.google.com/document/d/1Z695_k0Cvc458BsM540keBfV2B0Han-JKQIZC6DaCfY/edit?tab=t.0#heading=h.y24dm6r3wrdr",
+    homepageFilter: "mountainMage",
   },
 ];
 
@@ -66,213 +55,131 @@ const introParagraphs = [
   "While many artists offer mail-in signings, or are on the MtG event circuit and sign in person, others are only taking in cards to sign from one or more of the services that manage and handle the logistics for them. There are a few such services, but the majority of artists use MountainMage or Mark's services.",
 ];
 
-const howItWorksParagraphs = [
-  "Generally speaking, the process for getting a card signed through a service is simple, albeit time consuming. Both of the above services post a schedule of upcoming signings, from which will be a deadline. This deadline is the date that the service needs to receive your cards to be included in the signing.",
-  "Once you have picked out an artist and a date, you will need to decide if you want a regular signature, shadow signature, or perhaps some other custom job that is being offered, and then fill out a form with the pertinent information and submit that with your payment. Finally, you send your cards in and play the waiting game.",
-  "Turnaround times for receiving your cards back can vary pretty greatly depending on the service and the artist, but in our personal experiences, these services are quite communicative and do a fairly good job of getting everyone's signatures in an expedient fashion.",
+const howItWorksSteps = [
+  {
+    title: "Pick an artist and a deadline",
+    body: "Generally speaking, the process for getting a card signed through a service is simple, albeit time consuming. Both of the above services post a schedule of upcoming signings, from which will be a deadline. This deadline is the date that the service needs to receive your cards to be included in the signing.",
+  },
+  {
+    title: "Choose your signature and pay",
+    body: "Once you have picked out an artist and a date, you will need to decide if you want a regular signature, shadow signature, or perhaps some other custom job that is being offered, and then fill out a form with the pertinent information and submit that with your payment. Finally, you send your cards in and play the waiting game.",
+  },
+  {
+    title: "Ship your cards and wait",
+    body: "Turnaround times for receiving your cards back can vary pretty greatly depending on the service and the artist, but in our personal experiences, these services are quite communicative and do a fairly good job of getting everyone's signatures in an expedient fashion.",
+  },
 ];
+
+const ExternalButton = ({ href, children }: { href: string; children: ReactNode }) => (
+  <Box
+    component="a"
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    sx={[styles.button, styles.buttonSecondary]}
+  >
+    {children}
+    <ArrowUpRight size={13} aria-hidden />
+  </Box>
+);
+
+const ServicePanel = ({ service, index }: { service: Service; index: number }) => {
+  const headingId = `service-${index}`;
+  return (
+    <Box component="article" aria-labelledby={headingId} sx={styles.panel}>
+      <Box sx={styles.panelHead}>
+        <MonoLabel size={11}>Service {String(index + 1).padStart(2, "0")}</MonoLabel>
+        <MonoLabel size={11} tone="muted" tracking="tight">
+          {service.website ? "Website + Facebook" : "Facebook group"}
+        </MonoLabel>
+      </Box>
+      <Box component="h2" id={headingId} sx={styles.serviceName}>{service.name}</Box>
+
+      <Box component="dl" sx={styles.stats}>
+        <Box sx={styles.statRow}>
+          <Box component="dt" sx={styles.statLabel}># of Artists</Box>
+          <Box component="dd" sx={[styles.statValue, styles.statBig]}>{service.artistCount}</Box>
+        </Box>
+        <Box sx={styles.statRow}>
+          <Box component="dt" sx={styles.statLabel}>Cost per signature</Box>
+          <Box component="dd" sx={styles.statValue}>{service.costPerSignature}</Box>
+        </Box>
+        <Box sx={styles.statRow}>
+          <Box component="dt" sx={styles.statLabel}>Services offered</Box>
+          <Box component="dd" sx={styles.statValue}>
+            {service.servicesOffered.split(", ").map((offer) => (
+              <Box component="span" key={offer} sx={styles.tag}>{offer}</Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+
+      <Box component="p" sx={styles.description}>{service.description}</Box>
+
+      <Box sx={styles.actions}>
+        <Box
+          component={RouterLink}
+          to={`/?${service.homepageFilter}=true`}
+          sx={[styles.button, styles.buttonPrimary]}
+        >
+          Browse their artists
+          <ArrowRight size={14} weight="bold" aria-hidden />
+        </Box>
+        {service.upcomingSignings && (
+          <ExternalButton href={service.upcomingSignings}>Upcoming signings</ExternalButton>
+        )}
+        <ExternalButton href={service.facebookGroup}>Facebook group</ExternalButton>
+        {service.website && <ExternalButton href={service.website}>Website</ExternalButton>}
+      </Box>
+    </Box>
+  );
+};
 
 const SigningServices = () => {
   usePageTitle("Card Signing Services");
 
-  const ServiceStatItem = ({ label, value }: { label: string; value: string }) => {
-    return (
-      <Box sx={contentPageStyles.statItem}>
-        <Typography sx={contentPageStyles.statLabel}>{label}</Typography>
-        <Typography sx={contentPageStyles.statValue}>{value}</Typography>
-      </Box>
-    );
-  };
-
-  const ServiceGroupContainer = ({ service }: { service: Service }) => {
-    return (
-      <Paper elevation={0} sx={contentPageStyles.serviceCard}>
-        <Typography variant="h3" sx={contentPageStyles.serviceName}>
-          {service.name}
-        </Typography>
-
-        <Box sx={contentPageStyles.serviceStats}>
-          <ServiceStatItem label="# of Artists" value={service.artistCount} />
-          <ServiceStatItem
-            label="Cost Per Signature"
-            value={service.costPerSignature}
-          />
-          <ServiceStatItem
-            label="Services Offered"
-            value={service.servicesOffered}
-          />
-        </Box>
-
-        <Box sx={contentPageStyles.serviceInfo}>
-          <Typography sx={contentPageStyles.paragraph}>
-            {service.description}
-          </Typography>
-          <Box mt={2}>
-            <Typography sx={{ ...contentPageStyles.paragraph, mb: 0 }}>
-              You can view and join their Facebook group{" "}
-              <Link
-                sx={contentPageStyles.link}
-                href={service.facebookGroup}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                here
-              </Link>
-              {service.website && (
-                <>
-                  {" "}
-                  or visit their{" "}
-                  <Link
-                    sx={contentPageStyles.link}
-                    href={service.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    website
-                  </Link>
-                </>
-              )}
-              {service.upcomingSignings && (
-                <>
-                  . View their{" "}
-                  <Link
-                    sx={contentPageStyles.link}
-                    href={service.upcomingSignings}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    upcoming signings
-                  </Link>
-                </>
-              )}.
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
-    );
-  };
-
   return (
-    <Box sx={contentPageStyles.container}>
+    <Box sx={styles.page}>
       <PageMeta
         title="Card Signing Services"
         description="Learn how to get your Magic: The Gathering cards signed through professional signing services like Mark's and MountainMage."
         path="/signingservices"
       />
-      <Container maxWidth="lg">
-        <Paper elevation={0} sx={contentPageStyles.wrapper}>
-          <Typography variant="h1" sx={contentPageStyles.pageTitle}>
-            Card Signing Services
-          </Typography>
 
-          {/* Quick Comparison Table */}
-          <TableContainer component={Paper} elevation={0} sx={{ mb: 4, border: `1px solid ${themeColors.neutral[200]}`, backgroundColor: themeColors.background.paper }}>
-            <Table sx={{ '& .MuiTableCell-root': { color: themeColors.text.primary, borderColor: themeColors.neutral[200] } }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: themeColors.neutral[100] }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Service</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}># of Artists</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Cost Per Signature</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Services Offered</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Links</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {services.map((service) => (
-                  <TableRow key={service.name}>
-                    <TableCell sx={{ fontWeight: 'medium' }}>{service.name}</TableCell>
-                    <TableCell>{service.artistCount}</TableCell>
-                    <TableCell>{service.costPerSignature}</TableCell>
-                    <TableCell>{service.servicesOffered}</TableCell>
-                    <TableCell>
-                      <Link
-                        sx={contentPageStyles.link}
-                        href={service.facebookGroup}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Facebook
-                      </Link>
-                      {service.website && (
-                        <>
-                          {" | "}
-                          <Link
-                            sx={contentPageStyles.link}
-                            href={service.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Website
-                          </Link>
-                        </>
-                      )}
-                      {service.upcomingSignings && (
-                        <>
-                          {" | "}
-                          <Link
-                            sx={contentPageStyles.link}
-                            href={service.upcomingSignings}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Schedule
-                          </Link>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+      <Box component="section" sx={styles.hero}>
+        <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+          {services.length} signing services
+        </MonoLabel>
+        <Box component="h1" sx={styles.title}>Card signing services</Box>
+        <Box component="p" sx={styles.lede}>{introParagraphs[1]}</Box>
+      </Box>
 
-          {/* Collapsible How It Works Section */}
-          <Accordion
-            elevation={0}
-            sx={{
-              mb: 4,
-              border: `1px solid ${themeColors.neutral[200]}`,
-              '&:before': { display: 'none' },
-              backgroundColor: themeColors.background.dark,
-            }}
-          >
-            <AccordionSummary expandIcon={<CaretDown size={20} color="var(--c-text-primary)" />}>
-              <Typography variant="h2" sx={{ ...contentPageStyles.sectionTitle, mb: 0, mt: 0 }}>
-                How Do Signing Services Work?
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
+      <Box sx={styles.services}>
+        {services.map((service, index) => (
+          <ServicePanel key={service.name} service={service} index={index} />
+        ))}
+      </Box>
+
+      <Box component="section" aria-labelledby="how-it-works" sx={styles.howItWorks}>
+        <Box>
+          <MonoLabel size={11}>How it works</MonoLabel>
+          <Box component="h2" id="how-it-works" sx={styles.sectionTitle}>
+            How do signing services work?
+          </Box>
+          <Box component="p" sx={styles.paragraph}>{introParagraphs[0]}</Box>
+        </Box>
+        <Box component="ol" sx={styles.steps}>
+          {howItWorksSteps.map((step, index) => (
+            <Box component="li" key={step.title} sx={styles.step}>
+              <Box sx={styles.stepNumber} aria-hidden>{String(index + 1).padStart(2, "0")}</Box>
               <Box>
-                {introParagraphs.map((paragraph, index) => (
-                  <Typography key={`intro-${index}`} sx={contentPageStyles.paragraph}>
-                    {paragraph}
-                  </Typography>
-                ))}
-                <Divider sx={{ ...contentPageStyles.divider, my: 2 }} />
-                {howItWorksParagraphs.map((paragraph, index) => (
-                  <Typography key={`how-${index}`} sx={contentPageStyles.paragraph}>
-                    {paragraph}
-                  </Typography>
-                ))}
+                <Box component="h3" sx={styles.stepTitle}>{step.title}</Box>
+                <Box component="p" sx={styles.stepBody}>{step.body}</Box>
               </Box>
-            </AccordionDetails>
-          </Accordion>
-
-          <Divider sx={contentPageStyles.divider} />
-
-          <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            Service Details
-          </Typography>
-
-          <Grid container spacing={3}>
-            {services.map((service) => (
-              <Grid item xs={12} key={service.name}>
-                <ServiceGroupContainer service={service} />
-              </Grid>
-            ))}
-          </Grid>
-        </Paper>
-      </Container>
+            </Box>
+          ))}
+        </Box>
+      </Box>
     </Box>
   );
 };

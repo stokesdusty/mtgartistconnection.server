@@ -1,14 +1,11 @@
-import { Box } from "@mui/system";
-import {
-  artistGridStyles,
-  artistCompactStyles,
-  artistGalleryStyles,
-  gridHtmlElementStyles,
-} from "../../styles/artist-grid-styles";
-import { Link, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { GridDensity } from "./DensityToggle";
 import { MEDIA_BASE_URL as S3 } from "../../config/media";
+import Slab from "../shared/Slab";
+import GlowPill from "../shared/GlowPill";
+import { artistGridStyles } from "../../styles/artist-grid-styles";
+import { vaultMedia } from "../../styles/design-tokens";
 
 // React <19 doesn't recognize `fetchPriority` (camelCase) at runtime — it was only
 // added in React 19. Lowercase props are passed through to the DOM silently.
@@ -19,114 +16,74 @@ declare module 'react' {
   }
 }
 
-const ArtistGridItem = ({
-  artistData,
-  eager,
-  hasEvent,
-  density = 'comfortable',
-}: {
-  artistData: any;
+/** An upcoming signing shown as a badge on the tile ("IX Art Show · Oct 21"). */
+export interface TileEvent {
+  name: string;
+  /** Short date, e.g. "Oct 21". */
+  date: string;
+}
+
+interface ArtistGridItemProps {
+  artistData: { name: string; filename: string; location?: string; alternate_names?: string };
   eager?: boolean;
-  hasEvent?: boolean;
+  /** Next signing within 30 days, if any. */
+  event?: TileEvent;
   density?: GridDensity;
-}) => {
-  if (density === 'compact') {
-    return (
-      <Box sx={artistCompactStyles.container}>
-        <Link sx={artistCompactStyles.link} component={RouterLink} to={`/artist/${encodeURIComponent(artistData.name)}`}>
-          <Box sx={artistCompactStyles.imageBox} className="artist-image-box">
-            {hasEvent && <Box sx={artistGridStyles.eventDot} />}
-            <img
-              alt={artistData.name}
-              style={gridHtmlElementStyles.img}
-              src={`${S3}/grid/${artistData.filename}.jpg`}
-              srcSet={`${S3}/grid/${artistData.filename}.jpg 300w`}
-              sizes="(max-width: 600px) calc(33vw - 12px), (max-width: 960px) calc(16vw - 16px), 180px"
-              loading={eager ? 'eager' : 'lazy'}
-              fetchpriority={eager ? 'high' : undefined}
-              decoding="async"
-              width="300"
-              height="300"
-            />
-            <Box sx={artistCompactStyles.overlay}>
-              <Typography sx={artistCompactStyles.overlayName}>
-                {artistData.name}
-              </Typography>
-            </Box>
-          </Box>
-        </Link>
-      </Box>
-    );
-  }
+}
 
-  if (density === 'gallery') {
-    return (
-      <Box sx={artistGalleryStyles.container}>
-        <Link sx={artistGalleryStyles.link} component={RouterLink} to={`/artist/${encodeURIComponent(artistData.name)}`}>
-          <Box sx={artistGalleryStyles.imageBox} className="artist-image-box">
-            {hasEvent && <Box sx={artistGridStyles.eventDot} />}
-            <img
-              alt={artistData.name}
-              style={gridHtmlElementStyles.img}
-              src={`${S3}/banner/${artistData.filename}.jpeg`}
-              srcSet={`${S3}/banner/${artistData.filename}.jpeg 600w`}
-              sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 960px) calc(50vw - 24px), calc(33vw - 24px)"
-              loading={eager ? 'eager' : 'lazy'}
-              fetchpriority={eager ? 'high' : undefined}
-              decoding="async"
-              width="600"
-              height="337"
-            />
-            <Box sx={artistGalleryStyles.overlay} className="gallery-overlay">
-              <Typography sx={artistGalleryStyles.overlayName}>
-                {artistData.name}
-                {artistData.alternate_names && (
-                  <Typography
-                    component="span"
-                    sx={{ fontSize: '0.75em', fontWeight: 400, opacity: 0.8, ml: 0.5 }}
-                  >
-                    ({artistData.alternate_names})
-                  </Typography>
-                )}
-              </Typography>
-            </Box>
-          </Box>
-        </Link>
-      </Box>
-    );
-  }
+const ArtistGridItem = ({ artistData, eager, event, density = 'comfortable' }: ArtistGridItemProps) => {
+  const { name, filename, location, alternate_names } = artistData;
+  const isDense = density === 'compact';
+  const isBanner = density === 'gallery';
 
-  // comfortable (default)
+  // Grid and Dense use the square grid crop (300×300); Banner uses the wide banner art.
+  const useGridImage = !isBanner;
+  const src = useGridImage ? `${S3}/grid/${filename}.jpg` : `${S3}/banner/${filename}.jpeg`;
+  const sizes = isDense
+    ? '(max-width: 600px) calc(33vw - 16px), 180px'
+    : isBanner
+      ? '(max-width: 720px) calc(100vw - 36px), (max-width: 1100px) calc(50vw - 40px), calc(33vw - 40px)'
+      : '(max-width: 720px) calc(50vw - 24px), (max-width: 1100px) calc(33vw - 40px), calc(25vw - 40px)';
+
+  const badge = event && !isDense ? (
+    <GlowPill variant="onArt">
+      {/* Mobile shows the date only */}
+      <Box component="span" sx={{ [vaultMedia.mobile]: { display: 'none' } }}>{event.name} · </Box>
+      {event.date}
+    </GlowPill>
+  ) : undefined;
+
+  const meta = isBanner && alternate_names
+    ? [location, `aka ${alternate_names}`].filter(Boolean).join(' · ')
+    : location || undefined;
+
   return (
-    <Box sx={artistGridStyles.container}>
-      <Link sx={artistGridStyles.link} component={RouterLink} to={`/artist/${encodeURIComponent(artistData.name)}`}>
-        <Box sx={artistGridStyles.imageBox} className="artist-image-box">
-          {hasEvent && <Box sx={artistGridStyles.eventDot} />}
-          <img
-            alt={artistData.name}
-            style={gridHtmlElementStyles.img}
-            src={`${S3}/grid/${artistData.filename}.jpg`}
-            srcSet={`${S3}/grid/${artistData.filename}.jpg 300w`}
-            sizes="(max-width: 600px) calc(50vw - 24px), (max-width: 960px) calc(33vw - 20px), (max-width: 1280px) calc(25vw - 24px), 260px"
-            loading={eager ? 'eager' : 'lazy'}
-            fetchpriority={eager ? 'high' : undefined}
-            decoding="async"
-            width="300"
-            height="300"
-          />
-        </Box>
-        <Typography sx={artistGridStyles.text} className="artist-name">
-          {artistData.name}
-          {artistData.alternate_names && (
-            <Typography
-              component="span"
-              sx={{ fontSize: '0.75em', fontWeight: 400, color: 'inherit', opacity: 0.7, ml: 0.5 }}
-            >
-              ({artistData.alternate_names})
-            </Typography>
-          )}
-        </Typography>
-      </Link>
+    <Box
+      component={RouterLink}
+      to={`/artist/${encodeURIComponent(name)}`}
+      title={alternate_names ? `${name} (${alternate_names})` : undefined}
+      sx={artistGridStyles.link}
+    >
+      <Slab
+        src={src}
+        alt={name}
+        aspectRatio={isDense ? '1' : isBanner ? '16 / 9' : '5 / 6'}
+        mobileAspectRatio={isDense || isBanner ? undefined : '4 / 5'}
+        size={isDense ? 'sm' : 'md'}
+        captionSize={isDense ? 'sm' : 'md'}
+        title={name}
+        meta={isDense ? undefined : meta}
+        topLeft={badge}
+        interactive
+        imgProps={{
+          srcSet: useGridImage ? `${src} 300w` : `${src} 600w`,
+          sizes,
+          loading: eager ? 'eager' : 'lazy',
+          fetchpriority: eager ? 'high' : undefined,
+          width: useGridImage ? 300 : 600,
+          height: useGridImage ? 300 : 337,
+        }}
+      />
     </Box>
   );
 };

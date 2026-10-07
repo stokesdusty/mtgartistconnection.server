@@ -1,24 +1,18 @@
+import { useState, MouseEvent } from "react";
 import {
   Box,
   TextField,
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
-  Button,
   ListSubheader,
-  Typography,
+  Menu,
+  Popover,
 } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
-import InputAdornment from "@mui/material/InputAdornment";
-import { SelectChangeEvent } from "@mui/material/Select";
-import { MagnifyingGlass, Shuffle } from "@phosphor-icons/react";
-import { ChangeEvent } from "react";
+import FilterChip from "../shared/FilterChip";
+import MonoLabel from "../shared/MonoLabel";
 import { homepageStyles } from "../../styles/homepage-styles";
-import { themeColors } from "../../styles/design-tokens";
 
 export interface ScryfallSet {
   code: string;
@@ -27,238 +21,238 @@ export interface ScryfallSet {
   released_at: string;
 }
 
-interface FiltersFormProps {
-  idSuffix: string;
-  layout?: "grid" | "stack";
-  userSearch: string;
-  locationFilter: string;
-  setFilter: string;
-  locations: { US: string[]; Other: string[] };
+export type Locations = { US: string[]; Other: string[] };
+
+/** The boolean filters, keyed by their URL param. */
+export type ToggleKey = 'hasEvent' | 'sellsAps' | 'marksSig' | 'mountainMage';
+
+export const TOGGLE_FILTERS: { key: ToggleKey; label: string; live?: boolean }[] = [
+  { key: 'hasEvent', label: 'Signing soon', live: true },
+  { key: 'sellsAps', label: 'Sells APs' },
+  { key: 'marksSig', label: 'Marks Signature Service' },
+  { key: 'mountainMage', label: 'Mountain Mage' },
+];
+
+export const locationLabel = (value: string) =>
+  value === 'US' ? 'Anywhere in the US' : value.split(',')[0];
+
+// ─── Location ────────────────────────────────────────────────────────────────
+
+/** Shared option list: All, US states (+ "Anywhere in the US"), then other locations. */
+const locationOptions = (
+  locations: Locations,
+  selected: string,
+  onPick?: (value: string) => void,
+) => {
+  const item = (value: string, label: string, indent = true) => (
+    <MenuItem
+      key={value || 'all'}
+      value={value}
+      selected={onPick ? selected === value : undefined}
+      onClick={onPick ? () => onPick(value) : undefined}
+      sx={{ ...(homepageStyles.menuItem as object), pl: indent ? 3 : 1.5 }}
+    >
+      {label}
+    </MenuItem>
+  );
+  return [
+    item('', 'All locations', false),
+    ...(locations.US.length > 0
+      ? [
+          <ListSubheader key="us-header" sx={homepageStyles.listSubheader}>US States</ListSubheader>,
+          item('US', 'Anywhere in the US'),
+          ...locations.US.map((l) => item(l, l.split(',')[0])),
+        ]
+      : []),
+    ...(locations.Other.length > 0
+      ? [
+          <ListSubheader key="other-header" sx={homepageStyles.listSubheader}>Other Locations</ListSubheader>,
+          ...locations.Other.map((l) => item(l, l)),
+        ]
+      : []),
+  ];
+};
+
+/** "Location ▾" chip that opens the grouped location menu. */
+export const LocationChip = ({
+  locations,
+  value,
+  onChange,
+}: {
+  locations: Locations;
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  return (
+    <>
+      <FilterChip
+        dropdown
+        active={Boolean(value)}
+        aria-haspopup="menu"
+        aria-expanded={Boolean(anchor)}
+        onClick={(e: MouseEvent<HTMLButtonElement>) => setAnchor(e.currentTarget)}
+      >
+        {value ? locationLabel(value) : 'Location'}
+      </FilterChip>
+      <Menu
+        anchorEl={anchor}
+        open={Boolean(anchor)}
+        onClose={() => setAnchor(null)}
+        sx={homepageStyles.menu}
+      >
+        {locationOptions(locations, value, (v) => {
+          onChange(v);
+          setAnchor(null);
+        })}
+      </Menu>
+    </>
+  );
+};
+
+// ─── Set ─────────────────────────────────────────────────────────────────────
+
+const SetAutocomplete = ({
+  scryfallSets,
+  setsLoading,
+  value,
+  onChange,
+  autoFocus,
+}: {
   scryfallSets: ScryfallSet[];
   setsLoading: boolean;
-  marksSigServiceFilter: boolean;
-  mountainMageFilter: boolean;
-  hasUpcomingEventFilter: boolean;
-  sellsApsFilter: boolean;
-  onSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onLocationChange: (e: SelectChangeEvent) => void;
+  value: string;
+  onChange: (code: string) => void;
+  autoFocus?: boolean;
+}) => (
+  <Autocomplete
+    size="small"
+    options={scryfallSets}
+    getOptionLabel={(option) => option.name}
+    value={scryfallSets.find((s) => s.code === value) ?? null}
+    onChange={(_, newValue) => onChange(newValue?.code ?? "")}
+    loading={setsLoading}
+    loadingText="Loading sets..."
+    noOptionsText="No sets found"
+    openOnFocus
+    sx={homepageStyles.field}
+    renderInput={(params) => (
+      <TextField {...params} placeholder="Any set" aria-label="Filter by set" autoFocus={autoFocus} />
+    )}
+  />
+);
+
+/** "Set ▾" chip that opens a searchable set picker. */
+export const SetChip = ({
+  scryfallSets,
+  setsLoading,
+  value,
+  onChange,
+}: {
+  scryfallSets: ScryfallSet[];
+  setsLoading: boolean;
+  value: string;
+  onChange: (code: string) => void;
+}) => {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const selected = scryfallSets.find((s) => s.code === value);
+  return (
+    <>
+      <FilterChip
+        dropdown
+        active={Boolean(value)}
+        aria-haspopup="dialog"
+        aria-expanded={Boolean(anchor)}
+        onClick={(e: MouseEvent<HTMLButtonElement>) => setAnchor(e.currentTarget)}
+      >
+        {value ? selected?.name ?? value.toUpperCase() : 'Set'}
+      </FilterChip>
+      <Popover
+        anchorEl={anchor}
+        open={Boolean(anchor)}
+        onClose={() => setAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        sx={homepageStyles.popover}
+      >
+        <SetAutocomplete
+          autoFocus
+          scryfallSets={scryfallSets}
+          setsLoading={setsLoading}
+          value={value}
+          onChange={(code) => {
+            onChange(code);
+            setAnchor(null);
+          }}
+        />
+      </Popover>
+    </>
+  );
+};
+
+// ─── Full form (mobile filter sheet) ─────────────────────────────────────────
+
+interface FiltersFormProps {
+  idSuffix: string;
+  locationFilter: string;
+  setFilter: string;
+  locations: Locations;
+  scryfallSets: ScryfallSet[];
+  setsLoading: boolean;
+  toggles: Record<ToggleKey, boolean>;
+  onToggle: (key: ToggleKey, value: boolean) => void;
+  onLocationChange: (value: string) => void;
   onSetChange: (code: string) => void;
-  onMarksSigServiceChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onMountainMageChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onHasUpcomingEventChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onSellsApsChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onRandomArtist?: () => void;
-  hideSearch?: boolean;
 }
 
 const FiltersForm = ({
   idSuffix,
-  layout = "stack",
-  userSearch,
   locationFilter,
   setFilter,
   locations,
   scryfallSets,
   setsLoading,
-  marksSigServiceFilter,
-  mountainMageFilter,
-  hasUpcomingEventFilter,
-  sellsApsFilter,
-  onSearchChange,
+  toggles,
+  onToggle,
   onLocationChange,
   onSetChange,
-  onMarksSigServiceChange,
-  onMountainMageChange,
-  onHasUpcomingEventChange,
-  onSellsApsChange,
-  onRandomArtist,
-  hideSearch = false,
 }: FiltersFormProps) => {
   const locationLabelId = `location-select-label${idSuffix}`;
-  const locationSelectId = `location-select${idSuffix}`;
-
-  const searchField = (
-    <TextField
-      size="small"
-      sx={{ ...homepageStyles.textField, "& .MuiInputBase-input": { fontSize: "0.875rem" } }}
-      value={userSearch}
-      placeholder="Search for an artist"
-      aria-label="Search artists"
-      onChange={onSearchChange}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <MagnifyingGlass size={20} />
-          </InputAdornment>
-        ),
-      }}
-    />
-  );
-
-  const locationSelect = (
-    <FormControl
-      size="small"
-      sx={{ ...homepageStyles.locationSelect, "& .MuiInputLabel-root": { fontSize: "0.875rem" } }}
-    >
-      <InputLabel
-        id={locationLabelId}
-        sx={{ color: themeColors.text.secondary, "&.Mui-focused": { color: themeColors.primary.main } }}
-      >
-        Filter by Location
-      </InputLabel>
-      <Select
-        labelId={locationLabelId}
-        id={locationSelectId}
-        value={locationFilter}
-        label="Filter by Location"
-        onChange={onLocationChange}
-        sx={{ fontSize: "0.875rem" }}
-      >
-        <MenuItem value="">All Locations</MenuItem>
-        {locations.US.length > 0 && [
-          <ListSubheader key="us-header" sx={homepageStyles.listSubheader}>
-            US States
-          </ListSubheader>,
-          <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
-            Anywhere in the US
-          </MenuItem>,
-          ...locations.US.map((location) => (
-            <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-              {location.split(",")[0]}
-            </MenuItem>
-          )),
-        ]}
-        {locations.Other.length > 0 && [
-          <ListSubheader key="other-header" sx={homepageStyles.listSubheader}>
-            Other Locations
-          </ListSubheader>,
-          ...locations.Other.map((location) => (
-            <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-              {location}
-            </MenuItem>
-          )),
-        ]}
-      </Select>
-    </FormControl>
-  );
-
-  const setAutocomplete = (
-    <Autocomplete
-      size="small"
-      options={scryfallSets}
-      getOptionLabel={(option) => option.name}
-      value={scryfallSets.find((s) => s.code === setFilter) ?? null}
-      onChange={(_, newValue) => onSetChange(newValue?.code ?? "")}
-      loading={setsLoading}
-      loadingText="Loading sets..."
-      noOptionsText="No sets found"
-      sx={homepageStyles.locationSelect}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Filter by Set"
-          size="small"
-          sx={{
-            "& .MuiInputLabel-root": { fontSize: "0.875rem" },
-            "& .MuiInputBase-input": { fontSize: "0.875rem" },
-          }}
-        />
-      )}
-    />
-  );
-
-  const checkboxGroup = (
-    <Box sx={homepageStyles.checkboxContainer}>
-      <Typography sx={{ ...homepageStyles.signingAgentLabel, fontSize: "0.875rem", mb: 0.5 }}>
-        Filters
-      </Typography>
-      <FormGroup sx={{ ...homepageStyles.checkboxesContainer, gap: 0 }}>
-        <FormControlLabel
-          sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.8125rem" }, my: -0.25 }}
-          control={
-            <Checkbox
-              size="small"
-              checked={marksSigServiceFilter}
-              onChange={onMarksSigServiceChange}
-              name={`marksSigService${idSuffix}`}
-              sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-            />
-          }
-          label="Marks Signature Service"
-        />
-        <FormControlLabel
-          sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.8125rem" }, my: -0.25 }}
-          control={
-            <Checkbox
-              size="small"
-              checked={mountainMageFilter}
-              onChange={onMountainMageChange}
-              name={`mountainMage${idSuffix}`}
-              sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-            />
-          }
-          label="Mountain Mage Signing Service"
-        />
-        <FormControlLabel
-          sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.8125rem" }, my: -0.25 }}
-          control={
-            <Checkbox
-              size="small"
-              checked={hasUpcomingEventFilter}
-              onChange={onHasUpcomingEventChange}
-              name={`hasUpcomingEvent${idSuffix}`}
-              sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-            />
-          }
-          label="Has Upcoming Event"
-        />
-        <FormControlLabel
-          sx={{ "& .MuiFormControlLabel-label": { fontSize: "0.8125rem" }, my: -0.25 }}
-          control={
-            <Checkbox
-              size="small"
-              checked={sellsApsFilter}
-              onChange={onSellsApsChange}
-              name={`sellsAps${idSuffix}`}
-              sx={{ ...homepageStyles.checkbox, p: 0.5 }}
-            />
-          }
-          label="Sells APs on Website"
-        />
-      </FormGroup>
-    </Box>
-  );
-
-  if (layout === "grid") {
-    return (
-      <Box sx={{ ...homepageStyles.filtersGrid, gap: 2 }}>
-        <Box sx={homepageStyles.searchContainer}>
-          {searchField}
-          <Button
-            variant="contained"
-            onClick={onRandomArtist}
-            startIcon={<Shuffle size={20} />}
-            sx={{ ...homepageStyles.randomButton, fontSize: "0.8125rem", height: '40px' }}
-          >
-            Random Artist
-          </Button>
-        </Box>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {locationSelect}
-          {setAutocomplete}
-        </Box>
-        {checkboxGroup}
-      </Box>
-    );
-  }
 
   return (
-    <>
-      {!hideSearch && searchField}
-      {locationSelect}
-      {setAutocomplete}
-      {checkboxGroup}
-    </>
+    <Box sx={homepageStyles.formStack}>
+      <Box>
+        <MonoLabel component="div" id={locationLabelId} sx={{ mb: 1 }}>Location</MonoLabel>
+        <FormControl fullWidth size="small" sx={homepageStyles.field}>
+          <Select
+            labelId={locationLabelId}
+            id={`location-select${idSuffix}`}
+            value={locationFilter}
+            displayEmpty
+            onChange={(e) => onLocationChange(e.target.value)}
+            renderValue={(v) => (v ? locationLabel(v) : 'All locations')}
+            MenuProps={{ sx: homepageStyles.menu }}
+          >
+            {locationOptions(locations, locationFilter)}
+          </Select>
+        </FormControl>
+      </Box>
+
+      <Box>
+        <MonoLabel component="div" sx={{ mb: 1 }}>Set</MonoLabel>
+        <SetAutocomplete scryfallSets={scryfallSets} setsLoading={setsLoading} value={setFilter} onChange={onSetChange} />
+      </Box>
+
+      <Box>
+        <MonoLabel component="div" sx={{ mb: 1 }}>Show only</MonoLabel>
+        <Box sx={homepageStyles.chipWrap}>
+          {TOGGLE_FILTERS.map(({ key, label, live }) => (
+            <FilterChip key={key} active={toggles[key]} live={live} onClick={() => onToggle(key, !toggles[key])}>
+              {label}
+            </FilterChip>
+          ))}
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

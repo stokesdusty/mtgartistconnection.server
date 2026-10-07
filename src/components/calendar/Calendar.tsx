@@ -3,18 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import {
   Box,
-  Container,
-  Paper,
-  Typography,
   FormControl,
-  InputLabel,
+  FormControlLabel,
   Select,
   MenuItem,
   SelectChangeEvent,
   Fab,
-  Button,
   ListSubheader,
-  Chip
+  Switch
 } from "@mui/material";
 import { EventCardSkeleton } from "../shared/Skeletons";
 import { ArrowUp } from "@phosphor-icons/react";
@@ -24,8 +20,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import SigningEvent from "./SigningEvent";
 import EmptyState from "../shared/EmptyState";
-import { contentPageStyles } from "../../styles/content-page-styles";
+import MonoLabel from "../shared/MonoLabel";
+import SegmentedControl, { SegmentOption } from "../shared/SegmentedControl";
 import { calendarStyles } from "../../styles/calendar-styles";
+import { homepageStyles } from "../../styles/homepage-styles";
 import PageMeta from "../shared/PageMeta";
 
 // Map of state codes to full state names
@@ -45,6 +43,15 @@ const stateCodeToName: { [key: string]: string } = {
 
 type DateRangeFilter = 'all' | 'this-week' | 'this-month' | 'next-3-months';
 
+const DATE_RANGE_OPTIONS: SegmentOption<DateRangeFilter>[] = [
+  { value: 'all', label: 'All' },
+  { value: 'this-week', label: 'This week', shortLabel: 'Week' },
+  { value: 'this-month', label: 'This month', shortLabel: 'Month' },
+  { value: 'next-3-months', label: 'Next 3 months', shortLabel: '3 mo' },
+];
+
+const locationLabel = (value: string) => (value === 'US' ? 'Anywhere in the US' : value);
+
 const Calendar = () => {
   usePageTitle("Events Calendar");
 
@@ -54,6 +61,8 @@ const Calendar = () => {
   const dateRangeFilter = (searchParams.get('range') as DateRangeFilter) ?? 'all';
 
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  // Only meaningful with a collection to read from, so ignored when logged out.
+  const wishlistOnly = isLoggedIn && searchParams.get('wishlist') === '1';
 
   const { data, error, loading } = useQuery(GET_SIGNINGEVENTS);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -299,201 +308,222 @@ const Calendar = () => {
       });
     }
 
+    // Apply wishlist filter: events where a wishlisted artist is signing
+    if (wishlistOnly) {
+      filtered = filtered.filter((eventData: any) => (wishlistCountByEvent[eventData.id] ?? 0) > 0);
+    }
+
     return filtered.sort(
       (a: any, b: any) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     );
-  }, [data, locationFilter, artistFilter, dateRangeFilter, eventArtistsMap]);
+  }, [data, locationFilter, artistFilter, dateRangeFilter, eventArtistsMap, wishlistOnly, wishlistCountByEvent]);
+
+  // Group by the month each event starts in ("October 2026")
+  const monthGroups = useMemo(() => {
+    const groups: { key: string; label: string; events: any[] }[] = [];
+    filteredAndSortedEvents.forEach((eventData: any) => {
+      const start = new Date(eventData.startDate);
+      const key = `${start.getFullYear()}-${start.getMonth()}`;
+      let group = groups[groups.length - 1];
+      if (!group || group.key !== key) {
+        group = {
+          key,
+          label: start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          events: [],
+        };
+        groups.push(group);
+      }
+      group.events.push(eventData);
+    });
+    return groups;
+  }, [filteredAndSortedEvents]);
+
+  const hasFilters = Boolean(locationFilter || artistFilter || dateRangeFilter !== 'all' || wishlistOnly);
+
+  const pageMeta = (
+    <PageMeta
+      title="Events Calendar"
+      description="Browse upcoming Magic: The Gathering artist signing events, conventions, and streams. Find where your favorite MTG artists will be."
+      path="/calendar"
+    />
+  );
+
+  const title = (
+    <Box component="h1" sx={calendarStyles.title}>Signing calendar</Box>
+  );
 
   if (loading)
     return (
-      <Box sx={contentPageStyles.container}>
-        <Container maxWidth="lg">
-          <Paper elevation={0} sx={contentPageStyles.wrapper}>
-            <Typography variant="h1" sx={contentPageStyles.pageTitle}>
-              Events Calendar
-            </Typography>
-            <Box sx={contentPageStyles.eventsContainer}>
-              <EventCardSkeleton count={5} />
-            </Box>
-          </Paper>
-        </Container>
+      <Box sx={calendarStyles.page}>
+        {pageMeta}
+        <Box sx={calendarStyles.hero}>{title}</Box>
+        <EventCardSkeleton count={5} />
       </Box>
     );
 
   if (error)
     return (
-      <Box sx={contentPageStyles.container}>
-        <Container maxWidth="lg">
-          <Paper elevation={0} sx={contentPageStyles.wrapper}>
-            <Typography sx={contentPageStyles.errorMessage}>
-              Error loading calendar: {error.message}
-            </Typography>
-          </Paper>
-        </Container>
+      <Box sx={[calendarStyles.page, calendarStyles.statusMessage]}>
+        Error loading calendar: {error.message}
       </Box>
     );
 
+  const eyebrow = filteredAndSortedEvents.length === upcomingEventIds.length
+    ? `${upcomingEventIds.length} upcoming ${upcomingEventIds.length === 1 ? 'event' : 'events'}`
+    : `Showing ${filteredAndSortedEvents.length} of ${upcomingEventIds.length} upcoming events`;
+
   return (
-    <Box sx={contentPageStyles.container}>
-      <Container maxWidth="lg">
-        <PageMeta
-          title="Events Calendar"
-          description="Browse upcoming Magic: The Gathering artist signing events, conventions, and streams. Find where your favorite MTG artists will be."
-          path="/calendar"
+    <Box sx={calendarStyles.page}>
+      {pageMeta}
+
+      <Box sx={calendarStyles.hero}>
+        <Box>
+          <MonoLabel tone="accent" size={12} tracking="wide" sx={calendarStyles.eyebrow}>
+            {eyebrow}
+          </MonoLabel>
+          {title}
+        </Box>
+        <SegmentedControl
+          aria-label="Date range"
+          options={DATE_RANGE_OPTIONS}
+          value={dateRangeFilter}
+          onChange={handleDateRangeChange}
         />
-        <Paper elevation={0} sx={contentPageStyles.wrapper}>
-          <Typography variant="h1" sx={contentPageStyles.pageTitle}>
-            Events Calendar
-          </Typography>
+      </Box>
 
-          {/* Date range filter row */}
-          <Box
-            sx={{
-              marginBottom: 2,
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 1.5, sm: 1 },
-              alignItems: { xs: 'stretch', sm: 'center' },
-            }}
+      <Box sx={calendarStyles.filtersRow}>
+        <FormControl size="small" sx={calendarStyles.select}>
+          <Select
+            id="location-select"
+            value={locationFilter}
+            displayEmpty
+            onChange={handleLocationChange}
+            inputProps={{ 'aria-label': 'Filter by location' }}
+            renderValue={(v) =>
+              v ? locationLabel(v) : <Box component="span" sx={calendarStyles.selectPlaceholder}>Location</Box>
+            }
+            MenuProps={{ sx: homepageStyles.menu }}
           >
-            {/* Chip group */}
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 1,
-                flexWrap: 'wrap',
-                justifyContent: { xs: 'center', sm: 'flex-start' },
-              }}
-            >
-              {[
-                { value: 'this-week' as DateRangeFilter, label: 'This week' },
-                { value: 'this-month' as DateRangeFilter, label: 'This month' },
-                { value: 'next-3-months' as DateRangeFilter, label: 'Next 3 months' },
-                { value: 'all' as DateRangeFilter, label: 'All upcoming' },
-              ].map((option) => (
-                <Chip
-                  key={option.value}
-                  label={option.label}
-                  onClick={() => handleDateRangeChange(option.value)}
-                  variant={dateRangeFilter === option.value ? 'filled' : 'outlined'}
-                  sx={dateRangeFilter === option.value ? calendarStyles.dateChipActive : calendarStyles.dateChipInactive}
-                />
-              ))}
-            </Box>
-
-            {/* Event count badge */}
-            <Box
-              component="span"
-              sx={calendarStyles.eventCountBadge}
-            >
-              {filteredAndSortedEvents.length === upcomingEventIds.length
-                ? `${upcomingEventIds.length} events`
-                : `Showing ${filteredAndSortedEvents.length} of ${upcomingEventIds.length}`}
-            </Box>
-          </Box>
-
-          <Box sx={{ marginBottom: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <FormControl sx={calendarStyles.filterFormControl}>
-              <InputLabel id="location-select-label">Filter by Location</InputLabel>
-              <Select
-                labelId="location-select-label"
-                id="location-select"
-                value={locationFilter}
-                label="Filter by Location"
-                onChange={handleLocationChange}
-                sx={calendarStyles.filterSelect}
-              >
-                <MenuItem value="">
-                  <em>All Locations</em>
+            <MenuItem value="" sx={homepageStyles.menuItem}>
+              All locations
+            </MenuItem>
+            {locations.US.length > 0 && [
+              <ListSubheader key="us-header" sx={homepageStyles.listSubheader}>
+                US States
+              </ListSubheader>,
+              <MenuItem key="us-all" value="US" sx={homepageStyles.menuItem}>
+                Anywhere in the US ({locations.counts['US'] ?? 0})
+              </MenuItem>,
+              ...locations.US.map((location) => (
+                <MenuItem key={location} value={location} sx={homepageStyles.menuItem}>
+                  {location} ({locations.counts[location] ?? 0})
                 </MenuItem>
-                {locations.US.length > 0 && [
-                  <ListSubheader key="us-header" sx={calendarStyles.listSubheader}>
-                    US States
-                  </ListSubheader>,
-                  <MenuItem key="us-all" value="US" sx={{ pl: 3 }}>
-                    Anywhere in the US ({locations.counts['US'] ?? 0})
-                  </MenuItem>,
-                  ...locations.US.map((location) => (
-                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                      {location} ({locations.counts[location] ?? 0})
-                    </MenuItem>
-                  ))
-                ]}
-                {locations.Other.length > 0 && [
-                  <ListSubheader key="other-header" sx={calendarStyles.listSubheader}>
-                    Other Locations
-                  </ListSubheader>,
-                  ...locations.Other.map((location) => (
-                    <MenuItem key={location} value={location} sx={{ pl: 3 }}>
-                      {location} ({locations.counts[location] ?? 0})
-                    </MenuItem>
-                  ))
-                ]}
-              </Select>
-            </FormControl>
-
-            <FormControl sx={calendarStyles.filterFormControl}>
-              <InputLabel id="artist-select-label">Filter by Artist</InputLabel>
-              <Select
-                labelId="artist-select-label"
-                id="artist-select"
-                value={artistFilter}
-                label="Filter by Artist"
-                onChange={handleArtistChange}
-                sx={calendarStyles.filterSelect}
-              >
-                <MenuItem value="">
-                  <em>All Artists</em>
-                </MenuItem>
-                {uniqueArtists.map((artist) => (
-                  <MenuItem key={artist} value={artist}>
-                    {artist} ({artistEventCounts[artist] ?? 0})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {(locationFilter || artistFilter || dateRangeFilter !== 'all') && (
-              <Button
-                onClick={handleClearFilters}
-                variant="outlined"
-                sx={calendarStyles.clearFiltersButton}
-              >
-                Clear Filters
-              </Button>
-            )}
-          </Box>
-
-          <Box sx={contentPageStyles.eventsContainer}>
-            {filteredAndSortedEvents.length > 0 ? (
-              filteredAndSortedEvents.map((eventData: any) => (
-                <SigningEvent key={eventData.id} props={eventData} wishlistCount={wishlistCountByEvent[eventData.id] ?? 0} />
               ))
-            ) : locationFilter || artistFilter || dateRangeFilter !== 'all' ? (
-              <EmptyState
-                headline={`No events match${artistFilter ? ` for ${artistFilter}` : ''}${locationFilter ? ` in ${locationFilter}` : ''}${dateRangeFilter !== 'all' ? ` ${dateRangeFilter.replace('-', ' ')}` : ''}`}
-                body="Try broadening your filters."
-                action={{ label: 'Clear filters', onClick: handleClearFilters }}
-              />
-            ) : (
-              <EmptyState
-                headline="No upcoming events scheduled"
-                body="Check back soon for new signing events."
-              />
-            )}
+            ]}
+            {locations.Other.length > 0 && [
+              <ListSubheader key="other-header" sx={homepageStyles.listSubheader}>
+                Other Locations
+              </ListSubheader>,
+              ...locations.Other.map((location) => (
+                <MenuItem key={location} value={location} sx={homepageStyles.menuItem}>
+                  {location} ({locations.counts[location] ?? 0})
+                </MenuItem>
+              ))
+            ]}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={calendarStyles.select}>
+          <Select
+            id="artist-select"
+            value={artistFilter}
+            displayEmpty
+            onChange={handleArtistChange}
+            inputProps={{ 'aria-label': 'Filter by artist' }}
+            renderValue={(v) =>
+              v || <Box component="span" sx={calendarStyles.selectPlaceholder}>Artist</Box>
+            }
+            MenuProps={{ sx: homepageStyles.menu }}
+          >
+            <MenuItem value="" sx={homepageStyles.menuItem}>
+              All artists
+            </MenuItem>
+            {uniqueArtists.map((artist) => (
+              <MenuItem key={artist} value={artist} sx={homepageStyles.menuItem}>
+                {artist} ({artistEventCounts[artist] ?? 0})
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {hasFilters && (
+          <Box component="button" type="button" onClick={handleClearFilters} sx={calendarStyles.clearButton}>
+            Clear filters
           </Box>
-        </Paper>
-      </Container>
+        )}
+
+        <Box sx={calendarStyles.filtersSpacer} />
+
+        {isLoggedIn && (
+          <FormControlLabel
+            labelPlacement="start"
+            label="My wishlist only"
+            sx={calendarStyles.wishlistToggle}
+            control={
+              <Switch
+                checked={wishlistOnly}
+                onChange={(e) => updateFilter('wishlist', e.target.checked ? '1' : '')}
+                sx={calendarStyles.switch}
+              />
+            }
+          />
+        )}
+      </Box>
+
+      <Box sx={calendarStyles.months}>
+        {monthGroups.length > 0 ? (
+          monthGroups.map((group) => (
+            <Box component="section" key={group.key} aria-labelledby={`month-${group.key}`}>
+              <Box component="h2" id={`month-${group.key}`} sx={calendarStyles.monthHeader}>
+                <Box component="span" sx={calendarStyles.monthName}>{group.label}</Box>
+                <MonoLabel size={12} uppercase={false}>
+                  {group.events.length} {group.events.length === 1 ? 'event' : 'events'}
+                </MonoLabel>
+              </Box>
+              <Box component="ul" sx={calendarStyles.eventList}>
+                {group.events.map((eventData: any) => (
+                  <SigningEvent
+                    key={eventData.id}
+                    props={eventData}
+                    wishlistCount={wishlistCountByEvent[eventData.id] ?? 0}
+                    artistNames={eventArtistsMap[eventData.id]}
+                  />
+                ))}
+              </Box>
+            </Box>
+          ))
+        ) : hasFilters ? (
+          <EmptyState
+            headline={`No events match${artistFilter ? ` for ${artistFilter}` : ''}${locationFilter ? ` in ${locationLabel(locationFilter)}` : ''}${dateRangeFilter !== 'all' ? ` ${dateRangeFilter.replace(/-/g, ' ')}` : ''}${wishlistOnly ? ' with wishlisted artists' : ''}`}
+            body="Try broadening your filters."
+            action={{ label: 'Clear filters', onClick: handleClearFilters }}
+          />
+        ) : (
+          <EmptyState
+            headline="No upcoming events scheduled"
+            body="Check back soon for new signing events."
+          />
+        )}
+      </Box>
 
       {showScrollTop && (
         <Fab
-          color="primary"
           onClick={scrollToTop}
-          size="medium"
+          aria-label="Scroll to top"
           sx={calendarStyles.scrollToTopFab}
         >
-          <ArrowUp size={24} />
+          <ArrowUp size={20} />
         </Fab>
       )}
     </Box>

@@ -14,7 +14,7 @@ const noFilters = {
   userSearch: '',
   artistsWithEvents: new Set<string>(),
   setFilter: '',
-  setArtistsData: {},
+  setArtistNames: null,
 };
 
 const a = (name: string, flags = 0, location?: string, alternate_names?: string): ArtistFlag =>
@@ -239,13 +239,11 @@ describe('userSearch', () => {
 // Set filter
 // ---------------------------------------------------------------------------
 describe('setFilter', () => {
-  const setArtistsData = {
-    khm: ['aaronmiller', 'zackstella'],
-    grn: ['chriscahn'],
-  };
+  // artistsBySet returns our display names, already mapped server-side
+  const khmArtists = new Set(['Aaron Miller', 'Zack Stella']);
 
-  it('returns only artists in the specified set (normalized name match)', () => {
-    const result = filterArtists(artists, { ...noFilters, setFilter: 'khm', setArtistsData });
+  it('returns only artists credited in the selected set', () => {
+    const result = filterArtists(artists, { ...noFilters, setFilter: 'khm', setArtistNames: khmArtists });
     const names = result.map(a => a.name);
     expect(names).toContain('Aaron Miller');
     expect(names).toContain('Zack Stella');
@@ -253,21 +251,18 @@ describe('setFilter', () => {
   });
 
   it('returns empty array when the set has no matching artists', () => {
-    const result = filterArtists(artists, {
-      ...noFilters,
-      setFilter: 'unknown-set',
-      setArtistsData,
-    });
+    const result = filterArtists(artists, { ...noFilters, setFilter: 'khm', setArtistNames: new Set() });
     expect(result).toHaveLength(0);
   });
 
-  it('normalizes artist names by lowercasing and removing spaces for matching', () => {
-    // 'Aaron Miller' → 'aaronmiller' must match entry 'aaronmiller'
-    const result = filterArtists(
-      [a('Aaron Miller', 0)],
-      { ...noFilters, setFilter: 'khm', setArtistsData: { khm: ['aaronmiller'] } },
-    );
-    expect(result).toHaveLength(1);
+  it('matches nothing while the set list is not loaded', () => {
+    const result = filterArtists(artists, { ...noFilters, setFilter: 'khm', setArtistNames: null });
+    expect(result).toHaveLength(0);
+  });
+
+  it('ignores setArtistNames when no set is selected', () => {
+    const result = filterArtists(artists, { ...noFilters, setArtistNames: new Set() });
+    expect(result).toHaveLength(artists.length);
   });
 });
 

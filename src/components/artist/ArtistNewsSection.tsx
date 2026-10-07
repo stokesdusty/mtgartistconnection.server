@@ -1,15 +1,11 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Link,
-} from '@mui/material';
-import { CalendarBlank, ArrowRight } from "@phosphor-icons/react";
+import { Box } from '@mui/material';
+import { ArrowRight } from "@phosphor-icons/react";
 import { GET_NEWS_REVIEWS } from '../graphql/queries';
 import { artistStyles } from '../../styles/artist-styles';
-import { colors } from '../../styles/design-tokens';
+import MonoLabel from '../shared/MonoLabel';
 
 interface NewsArticle {
   id: string;
@@ -61,95 +57,43 @@ const ArtistNewsSection: React.FC<ArtistNewsSectionProps> = ({ artistName }) => 
   }
 
   return (
-    <Box sx={artistStyles.artistPage}>
-        <Typography sx={artistStyles.sectionHeader} variant="h4" >Recent News</Typography>
-        <Box sx={artistStyles.infoRow}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {artistArticles.map((article) => (
-              <Box
-                key={article.id}
-                sx={{
-                  backgroundColor: colors.neutral.white,
-                  borderRadius: '8px',
-                  padding: 2,
-                  border: '1px solid #e0e0e0',
-                  cursor: 'pointer',
-                  transition: 'all 200ms',
-                  '&:hover': {
-                    borderColor: colors.primary.main,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                  },
-                }}
-                onClick={() => navigate(`/news/${article.id}`)}
-              >
-                <Typography
-                  sx={{
-                    fontWeight: 600,
-                    color: colors.text.primary,
-                    fontSize: '1rem',
-                    mb: 0.5,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  {article.title}
-                  <ArrowRight size={16} color={colors.primary.main} style={{ marginLeft: 4 }} />
-                </Typography>
+    <Box component="section" aria-labelledby="artist-news-label">
+      <MonoLabel component="h2" id="artist-news-label">Recent news</MonoLabel>
+      <Box sx={artistStyles.newsList}>
+        {artistArticles.map((article) => (
+          <Box
+            component="button"
+            type="button"
+            key={article.id}
+            sx={artistStyles.newsCard}
+            onClick={() => navigate(`/news/${article.id}`)}
+          >
+            <Box component="span" sx={artistStyles.newsTitle}>
+              {article.title}
+              <ArrowRight size={16} aria-hidden />
+            </Box>
 
-                {(article.publishedAt || article.generatedAt) && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5,
-                      mb: 1,
-                      color: colors.neutral[600],
-                    }}
-                  >
-                    <CalendarBlank size={14} weight="duotone" />
-                    <Typography sx={{ fontSize: '0.8rem' }}>
-                      {formatDate(article.publishedAt || article.generatedAt)}
-                    </Typography>
-                  </Box>
-                )}
+            {(article.publishedAt || article.generatedAt) && (
+              <MonoLabel sx={artistStyles.newsDate} tracking="tight">
+                {formatDate(article.publishedAt || article.generatedAt)}
+              </MonoLabel>
+            )}
 
-                <Typography
-                  sx={{
-                    color: colors.neutral[700],
-                    fontSize: '0.9rem',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {article.summary}
-                </Typography>
-              </Box>
-            ))}
-
-            <Link
-              component="button"
-              onClick={() => navigate(`/news/artist/${encodeURIComponent(artistName)}`)}
-              underline="none"
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 0.5,
-                color: colors.primary.main,
-                fontWeight: 600,
-                fontSize: '0.9rem',
-                mt: 1,
-                cursor: 'pointer',
-                transition: 'all 200ms',
-                '&:hover': {
-                  color: colors.primary.dark,
-                },
-              }}
-            >
-              See all news for {artistName} <ArrowRight size={16} style={{ marginLeft: 4 }} />
-            </Link>
+            <Box component="span" sx={[artistStyles.newsSummary, { display: 'block' }]}>
+              {article.summary}
+            </Box>
           </Box>
+        ))}
+
+        <Box
+          component="button"
+          type="button"
+          onClick={() => navigate(`/news/artist/${encodeURIComponent(artistName)}`)}
+          sx={artistStyles.newsAllLink}
+        >
+          See all news for {artistName} <ArrowRight size={14} aria-hidden />
         </Box>
+      </Box>
     </Box>
   );
 };

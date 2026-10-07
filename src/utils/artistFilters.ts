@@ -20,7 +20,8 @@ export interface ArtistFilterOptions {
   userSearch: string;
   artistsWithEvents: Set<string>;
   setFilter: string;
-  setArtistsData: Record<string, string[]>;
+  /** Our artist names credited in the selected set (from the artistsBySet query). */
+  setArtistNames: ReadonlySet<string> | null;
 }
 
 export function filterArtists(
@@ -37,7 +38,7 @@ export function filterArtists(
     userSearch,
     artistsWithEvents,
     setFilter,
-    setArtistsData,
+    setArtistNames,
   } = options;
 
   let filtered = allFlags;
@@ -77,8 +78,8 @@ export function filterArtists(
     });
   }
   if (setFilter) {
-    const setNames = new Set<string>(setArtistsData[setFilter] ?? []);
-    filtered = filtered.filter((a) => setNames.has(a.name.toLowerCase().replace(/\s/g, '')));
+    // Names are already mapped to our artists server-side; null (not loaded) matches nothing.
+    filtered = filtered.filter((a) => setArtistNames?.has(a.name) ?? false);
   }
 
   return filtered;

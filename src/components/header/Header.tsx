@@ -1,12 +1,9 @@
-import { forwardRef, useEffect, useMemo, useState } from "react";
-import { MEDIA_BASE_URL } from "../../config/media";
+import { useState } from "react";
 import {
   AppBar,
   Box,
   Menu,
   MenuItem,
-  Tab,
-  Tabs,
   Toolbar,
   useMediaQuery,
   useTheme,
@@ -20,11 +17,10 @@ import {
   ListItemText,
   Divider,
 } from "@mui/material";
-import { Link, LinkProps, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, ShareNetwork, Newspaper, MagnifyingGlass } from "@phosphor-icons/react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, MagnifyingGlass, ChartBar } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
-import { shadows } from '../../styles/design-tokens';
 import { useSelector, useDispatch } from 'react-redux';
 import { useApolloClient } from '@apollo/client';
 import { RootState } from '../../store/store';
@@ -33,20 +29,43 @@ import { logout } from '../../store/auth-slice';
 interface NavItem {
   label: string;
   to: string;
+  /** Extra path prefixes that mark this item active (e.g. artist pages under Artists). */
+  matches?: string[];
 }
 
 const navItems: NavItem[] = [
-  { label: "Home", to: "/" },
-  { label: "News", to: "/news" },
+  { label: "Artists", to: "/", matches: ["/artist/", "/allcards/", "/artistcardbreakdown/"] },
+  { label: "Events", to: "/calendar", matches: ["/calendar/"] },
   { label: "Services", to: "/signingservices" },
-  { label: "Events", to: "/calendar" },
 ];
 
-const NavLink = forwardRef<HTMLAnchorElement, LinkProps>(
-  ({ to, ...props }, ref) => (
-    <Link to={to} ref={ref} {...props} role={undefined} />
-  )
-);
+const dashboardItem: NavItem = { label: "Dashboard", to: "/dashboard" };
+
+const isActive = (item: NavItem, pathname: string) =>
+  pathname === item.to || (item.matches ?? []).some(prefix => pathname.startsWith(prefix));
+
+interface DrawerLink {
+  label: string;
+  to: string;
+  icon: JSX.Element;
+}
+
+const accountTools: DrawerLink[] = [
+  { label: "Your Signed Cards", to: "/yourcards", icon: <Cards size={20} weight="duotone" /> },
+  { label: "Following", to: "/following", icon: <Heart size={20} weight="duotone" /> },
+  { label: "Signing Status Tracker", to: "/signingtracker", icon: <Envelope size={20} weight="duotone" /> },
+  { label: "Artist Sheet Generator", to: "/artistsheet", icon: <ClipboardText size={20} weight="duotone" /> },
+  { label: "Random Flavor Text", to: "/randomflavortext", icon: <Shuffle size={20} weight="duotone" /> },
+  { label: "Settings", to: "/settings", icon: <GearSix size={20} /> },
+];
+
+const adminTools: DrawerLink[] = [
+  { label: "Add Artist", to: "/add", icon: <UserPlus size={20} /> },
+  // Hidden while the Bluesky post sync is off (webservice commit 7284679)
+  // { label: "Review Socials", to: "/reviewsocial", icon: <ShareNetwork size={20} /> },
+  { label: "Analytics", to: "/analytics", icon: <ChartBar size={20} /> },
+  { label: "Scan Event for Artists", to: "/scaneventartists", icon: <MagnifyingGlass size={20} /> },
+];
 
 const Header = () => {
   const location = useLocation();
@@ -57,18 +76,6 @@ const Header = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === 'admin';
 
-  const validPaths = useMemo(() => {
-    const paths = navItems.map(item => item.to);
-    if (isLoggedIn) paths.push('/dashboard');
-    return paths;
-  }, [isLoggedIn]);
-
-  const [value, setValue] = useState<string | false>(() =>
-    validPaths.includes(location.pathname)
-      ? location.pathname
-      : false
-  );
-
   const theme = useTheme();
   const isBelowLarge = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -76,16 +83,14 @@ const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { mode, toggleColorMode } = useColorMode();
 
+  const visibleNav = isLoggedIn ? [...navItems, dashboardItem] : navItems;
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: string | false) => {
-    setValue(newValue);
   };
 
   const handleMenuItemClick = (to: string) => {
@@ -125,160 +130,83 @@ const Header = () => {
     setDrawerOpen(open);
   };
 
-  const handleSettingsClick = () => {
+  const handleDrawerNavigate = (to: string) => {
     setDrawerOpen(false);
-    navigate('/settings');
+    navigate(to);
   };
 
-  const handleYourCardsClick = () => {
-    setDrawerOpen(false);
-    navigate('/yourcards');
-  };
-
-  const handleSigningTrackerClick = () => {
-    setDrawerOpen(false);
-    navigate('/signingtracker');
-  };
-
-  const handleFollowingClick = () => {
-    setDrawerOpen(false);
-    navigate('/following');
-  };
-
-  const handleArtistSheetClick = () => {
-    setDrawerOpen(false);
-    navigate('/artistsheet');
-  };
-
-  const handleRandomFlavorTextClick = () => {
-    setDrawerOpen(false);
-    navigate('/randomflavortext');
-  };
-
-  useEffect(() => {
-    setValue(
-      validPaths.includes(location.pathname)
-        ? location.pathname
-        : false
-    );
-  }, [location.pathname, validPaths]);
-
-  const handleAddArtistClick = () => {
-    setDrawerOpen(false);
-    navigate('/add');
-  };
-
-  const handleReviewSocialsClick = () => {
-    setDrawerOpen(false);
-    navigate('/reviewsocial');
-  };
-
-  const handleReviewNewsClick = () => {
-    setDrawerOpen(false);
-    navigate('/reviewnews');
-  };
-
-  const handleAnalyticsClick = () => {
-    setDrawerOpen(false);
-    navigate('/analytics');
-  };
-
-  const handleScanEventArtistsClick = () => {
-    setDrawerOpen(false);
-    navigate('/scaneventartists');
-  };
-
-  const renderMenuItems = () => {
-    return navItems.map((item) => (
-      <MenuItem
-        key={item.to}
-        onClick={() => handleMenuItemClick(item.to)}
-        sx={headerStyles.menuItem}
-        selected={location.pathname === item.to}
-      >
-        {item.label}
-      </MenuItem>
-    ));
-  };
-
-  const renderTabs = () => {
-    return navItems.map((item) => (
-      <Tab
-        key={item.to}
-        component={NavLink}
-        to={item.to}
-        disableRipple
-        label={item.label}
-        value={item.to}
-        sx={headerStyles.tab}
-      />
-    ));
-  };
+  const renderDrawerLink = ({ label, to, icon }: DrawerLink) => (
+    <ListItem key={to} disablePadding>
+      <ListItemButton onClick={() => handleDrawerNavigate(to)} sx={headerStyles.drawerListItem}>
+        <ListItemIcon>{icon}</ListItemIcon>
+        <ListItemText primary={label} primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
+      </ListItemButton>
+    </ListItem>
+  );
 
   return (
     <AppBar position="sticky" sx={headerStyles.appBar} elevation={0}>
-      <Toolbar sx={headerStyles.toolbar}>
-        <Box sx={headerStyles.logoContainer}>
-          <Link to="/">
-            <Box
-              component="img"
-              sx={headerStyles.logoImage}
-              alt="MtG Artist Connection Logo"
-              src={`${MEDIA_BASE_URL}/logo.png`}
-            />
-          </Link>
+      <Toolbar sx={headerStyles.toolbar} disableGutters>
+        <Box component={Link} to="/" sx={headerStyles.logoLink}>
+          <Box component="span" role="img" aria-label="MtG Artist Connection Logo" sx={headerStyles.logo} />
         </Box>
-        <Box sx={headerStyles.tabContainer}>
-          <IconButton onClick={toggleColorMode} sx={headerStyles.themeToggle} aria-label="toggle dark mode">
-            {mode === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+
+        {!isBelowLarge && (
+          <Box component="nav" aria-label="Main" sx={headerStyles.nav}>
+            {visibleNav.map(item => (
+              <Box
+                key={item.to}
+                component={Link}
+                to={item.to}
+                aria-current={isActive(item, location.pathname) ? 'page' : undefined}
+                sx={headerStyles.navItem}
+              >
+                {item.label}
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        <Box sx={headerStyles.actions}>
+          <IconButton
+            onClick={toggleColorMode}
+            sx={headerStyles.iconButton}
+            aria-label={mode === 'dark' ? 'switch to light mode' : 'switch to dark mode'}
+          >
+            {mode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </IconButton>
           {!isBelowLarge ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tabs
-                value={value}
-                onChange={handleTabChange}
-                sx={headerStyles.tabs}
-                textColor="inherit"
+            isLoggedIn ? (
+              <Button
+                onClick={toggleDrawer(true)}
+                sx={headerStyles.solidButton}
+                aria-label="open account menu"
+                startIcon={<ListIcon size={16} weight="bold" />}
               >
-                {renderTabs()}
-                {isLoggedIn && (
-                  <Tab
-                    component={NavLink}
-                    to="/dashboard"
-                    disableRipple
-                    label="Dashboard"
-                    value="/dashboard"
-                    sx={headerStyles.tab}
-                  />
-                )}
-              </Tabs>
-              {isLoggedIn ? (
-                <IconButton onClick={toggleDrawer(true)} sx={headerStyles.menuButton} aria-label="open account menu">
-                  <ListIcon size={20} />
-                </IconButton>
-              ) : (
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button onClick={handleLogin} sx={headerStyles.signInButton}>
-                    Sign In
-                  </Button>
-                  <Button onClick={handleSignUp} sx={headerStyles.signUpButton}>
-                    Sign Up
-                  </Button>
-                </Box>
-              )}
-            </Box>
+                Account
+              </Button>
+            ) : (
+              <>
+                <Button onClick={handleSignUp} sx={headerStyles.textButton}>
+                  Sign up
+                </Button>
+                <Button onClick={handleLogin} sx={headerStyles.solidButton}>
+                  Sign in
+                </Button>
+              </>
+            )
           ) : (
             <>
               <IconButton
                 id="menu-button"
+                aria-label={isLoggedIn ? "open account menu" : "open menu"}
                 aria-controls={(!isLoggedIn && open) ? "basic-menu" : undefined}
                 aria-haspopup="true"
                 aria-expanded={(!isLoggedIn && open) ? "true" : undefined}
                 onClick={isLoggedIn ? toggleDrawer(true) : handleClick}
                 sx={headerStyles.menuButton}
-                edge="end"
               >
-                <ListIcon size={24} />
+                <ListIcon size={20} />
               </IconButton>
               {!isLoggedIn && (
                 <Menu
@@ -286,17 +214,29 @@ const Header = () => {
                   anchorEl={anchorEl}
                   open={open}
                   onClose={handleClose}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                   MenuListProps={{
                     "aria-labelledby": "menu-button",
                   }}
                   sx={headerStyles.menu}
                 >
-                  {renderMenuItems()}
+                  {navItems.map(item => (
+                    <MenuItem
+                      key={item.to}
+                      onClick={() => handleMenuItemClick(item.to)}
+                      sx={headerStyles.menuItem}
+                      selected={isActive(item, location.pathname)}
+                    >
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                  <Divider sx={headerStyles.drawerDivider} />
                   <MenuItem onClick={handleLogin} sx={headerStyles.menuItem}>
-                    Sign In
+                    Sign in
                   </MenuItem>
                   <MenuItem onClick={handleSignUp} sx={headerStyles.menuItem}>
-                    Sign Up
+                    Sign up
                   </MenuItem>
                 </Menu>
               )}
@@ -308,9 +248,9 @@ const Header = () => {
         anchor="right"
         open={drawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ sx: { boxShadow: shadows.lg, backgroundColor: 'background.paper', backgroundImage: 'none' } }}
+        PaperProps={{ sx: headerStyles.drawerPaper }}
       >
-        <Box sx={{ width: 280, color: 'text.primary' }} role="presentation">
+        <Box sx={{ color: 'text.primary' }} role="presentation">
           <Box sx={headerStyles.drawerHeader}>
             <Box sx={headerStyles.drawerHeaderLabel}>Account</Box>
             <Box sx={headerStyles.drawerHeaderEmail}>{user?.email}</Box>
@@ -318,134 +258,31 @@ const Header = () => {
           {isBelowLarge && (
             <>
               <List sx={{ p: 1 }}>
-                {navItems.map((item) => (
+                {visibleNav.map((item) => (
                   <ListItem key={item.to} disablePadding>
                     <ListItemButton
-                      onClick={() => { navigate(item.to); setDrawerOpen(false); }}
-                      selected={location.pathname === item.to}
+                      onClick={() => handleDrawerNavigate(item.to)}
+                      selected={isActive(item, location.pathname)}
                       sx={headerStyles.drawerListItem}
                     >
-                      <ListItemText primary={item.label} primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+                      <ListItemText primary={item.label} primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
                     </ListItemButton>
                   </ListItem>
                 ))}
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => { navigate('/dashboard'); setDrawerOpen(false); }}
-                    selected={location.pathname === '/dashboard'}
-                    sx={headerStyles.drawerListItem}
-                  >
-                    <ListItemText primary="Dashboard" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-                  </ListItemButton>
-                </ListItem>
               </List>
-              <Divider />
+              <Divider sx={headerStyles.drawerDivider} />
             </>
           )}
-          <List sx={{ p: 1 }}
-            subheader={
-              <Box sx={{ px: 1, pt: 1, pb: 0.5, fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'text.secondary', opacity: 0.7 }}>
-                Account Tools
-              </Box>
-            }
-          >
-            <ListItem disablePadding>
-              <ListItemButton onClick={handleYourCardsClick} sx={headerStyles.drawerListItem}>
-                <ListItemIcon>
-                  <Cards size={20} weight="duotone" />
-                </ListItemIcon>
-                <ListItemText primary="Your Signed Cards" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={handleFollowingClick} sx={headerStyles.drawerListItem}>
-                <ListItemIcon>
-                  <Heart size={20} weight="duotone" />
-                </ListItemIcon>
-                <ListItemText primary="Following" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={handleSigningTrackerClick} sx={headerStyles.drawerListItem}>
-                <ListItemIcon>
-                  <Envelope size={20} weight="duotone" />
-                </ListItemIcon>
-                <ListItemText primary="Signing Status Tracker" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={handleArtistSheetClick} sx={headerStyles.drawerListItem}>
-                <ListItemIcon>
-                  <ClipboardText size={20} weight="duotone" />
-                </ListItemIcon>
-                <ListItemText primary="Artist Sheet Generator" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={handleRandomFlavorTextClick} sx={headerStyles.drawerListItem}>
-                <ListItemIcon>
-                  <Shuffle size={20} weight="duotone" />
-                </ListItemIcon>
-                <ListItemText primary="Random Flavor Text" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={handleSettingsClick} sx={headerStyles.drawerListItem}>
-                <ListItemIcon>
-                  <GearSix size={20} />
-                </ListItemIcon>
-                <ListItemText primary="Settings" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-              </ListItemButton>
-            </ListItem>
-            {isLoggedIn && isAdmin && <>
-              <ListItem disablePadding>
-                <ListItemButton onClick={handleAddArtistClick} sx={headerStyles.drawerListItem}>
-                  <ListItemIcon>
-                    <UserPlus size={20} />
-                  </ListItemIcon>
-                  <ListItemText primary="Add Artist" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={handleReviewSocialsClick} sx={headerStyles.drawerListItem}>
-                  <ListItemIcon>
-                    <ShareNetwork size={20} />
-                  </ListItemIcon>
-                  <ListItemText primary="Review Socials" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={handleReviewNewsClick} sx={headerStyles.drawerListItem}>
-                  <ListItemIcon>
-                    <Newspaper size={20} />
-                  </ListItemIcon>
-                  <ListItemText primary="Review News" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={handleAnalyticsClick} sx={headerStyles.drawerListItem}>
-                  <ListItemIcon>
-                    <GearSix size={20} />
-                  </ListItemIcon>
-                  <ListItemText primary="Analytics" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={handleScanEventArtistsClick} sx={headerStyles.drawerListItem}>
-                  <ListItemIcon>
-                    <MagnifyingGlass size={20} />
-                  </ListItemIcon>
-                  <ListItemText primary="Scan Event for Artists" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
-                </ListItemButton>
-              </ListItem>
-            </>}
-            <Divider sx={{ my: 1 }} />
+          <List sx={{ p: 1 }} subheader={<Box sx={headerStyles.drawerSubheader}>Account Tools</Box>}>
+            {accountTools.map(renderDrawerLink)}
+            {isLoggedIn && isAdmin && adminTools.map(renderDrawerLink)}
+            <Divider sx={headerStyles.drawerDividerSpaced} />
             <ListItem disablePadding>
               <ListItemButton onClick={handleLogout} sx={headerStyles.drawerListItemLogout}>
                 <ListItemIcon>
                   <SignOut size={20} />
                 </ListItemIcon>
-                <ListItemText primary="Sign Out" primaryTypographyProps={{ sx: { ...headerStyles.drawerItemText, color: 'text.primary' } }} />
+                <ListItemText primary="Sign Out" primaryTypographyProps={{ sx: headerStyles.drawerItemText }} />
               </ListItemButton>
             </ListItem>
           </List>

@@ -10,7 +10,7 @@
 
 No card→artist mapping currently exists in the system. The Artist MongoDB documents have no card data. The only bridge between local artists and card data is the `scryfall_name` field on each Artist document, which maps local artist names to Scryfall's version of their name.
 
-The existing `set-artists.json` pattern (`src/data/set-artists.json`) is the right model to follow — a static JSON file mapping normalized keys to arrays of normalized artist names, filtered entirely on the client.
+> **Update (2026-10):** `set-artists.json` and its build script have been removed. The set filter now uses the webservice: a daily job (`jobs/setArtistSync.ts`) stores Scryfall artist credits per set in the `SetArtists` collection, and the `artistsBySet(code)` query maps them to our artists via `scryfall_name` at request time. A card-name index would fit the same pattern (daily job + query) better than a bundled static JSON file, which went stale and added ~300 KB to the homepage bundle.
 
 ### Recommended Approach: Static JSON Index
 

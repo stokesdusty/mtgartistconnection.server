@@ -3,16 +3,15 @@ import { useQuery } from '@apollo/client';
 import {
   Box,
   Button,
-  Container,
-  Paper,
   TextField,
-  Typography,
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Printer, Trash } from '@phosphor-icons/react';
+import { Plus, Printer, Trash, X } from '@phosphor-icons/react';
 import { GET_ARTIST_NAMES } from '../graphql/queries';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { colors, themeColors } from '../../styles/design-tokens';
+import { vault, vaultRadii } from '../../styles/design-tokens';
+import { artistSheetStyles as styles } from '../../styles/artist-sheet-styles';
+import MonoLabel from '../shared/MonoLabel';
 
 interface Slot {
   name: string;
@@ -36,68 +35,44 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-
-// Shared MUI overrides so form fields adapt to dark mode
-const inputSx = {
-  '& .MuiInputBase-input': { color: themeColors.text.primary },
-  '& .MuiInputLabel-root': { color: themeColors.text.secondary },
-  '& .MuiInputLabel-root.Mui-focused': { color: themeColors.primary.main },
-  '& .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.neutral[300] },
-  '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.text.hint },
-  '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: themeColors.primary.main },
-  '& .MuiSvgIcon-root': { color: themeColors.text.secondary },
-};
-
 // SlotCard always uses light/print colors — it represents content on white paper
 function SlotCard({ slot, onDelete }: { slot: Slot | null; onDelete?: () => void }) {
   const empty = slot === null;
   return (
-    <Box
-      sx={{
-        borderLeft: `4px solid ${empty ? colors.neutral[300] : colors.accent.blue}`,
-        backgroundColor: colors.neutral.white,
-        p: '6px 8px',
-        minHeight: 72,
-        boxSizing: 'border-box',
-        position: 'relative',
-        '&:hover .slot-delete': { opacity: 1 },
-      }}
-    >
-      <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[700], lineHeight: 1.6 }}>
+    <Box sx={[styles.slot, empty ? {} : styles.slotFilled]}>
+      <Box sx={styles.slotLine}>
         <strong>Your Name:</strong> {slot?.name ?? ''}
-      </Typography>
-      <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[700], lineHeight: 1.6 }}>
+      </Box>
+      <Box sx={styles.slotLine}>
         <strong>Color:</strong> {slot?.color ?? ''}
-      </Typography>
-      <Typography sx={{ fontSize: '0.7rem', color: colors.neutral[700], lineHeight: 1.6 }}>
+      </Box>
+      <Box sx={styles.slotLine}>
         <strong>Artist/Quantity:</strong> {slot ? `${slot.artist} ×${slot.quantity}` : ''}
-      </Typography>
+      </Box>
       {!empty && (
         <Box
+          component="button"
+          type="button"
           className="slot-delete"
           onClick={onDelete}
-          sx={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-            width: 16,
-            height: 16,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            opacity: 0,
-            transition: 'opacity 150ms',
-            color: colors.neutral[500],
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            lineHeight: 1,
-            '&:hover': { color: colors.accent.red },
-          }}
+          aria-label={`Remove slot for ${slot.name} and edit it`}
+          sx={styles.slotDelete}
         >
-          ✕
+          <X size={11} weight="bold" />
         </Box>
       )}
+    </Box>
+  );
+}
+
+/** Mono label stacked above a form control. */
+function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
+  return (
+    <Box sx={styles.field}>
+      <Box component="label" htmlFor={htmlFor} sx={{ cursor: 'pointer' }}>
+        <MonoLabel tracking="tight">{label}</MonoLabel>
+      </Box>
+      {children}
     </Box>
   );
 }
@@ -193,54 +168,50 @@ const ArtistSheet = () => {
   ];
 
   return (
-    <>
-      {/* Form */}
-      <Box sx={{ bgcolor: themeColors.background.default, py: 2 }}>
-        <Container maxWidth="md">
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              color: themeColors.text.primary,
-              mb: 1.5,
-              fontFamily: 'Fraunces, Georgia, serif',
-            }}
-          >
-            Artist Sheet Generator
-          </Typography>
+    <Box sx={styles.page}>
+      <Box sx={styles.inner}>
+        {/* Header */}
+        <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+          {slots.length} / {SLOTS_PER_PAGE} slots filled
+        </MonoLabel>
+        <Box component="h1" sx={styles.title}>
+          Artist sheet
+        </Box>
+        <Box component="p" sx={styles.subtitle}>
+          Build a printable signing session sheet
+        </Box>
 
-          <Paper
-            elevation={0}
-            sx={{
-              p: 1.5,
-              bgcolor: themeColors.background.paper,
-              border: `1px solid ${themeColors.neutral[200]}`,
-              borderRadius: 2,
-            }}
-          >
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5, mb: 1.5 }}>
+        {/* Form */}
+        <Box sx={styles.formPanel}>
+          <Box sx={styles.fields}>
+            <Field label="Your name" htmlFor="sheet-name">
               <TextField
-                label="Your Name"
+                id="sheet-name"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 onKeyDown={handleKeyDown}
                 fullWidth
                 size="small"
-                sx={inputSx}
+                sx={styles.input}
               />
+            </Field>
 
+            <Field label="Signature type / color(s)" htmlFor="sheet-color">
               <TextField
-                label="Signature Type/Color(s)"
+                id="sheet-color"
                 placeholder="e.g. W, U, B, R, G"
                 value={color}
                 onChange={e => setColor(e.target.value)}
                 onKeyDown={handleKeyDown}
                 fullWidth
                 size="small"
-                sx={inputSx}
+                sx={styles.input}
               />
+            </Field>
 
+            <Field label="Artist" htmlFor="sheet-artist">
               <Autocomplete
+                id="sheet-artist"
                 freeSolo
                 fullWidth
                 size="small"
@@ -248,22 +219,31 @@ const ArtistSheet = () => {
                 value={artist}
                 onChange={(_, v) => setArtist(v ?? '')}
                 onInputChange={(_, v) => setArtist(v)}
-                sx={inputSx}
+                sx={styles.input}
                 componentsProps={{
-                  paper: { sx: { bgcolor: themeColors.background.paper, color: themeColors.text.primary } },
+                  paper: {
+                    sx: {
+                      mt: '6px',
+                      bgcolor: vault.surface,
+                      color: vault.fg,
+                      border: `1px solid ${vault.line}`,
+                      borderRadius: vaultRadii.card,
+                      boxShadow: `0 20px 60px ${vault.shadow}`,
+                    },
+                  },
                 }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Artist"
                     placeholder="Search or type an artist name..."
-                    sx={inputSx}
                   />
                 )}
               />
+            </Field>
 
+            <Field label="Quantity" htmlFor="sheet-quantity">
               <TextField
-                label="Quantity"
+                id="sheet-quantity"
                 type="number"
                 value={quantity}
                 onChange={e => {
@@ -274,106 +254,76 @@ const ArtistSheet = () => {
                 fullWidth
                 size="small"
                 inputProps={{ min: 1, max: 99 }}
-                sx={inputSx}
+                sx={styles.input}
               />
-            </Box>
+            </Field>
+          </Box>
 
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Button
-                variant="contained"
-                onClick={handleAdd}
-                disabled={!canAdd}
-                disableElevation
-                size="small"
-                sx={{
-                  bgcolor: colors.primary.main,
-                  '&:hover': { bgcolor: colors.primary.dark },
-                  '&.Mui-disabled': { bgcolor: themeColors.neutral[100], color: themeColors.text.disabled },
-                }}
-              >
-                Add Slot ({slots.length}/{SLOTS_PER_PAGE})
-              </Button>
+          <Box sx={styles.actions}>
+            <Button
+              onClick={handleAdd}
+              disabled={!canAdd}
+              startIcon={<Plus size={16} weight="bold" />}
+              sx={styles.primaryButton}
+            >
+              Add slot
+              <Box component="span" sx={styles.slotCount}>
+                {slots.length}/{SLOTS_PER_PAGE}
+              </Box>
+            </Button>
 
-              {slots.length > 0 && (
-                <>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Printer size={16} />}
-                    onClick={handlePrint}
-                    sx={{ borderColor: themeColors.neutral[300], color: themeColors.text.primary }}
-                  >
-                    Print Sheet
-                  </Button>
-                  <Button
-                    variant="text"
-                    size="small"
-                    startIcon={<Trash size={16} />}
-                    onClick={() => setSlots([])}
-                    sx={{ color: colors.accent.red, ml: 'auto' }}
-                  >
-                    Clear
-                  </Button>
-                </>
-              )}
-            </Box>
-          </Paper>
+            {slots.length > 0 && (
+              <>
+                <Button
+                  startIcon={<Printer size={16} />}
+                  onClick={handlePrint}
+                  sx={styles.secondaryButton}
+                >
+                  Print sheet
+                </Button>
+                <Button
+                  startIcon={<Trash size={16} />}
+                  onClick={() => setSlots([])}
+                  sx={styles.clearButton}
+                >
+                  Clear
+                </Button>
+              </>
+            )}
+          </Box>
 
           {slots.length > 0 && (
-            <Typography sx={{ mt: 1, fontSize: '0.75rem', color: themeColors.text.secondary }}>
+            <Box component="p" sx={styles.hint}>
               Preview below — keep adding slots or print when ready.
-            </Typography>
+            </Box>
           )}
-        </Container>
-      </Box>
+        </Box>
 
-      {/* Sheet preview — "desk" surface with a paper card on it */}
-      <Box
-        sx={{
-          bgcolor: themeColors.background.dark,
-          py: 4,
-          px: { xs: 1, sm: 3 },
-        }}
-      >
-        <Container maxWidth="md" disableGutters>
-          {/* Page label */}
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              color: themeColors.text.hint,
-              mb: 1,
-              textAlign: 'center',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-            }}
-          >
-            Sheet preview — {slots.length} / {SLOTS_PER_PAGE} slots filled
-          </Typography>
+        {/* Sheet preview — white page on a slab mount */}
+        <Box component="section" sx={styles.previewSection}>
+          <Box sx={styles.sectionHeader}>
+            <Box component="h2" sx={styles.sectionTitle}>
+              Sheet preview
+            </Box>
+            <MonoLabel tracking="tight">
+              {slots.length} / {SLOTS_PER_PAGE} filled
+            </MonoLabel>
+          </Box>
 
-          {/* The "paper" */}
-          <Paper
-            elevation={6}
-            sx={{
-              bgcolor: colors.neutral.white,
-              borderRadius: 1,
-              p: 1.5,
-              boxShadow: '0 4px 24px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10)',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '6px',
-            }}
-          >
-            {displaySlots.map((slot, i) => (
-              <SlotCard
-                key={i}
-                slot={slot}
-                onDelete={slot !== null ? () => handleDelete(i) : undefined}
-              />
-            ))}
-          </Paper>
-        </Container>
+          <Box sx={styles.paperMount}>
+            <Box sx={styles.paper}>
+              {displaySlots.map((slot, i) => (
+                <SlotCard
+                  key={i}
+                  slot={slot}
+                  onDelete={slot !== null ? () => handleDelete(i) : undefined}
+                />
+              ))}
+            </Box>
+          </Box>
+        </Box>
       </Box>
-    </>
+    </Box>
   );
 };
 

@@ -4,21 +4,18 @@ import {
   Box,
   Button,
   CircularProgress,
-  Typography,
-  Alert,
-  Container,
-  Paper,
-  Link as MuiLink,
 } from "@mui/material";
 import { ArrowsCounterClockwise } from "@phosphor-icons/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import axios from "axios";
-import { contentPageStyles } from "../../styles/content-page-styles";
+import { ART_CROP_RATIO, randomFlavorStyles as styles } from "../../styles/random-flavor-styles";
 import { GET_ARTIST_FILTER_FLAGS } from "../graphql/queries";
-import { themeColors, transitions } from "../../styles/design-tokens";
 import PageMeta from "../shared/PageMeta";
 import ArtistLink from "../shared/ArtistLink";
+import MonoLabel from "../shared/MonoLabel";
+import Slab from "../shared/Slab";
+import { SkeletonBar } from "../shared/Skeletons";
 
 interface CardData {
   id: string;
@@ -73,116 +70,100 @@ const RandomFlavorText = () => {
 
   if (isLoading && !cardData)
     return (
-      <Box sx={contentPageStyles.container}>
-        <Container maxWidth="lg">
-          <Paper elevation={0} sx={contentPageStyles.wrapper}>
-            <Box sx={contentPageStyles.flavorLoadingContainer}>
-              <CircularProgress />
-            </Box>
-          </Paper>
-        </Container>
+      <Box sx={styles.page}>
+        <Box
+          role="status"
+          aria-busy="true"
+          aria-label="Loading flavor text"
+          sx={styles.inner}
+        >
+          <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+            Random flavor text
+          </MonoLabel>
+          <Slab aspectRatio={ART_CROP_RATIO} size="lg" sx={styles.art} />
+          <Box sx={[styles.figure, { display: "grid", justifyItems: "center", gap: "12px" }]} aria-hidden>
+            <SkeletonBar width="90%" height={22} />
+            <SkeletonBar width="70%" height={22} />
+            <SkeletonBar width={160} height={16} sx={{ mt: "20px" }} />
+          </Box>
+        </Box>
       </Box>
     );
 
   return (
-    <Box sx={contentPageStyles.container}>
-      <Container maxWidth="lg">
+    <Box sx={styles.page}>
+      <Box sx={styles.inner}>
         <PageMeta
           title="Random Flavor Text"
           description="Read random Magic: The Gathering flavor text with beautiful card art from your favorite MTG artists."
           path="/randomflavortext"
         />
-        <Paper elevation={0} sx={contentPageStyles.wrapper}>
-          <Typography variant="h1" sx={contentPageStyles.pageTitle}>
-            Random Flavor Text
-          </Typography>
+        <MonoLabel component="h1" tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+          Random flavor text
+        </MonoLabel>
 
-          {error && (
-            <Alert severity="error" sx={contentPageStyles.errorAlert}>
-              {error}
-            </Alert>
-          )}
+        {error && (
+          <Box role="alert" sx={styles.errorPanel}>
+            {error}
+          </Box>
+        )}
 
-          {cardData && (
-            <Box sx={contentPageStyles.contentContainer}>
-              <Paper elevation={0} sx={contentPageStyles.flavorCardContainer}>
-                <Typography variant="h3" sx={contentPageStyles.cardName}>
+        {cardData && (
+          <>
+            <Slab
+              key={cardData.id}
+              src={cardData.image_uris?.art_crop}
+              alt={`${cardData.name} artwork`}
+              imgProps={{ loading: "eager" }}
+              aspectRatio={ART_CROP_RATIO}
+              size="lg"
+              sx={styles.art}
+            >
+              {isLoading && (
+                <Box sx={styles.artLoadingOverlay}>
+                  <CircularProgress size={32} color="inherit" />
+                </Box>
+              )}
+            </Slab>
+
+            <Box component="figure" sx={styles.figure}>
+              <Box component="blockquote" sx={styles.quote}>
+                {cardData.flavor_text}
+              </Box>
+              <Box component="figcaption" sx={styles.caption}>
+                <Box component="h2" sx={styles.cardName}>
                   {cardData.name}
-                </Typography>
-
-                <Typography
-                  variant="subtitle1"
-                  sx={contentPageStyles.artistByline}
-                >
+                </Box>
+                <Box component="span" sx={styles.byline}>
                   Art by <ArtistLink name={cardData.artist} />
-                </Typography>
-
+                </Box>
                 {matchedArtistName && (
-                  <MuiLink
+                  <Box
                     component={RouterLink}
                     to={`/allcards/${matchedArtistName}`}
-                    sx={{
-                      fontSize: "0.8125rem",
-                      color: themeColors.primary.main,
-                      textDecoration: "none",
-                      mt: "-0.25rem",
-                      transition: transitions.fast,
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
-                    }}
+                    sx={styles.allCardsLink}
                   >
-                    See all their cards →
-                  </MuiLink>
+                    <MonoLabel tone="inherit" tracking="tight">
+                      See all their cards →
+                    </MonoLabel>
+                  </Box>
                 )}
-
-                <Box sx={contentPageStyles.imageContainer}>
-                  {isLoading && cardData && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: "rgba(255, 255, 255, 0.7)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        zIndex: 1,
-                      }}
-                    >
-                      <CircularProgress />
-                    </Box>
-                  )}
-                  <img
-                    alt={`${cardData.name} artwork`}
-                    key={cardData.id}
-                    src={cardData.image_uris?.art_crop}
-                  />
-                </Box>
-
-                <Typography variant="body1" sx={contentPageStyles.flavorText}>
-                  {cardData.flavor_text}
-                </Typography>
-              </Paper>
-
-              <Button
-                variant="contained"
-                startIcon={
-                  isLoading ? <CircularProgress size={24} color="inherit" /> : <ArrowsCounterClockwise size={24} />
-                }
-                sx={contentPageStyles.reloadButton}
-                onClick={handleReload}
-                disabled={isLoading}
-                disableElevation
-              >
-                {isLoading ? "Loading..." : "Get Another Text"}
-              </Button>
+              </Box>
             </Box>
-          )}
-        </Paper>
-      </Container>
+
+            <Button
+              startIcon={
+                isLoading ? <CircularProgress size={18} color="inherit" /> : <ArrowsCounterClockwise size={18} weight="bold" />
+              }
+              sx={styles.reloadButton}
+              onClick={handleReload}
+              disabled={isLoading}
+            >
+              {isLoading ? "Loading..." : "Get another text"}
+            </Button>
+          </>
+        )}
+      </Box>
     </Box>
   );
 };
