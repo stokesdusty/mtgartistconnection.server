@@ -1,26 +1,15 @@
-import {
-    Box,
-    Button,
-    Radio,
-    RadioGroup,
-    TextField,
-    Typography,
-    Container,
-    Paper,
-    FormControlLabel,
-    FormControl,
-    FormLabel,
-    Alert,
-} from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
+import { useForm, UseFormRegister } from "react-hook-form";
 import { useMutation } from "@apollo/client";
+import { Box, TextField } from "@mui/material";
 import { ADD_ARTIST } from "../graphql/mutations";
 import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS } from "../graphql/queries";
-import { useSelector } from "react-redux";
-import { colors } from "../../styles/design-tokens";
-import { useState } from "react";
 import { RootState } from "../../store/store";
-import { Navigate } from "react-router-dom";
+import { addArtistStyles as styles } from "../../styles/add-artist-styles";
+import MonoLabel from "../shared/MonoLabel";
+import SegmentedControl from "../shared/SegmentedControl";
 
 type Inputs = {
     name: string;
@@ -44,96 +33,7 @@ type Inputs = {
     inprnt: string;
 }
 
-const styles = {
-    container: {
-        backgroundColor: colors.primary.main,
-        minHeight: "100vh",
-        padding: { xs: 2, md: 4 },
-    },
-    contentWrapper: {
-        maxWidth: 800,
-        margin: "0 auto",
-        padding: { xs: 3, md: 4 },
-        backgroundColor: colors.neutral.white,
-        borderRadius: 2,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-    },
-    pageTitle: {
-        color: colors.primary.main,
-        fontWeight: 700,
-        fontSize: { xs: "2rem", md: "2.5rem" },
-        marginBottom: 3,
-        textAlign: "center",
-    },
-    sectionHeader: {
-        color: colors.primary.main,
-        fontWeight: 600,
-        fontSize: "1.5rem",
-        marginBottom: 2,
-        marginTop: 3,
-        paddingBottom: 1,
-        borderBottom: `2px solid ${colors.primary.main}`,
-    },
-    form: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-    },
-    textField: {
-        "& .MuiOutlinedInput-root": {
-            borderRadius: "8px",
-            "&:hover fieldset": {
-                borderColor: colors.primary.main,
-            },
-            "&.Mui-focused fieldset": {
-                borderColor: colors.primary.main,
-            },
-        },
-        "& .MuiInputLabel-root": {
-            "&.Mui-focused": {
-                color: colors.primary.main,
-            },
-        },
-    },
-    radioGroup: {
-        "& .MuiFormControlLabel-root": {
-            margin: "0 16px 0 0",
-        },
-        "& .MuiRadio-root": {
-            color: colors.primary.main,
-            "&.Mui-checked": {
-                color: colors.primary.main,
-            },
-        },
-    },
-    formControl: {
-        marginTop: 2,
-        marginBottom: 1,
-    },
-    formLabel: {
-        color: colors.primary.main,
-        fontWeight: 600,
-        fontSize: "1rem",
-        "&.Mui-focused": {
-            color: colors.primary.main,
-        },
-    },
-    submitButton: {
-        backgroundColor: colors.primary.main,
-        color: colors.neutral.white,
-        marginTop: 3,
-        padding: "12px 24px",
-        fontSize: "1.1rem",
-        fontWeight: 600,
-        borderRadius: "8px",
-        "&:hover": {
-            backgroundColor: colors.primary.dark,
-        },
-    },
-    fieldSection: {
-        marginBottom: 2,
-    },
-};
+type YesNo = "true" | "false";
 
 const defaultValues: Inputs = {
     name: "",
@@ -157,6 +57,56 @@ const defaultValues: Inputs = {
     inprnt: "",
 };
 
+const YES_NO_OPTIONS = [
+    { value: "false" as const, label: "No" },
+    { value: "true" as const, label: "Yes" },
+];
+
+interface FieldProps {
+    name: keyof Inputs;
+    label: string;
+    register: UseFormRegister<Inputs>;
+    type?: string;
+    placeholder?: string;
+    multiline?: boolean;
+    wide?: boolean;
+}
+
+const Field = ({ name, label, register, type, placeholder, multiline, wide }: FieldProps) => {
+    const id = `add-artist-${name}`;
+    return (
+        <Box sx={[styles.field, !!wide && styles.fieldWide]}>
+            <Box component="label" htmlFor={id} sx={styles.fieldLabel}>
+                <MonoLabel tracking="tight">{label}</MonoLabel>
+            </Box>
+            <TextField
+                id={id}
+                type={type}
+                fullWidth
+                size="small"
+                placeholder={placeholder}
+                multiline={multiline}
+                minRows={multiline ? 3 : undefined}
+                {...register(name)}
+                sx={styles.input}
+            />
+        </Box>
+    );
+};
+
+interface OptionRowProps {
+    label: string;
+    value: YesNo;
+    onChange: (value: YesNo) => void;
+}
+
+const OptionRow = ({ label, value, onChange }: OptionRowProps) => (
+    <Box sx={styles.optionRow}>
+        <Box component="span" sx={styles.optionLabel}>{label}</Box>
+        <SegmentedControl options={YES_NO_OPTIONS} value={value} onChange={onChange} aria-label={label} />
+    </Box>
+);
+
 interface FormBodyProps {
     onSuccess: (artistName: string) => void;
 }
@@ -164,10 +114,10 @@ interface FormBodyProps {
 const AddArtistFormBody = ({ onSuccess }: FormBodyProps) => {
     const { register, handleSubmit } = useForm<Inputs>({ defaultValues });
     const [addArtist] = useMutation(ADD_ARTIST);
-    const [signature, setSignature] = useState("false");
-    const [artistProof, setArtistProof] = useState("false");
-    const [isSigning, setIsSigning] = useState("false");
-    const [marks, setMarks] = useState("false");
+    const [signature, setSignature] = useState<YesNo>("false");
+    const [artistProof, setArtistProof] = useState<YesNo>("false");
+    const [isSigning, setIsSigning] = useState<YesNo>("false");
+    const [marks, setMarks] = useState<YesNo>("false");
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -226,242 +176,64 @@ const AddArtistFormBody = ({ onSuccess }: FormBodyProps) => {
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} style={styles.form as React.CSSProperties}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={styles.form}>
             {error && (
-                <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>
+                <Box role="alert" sx={[styles.message, styles.messageError]}>{error}</Box>
             )}
 
-            <Typography sx={styles.sectionHeader} variant="h4">
-                Basic Information
-            </Typography>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Artist Name"
-                    {...register("name")}
-                    sx={styles.textField}
-                />
+            <Box component="section" aria-labelledby="add-artist-basic" sx={styles.panel}>
+                <Box component="h2" id="add-artist-basic" sx={styles.sectionTitle}>Basic information</Box>
+                <Box component="p" sx={styles.sectionIntro}>Name, contact and where the artist's image lives.</Box>
+                <Box sx={styles.fieldGrid}>
+                    <Field name="name" label="Artist name" register={register} />
+                    <Field name="email" label="Email" type="email" register={register} />
+                    <Field name="filename" label="File name" register={register} />
+                    <Field name="location" label="Location" register={register} />
+                    <Field name="url" label="Website URL" placeholder="https://" wide register={register} />
+                </Box>
             </Box>
 
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Email"
-                    type="email"
-                    {...register("email")}
-                    sx={styles.textField}
-                />
+            <Box component="section" aria-labelledby="add-artist-social" sx={styles.panel}>
+                <Box component="h2" id="add-artist-social" sx={styles.sectionTitle}>Social links</Box>
+                <Box component="p" sx={styles.sectionIntro}>Leave blank anything the artist doesn't use.</Box>
+                <Box sx={styles.fieldGrid}>
+                    <Field name="facebook" label="Facebook" register={register} />
+                    <Field name="instagram" label="Instagram" register={register} />
+                    <Field name="twitter" label="Twitter" register={register} />
+                    <Field name="bluesky" label="Bluesky" register={register} />
+                    <Field name="youtube" label="YouTube" register={register} />
+                    <Field name="artstation" label="ArtStation" register={register} />
+                    <Field name="patreon" label="Patreon" register={register} />
+                    <Field name="inprnt" label="INPRNT link" register={register} />
+                </Box>
             </Box>
 
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="File Name"
-                    {...register("filename")}
-                    sx={styles.textField}
-                />
+            <Box component="section" aria-labelledby="add-artist-signing" sx={styles.panel}>
+                <Box component="h2" id="add-artist-signing" sx={styles.sectionTitle}>Signing</Box>
+                <Box component="p" sx={styles.sectionIntro}>How collectors can get cards signed.</Box>
+                <Box sx={styles.fieldGrid}>
+                    <Field name="signingComment" label="Signing comment" multiline wide register={register} />
+                    <Field name="mountainmage" label="MountainMage service" wide register={register} />
+                </Box>
             </Box>
 
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Location"
-                    {...register("location")}
-                    sx={styles.textField}
-                />
+            <Box component="section" aria-labelledby="add-artist-options" sx={styles.panel}>
+                <Box component="h2" id="add-artist-options" sx={styles.sectionTitle}>Artist options</Box>
+                <Box component="p" sx={styles.sectionIntro}>Flags used for homepage filters and the artist page.</Box>
+                <Box sx={styles.optionList}>
+                    <OptionRow label="Artist proofs available" value={artistProof} onChange={setArtistProof} />
+                    <OptionRow label="Have signature example" value={signature} onChange={setSignature} />
+                    <OptionRow label="Offers signing services" value={isSigning} onChange={setIsSigning} />
+                    <OptionRow label="Mark's Signature Service" value={marks} onChange={setMarks} />
+                </Box>
             </Box>
 
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Website URL"
-                    {...register("url")}
-                    sx={styles.textField}
-                />
+            <Box sx={styles.actions}>
+                <Box component="button" type="submit" disabled={submitting} sx={styles.button}>
+                    {submitting ? "Adding…" : "Add artist"}
+                </Box>
             </Box>
-
-            <Typography sx={styles.sectionHeader} variant="h4">
-                Social Media Links
-            </Typography>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Facebook"
-                    {...register("facebook")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Instagram"
-                    {...register("instagram")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Twitter"
-                    {...register("twitter")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="YouTube"
-                    {...register("youtube")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="ArtStation"
-                    {...register("artstation")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Patreon"
-                    {...register("patreon")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Bluesky"
-                    {...register("bluesky")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="INPRNT Link"
-                    {...register("inprnt")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Typography sx={styles.sectionHeader} variant="h4">
-                Signing Information
-            </Typography>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Signing Comment"
-                    multiline
-                    rows={3}
-                    {...register("signingComment")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Box sx={styles.fieldSection}>
-                <TextField
-                    fullWidth
-                    margin="normal"
-                    label="MountainMage Service"
-                    {...register("mountainmage")}
-                    sx={styles.textField}
-                />
-            </Box>
-
-            <Typography sx={styles.sectionHeader} variant="h4">
-                Artist Options
-            </Typography>
-
-            <FormControl sx={styles.formControl}>
-                <FormLabel sx={styles.formLabel}>Artist Proofs Available</FormLabel>
-                <RadioGroup
-                    row
-                    value={artistProof}
-                    onChange={(e) => setArtistProof(e.target.value)}
-                    sx={styles.radioGroup}
-                >
-                    <FormControlLabel value="false" control={<Radio />} label="No" />
-                    <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                </RadioGroup>
-            </FormControl>
-
-            <FormControl sx={styles.formControl}>
-                <FormLabel sx={styles.formLabel}>Have Signature Example</FormLabel>
-                <RadioGroup
-                    row
-                    value={signature}
-                    onChange={(e) => setSignature(e.target.value)}
-                    sx={styles.radioGroup}
-                >
-                    <FormControlLabel value="false" control={<Radio />} label="No" />
-                    <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                </RadioGroup>
-            </FormControl>
-
-            <FormControl sx={styles.formControl}>
-                <FormLabel sx={styles.formLabel}>Offers Signing Services</FormLabel>
-                <RadioGroup
-                    row
-                    value={isSigning}
-                    onChange={(e) => setIsSigning(e.target.value)}
-                    sx={styles.radioGroup}
-                >
-                    <FormControlLabel value="false" control={<Radio />} label="No" />
-                    <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                </RadioGroup>
-            </FormControl>
-
-            <FormControl sx={styles.formControl}>
-                <FormLabel sx={styles.formLabel}>Mark's Signature Service</FormLabel>
-                <RadioGroup
-                    row
-                    value={marks}
-                    onChange={(e) => setMarks(e.target.value)}
-                    sx={styles.radioGroup}
-                >
-                    <FormControlLabel value="false" control={<Radio />} label="No" />
-                    <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                </RadioGroup>
-            </FormControl>
-
-            <Button
-                type="submit"
-                variant="contained"
-                sx={styles.submitButton}
-                fullWidth
-                disabled={submitting}
-            >
-                {submitting ? "Adding..." : "Add Artist"}
-            </Button>
-        </form>
+        </Box>
     );
 };
 
@@ -482,20 +254,34 @@ const AddArtist = () => {
     };
 
     return (
-        <Box sx={styles.container}>
-            <Container maxWidth="md">
-                <Paper elevation={0} sx={styles.contentWrapper}>
-                    <Typography variant="h2" sx={styles.pageTitle}>
-                        Add Artist
-                    </Typography>
-                    {successMessage && (
-                        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccessMessage(null)}>
-                            {successMessage}
-                        </Alert>
-                    )}
-                    <AddArtistFormBody key={formKey} onSuccess={handleSuccess} />
-                </Paper>
-            </Container>
+        <Box sx={styles.page}>
+            <Box sx={styles.inner}>
+                <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+                    Admin
+                </MonoLabel>
+                <Box component="h1" sx={styles.title}>
+                    Add artist
+                </Box>
+                <Box component="p" sx={styles.intro}>
+                    Create a new artist profile. Anything left blank can be filled in later from the artist's edit page.
+                </Box>
+
+                {successMessage && (
+                    <Box role="status" sx={[styles.message, styles.messageSuccess, styles.successSpacing]}>
+                        <Box
+                            component="button"
+                            type="button"
+                            aria-label="Dismiss"
+                            onClick={() => setSuccessMessage(null)}
+                            sx={styles.messageDismiss}
+                        >
+                            ×
+                        </Box>
+                        {successMessage}
+                    </Box>
+                )}
+                <AddArtistFormBody key={formKey} onSuccess={handleSuccess} />
+            </Box>
         </Box>
     );
 };
