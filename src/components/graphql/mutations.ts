@@ -127,6 +127,8 @@ export const UPDATE_PASSWORD = gql`
         updatePassword(currentPassword: $currentPassword, newPassword: $newPassword){
             success
             message
+            token
+            refreshToken
         }
     }
 `;

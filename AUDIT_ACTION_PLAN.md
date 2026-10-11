@@ -161,14 +161,14 @@ for external ones.
 
 **Files:** `src/utils/connection.ts:5`, `src/scripts/backfillArtistNames.ts:6`
 
-**Issue:** The MongoDB Atlas username (`stokesdusty`) and cluster hostname are
+**Issue:** The MongoDB Atlas username and cluster hostname are
 hardcoded in source, with only the password pulled from an env var, narrowing
 an attacker's job to just guessing/leaking the password.
 
 **Prompt:**
 > In `src/utils/connection.ts` (line 5) and `src/scripts/backfillArtistNames.ts`
 > (line 6), the MongoDB connection is built as
-> `` `mongodb+srv://stokesdusty:${process.env.MONGODB_PASSWORD}@cluster0.mo7516l.mongodb.net/?retryWrites=true&w=majority` ``
+> `` `mongodb+srv://<user>:${process.env.MONGODB_PASSWORD}@<cluster-host>/?retryWrites=true&w=majority` ``
 > — the username and cluster host are hardcoded, only the password comes from
 > an env var. Replace this with a single `MONGODB_URI` environment variable
 > containing the full connection string, read via `process.env.MONGODB_URI`,

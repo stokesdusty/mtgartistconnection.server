@@ -6,9 +6,10 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { ReactNode, useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { RootState } from "../../store/store";
+import { login } from "../../store/auth-slice";
 import { useMutation, useQuery } from "@apollo/client";
 import { UPDATE_PASSWORD, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
 import { GET_CURRENT_USER } from "../graphql/queries";
@@ -26,6 +27,7 @@ const PREFERENCE_LABELS = {
 const Settings = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const dispatch = useDispatch();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -100,6 +102,12 @@ const Settings = () => {
       });
 
       if (data?.updatePassword?.success) {
+        // The server revokes all other sessions on password change and
+        // returns fresh tokens for this one
+        const { token, refreshToken } = data.updatePassword;
+        if (token && refreshToken && user) {
+          dispatch(login({ token, refreshToken, user }));
+        }
         setPasswordSuccess("Password updated successfully");
         setCurrentPassword("");
         setNewPassword("");

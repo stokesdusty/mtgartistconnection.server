@@ -1,294 +1,219 @@
-import { 
-    Box, 
-    Button, 
-    LinearProgress, 
-    MenuItem, 
-    Select, 
-    Typography, 
-    Container, 
-    Paper,
-    FormControl,
-    InputLabel,
-    FormHelperText
-  } from "@mui/material";
-  import { useMutation, useQuery } from "@apollo/client";
-  import { useSelector } from "react-redux";
-  import { useEffect, useState } from "react";
-  import { GET_ARTIST_NAMES, GET_SIGNINGEVENTS } from "../graphql/queries";
-  import { ADD_ARTISTTOEVENT } from "../graphql/mutations";
-  import { colors } from "../../styles/design-tokens";
-  
-  const AddArtistToEvent = () => {
-      const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn );
-  
-      const {data: eventData, error: eventDataError, loading: eventDataLoading} = useQuery(GET_SIGNINGEVENTS, { fetchPolicy: 'network-only' });
-      const {data: artistData, error: artistDataError, loading: artistDataLoading}= useQuery(GET_ARTIST_NAMES);
-      const [ addArtistToEvent ] = useMutation(ADD_ARTISTTOEVENT, {
-          refetchQueries: [{ query: GET_SIGNINGEVENTS }],
-          // Drop cached artist-by-event lists so the calendar refetches them on next visit
-          update: (cache) => {
-              cache.evict({ id: 'ROOT_QUERY', fieldName: 'mapArtistToEventByEventId' });
-              cache.evict({ id: 'ROOT_QUERY', fieldName: 'artistsByEventIds' });
-              cache.gc();
-          },
-      });
-  
-      const [filteredData, setFilteredData] = useState<any[]>([]);
-      const [signingEvent, setSigningEvent] = useState<any>("Default");
-      const [artist, setArtist] = useState<any>("Default");
-      
-      const styles = {
-          container: {
-              backgroundColor: colors.primary.main,
-              minHeight: "100vh",
-              padding: { xs: 2, md: 4 },
-          },
-          contentWrapper: {
-              maxWidth: 600,
-              margin: "0 auto",
-              padding: { xs: 3, md: 4 },
-              backgroundColor: colors.neutral.white,
-              borderRadius: 2,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-          },
-          pageTitle: {
-              color: colors.primary.main,
-              fontWeight: 700,
-              fontSize: { xs: "2rem", md: "2.5rem" },
-              marginBottom: 3,
-              textAlign: "center",
-          },
-          sectionHeader: {
-              color: colors.primary.main,
-              fontWeight: 600,
-              fontSize: "1.5rem",
-              marginBottom: 2,
-              marginTop: 3,
-              paddingBottom: 1,
-              borderBottom: `2px solid ${colors.primary.main}`,
-          },
-          form: {
-              display: "flex",
-              flexDirection: "column",
-              gap: 3,
-          },
-          formControl: {
-              "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                  "&:hover fieldset": {
-                      borderColor: colors.primary.main,
-                  },
-                  "&.Mui-focused fieldset": {
-                      borderColor: colors.primary.main,
-                  },
-              },
-              "& .MuiInputLabel-root": {
-                  "&.Mui-focused": {
-                      color: colors.primary.main,
-                  },
-              },
-          },
-          submitButton: {
-              backgroundColor: colors.primary.main,
-              color: colors.neutral.white,
-              marginTop: 3,
-              padding: "12px 24px",
-              fontSize: "1.1rem",
-              fontWeight: 600,
-              borderRadius: "8px",
-              "&:hover": {
-                  backgroundColor: colors.primary.dark,
-              },
-          },
-          fieldSection: {
-              marginBottom: 2,
-          },
-          errorMessage: {
-              color: colors.accent.red,
-              textAlign: "center",
-              padding: 4,
-              backgroundColor: colors.accent.redLight,
-              borderRadius: 2,
-              marginBottom: 2,
-          },
-          loadingContainer: {
-              backgroundColor: colors.primary.main,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "50vh",
-          },
-          helperText: {
-              color: colors.neutral[600],
-              fontSize: "0.875rem",
-              marginTop: 1,
-          },
-          selectSection: {
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-          },
-      };
-  
-      useEffect(() => {
-          const today = new Date();
-          if (eventData) {
-              let filtered: any[] = [];
-              eventData.signingEvent.forEach((signingEvent: any) => {
-                  let endDate = new Date(signingEvent.endDate)
-                  if (endDate >= today) {
-                      filtered.push(signingEvent)
-                  }
-              })
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
+import { useMutation, useQuery } from "@apollo/client";
+import { Autocomplete, Box, FormControl, MenuItem, Select, TextField } from "@mui/material";
+import { GET_ARTIST_NAMES, GET_SIGNINGEVENTS } from "../graphql/queries";
+import { ADD_ARTISTTOEVENT } from "../graphql/mutations";
+import { RootState } from "../../store/store";
+import { eventFormStyles as styles } from "../../styles/event-form-styles";
+import MonoLabel from "../shared/MonoLabel";
 
-              const sorted = filtered.sort((a, b) =>
-                  new Date(a.endDate).getTime()
-                  - new Date(b.endDate).getTime()
-                )
-              setFilteredData(sorted);
-             }  else {
-                  setFilteredData([])
-              }
-      }, [eventData]);
+interface SigningEvent {
+    id: string;
+    name: string;
+    city: string;
+    startDate: string;
+    endDate: string;
+}
 
-      const onSubmit = async () => {
-          try {
-              await addArtistToEvent({
-                  variables: {
-                      artistName: artist,
-                      eventId: signingEvent,
-                  },
-              });
-          } catch (err: any) {
-              console.error(err.message);
-          }
-      }
-  
-      if (eventDataLoading || artistDataLoading) {
-          return (
-              <Box sx={styles.container}>
-                  <Box sx={styles.loadingContainer}>
-                      <LinearProgress sx={{ color: colors.primary.main, width: "300px" }} />
-                  </Box>
-              </Box>
-          );
-      }
-      
-      if (eventDataError || artistDataError) {
-          return (
-              <Box sx={styles.container}>
-                  <Container maxWidth="sm">
-                      <Paper elevation={0} sx={styles.contentWrapper}>
-                          <Typography sx={styles.errorMessage}>
-                              Error loading data: {eventDataError?.message || artistDataError?.message}
-                          </Typography>
-                      </Paper>
-                  </Container>
-              </Box>
-          );
-      }
-      
-      if (!isLoggedIn) {
-          return (
-              <Box sx={styles.container}>
-                  <Container maxWidth="sm">
-                      <Paper elevation={0} sx={styles.contentWrapper}>
-                          <Typography sx={styles.errorMessage}>
-                              Error: You must be logged in to add an artist to an event
-                          </Typography>
-                      </Paper>
-                  </Container>
-              </Box>
-          );
-      }
-  
-      return (
-          <Box sx={styles.container}>
-              <Container maxWidth="sm">
-                  <Paper elevation={0} sx={styles.contentWrapper}>
-                      <Typography variant="h2" sx={styles.pageTitle}>
-                          Add Artist to Event
-                      </Typography>
-                      
-                      <Box sx={styles.form}>
-                          <Typography sx={styles.sectionHeader} variant="h4">
-                              Event Selection
-                          </Typography>
-                          
-                          <Box sx={styles.fieldSection}>
-                              <FormControl fullWidth sx={styles.formControl}>
-                                  <InputLabel id="event-label">Signing Event</InputLabel>
-                                  <Select
-                                      labelId="event-label"
-                                      id="event"
-                                      value={signingEvent}
-                                      label="Signing Event"
-                                      onChange={(e) => setSigningEvent(e.target.value)}
-                                  >
-                                      <MenuItem value={"Default"} disabled>
-                                          Select an Event
-                                      </MenuItem>
-                                      {filteredData.map((singleEvent) => {
-                                          const startDate = new Date(singleEvent.startDate).toLocaleDateString();
-                                          const endDate = new Date(singleEvent.endDate).toLocaleDateString();
-                                          return (
-                                              <MenuItem value={singleEvent.id} key={singleEvent.id}>
-                                                  {singleEvent.name} - {singleEvent.city} ({startDate} - {endDate})
-                                              </MenuItem>
-                                          )
-                                      })}
-                                  </Select>
-                                  <FormHelperText sx={styles.helperText}>
-                                      Select the signing event where the artist will be present
-                                  </FormHelperText>
-                              </FormControl>
-                          </Box>
-  
-                          <Typography sx={styles.sectionHeader} variant="h4">
-                              Artist Selection
-                          </Typography>
-                          
-                          <Box sx={styles.fieldSection}>
-                              <FormControl fullWidth sx={styles.formControl}>
-                                  <InputLabel id="artist-label">Artist</InputLabel>
-                                  <Select
-                                      labelId="artist-label"
-                                      id="artist"
-                                      value={artist}
-                                      label="Artist"
-                                      onChange={(e) => setArtist(e.target.value)}
-                                  >
-                                      <MenuItem value={"Default"} disabled>
-                                          Select an Artist
-                                      </MenuItem>
-                                      {artistData.artistNames.map((singleArtist: any) => {
-                                          return (
-                                              <MenuItem value={singleArtist.name} key={singleArtist.name}>
-                                                  {singleArtist.name}
-                                              </MenuItem>
-                                          )
-                                      })}
-                                  </Select>
-                                  <FormHelperText sx={styles.helperText}>
-                                      Select the artist who will be attending the event
-                                  </FormHelperText>
-                              </FormControl>
-                          </Box>
-                          
-                          <Button 
-                              onClick={onSubmit} 
-                              variant="contained" 
-                              sx={styles.submitButton}
-                              fullWidth
-                              disabled={signingEvent === "Default" || artist === "Default"}
-                          >
-                              Add Artist to Event
-                          </Button>
-                      </Box>
-                  </Paper>
-              </Container>
-          </Box>
-      );
-  };
-  
-  export default AddArtistToEvent;
+const formatRange = (event: SigningEvent) => {
+    const start = new Date(event.startDate).toLocaleDateString();
+    const end = new Date(event.endDate).toLocaleDateString();
+    return start === end ? start : `${start} – ${end}`;
+};
+
+const AddArtistToEvent = () => {
+    const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+
+    const { data: eventData, error: eventDataError, loading: eventDataLoading } = useQuery(GET_SIGNINGEVENTS, { fetchPolicy: 'network-only' });
+    const { data: artistData, error: artistDataError, loading: artistDataLoading } = useQuery(GET_ARTIST_NAMES);
+    const [addArtistToEvent] = useMutation(ADD_ARTISTTOEVENT, {
+        refetchQueries: [{ query: GET_SIGNINGEVENTS }],
+        // Drop cached artist-by-event lists so the calendar refetches them on next visit
+        update: (cache) => {
+            cache.evict({ id: 'ROOT_QUERY', fieldName: 'mapArtistToEventByEventId' });
+            cache.evict({ id: 'ROOT_QUERY', fieldName: 'artistsByEventIds' });
+            cache.gc();
+        },
+    });
+
+    const [eventId, setEventId] = useState("");
+    const [artist, setArtist] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Upcoming and in-progress events, soonest-ending first
+    const upcomingEvents = useMemo<SigningEvent[]>(() => {
+        const today = new Date();
+        return (eventData?.signingEvent ?? [])
+            .filter((event: SigningEvent) => new Date(event.endDate) >= today)
+            .sort((a: SigningEvent, b: SigningEvent) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+    }, [eventData]);
+
+    const artistNames = useMemo<string[]>(
+        () => (artistData?.artistNames ?? []).map((a: { name: string }) => a.name),
+        [artistData]
+    );
+
+    if (!isLoggedIn) {
+        return <Navigate to="/" replace />;
+    }
+
+    const loading = eventDataLoading || artistDataLoading;
+    const loadError = eventDataError || artistDataError;
+    const canSubmit = !!eventId && !!artist && !submitting;
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!canSubmit) return;
+        setError(null);
+        setSuccessMessage(null);
+        setSubmitting(true);
+        try {
+            await addArtistToEvent({
+                variables: {
+                    artistName: artist,
+                    eventId,
+                },
+            });
+            const eventName = upcomingEvents.find((ev) => ev.id === eventId)?.name;
+            setSuccessMessage(`${artist} added to ${eventName ?? "the event"}.`);
+            // Keep the event selected so several artists can be added in a row
+            setArtist(null);
+        } catch (err: any) {
+            setError(err.message || "Failed to add artist to event. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <Box sx={styles.page}>
+            <Box sx={styles.inner}>
+                <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+                    Admin
+                </MonoLabel>
+                <Box component="h1" sx={styles.title}>
+                    Add artist to event
+                </Box>
+                <Box component="p" sx={styles.intro}>
+                    Attach an artist to an upcoming signing event so they show up on its calendar page. The event stays
+                    selected after each add, so you can work through a guest list quickly.
+                </Box>
+
+                {loading ? (
+                    <Box role="status" sx={styles.status}>Loading events and artists…</Box>
+                ) : loadError ? (
+                    <Box role="alert" sx={[styles.message, styles.messageError]}>
+                        Error loading data: {loadError.message}
+                    </Box>
+                ) : (
+                    <>
+                        {successMessage && (
+                            <Box role="status" sx={[styles.message, styles.messageSuccess, styles.successSpacing]}>
+                                <Box
+                                    component="button"
+                                    type="button"
+                                    aria-label="Dismiss"
+                                    onClick={() => setSuccessMessage(null)}
+                                    sx={styles.messageDismiss}
+                                >
+                                    ×
+                                </Box>
+                                {successMessage}
+                            </Box>
+                        )}
+
+                        <Box component="form" noValidate onSubmit={onSubmit} sx={styles.form}>
+                            {error && (
+                                <Box role="alert" sx={[styles.message, styles.messageError]}>{error}</Box>
+                            )}
+
+                            <Box component="section" aria-labelledby="add-to-event-select" sx={styles.panel}>
+                                <Box component="h2" id="add-to-event-select" sx={styles.sectionTitle}>Pairing</Box>
+                                <Box component="p" sx={styles.sectionIntro}>
+                                    Only events that haven't ended yet are listed.
+                                </Box>
+                                <Box sx={styles.stack}>
+                                    <Box sx={styles.field}>
+                                        <MonoLabel component="div" id="add-to-event-event-label" tracking="tight">
+                                            Signing event
+                                        </MonoLabel>
+                                        <FormControl fullWidth size="small" sx={styles.input}>
+                                            <Select
+                                                labelId="add-to-event-event-label"
+                                                id="add-to-event-event"
+                                                value={eventId}
+                                                displayEmpty
+                                                onChange={(e) => setEventId(e.target.value)}
+                                                renderValue={(id) => {
+                                                    const ev = upcomingEvents.find((x) => x.id === id);
+                                                    return ev
+                                                        ? `${ev.name} · ${ev.city}`
+                                                        : <Box component="span" sx={styles.placeholder}>Select an event</Box>;
+                                                }}
+                                                MenuProps={{ sx: styles.menu }}
+                                            >
+                                                {upcomingEvents.length === 0 && (
+                                                    <MenuItem disabled sx={styles.menuItem}>No upcoming events</MenuItem>
+                                                )}
+                                                {upcomingEvents.map((ev) => (
+                                                    <MenuItem value={ev.id} key={ev.id} sx={styles.menuItem}>
+                                                        <Box component="span">{ev.name}</Box>
+                                                        <MonoLabel tracking="tight" uppercase={false}>
+                                                            {ev.city} · {formatRange(ev)}
+                                                        </MonoLabel>
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <Box component="p" sx={styles.fieldHelp}>
+                                            The event the artist will be attending.
+                                        </Box>
+                                    </Box>
+
+                                    <Box sx={styles.field}>
+                                        <Box component="label" htmlFor="add-to-event-artist" sx={styles.fieldLabel}>
+                                            <MonoLabel tracking="tight">Artist</MonoLabel>
+                                        </Box>
+                                        <Autocomplete
+                                            id="add-to-event-artist"
+                                            options={artistNames}
+                                            value={artist}
+                                            onChange={(_, value) => setArtist(value)}
+                                            size="small"
+                                            fullWidth
+                                            autoHighlight
+                                            renderOption={(props, option) => (
+                                                <Box component="li" {...props} key={option} sx={styles.menuItem}>
+                                                    {option}
+                                                </Box>
+                                            )}
+                                            renderInput={(params) => (
+                                                <TextField {...params} placeholder="Search artists" sx={styles.input} />
+                                            )}
+                                            slotProps={{ popper: { sx: styles.menu } }}
+                                        />
+                                        <Box component="p" sx={styles.fieldHelp}>
+                                            Type to search all {artistNames.length.toLocaleString()} artists.
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            <Box sx={styles.actions}>
+                                <Box component="button" type="submit" disabled={!canSubmit} sx={styles.button}>
+                                    {submitting ? "Adding…" : "Add artist to event"}
+                                </Box>
+                            </Box>
+                        </Box>
+                    </>
+                )}
+            </Box>
+        </Box>
+    );
+};
+
+export default AddArtistToEvent;
