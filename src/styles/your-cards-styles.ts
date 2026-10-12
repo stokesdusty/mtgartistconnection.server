@@ -8,7 +8,7 @@ const focusRing = {
 
 // Artist | Proofs | Signed | Wishlist | arrow
 const COLUMNS = 'minmax(0, 1fr) 96px 96px 96px 20px';
-const COLUMNS_MOBILE = 'minmax(0, 1fr) 48px 48px 48px';
+const COLUMNS_MOBILE = 'minmax(0, 1fr) 64px 64px 64px';
 
 export const yourCardsStyles: Record<string, SystemStyleObject<Theme>> = {
   page: {
@@ -87,10 +87,32 @@ export const yourCardsStyles: Record<string, SystemStyleObject<Theme>> = {
     gap: '12px',
     padding: '0 12px 12px',
     borderBottom: `1px solid ${vault.lineStrong}`,
-    [vaultMedia.mobile]: { gridTemplateColumns: COLUMNS_MOBILE, gap: '8px', padding: '0 8px 10px' },
+    [vaultMedia.mobile]: { gridTemplateColumns: COLUMNS_MOBILE, gap: '6px', padding: '0 8px 10px' },
   },
   colLabel: {
-    textAlign: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  sortButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: 0,
+    border: 0,
+    background: 'none',
+    color: vault.faint,
+    cursor: 'pointer',
+    borderRadius: '2px',
+    '&:hover > span:first-of-type': { color: vault.fg },
+    ...focusRing,
+    [vaultMedia.mobile]: {
+      gap: '2px',
+      '& > span:first-of-type': { fontSize: 10, letterSpacing: '.04em' },
+    },
+  },
+  sortCaret: {
+    display: 'inline-flex',
+    color: vault.accentText,
   },
   row: {
     display: 'grid',
@@ -106,7 +128,7 @@ export const yourCardsStyles: Record<string, SystemStyleObject<Theme>> = {
     '&:hover': { backgroundColor: vault.chip },
     '&:hover .your-cards-arrow': { color: vault.fg },
     ...focusRing,
-    [vaultMedia.mobile]: { gridTemplateColumns: COLUMNS_MOBILE, gap: '8px', padding: '12px 8px' },
+    [vaultMedia.mobile]: { gridTemplateColumns: COLUMNS_MOBILE, gap: '6px', padding: '12px 8px' },
   },
   artist: {
     display: 'flex',
@@ -131,6 +153,7 @@ export const yourCardsStyles: Record<string, SystemStyleObject<Theme>> = {
     [vaultMedia.mobile]: { width: 30, height: 30, fontSize: 11 },
   },
   artistName: {
+    minWidth: 0,
     fontSize: 16,
     fontWeight: 600,
     letterSpacing: '-0.01em',

@@ -1,6 +1,6 @@
-import { Box, CircularProgress, Typography, Container, Paper } from '@mui/material';
+import { Box, Button, CircularProgress, Typography, Container, Paper } from '@mui/material';
 import axios from 'axios';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useParams } from 'react-router';
 import { useLoading } from '../../LoadingContext';
@@ -13,18 +13,30 @@ import {
 } from 'recharts';
 import { cardBreakdownStyles } from '../../styles/card-breakdown-styles';
 import { colors, spacing } from '../../styles/design-tokens';
+import { usePriceClickLogger } from '../../hooks/usePriceClickLogger';
+import { tcgplayerProductUrl, tcgplayerSearchUrl } from '../../utils/affiliateLinks';
+
+interface CardPrices {
+    usd?: string | null;
+    usd_foil?: string | null;
+    usd_etched?: string | null;
+}
 
 interface Card {
     related_uris: {
         gatherer: string;
     };
     id: string;
+    illustration_id?: string;
     image_uris?: {
         border_crop: string;
+        art_crop?: string;
     };
     card_faces?: {
+        illustration_id?: string;
         image_uris?: {
             normal: string;
+            art_crop?: string;
         };
     }[];
     cmc: number;
@@ -32,10 +44,19 @@ interface Card {
     name: string;
     artist: string;
     colors?: string[]; // colors is now optional
+    set: string;
     set_name: string;
+    set_type?: string;
+    collector_number: string;
+    released_at: string;
     oracle_text: string;
     rarity: string;
     mana_cost: string;
+    prices?: CardPrices;
+    tcgplayer_id?: number;
+    edhrec_rank?: number;
+    reserved?: boolean;
+    scryfall_uri?: string;
 }
 
 interface ScryfallResponse {
@@ -45,10 +66,6 @@ interface ScryfallResponse {
     total_cards: number;
 }
 
-interface ManaCostData {
-    cmc: number;
-    count: number;
-}
 interface TypeData {
     type: string;
     count: number;
@@ -62,6 +79,50 @@ interface SetData {
     set: string;
     count: number;
 }
+interface YearData {
+    year: number;
+    newArt: number;
+    reprints: number;
+}
+interface Artwork {
+    key: string;
+    /** Earliest printing of this illustration. */
+    first: Card;
+    printings: number;
+    artCrop?: string;
+}
+
+// Gallery starts collapsed so prolific artists don't render hundreds of images up front.
+const GALLERY_PREVIEW = 24;
+const TOP_LIST_SIZE = 10;
+
+// Double-faced cards keep the illustration on each face; use the front face's.
+const illustrationKey = (card: Card) =>
+    card.illustration_id ?? card.card_faces?.[0]?.illustration_id ?? `${card.name}|${card.id}`;
+
+const artCrop = (card: Card) => card.image_uris?.art_crop ?? card.card_faces?.[0]?.image_uris?.art_crop;
+
+const parsePrice = (value?: string | null) => (value ? parseFloat(value) : 0);
+
+/** Highest market price across finishes, plus which finish it is. */
+const topPrice = (card: Card): { value: number; finish: string } => {
+    const options = [
+        { value: parsePrice(card.prices?.usd), finish: 'Nonfoil' },
+        { value: parsePrice(card.prices?.usd_foil), finish: 'Foil' },
+        { value: parsePrice(card.prices?.usd_etched), finish: 'Etched' },
+    ];
+    return options.reduce((best, o) => (o.value > best.value ? o : best));
+};
+
+const formatUsd = (value: number) => `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const colorNames = {
+    'W': 'White',
+    'U': 'Blue',
+    'B': 'Black',
+    'R': 'Red',
+    'G': 'Green'
+};
 
 const ArtistCardAnalysis = () => {
     const { name: artist } = useParams<{ name?: string }>();
@@ -242,132 +303,132 @@ const ArtistCardAnalysis = () => {
         };
     }, [noResultsFromPrimary, artistQueryData, artist, fetchCards]);
 
-    // Function to extract the main card type
-    const getMainCardType = (typeLine: string) => {
-        // Check if typeLine is undefined or null
-        if (!typeLine) {
-            return 'Unknown';
-        }
-        
-        // Extract the main type (before the —)
-        const mainTypePart = typeLine.split('—')[0].trim();
 
-        // Check for common main types
-        if (mainTypePart.includes('Creature')) return 'Creature';
-        if (mainTypePart.includes('Instant')) return 'Instant';
-        if (mainTypePart.includes('Sorcery')) return 'Sorcery';
-        if (mainTypePart.includes('Artifact')) return 'Artifact';
-        if (mainTypePart.includes('Enchantment')) return 'Enchantment';
-        if (mainTypePart.includes('Land')) return 'Land';
-        if (mainTypePart.includes('Planeswalker')) return 'Planeswalker';
+    const logPriceClick = usePriceClickLogger('breakdown');
+    const [showAllArt, setShowAllArt] = useState(false);
 
-        // Return the full main type if it doesn't match common patterns
-        return mainTypePart;
-    };
+    const stats = useMemo(() => {
+        const cards = cardsWithDupes;
 
-    // Get creature type distribution
-    const getCreatureType = (typeLine: string) => {
-        if (!typeLine) {
-            return null;
-        }
-        
-        const parts = typeLine.split('—');
-        if (parts.length > 1 && parts[0].trim().includes('Creature')) {
-            return parts[1].trim();
-        }
-        return null;
-    };
-
-    // Process mana cost distribution
-    const manaCostDist: { [key: number]: number } = {} as { [key: number]: number };
-    cardsWithDupes.forEach(card => {
-        const cmc = card.cmc;
-        manaCostDist[cmc] = (manaCostDist[cmc] || 0) + 1;
-    });
-
-    // Process card type distribution
-    const typeDist: { [key: string]: number } = {};
-    cardsWithDupes.forEach((card) => {
-        if (card && card.type_line) {
-            const mainType = getMainCardType(card.type_line);
-            typeDist[mainType] = (typeDist[mainType] || 0) + 1;
-        }
-    });
-
-    // Process creature type distribution
-    const creatureTypeDist: { [key: string]: number } = {};
-    cardsWithDupes.forEach((card) => {
-        if (card && card.type_line) {
-            const creatureType = getCreatureType(card.type_line);
-            if (creatureType) {
-                creatureType.split(' ').forEach((type) => {
-                    creatureTypeDist[type] = (creatureTypeDist[type] || 0) + 1;
-                });
+        // Main type (before the —), bucketed into the common types
+        const getMainCardType = (typeLine: string) => {
+            if (!typeLine) return 'Unknown';
+            const mainTypePart = typeLine.split('—')[0].trim();
+            for (const t of ['Creature', 'Instant', 'Sorcery', 'Artifact', 'Enchantment', 'Land', 'Planeswalker']) {
+                if (mainTypePart.includes(t)) return t;
             }
-        }
-    });
+            return mainTypePart;
+        };
 
-    // Process rarity distribution
-    const rarityDist: { [key: string]: number } = {} as { [key: string]: number };
-    cardsWithDupes.forEach((card) => {
-        const rarity = card.rarity;
-        rarityDist[rarity] = (rarityDist[rarity] || 0) + 1;
-    });
-
-    // Process color distribution
-    const colorDist: { [key: string]: number } = {} as { [key: string]: number };
-    const colorNames = {
-        'W': 'White',
-        'U': 'Blue',
-        'B': 'Black',
-        'R': 'Red',
-        'G': 'Green'
-    };
-
-    cardsWithDupes.forEach((card) => {
-        if (card.colors && card.colors.length > 0) {
-            card.colors.forEach(color => {
-                colorDist[color] = (colorDist[color] || 0) + 1;
+        const countBy = <T,>(items: T[], keyOf: (item: T) => string | string[] | null) => {
+            const dist: Record<string, number> = {};
+            items.forEach((item) => {
+                const keys = keyOf(item);
+                if (keys === null) return;
+                (Array.isArray(keys) ? keys : [keys]).forEach((k) => { dist[k] = (dist[k] || 0) + 1; });
             });
-        } else {
-            // For colorless cards
-            colorDist['C'] = (colorDist['C'] || 0) + 1;
+            return dist;
+        };
+        const byCountDesc = <T extends { count: number }>(a: T, b: T) => b.count - a.count;
+
+        const typeData: TypeData[] = Object.entries(countBy(cards, (c) => (c.type_line ? getMainCardType(c.type_line) : null)))
+            .map(([type, count]) => ({ type, count }))
+            .sort(byCountDesc);
+
+        const creatureTypeCount = Object.keys(countBy(cards, (c) => {
+            const parts = c.type_line?.split('—') ?? [];
+            return parts.length > 1 && parts[0].includes('Creature') ? parts[1].trim().split(' ') : null;
+        })).length;
+
+        const rarityDist = countBy(cards, (c) => c.rarity);
+
+        const colorData: ColorData[] = Object.entries(countBy(cards, (c) => (c.colors?.length ? c.colors : 'C')))
+            .map(([color, count]) => ({
+                color,
+                fullName: colorNames[color as keyof typeof colorNames] || (color === 'C' ? 'Colorless' : color),
+                count,
+            }))
+            .sort(byCountDesc);
+
+        const setData: SetData[] = Object.entries(countBy(cards, (c) => c.set_name))
+            .map(([set, count]) => ({ set, count }))
+            .sort(byCountDesc);
+
+        // Lands are almost always 0 CMC and would drag the average down.
+        const nonLands = cards.filter((c) => !c.type_line?.includes('Land'));
+        const avgCmc = nonLands.length > 0 ? nonLands.reduce((sum, c) => sum + c.cmc, 0) / nonLands.length : 0;
+
+        // Group printings by illustration: one painting reprinted 20 times is one artwork.
+        const artworkMap = new Map<string, Artwork>();
+        cards.forEach((card) => {
+            const key = illustrationKey(card);
+            const existing = artworkMap.get(key);
+            if (!existing) {
+                artworkMap.set(key, { key, first: card, printings: 1, artCrop: artCrop(card) });
+                return;
+            }
+            existing.printings += 1;
+            if (card.released_at < existing.first.released_at) existing.first = card;
+            existing.artCrop = existing.artCrop ?? artCrop(card);
+        });
+        const artworks = Array.from(artworkMap.values())
+            .sort((a, b) => b.first.released_at.localeCompare(a.first.released_at));
+        const mostReprinted = [...artworks].sort((a, b) => b.printings - a.printings)[0];
+
+        // Career timeline: new paintings vs reprints of older art, per year.
+        const firstPrintingIds = new Set(artworks.map((a) => a.first.id));
+        const yearMap = new Map<number, YearData>();
+        cards.forEach((card) => {
+            const year = Number(card.released_at?.slice(0, 4));
+            if (!year) return;
+            const row = yearMap.get(year) ?? { year, newArt: 0, reprints: 0 };
+            if (firstPrintingIds.has(card.id)) row.newArt += 1; else row.reprints += 1;
+            yearMap.set(year, row);
+        });
+        const years = Array.from(yearMap.keys());
+        const firstYear = years.length ? Math.min(...years) : undefined;
+        const lastYear = years.length ? Math.max(...years) : undefined;
+        // Fill empty years so gaps in a career show up as gaps.
+        const yearData: YearData[] = [];
+        if (firstYear && lastYear) {
+            for (let y = firstYear; y <= lastYear; y++) yearData.push(yearMap.get(y) ?? { year: y, newArt: 0, reprints: 0 });
         }
-    });
+        const sortedByDate = [...cards].sort((a, b) => a.released_at.localeCompare(b.released_at));
 
-    // Process set distribution
-    const setDist: { [key: string]: number } = {} as { [key: string]: number };
-    cardsWithDupes.forEach((card) => {
-        const set = card.set_name;
-        setDist[set] = (setDist[set] || 0) + 1;
-    });
+        const mostValuable = cards
+            .map((card) => ({ card, ...topPrice(card) }))
+            .filter((c) => c.value > 0)
+            .sort((a, b) => b.value - a.value)
+            .slice(0, TOP_LIST_SIZE);
 
-    // Convert distributions to array format for charts
-    const manaCostData: ManaCostData[] = Object.entries(manaCostDist).map(([cmc, count]) => ({
-        cmc: Number(cmc),
-        count
-    })).sort((a, b) => a.cmc - b.cmc);
+        // edhrec_rank is per card name, so keep one printing per name.
+        const seenNames = new Set<string>();
+        const mostPlayed = cards
+            .filter((c) => c.edhrec_rank !== undefined)
+            .sort((a, b) => a.edhrec_rank! - b.edhrec_rank!)
+            .filter((c) => (seenNames.has(c.name) ? false : (seenNames.add(c.name), true)))
+            .slice(0, TOP_LIST_SIZE);
 
-    const typeData: TypeData[] = Object.entries(typeDist).map(([type, count]) => ({
-        type,
-        count
-    }));
-
-    const creatureTypeData: TypeData[] = Object.entries(creatureTypeDist).map(([type, count]) => ({
-        type,
-        count
-    })).sort((a, b) => (b.count as number) - (a.count as number));
-
-    const colorData: ColorData[] = Object.entries(colorDist).map(([color, count]) => ({
-        color,
-        fullName: colorNames[color as keyof typeof colorNames] || (color === 'C' ? 'Colorless' : color),
-        count
-    }));
-
-    const setData: SetData[] = Object.entries(setDist).map(([set, count]) => ({
-        set,
-        count
-    })).sort((a, b) => b.count - a.count);
+        return {
+            typeData,
+            creatureTypeCount,
+            rarityDist,
+            colorData,
+            setData,
+            avgCmc,
+            artworks,
+            mostReprinted,
+            yearData,
+            firstYear,
+            lastYear,
+            firstCard: sortedByDate[0],
+            // artworks is newest-first, keyed on each illustration's first printing.
+            latestArt: artworks[0]?.first,
+            mostValuable,
+            mostPlayed,
+            reservedCount: new Set(cards.filter((c) => c.reserved).map((c) => c.name)).size,
+        };
+    }, [cardsWithDupes]);
 
     // Colors for the charts
     const COLORS = [
@@ -383,23 +444,22 @@ const ArtistCardAnalysis = () => {
         'B': colors.neutral[900],
         'R': colors.accent.red,
         'G': colors.accent.green,
-        'common': colors.neutral[400],
-        'uncommon': colors.neutral[300],
-        'rare': colors.accent.orange,
-        'mythic': colors.accent.red,
     };
 
-    // Calculate some statistics
-    const avgCmc = cardsWithDupes.length > 0
-        ? cardsWithDupes.reduce((sum, card) => sum + card.cmc, 0) / cardsWithDupes.length
-        : 0;
-    const mostCommonType = typeData.length > 0 && typeData[0]
-        ? typeData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.type || 'N/A'
-        : 'N/A';
-    const mostCommonColor = colorData.length > 0
-        ? colorData.sort((a, b) => (b.count as number) - (a.count as number))[0]?.fullName || 'N/A'
-        : 'N/A';
+    const artistDisplayName = cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist;
 
+    const tcgplayerLink = (card: Card) =>
+        card.tcgplayer_id ? tcgplayerProductUrl(card.tcgplayer_id, 'breakdown') : tcgplayerSearchUrl(card.name, 'breakdown');
+
+    const onTcgplayerClick = (card: Card) =>
+        logPriceClick('tcgplayer', { artistName: artistDisplayName || '', cardName: card.name, cardSet: card.set });
+
+    const statRow = (label: string, value: ReactNode) => (
+        <Box component="li" sx={cardBreakdownStyles.statsItem}>
+            <Typography component="span" sx={cardBreakdownStyles.statsLabel}>{label}</Typography>
+            <Typography component="span" sx={cardBreakdownStyles.statsValue}>{value}</Typography>
+        </Box>
+    );
 
     if (isFetching) {
         return (
@@ -434,6 +494,13 @@ const ArtistCardAnalysis = () => {
             </Box>
           );
     }
+
+    const {
+        typeData, creatureTypeCount, rarityDist, colorData, setData, avgCmc, artworks, mostReprinted,
+        yearData, firstYear, lastYear, firstCard, latestArt, mostValuable, mostPlayed, reservedCount,
+    } = stats;
+    const visibleArtworks = showAllArt ? artworks : artworks.slice(0, GALLERY_PREVIEW);
+
     return (
         <Box sx={cardBreakdownStyles.container}>
             <Container maxWidth="lg">
@@ -442,52 +509,57 @@ const ArtistCardAnalysis = () => {
                         Card Analysis Dashboard
                     </Typography>
                     <Typography sx={cardBreakdownStyles.artistTitle}>
-                        {cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}
+                        {artistDisplayName}
                     </Typography>
+
+                    {/* Headline numbers */}
+                    <Box sx={cardBreakdownStyles.headlineGrid}>
+                        <Box sx={cardBreakdownStyles.headlineTile}>
+                            <Typography sx={cardBreakdownStyles.headlineValue}>{artworks.length}</Typography>
+                            <Typography sx={cardBreakdownStyles.headlineLabel}>Unique artworks</Typography>
+                        </Box>
+                        <Box sx={cardBreakdownStyles.headlineTile}>
+                            <Typography sx={cardBreakdownStyles.headlineValue}>{cardsWithDupes.length}</Typography>
+                            <Typography sx={cardBreakdownStyles.headlineLabel}>Total printings</Typography>
+                        </Box>
+                        <Box sx={cardBreakdownStyles.headlineTile}>
+                            <Typography sx={cardBreakdownStyles.headlineValue}>
+                                {firstYear && lastYear ? lastYear - firstYear + 1 : '—'}
+                            </Typography>
+                            <Typography sx={cardBreakdownStyles.headlineLabel}>
+                                {firstYear && lastYear ? `Years active (${firstYear}–${lastYear})` : 'Years active'}
+                            </Typography>
+                        </Box>
+                        <Box sx={cardBreakdownStyles.headlineTile}>
+                            <Typography sx={cardBreakdownStyles.headlineValue}>{setData.length}</Typography>
+                            <Typography sx={cardBreakdownStyles.headlineLabel}>Sets illustrated</Typography>
+                        </Box>
+                    </Box>
 
                     {/* Card Statistics Summary */}
                     <Box sx={{ ...cardBreakdownStyles.chartCard, marginBottom: 4 }}>
                         <Typography sx={cardBreakdownStyles.chartTitle}>Card Statistics Summary</Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: spacing.xl, md: spacing.xxl } }}>
                             <Box sx={cardBreakdownStyles.statsCard}>
-                                <Typography sx={cardBreakdownStyles.statsTitle}>General Stats</Typography>
+                                <Typography sx={cardBreakdownStyles.statsTitle}>Career</Typography>
                                 <Box component="ul" sx={cardBreakdownStyles.statsList}>
-                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Total Cards:</Typography>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{cardsWithDupes.length}</Typography>
-                                    </Box>
-                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Average CMC:</Typography>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{avgCmc.toFixed(2)}</Typography>
-                                    </Box>
-                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Most Common Type:</Typography>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{mostCommonType}</Typography>
-                                    </Box>
-                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Most Common Color:</Typography>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{mostCommonColor}</Typography>
-                                    </Box>
+                                    {firstCard && statRow('First card:', `${firstCard.name} (${firstCard.set_name}, ${firstCard.released_at.slice(0, 4)})`)}
+                                    {latestArt && statRow('Latest new art:', `${latestArt.name} (${latestArt.set_name}, ${latestArt.released_at.slice(0, 4)})`)}
+                                    {mostReprinted && mostReprinted.printings > 1 &&
+                                        statRow('Most reprinted art:', `${mostReprinted.first.name} (${mostReprinted.printings} printings)`)}
+                                    {reservedCount > 0 && statRow('Reserved List cards:', reservedCount)}
                                 </Box>
                             </Box>
 
                             <Box sx={cardBreakdownStyles.statsCard}>
-                                <Typography sx={cardBreakdownStyles.statsTitle}>Artist Info</Typography>
+                                <Typography sx={cardBreakdownStyles.statsTitle}>Gameplay</Typography>
                                 <Box component="ul" sx={cardBreakdownStyles.statsList}>
-                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Artist:</Typography>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{cardsWithDupes.length > 0 ? cardsWithDupes[0].artist : artist}</Typography>
-                                    </Box>
-                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Sets Illustrated:</Typography>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{setData.length}</Typography>
-                                    </Box>
-                                    <Box component="li" sx={cardBreakdownStyles.statsItem}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Creature Types:</Typography>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsValue}>{creatureTypeData.length}</Typography>
-                                    </Box>
+                                    {statRow('Most common type:', typeData[0]?.type ?? 'N/A')}
+                                    {statRow('Most common color:', colorData[0]?.fullName ?? 'N/A')}
+                                    {statRow('Average CMC (nonland):', avgCmc.toFixed(2))}
+                                    {statRow('Creature types:', creatureTypeCount)}
                                     <Box component="li" sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: { sm: 'space-between' } }}>
-                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Rarity Distribution:</Typography>
+                                        <Typography component="span" sx={cardBreakdownStyles.statsLabel}>Rarity:</Typography>
                                         <Typography component="span" sx={{ ...cardBreakdownStyles.statsValue, textAlign: { sm: 'right' } }}>
                                             {Object.entries(rarityDist)
                                                 .map(([rarity, count]) => `${rarity.charAt(0).toUpperCase() + rarity.slice(1)}: ${count}`)
@@ -499,46 +571,102 @@ const ArtistCardAnalysis = () => {
                         </Box>
                     </Box>
 
+                    {/* Career Timeline */}
+                    {yearData.length > 0 && (
+                        <Box sx={{ ...cardBreakdownStyles.chartCard, marginBottom: 4 }}>
+                            <Typography sx={cardBreakdownStyles.chartTitle}>Career Timeline</Typography>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={yearData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} vertical={false} />
+                                    <XAxis
+                                        dataKey="year"
+                                        tick={{ fill: colors.neutral[700], fontSize: '0.75rem' }}
+                                        axisLine={{ stroke: colors.neutral[300] }}
+                                    />
+                                    <YAxis
+                                        allowDecimals={false}
+                                        tick={{ fill: colors.neutral[700] }}
+                                        axisLine={{ stroke: colors.neutral[300] }}
+                                    />
+                                    <Tooltip
+                                        formatter={(value: number, name: string) => [`${value} printings`, name]}
+                                        contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
+                                        labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
+                                    />
+                                    <Legend
+                                        iconSize={8}
+                                        iconType="circle"
+                                        formatter={(value) => <span style={{ color: colors.neutral[600], fontSize: '0.8rem' }}>{value}</span>}
+                                    />
+                                    <Bar dataKey="newArt" name="New art" stackId="year" fill={colors.primary.main} animationDuration={1500} />
+                                    <Bar dataKey="reprints" name="Reprints" stackId="year" fill={colors.accent.orange} radius={[4, 4, 0, 0]} animationDuration={1500} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </Box>
+                    )}
+
+                    {/* Collector lists */}
                     <Box sx={cardBreakdownStyles.gridContainer}>
-                    {/* Mana Cost Distribution */}
-                    <Box sx={cardBreakdownStyles.chartCard}>
-                        <Typography sx={cardBreakdownStyles.chartTitle}>Mana Cost Distribution</Typography>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={manaCostData} margin={{ top: 20, right: 10, left: 0, bottom: 40 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} />
-                                <XAxis 
-                                    dataKey="cmc" 
-                                    label={{ value: 'Converted Mana Cost', position: 'insideBottom', offset: -10, fill: colors.neutral[700] }} 
-                                    tick={{ fill: colors.neutral[700] }}
-                                    axisLine={{ stroke: colors.neutral[300] }}
-                                />
-                                <YAxis 
-                                    label={{ value: 'Number of Cards', angle: -90, position: 'insideLeft', offset: 5, fill: colors.neutral[700] }} 
-                                    tick={{ fill: colors.neutral[700] }}
-                                    axisLine={{ stroke: colors.neutral[300] }}
-                                />
-                                <Tooltip 
-                                    formatter={(value: number) => [`${value} cards`, 'Count']}
-                                    contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
-                                    labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
-                                />
-                                <Bar 
-                                    dataKey="count" 
-                                    name="Cards" 
-                                    radius={[4, 4, 0, 0]}
-                                    fill="url(#manaCostGradient)"
-                                    animationDuration={1500}
-                                />
-                                <defs>
-                                    <linearGradient id="manaCostGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={colors.primary.main} stopOpacity={0.9}/>
-                                        <stop offset="95%" stopColor={colors.primary.main} stopOpacity={0.6}/>
-                                    </linearGradient>
-                                </defs>
-                            </BarChart>
-                        </ResponsiveContainer>
+                        <Box sx={cardBreakdownStyles.chartCard}>
+                            <Typography sx={cardBreakdownStyles.chartTitle}>Most Valuable Printings</Typography>
+                            {mostValuable.length === 0 ? (
+                                <Typography sx={cardBreakdownStyles.statsLabel}>No price data available.</Typography>
+                            ) : (
+                                <Box component="ol" sx={cardBreakdownStyles.rankList}>
+                                    {mostValuable.map(({ card, value, finish }) => (
+                                        <Box component="li" key={`${card.id}-${finish}`} sx={cardBreakdownStyles.rankRow}>
+                                            <Box sx={cardBreakdownStyles.rankMain}>
+                                                <Typography sx={cardBreakdownStyles.rankName}>
+                                                    {card.name}
+                                                    {card.reserved && <Box component="span" sx={cardBreakdownStyles.badge}>Reserved List</Box>}
+                                                </Typography>
+                                                <Typography sx={cardBreakdownStyles.rankMeta}>
+                                                    {card.set_name} · #{card.collector_number} · {finish}
+                                                </Typography>
+                                            </Box>
+                                            <Box
+                                                component="a"
+                                                href={tcgplayerLink(card)}
+                                                target="_blank"
+                                                rel="noopener noreferrer sponsored"
+                                                title={`Buy ${card.name} on TCGplayer`}
+                                                onClick={() => onTcgplayerClick(card)}
+                                                sx={cardBreakdownStyles.priceLink}
+                                            >
+                                                {formatUsd(value)}
+                                            </Box>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
+
+                        <Box sx={cardBreakdownStyles.chartCard}>
+                            <Typography sx={cardBreakdownStyles.chartTitle}>Most Played in Commander</Typography>
+                            {mostPlayed.length === 0 ? (
+                                <Typography sx={cardBreakdownStyles.statsLabel}>No EDHREC data available.</Typography>
+                            ) : (
+                                <Box component="ol" sx={cardBreakdownStyles.rankList}>
+                                    {mostPlayed.map((card) => (
+                                        <Box component="li" key={card.id} sx={cardBreakdownStyles.rankRow}>
+                                            <Box sx={cardBreakdownStyles.rankMain}>
+                                                <Typography sx={cardBreakdownStyles.rankName}>{card.name}</Typography>
+                                                <Typography sx={cardBreakdownStyles.rankMeta}>{card.type_line}</Typography>
+                                            </Box>
+                                            <Typography sx={cardBreakdownStyles.rankValue}>
+                                                #{card.edhrec_rank!.toLocaleString('en-US')}
+                                            </Typography>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            )}
+                            <Typography sx={{ ...cardBreakdownStyles.rankMeta, marginTop: spacing.md }}>
+                                Overall EDHREC rank. Lower means played in more decks.
+                            </Typography>
+                        </Box>
                     </Box>
-    
+
+                    <Box sx={cardBreakdownStyles.gridContainer}>
                     {/* Card Type Distribution */}
                     <Box sx={cardBreakdownStyles.chartCard}>
                         <Typography sx={cardBreakdownStyles.chartTitle}>Card Type Distribution</Typography>
@@ -561,14 +689,14 @@ const ArtistCardAnalysis = () => {
                                 >
                                     {typeData.map((entry, index) => (
                                         <Cell
-                                            key={`cell-${index}`} 
-                                            fill={COLORS[index % COLORS.length]} 
+                                            key={`cell-${index}`}
+                                            fill={COLORS[index % COLORS.length]}
                                             stroke={colors.neutral.white}
                                             strokeWidth={1}
                                         />
                                     ))}
                                 </Pie>
-                                <Tooltip 
+                                <Tooltip
                                     formatter={(value: number, name: string) => {
                                         const numValue = Number(value);
                                         const percentage = isNaN(numValue) ? 0 : ((numValue / cardsWithDupes.length) * 100).toFixed(1);
@@ -577,9 +705,9 @@ const ArtistCardAnalysis = () => {
                                     contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
                                     labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
                                 />
-                                <Legend 
-                                    layout="horizontal" 
-                                    verticalAlign="bottom" 
+                                <Legend
+                                    layout="horizontal"
+                                    verticalAlign="bottom"
                                     align="center"
                                     iconSize={8} // This is a number, not a color.
                                     iconType="circle"
@@ -588,29 +716,29 @@ const ArtistCardAnalysis = () => {
                             </PieChart>
                         </ResponsiveContainer>
                     </Box>
-    
+
                     {/* Color Distribution */}
                     <Box sx={cardBreakdownStyles.chartCard}>
                         <Typography sx={cardBreakdownStyles.chartTitle}>Color Distribution</Typography>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={colorData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} />
-                                <XAxis 
-                                    dataKey="fullName" 
+                                <XAxis
+                                    dataKey="fullName"
                                     tick={{ fill: colors.neutral[700], fontSize: '0.7rem' }}
                                     axisLine={{ stroke: colors.neutral[300] }}
                                 />
-                                <YAxis 
+                                <YAxis
                                     tick={{ fill: colors.neutral[700] }}
                                     axisLine={{ stroke: colors.neutral[300] }}
                                 />
-                                <Tooltip 
+                                <Tooltip
                                     formatter={(value: number) => [`${value} cards`, 'Count']}
                                     contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
                                     labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
                                 />
-                                <Bar 
-                                    dataKey="count" 
+                                <Bar
+                                    dataKey="count"
                                     radius={[4, 4, 0, 0]}
                                     animationDuration={1500}
                                 >
@@ -626,82 +754,88 @@ const ArtistCardAnalysis = () => {
                             </BarChart>
                         </ResponsiveContainer>
                     </Box>
-    
-                    {/* Set Distribution */}
-                    <Box sx={cardBreakdownStyles.chartCard}>
-                        <Typography sx={cardBreakdownStyles.chartTitle}>Set Distribution (Top 10)</Typography>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart 
-                                data={setData.slice(0, 10)} 
-                                layout="vertical" 
-                                margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} horizontal={true} vertical={false} />
-                                <XAxis 
-                                    type="number" 
-                                    tick={{ fill: colors.neutral[700] }}
-                                    axisLine={{ stroke: colors.neutral[300] }}
-                                />
-                                <YAxis 
-                                    dataKey="set" 
-                                    type="category" 
-                                    tick={{ fill: colors.neutral[700], fontSize: '0.75rem' }}
-                                    axisLine={{ stroke: colors.neutral[300] }}
-                                    width={70}
-                                />
-                                <Tooltip 
-                                    formatter={(value: number) => [`${value} cards`, 'Count']}
-                                    contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
-                                    labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
-                                />
-                                <Bar 
-                                    dataKey="count" 
-                                    fill="url(#setGradient)" 
-                                    radius={[0, 4, 4, 0]}
-                                    animationDuration={1500}
-                                />
-                                <defs>
-                                    <linearGradient id="setGradient" x1="0" y1="0" x2="1" y2="0">
-                                        <stop offset="5%" stopColor={colors.accent.orange} stopOpacity={0.9}/>
-                                        <stop offset="95%" stopColor={colors.accent.orange} stopOpacity={0.6}/>
-                                    </linearGradient>
-                                </defs>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </Box>
                 </Box>
-    
-                {/* Card List */}
-                <Box sx={{ ...cardBreakdownStyles.chartCard, marginTop: 4 }}>
-                    <Typography sx={cardBreakdownStyles.chartTitle}>Card Details</Typography>
-                    <Box sx={{ overflowX: 'auto' }}>
-                        <Box component="table" sx={cardBreakdownStyles.table}>
-                            <Box component="thead" sx={cardBreakdownStyles.tableHead}>
-                                <Box component="tr">
-                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Name</Box>
-                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Mana Cost</Box>
-                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Type</Box>
-                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Color</Box>
-                                    <Box component="th" sx={cardBreakdownStyles.tableHeaderCell}>Set</Box>
-                                    <Box component="th" sx={{ ...cardBreakdownStyles.tableHeaderCell, borderRight: 'none' }}>Oracle Text</Box>
+
+                {/* Set Distribution */}
+                <Box sx={{ ...cardBreakdownStyles.chartCard, marginBottom: 4 }}>
+                    <Typography sx={cardBreakdownStyles.chartTitle}>Set Distribution (Top 10)</Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart
+                            data={setData.slice(0, 10)}
+                            layout="vertical"
+                            margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" stroke={colors.neutral[100]} horizontal={true} vertical={false} />
+                            <XAxis
+                                type="number"
+                                tick={{ fill: colors.neutral[700] }}
+                                axisLine={{ stroke: colors.neutral[300] }}
+                            />
+                            <YAxis
+                                dataKey="set"
+                                type="category"
+                                tick={{ fill: colors.neutral[700], fontSize: '0.75rem' }}
+                                axisLine={{ stroke: colors.neutral[300] }}
+                                width={70}
+                            />
+                            <Tooltip
+                                formatter={(value: number) => [`${value} cards`, 'Count']}
+                                contentStyle={{ backgroundColor: `${colors.neutral.white}F2`, borderRadius: '4px', border: `1px solid ${colors.neutral[300]}` }}
+                                labelStyle={{ fontWeight: 'bold', color: colors.neutral[900] }}
+                            />
+                            <Bar
+                                dataKey="count"
+                                fill="url(#setGradient)"
+                                radius={[0, 4, 4, 0]}
+                                animationDuration={1500}
+                            />
+                            <defs>
+                                <linearGradient id="setGradient" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="5%" stopColor={colors.accent.orange} stopOpacity={0.9}/>
+                                    <stop offset="95%" stopColor={colors.accent.orange} stopOpacity={0.6}/>
+                                </linearGradient>
+                            </defs>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Box>
+
+                {/* Art Gallery: one tile per illustration, newest first */}
+                <Box sx={cardBreakdownStyles.chartCard}>
+                    <Typography sx={cardBreakdownStyles.chartTitle}>Art Gallery ({artworks.length})</Typography>
+                    <Box sx={cardBreakdownStyles.galleryGrid}>
+                        {visibleArtworks.map((art) => (
+                            <Box
+                                key={art.key}
+                                component="a"
+                                href={art.first.scryfall_uri}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={cardBreakdownStyles.galleryItem}
+                            >
+                                {art.artCrop ? (
+                                    <Box component="img" src={art.artCrop} alt={art.first.name} loading="lazy" sx={cardBreakdownStyles.galleryImage} />
+                                ) : (
+                                    <Box sx={cardBreakdownStyles.galleryImage} />
+                                )}
+                                {art.printings > 1 && (
+                                    <Box component="span" sx={cardBreakdownStyles.galleryBadge}>×{art.printings}</Box>
+                                )}
+                                <Box sx={cardBreakdownStyles.galleryCaption}>
+                                    <Typography sx={cardBreakdownStyles.rankName}>{art.first.name}</Typography>
+                                    <Typography sx={cardBreakdownStyles.rankMeta}>
+                                        {art.first.set_name} · {art.first.released_at.slice(0, 4)}
+                                    </Typography>
                                 </Box>
                             </Box>
-                            <Box component="tbody">
-                                {cardsWithDupes.map((card, index) => (
-                                    <Box component="tr" key={index} sx={cardBreakdownStyles.tableRow}>
-                                        <Box component="td" sx={cardBreakdownStyles.tableCellName}>{card.name}</Box>
-                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>{card.mana_cost}</Box>
-                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>{card.type_line}</Box>
-                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>
-                                            {card.colors?.map(color => colorNames[color as keyof typeof colorNames]).join(', ') || 'Colorless'}
-                                        </Box>
-                                        <Box component="td" sx={cardBreakdownStyles.tableCell}>{card.set_name}</Box>
-                                        <Box component="td" sx={{ ...cardBreakdownStyles.tableCellOracleText, borderRight: 'none' }}>{card.oracle_text}</Box>
-                                    </Box>
-                                ))}
-                            </Box>
-                        </Box>
+                        ))}
                     </Box>
+                    {artworks.length > GALLERY_PREVIEW && (
+                        <Box sx={{ textAlign: 'center', marginTop: spacing.lg }}>
+                            <Button variant="outlined" onClick={() => setShowAllArt((v) => !v)}>
+                                {showAllArt ? 'Show less' : `Show all ${artworks.length} artworks`}
+                            </Button>
+                        </Box>
+                    )}
                 </Box>
                 </Paper>
             </Container>

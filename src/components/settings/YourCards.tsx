@@ -1,8 +1,10 @@
+import { useState } from "react";
 import EmptyState from "../shared/EmptyState";
-import { Box } from "@mui/material";
+import { Box, Theme } from "@mui/material";
+import { SystemStyleObject } from "@mui/system";
 import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { ArrowRight } from "@phosphor-icons/react";
+import { ArrowRight, CaretDown, CaretUp } from "@phosphor-icons/react";
 import { RootState } from "../../store/store";
 import { useQuery } from "@apollo/client";
 import { GET_MY_CARD_COLLECTION } from "../graphql/queries";
@@ -33,6 +35,21 @@ interface ArtistSummary {
   wishlist: number;
 }
 
+type SortKey = "name" | "proofs" | "signed" | "wishlist";
+type SortDir = "asc" | "desc";
+
+const byName = (a: ArtistSummary, b: ArtistSummary) =>
+  a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+
+function sortArtists(artists: ArtistSummary[], key: SortKey, dir: SortDir): ArtistSummary[] {
+  const sign = dir === "asc" ? 1 : -1;
+  return [...artists].sort((a, b) => {
+    if (key === "name") return sign * byName(a, b);
+    // Ties fall back to name so equal counts stay alphabetical
+    return sign * (a[key] - b[key]) || byName(a, b);
+  });
+}
+
 function buildArtistSummaries(items: CollectionItem[]): ArtistSummary[] {
   const map = new Map<string, ArtistSummary>();
   for (const item of items) {
@@ -43,9 +60,7 @@ function buildArtistSummaries(items: CollectionItem[]): ArtistSummary[] {
     if (item.signedNonfoil || item.signedFoil) entry.signed++;
     if (item.wishlistSigned) entry.wishlist++;
   }
-  return Array.from(map.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-  );
+  return Array.from(map.values());
 }
 
 const initials = (name: string) =>
@@ -62,9 +77,54 @@ const Count = ({ n }: { n: number }) => (
   </Box>
 );
 
+const SortHeader = ({
+  label,
+  column,
+  sortKey,
+  sortDir,
+  onSort,
+  sx,
+}: {
+  label: string;
+  column: SortKey;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (column: SortKey) => void;
+  sx?: SystemStyleObject<Theme>;
+}) => {
+  const active = sortKey === column;
+  const Caret = sortDir === "asc" ? CaretUp : CaretDown;
+  return (
+    <Box
+      role="columnheader"
+      aria-sort={active ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+      sx={sx}
+    >
+      <Box component="button" type="button" onClick={() => onSort(column)} sx={styles.sortButton}>
+        <MonoLabel tracking="tight" tone={active ? "accent" : "faint"}>{label}</MonoLabel>
+        <Box component="span" sx={[styles.sortCaret, active ? {} : { visibility: "hidden" }]} aria-hidden>
+          <Caret size={10} weight="bold" />
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
 const YourCards = () => {
   usePageTitle("Your Cards");
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const handleSort = (column: SortKey) => {
+    if (column === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(column);
+      // Counts are most useful biggest-first; names A→Z
+      setSortDir(column === "name" ? "asc" : "desc");
+    }
+  };
 
   const { data, loading } = useQuery(GET_MY_CARD_COLLECTION, {
     skip: !isLoggedIn,
@@ -88,11 +148,12 @@ const YourCards = () => {
   }
 
   const items: CollectionItem[] = data?.myCardCollection ?? [];
-  const artists = buildArtistSummaries(items);
+  const artists = sortArtists(buildArtistSummaries(items), sortKey, sortDir);
   const totalProofs = artists.reduce((sum, a) => sum + a.proofs, 0);
   const totalSigned = artists.reduce((sum, a) => sum + a.signed, 0);
   const totalWishlist = artists.reduce((sum, a) => sum + a.wishlist, 0);
   const wishlistItems = items.filter((item) => item.wishlistSigned);
+  const sortProps = { sortKey, sortDir, onSort: handleSort };
 
   return (
     <Box sx={styles.page}>
@@ -128,10 +189,10 @@ const YourCards = () => {
 
             <Box>
               <Box sx={styles.headerRow}>
-                <MonoLabel tracking="tight">Artist</MonoLabel>
-                <MonoLabel tracking="tight" sx={styles.colLabel}>Proofs</MonoLabel>
-                <MonoLabel tracking="tight" sx={styles.colLabel}>Signed</MonoLabel>
-                <MonoLabel tracking="tight" sx={styles.colLabel}>Wishlist</MonoLabel>
+                <SortHeader label="Artist" column="name" {...sortProps} />
+                <SortHeader label="Proofs" column="proofs" {...sortProps} sx={styles.colLabel} />
+                <SortHeader label="Signed" column="signed" {...sortProps} sx={styles.colLabel} />
+                <SortHeader label="Wishlist" column="wishlist" {...sortProps} sx={styles.colLabel} />
                 <Box sx={styles.arrowSpacer} />
               </Box>
               {artists.map((artist) => (

@@ -1,7 +1,7 @@
 // Affiliate URL builders. Every link carries a placement sub-ID so partner
 // dashboards (and our own click log) can tell which part of the site drove a sale.
 
-export type Placement = 'allcards' | 'artist_page' | 'event' | 'wishlist';
+export type Placement = 'allcards' | 'artist_page' | 'breakdown' | 'event' | 'wishlist';
 export type PricePlatform = 'manapool' | 'tcgplayer' | 'cardkingdom';
 
 const TCGPLAYER_PARTNER = 'https://partner.tcgplayer.com/JkbQGE';
