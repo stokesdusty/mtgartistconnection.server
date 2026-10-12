@@ -78,6 +78,20 @@ export const artistStyles: Record<string, SystemStyleObject<Theme>> = {
     color: vault.muted,
     [vaultMedia.mobile]: { fontSize: 13 },
   },
+  verifiedBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: '5px',
+    padding: '3px 10px',
+    borderRadius: vaultRadii.pill,
+    backgroundColor: vault.okBg,
+    color: vault.ok,
+    border: `1px solid ${vault.ok}`,
+    fontSize: 12,
+    fontWeight: 600,
+    lineHeight: 1.4,
+  },
 
   // ─── Sticky rail ───────────────────────────────────────────────────────────
   rail: {
@@ -164,6 +178,13 @@ export const artistStyles: Record<string, SystemStyleObject<Theme>> = {
     border: `1px solid ${vault.lineStrong}`,
     '&:hover': { backgroundColor: vault.chip },
     [vaultMedia.mobile]: { display: 'none' },
+  },
+  // Same look as editButton but stays visible on phones, where artists are likely to be.
+  ownerEditButton: {
+    backgroundColor: 'transparent',
+    color: vault.fg,
+    border: `1px solid ${vault.lineStrong}`,
+    '&:hover': { backgroundColor: vault.chip },
   },
 
   // ─── Link cards ────────────────────────────────────────────────────────────
@@ -254,6 +275,28 @@ export const artistStyles: Record<string, SystemStyleObject<Theme>> = {
     marginBottom: '8px',
   },
   collectionSummary: {
+    fontSize: 13,
+    color: vault.muted,
+  },
+
+  // ─── From the artist ───────────────────────────────────────────────────────
+  artistNote: {
+    padding: '20px 22px',
+    borderRadius: vaultRadii.panel,
+    backgroundColor: vault.surface,
+    border: `1px solid ${vault.line}`,
+    borderLeft: `3px solid ${vault.accent}`,
+    [vaultMedia.mobile]: { padding: '16px 18px' },
+  },
+  artistNoteText: {
+    margin: '10px 0 0',
+    fontSize: 15,
+    lineHeight: 1.6,
+    color: vault.fg,
+    whiteSpace: 'pre-line',
+    overflowWrap: 'anywhere',
+  },
+  artistNoteMeta: {
     fontSize: 13,
     color: vault.muted,
   },

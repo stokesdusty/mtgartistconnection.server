@@ -58,6 +58,9 @@ export const GET_ARTIST_BY_NAME = gql`
             location
             bluesky
             omalink
+            artistNote
+            artistNoteUpdatedAt
+            isVerified
             inprnt
         }
     }
@@ -173,6 +176,59 @@ export const GET_CURRENT_USER = gql`
             }
             followedArtists
             monitoredStates
+        }
+    }
+`;
+
+// Kept apart from GET_CURRENT_USER so the header can ask for just these.
+export const GET_MY_ARTIST_ACCESS = gql`
+    query myArtistAccess {
+        me {
+            id
+            isVerifiedArtist
+            artistId
+        }
+    }
+`;
+
+export const ARTIST_DASHBOARD_FIELDS = `
+    id
+    name
+    email
+    url
+    facebook
+    instagram
+    twitter
+    patreon
+    youtube
+    artstation
+    bluesky
+    omalink
+    inprnt
+    location
+    signing
+    artistProofs
+    artistNote
+    artistNoteUpdatedAt
+`;
+
+export const GET_ARTIST_DASHBOARD = gql`
+    query artistDashboard($artistId: ID) {
+        artistDashboard(artistId: $artistId) {
+            ${ARTIST_DASHBOARD_FIELDS}
+        }
+    }
+`;
+
+export const GET_ARTIST_EDIT_LOG = gql`
+    query artistEditLog($artistId: ID!) {
+        artistEditLog(artistId: $artistId) {
+            id
+            byAdmin
+            createdAt
+            changes {
+                field
+            }
         }
     }
 `;

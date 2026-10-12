@@ -18,13 +18,14 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, MagnifyingGlass, ChartBar, CurrencyDollar } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, MagnifyingGlass, ChartBar, CurrencyDollar, PaintBrush } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
 import { useSelector, useDispatch } from 'react-redux';
-import { useApolloClient } from '@apollo/client';
+import { useApolloClient, useQuery } from '@apollo/client';
 import { RootState } from '../../store/store';
 import { logout } from '../../store/auth-slice';
+import { GET_MY_ARTIST_ACCESS } from '../graphql/queries';
 
 interface NavItem {
   label: string;
@@ -59,6 +60,8 @@ const accountTools: DrawerLink[] = [
   { label: "Settings", to: "/settings", icon: <GearSix size={20} /> },
 ];
 
+const artistDashboardLink: DrawerLink = { label: "Your Artist Page", to: "/artist-dashboard", icon: <PaintBrush size={20} weight="duotone" /> };
+
 const adminTools: DrawerLink[] = [
   { label: "Add Artist", to: "/add", icon: <UserPlus size={20} /> },
   // Hidden while the Bluesky post sync is off (webservice commit 7284679)
@@ -76,6 +79,13 @@ const Header = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === 'admin';
+  // Verification is set by an admin in the database after login, so ask the
+  // API instead of trusting the user stored at login time.
+  const { data: artistAccess } = useQuery(GET_MY_ARTIST_ACCESS, {
+    skip: !isLoggedIn,
+    fetchPolicy: 'cache-and-network',
+  });
+  const isVerifiedArtist = !!(artistAccess?.me?.isVerifiedArtist && artistAccess.me.artistId);
 
   const theme = useTheme();
   const isBelowLarge = useMediaQuery(theme.breakpoints.down("md"));
@@ -275,6 +285,7 @@ const Header = () => {
             </>
           )}
           <List sx={{ p: 1 }} subheader={<Box sx={headerStyles.drawerSubheader}>Account Tools</Box>}>
+            {isLoggedIn && isVerifiedArtist && renderDrawerLink(artistDashboardLink)}
             {accountTools.map(renderDrawerLink)}
             {isLoggedIn && isAdmin && adminTools.map(renderDrawerLink)}
             <Divider sx={headerStyles.drawerDividerSpaced} />

@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { ARTIST_DASHBOARD_FIELDS } from "./queries";
 
 export const USER_LOGIN = gql`
     mutation login($email:String!, $password:String!){
@@ -544,6 +545,14 @@ export const DELETE_SIGNING_REPORT = gql`
         deleteSigningReport(id: $id) {
             success
             message
+        }
+    }
+`;
+
+export const UPDATE_ARTIST_PROFILE = gql`
+    mutation updateArtistProfile($artistId: ID!, $input: ArtistProfileInput!) {
+        updateArtistProfile(artistId: $artistId, input: $input) {
+            ${ARTIST_DASHBOARD_FIELDS}
         }
     }
 `;

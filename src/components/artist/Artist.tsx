@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import axios from "axios";
-import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CURRENT_USER, GET_USER_CARD_COLLECTION } from "../graphql/queries";
+import { GET_ARTIST_BY_NAME, GET_SIGNINGEVENTS, GET_ARTISTS_BY_EVENT_IDS, GET_CURRENT_USER, GET_MY_ARTIST_ACCESS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
 import { FOLLOW_ARTIST, UNFOLLOW_ARTIST, UPDATE_EMAIL_PREFERENCES, LOG_LINK_CLICK } from "../graphql/mutations";
 import {
   Box,
@@ -11,7 +11,7 @@ import {
 import { ArtistPageSkeleton } from "../shared/Skeletons";
 import { MEDIA_BASE_URL } from "../../config/media";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { Question, BellRinging, PencilSimple, GlobeSimple, FacebookLogo, InstagramLogo, TwitterLogo, PatreonLogo, YoutubeLogo } from "@phosphor-icons/react";
+import { Question, BellRinging, PencilSimple, SealCheck, GlobeSimple, FacebookLogo, InstagramLogo, TwitterLogo, PatreonLogo, YoutubeLogo } from "@phosphor-icons/react";
 import { FaArtstation } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
@@ -164,6 +164,9 @@ const Artist = () => {
   const { data: eventsData } = useQuery(GET_SIGNINGEVENTS);
 
   const { data: userData } = useQuery(GET_CURRENT_USER, {
+    skip: !isLoggedIn,
+  });
+  const { data: artistAccess } = useQuery(GET_MY_ARTIST_ACCESS, {
     skip: !isLoggedIn,
   });
 
@@ -443,6 +446,8 @@ const Artist = () => {
       ].filter(Boolean).join(', ')
     : null;
 
+  const isOwnPage = !!artistAccess?.me?.isVerifiedArtist && artistAccess.me.artistId === artistByName.id;
+
   const followLabel = !isLoggedIn ? 'Sign in to follow' : isFollowing ? 'Following' : '+ Follow';
 
   return (
@@ -487,6 +492,14 @@ const Artist = () => {
               Also credited as {artistByName.alternate_names}
             </Box>
           )}
+          {artistByName.isVerified && (
+            <Tooltip title="This artist manages their own page" arrow placement="right">
+              <Box component="span" sx={artistStyles.verifiedBadge} tabIndex={0}>
+                <SealCheck size={14} weight="fill" aria-hidden />
+                Verified artist
+              </Box>
+            </Tooltip>
+          )}
         </Box>
       </Box>
 
@@ -500,6 +513,16 @@ const Artist = () => {
             <Box component="span" sx={artistStyles.signingPillLabel}>{signingPillLabel}</Box>
             {' '}<span aria-hidden>→</span>
           </GlowPill>
+        )}
+
+        {isOwnPage && userData?.me?.role !== 'admin' && (
+          <Button
+            startIcon={<PencilSimple size={16} />}
+            onClick={() => navigate('/artist-dashboard')}
+            sx={[artistStyles.railButton, artistStyles.ownerEditButton]}
+          >
+            Edit your page
+          </Button>
         )}
 
         {userData?.me?.role === 'admin' && (
@@ -584,6 +607,20 @@ const Artist = () => {
 
       <Box sx={artistStyles.columns}>
         <Box sx={artistStyles.mainColumn}>
+          {artistByName.artistNote && (
+            <Box component="section" aria-labelledby="artist-note-label" sx={artistStyles.artistNote}>
+              <Box sx={[artistStyles.sectionHead, { mb: 0 }]}>
+                <MonoLabel component="h2" id="artist-note-label" tone="accent">From the artist</MonoLabel>
+                {artistByName.artistNoteUpdatedAt && (
+                  <Box component="span" sx={artistStyles.artistNoteMeta}>
+                    Updated {new Date(artistByName.artistNoteUpdatedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </Box>
+                )}
+              </Box>
+              <Box component="p" sx={artistStyles.artistNoteText}>{artistByName.artistNote}</Box>
+            </Box>
+          )}
+
           <Box component="section" aria-labelledby="artist-info-label">
             <Box sx={artistStyles.sectionHead}>
               <MonoLabel component="h2" id="artist-info-label">Artist info</MonoLabel>

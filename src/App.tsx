@@ -38,6 +38,8 @@ const YourCards = lazy(() => import(/* webpackChunkName: "your-cards" */ "./comp
 const SigningTracker = lazy(() => import(/* webpackChunkName: "signing-tracker" */ "./components/signingtracker/SigningTracker"));
 const ArtistSheet = lazy(() => import(/* webpackChunkName: "artist-sheet" */ "./components/artistsheet/ArtistSheet"));
 const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ "./components/dashboard/Dashboard"));
+// Open to any signed-in user; the API only returns data to the verified artist or an admin
+const ArtistDashboard = lazy(() => import(/* webpackChunkName: "artist-dashboard" */ "./components/artistdashboard/ArtistDashboard"));
 
 // Admin-only — routes absent for non-admin sessions so chunks are never fetched
 const AddArtist = lazy(() => import(/* webpackChunkName: "admin-add-artist" */ "./components/blogs/AddArtist"));
@@ -129,6 +131,8 @@ function App() {
                   <Route path="/following" element={<Following />} />
                   <Route path="/signingtracker" element={<SigningTracker />} />
                   <Route path="/artistsheet" element={<ArtistSheet />} />
+                  <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+                  <Route path="/artist-dashboard/:artistId" element={<ArtistDashboard />} />
                   {isAdmin && <>
                     <Route path="/add" element={<AddArtist />} />
                     <Route path="/editartist/:artistId" element={<EditArtist />} />
