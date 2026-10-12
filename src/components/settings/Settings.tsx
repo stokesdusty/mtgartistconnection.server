@@ -16,6 +16,7 @@ import { GET_CURRENT_USER } from "../graphql/queries";
 import { settingsStyles as styles } from "../../styles/settings-styles";
 import MonoLabel from "../shared/MonoLabel";
 import { SettingsSkeleton } from "../shared/Skeletons";
+import MySigningReports from "./MySigningReports";
 
 const PREFERENCE_LABELS = {
   siteUpdates: "Receive site update emails",
@@ -214,6 +215,8 @@ const Settings = () => {
               Save Preferences
             </Button>
           </Box>
+
+          <MySigningReports />
 
           {/* ── Password ────────────────────────────────────────────────── */}
           <Box component="section" aria-labelledby="settings-password" sx={styles.panel}>

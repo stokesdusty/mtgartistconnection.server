@@ -275,6 +275,10 @@ export default function AnalyticsDashboard() {
         variables: { range: rangeVar, groupBy: 'platform' },
         skip: !isAdmin,
     });
+    const { data: placementData } = useQuery(GET_CLICK_STATS, {
+        variables: { range: rangeVar, groupBy: 'placement' },
+        skip: !isAdmin,
+    });
     const { data: artistData } = useQuery(GET_TOP_ARTISTS_BY_CLICKS, {
         variables: { range: rangeVar, limit: 10 },
         skip: !isAdmin,
@@ -300,6 +304,7 @@ export default function AnalyticsDashboard() {
 
     const vendorStats: ClickStat[]         = vendorData?.clickStats ?? [];
     const platformStats: ClickStat[]       = platformData?.clickStats ?? [];
+    const placementStats: ClickStat[]      = placementData?.clickStats ?? [];
     const topArtists: TopArtist[]          = artistData?.topArtistsByClicks ?? [];
     const timeseries: TimeseriesPoint[]    = timeseriesData?.clickTimeseries ?? [];
     const topPages: ClickStat[]            = topPagesData?.topPagesByViews ?? [];
@@ -360,6 +365,8 @@ export default function AnalyticsDashboard() {
                         <BarList title="Price clicks by vendor" stats={vendorStats} />
                         <BarList title="Outbound by platform"   stats={platformStats} />
                     </Box>
+
+                    <BarList title="Price clicks by placement · vendor" stats={placementStats} />
 
                     <Panel title="Top artists by clicks">
                         {topArtists.length === 0 ? (

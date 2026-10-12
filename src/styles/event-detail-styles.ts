@@ -226,4 +226,96 @@ export const eventDetailStyles: Record<string, SystemStyleObject<Theme>> = {
     fontSize: 14,
     color: vault.muted,
   },
+
+  // ─── Bring cards to get signed ─────────────────────────────────────────────
+  shopIntro: {
+    margin: '0 0 20px',
+    maxWidth: 640,
+    fontSize: 14,
+    lineHeight: 1.5,
+    color: vault.muted,
+  },
+  shopChips: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    marginBottom: '24px',
+  },
+  // Searchable artist picker for shows with many artists.
+  shopPicker: {
+    width: 340,
+    maxWidth: '100%',
+    marginBottom: '24px',
+    '& .MuiOutlinedInput-root': {
+      minHeight: 44,
+      borderRadius: '9px',
+      backgroundColor: vault.bg,
+      color: vault.fg,
+      fontSize: 14,
+      '& fieldset': { borderColor: vault.lineStrong },
+      '&:hover fieldset': { borderColor: vault.faint },
+      '&.Mui-focused fieldset': { borderColor: vault.accent, borderWidth: 1 },
+    },
+    '& .MuiInputLabel-root': { color: vault.muted, fontSize: 14 },
+    '& .MuiInputLabel-root.Mui-focused': { color: vault.accentText },
+    '& .MuiSvgIcon-root': { color: vault.faint },
+    [vaultMedia.mobile]: { width: '100%' },
+  },
+  shopGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: '20px',
+    [vaultMedia.tablet]: { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' },
+    [narrow]: { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' },
+  },
+  shopCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    minWidth: 0,
+  },
+  shopCardName: {
+    margin: 0,
+    fontSize: 14,
+    fontWeight: 600,
+    lineHeight: 1.3,
+    color: vault.fg,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  shopFooter: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px 24px',
+    marginTop: '24px',
+  },
+  shopFooterLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    paddingBottom: '2px',
+    fontSize: 14,
+    color: vault.muted,
+    textDecoration: 'none',
+    borderBottom: `1px solid ${vault.lineStrong}`,
+    transition: `color ${vaultEffects.transition}, border-color ${vaultEffects.transition}`,
+    '&:hover': { color: vault.fg, borderColor: vault.fg },
+    ...focusRing,
+  },
+  shopDisclosure: {
+    marginTop: '16px',
+    fontSize: 12,
+    color: vault.faint,
+  },
+};
+
+// Dropdown list for the artist picker (rendered in a portal, so styled separately).
+export const shopPickerPaper: SystemStyleObject<Theme> = {
+  mt: '6px',
+  bgcolor: vault.surface,
+  color: vault.fg,
+  border: `1px solid ${vault.line}`,
+  borderRadius: vaultRadii.card,
+  boxShadow: `0 20px 60px ${vault.shadow}`,
 };

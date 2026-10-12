@@ -6,7 +6,7 @@ import { useQuery } from "@apollo/client";
 import { ArrowLeft, ArrowUpRight, CaretDown, Calendar, DownloadSimple } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
 import { daysUntil, eventStatusLabel, formatDateRangeWithYear } from "../../utils/eventDates";
 import { eventDetailStyles as styles } from "../../styles/event-detail-styles";
@@ -14,6 +14,8 @@ import MonoLabel from "../shared/MonoLabel";
 import Slab from "../shared/Slab";
 import { SkeletonBar } from "../shared/Skeletons";
 import { LiveDot } from "../shared/GlowPill";
+import EventShopSection from "./EventShopSection";
+import SegmentedControl from "../shared/SegmentedControl";
 
 const backLink = (
   <Box sx={styles.backRow}>
@@ -24,9 +26,25 @@ const backLink = (
   </Box>
 );
 
+type EventTab = 'artists' | 'cards';
+
 const EventDetail = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const [calendarMenuAnchor, setCalendarMenuAnchor] = useState<null | HTMLElement>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  // "?tab=cards" opens the shopping tab directly, so it can be linked to.
+  const tab: EventTab = searchParams.get('tab') === 'cards' ? 'cards' : 'artists';
+  // The shop fetches from Scryfall, so it only mounts once opened; it then stays
+  // mounted (hidden) so switching tabs keeps the chosen artist and loaded cards.
+  const [shopOpened, setShopOpened] = useState(tab === 'cards');
+
+  const handleTabChange = (next: EventTab) => {
+    if (next === 'cards') setShopOpened(true);
+    const params = new URLSearchParams(searchParams);
+    if (next === 'cards') params.set('tab', 'cards');
+    else params.delete('tab');
+    setSearchParams(params, { replace: true });
+  };
 
   const { data: eventsData, error: eventError, loading: eventLoading } = useQuery(GET_SIGNINGEVENTS);
 
@@ -147,6 +165,8 @@ const EventDetail = () => {
   const status = eventStatusLabel(event.startDate, event.endDate);
   const isPast = daysUntil(event.endDate) < 0;
   const confirmedCount = artistData?.mapArtistToEventByEventId?.length;
+  // Shopping only makes sense before the event, once we know who's coming.
+  const showShop = !isPast && artistsWithImages.length > 0;
 
   return (
     <Box sx={styles.page}>
@@ -232,53 +252,74 @@ const EventDetail = () => {
         </MenuItem>
       </Menu>
 
-      <Box component="section" aria-labelledby="artists-attending" sx={styles.artistsSection}>
+      <Box sx={styles.artistsSection}>
         <Box sx={styles.sectionHeader}>
-          <Box component="h2" id="artists-attending" sx={styles.sectionTitle}>Artists attending</Box>
-          {artistsWithImages.length > 1 && (
+          {showShop ? (
+            <SegmentedControl
+              options={[
+                { value: 'artists', label: `Artists · ${artistsWithImages.length}` },
+                { value: 'cards', label: 'Bring cards to sign', shortLabel: 'Cards to sign' },
+              ]}
+              value={tab}
+              onChange={handleTabChange}
+              aria-label="Event sections"
+            />
+          ) : (
+            <Box component="h2" id="artists-attending" sx={styles.sectionTitle}>Artists attending</Box>
+          )}
+          {artistsWithImages.length > 1 && (!showShop || tab === 'artists') && (
             <MonoLabel size={11} tracking="tight" sx={styles.sortHint}>A–Z</MonoLabel>
           )}
         </Box>
 
-        {artistLoading && artistsWithImages.length === 0 ? (
-          <Box sx={styles.grid} aria-busy="true">
-            {Array.from({ length: 4 }, (_, i) => (
-              <Slab key={i} aspectRatio="5 / 6" mobileAspectRatio="4 / 5" />
-            ))}
-          </Box>
-        ) : artistError ? (
-          <Box component="p" sx={styles.errorMessage}>Error loading artists</Box>
-        ) : (
-          <Box sx={styles.grid}>
-            {artistsWithImages.length > 0 ? (
-              artistsWithImages.map((artist: { name: string; filename: string | null }) => (
-                <Box
-                  key={artist.name}
-                  component={RouterLink}
-                  to={`/allcards/${encodeURIComponent(artist.name)}`}
-                  sx={styles.artistLink}
-                >
-                  <Slab
-                    src={artist.filename ? `${MEDIA_BASE_URL}/grid/${artist.filename}.jpg` : undefined}
-                    alt={artist.name}
-                    aspectRatio="5 / 6"
-                    mobileAspectRatio="4 / 5"
-                    title={artist.name}
-                    interactive
-                    imgProps={{
-                      srcSet: `${MEDIA_BASE_URL}/grid/${artist.filename}.jpg 300w`,
-                      sizes: '(max-width: 720px) calc(50vw - 24px), (max-width: 1100px) calc(33vw - 40px), calc(25vw - 40px)',
-                      width: 300,
-                      height: 300,
-                    }}
-                  />
+        <Box component="section" aria-label="Artists attending" hidden={showShop && tab !== 'artists'}>
+
+          {artistLoading && artistsWithImages.length === 0 ? (
+            <Box sx={styles.grid} aria-busy="true">
+              {Array.from({ length: 4 }, (_, i) => (
+                <Slab key={i} aspectRatio="5 / 6" mobileAspectRatio="4 / 5" />
+              ))}
+            </Box>
+          ) : artistError ? (
+            <Box component="p" sx={styles.errorMessage}>Error loading artists</Box>
+          ) : (
+            <Box sx={styles.grid}>
+              {artistsWithImages.length > 0 ? (
+                artistsWithImages.map((artist: { name: string; filename: string | null }) => (
+                  <Box
+                    key={artist.name}
+                    component={RouterLink}
+                    to={`/allcards/${encodeURIComponent(artist.name)}`}
+                    sx={styles.artistLink}
+                  >
+                    <Slab
+                      src={artist.filename ? `${MEDIA_BASE_URL}/grid/${artist.filename}.jpg` : undefined}
+                      alt={artist.name}
+                      aspectRatio="5 / 6"
+                      mobileAspectRatio="4 / 5"
+                      title={artist.name}
+                      interactive
+                      imgProps={{
+                        srcSet: `${MEDIA_BASE_URL}/grid/${artist.filename}.jpg 300w`,
+                        sizes: '(max-width: 720px) calc(50vw - 24px), (max-width: 1100px) calc(33vw - 40px), calc(25vw - 40px)',
+                        width: 300,
+                        height: 300,
+                      }}
+                    />
+                  </Box>
+                ))
+              ) : (
+                <Box component="p" sx={styles.emptyMessage}>
+                  No artists confirmed yet
                 </Box>
-              ))
-            ) : (
-              <Box component="p" sx={styles.emptyMessage}>
-                No artists confirmed yet
-              </Box>
-            )}
+              )}
+            </Box>
+          )}
+        </Box>
+
+        {showShop && (shopOpened || tab === 'cards') && (
+          <Box hidden={tab !== 'cards'}>
+            <EventShopSection artists={artistsWithImages.map((a: { name: string }) => a.name)} />
           </Box>
         )}
       </Box>

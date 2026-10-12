@@ -10,6 +10,7 @@ import { usePageTitle } from "../../hooks/usePageTitle";
 import { yourCardsStyles as styles } from "../../styles/your-cards-styles";
 import MonoLabel from "../shared/MonoLabel";
 import { YourCardsSkeleton } from "../shared/Skeletons";
+import WishlistShop from "./WishlistShop";
 
 interface CollectionItem {
   id: string;
@@ -91,6 +92,7 @@ const YourCards = () => {
   const totalProofs = artists.reduce((sum, a) => sum + a.proofs, 0);
   const totalSigned = artists.reduce((sum, a) => sum + a.signed, 0);
   const totalWishlist = artists.reduce((sum, a) => sum + a.wishlist, 0);
+  const wishlistItems = items.filter((item) => item.wishlistSigned);
 
   return (
     <Box sx={styles.page}>
@@ -154,6 +156,8 @@ const YourCards = () => {
                 </Box>
               ))}
             </Box>
+
+            {wishlistItems.length > 0 && <WishlistShop items={wishlistItems} />}
           </>
         )}
       </Box>

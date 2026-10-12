@@ -27,7 +27,7 @@ import {
 import { AllCardsGridSkeleton } from "../shared/Skeletons";
 import { ArrowLeft, ArrowRight, ArrowUp, ArrowsClockwise, ArrowsDownUp, CaretDown, Check, DeviceMobileCamera, DeviceMobileSpeaker, PenNib, Sparkle, Heart } from "@phosphor-icons/react";
 import { GET_ARTIST_BY_NAME, GET_CARD_PRICES, GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS, GET_USER_CARD_COLLECTION } from "../graphql/queries";
-import { TOGGLE_CARD_COLLECTION_FIELD, LOG_PRICE_CLICK } from "../graphql/mutations";
+import { TOGGLE_CARD_COLLECTION_FIELD } from "../graphql/mutations";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { allCardsStyles, CARD_COL_MIN_WIDTH, CARD_METRICS, RAIL_HEIGHT } from "../../styles/all-cards-styles";
 import artistCardOverrides from "../../data/artist-card-overrides.json";
@@ -39,6 +39,9 @@ import Slab from "../shared/Slab";
 import GlowPill from "../shared/GlowPill";
 import MonoLabel from "../shared/MonoLabel";
 import FilterChip from "../shared/FilterChip";
+import PriceChip, { formatCents } from "../shared/PriceChip";
+import { usePriceClickLogger } from "../../hooks/usePriceClickLogger";
+import { cardKingdomUrl, manapoolUrl, PricePlatform, tcgplayerProductUrl } from "../../utils/affiliateLinks";
 
 interface Card {
   related_uris: any;
@@ -193,35 +196,6 @@ function getCardLayout(columnWidth: number, isMobile: boolean, isTouch: boolean)
   };
 }
 
-interface PriceChipProps {
-  label: string;
-  value: string;
-  href: string;
-  title: string;
-  layout: CardLayout;
-  onClick: () => void;
-}
-
-const PriceChip = ({ label, value, href, title, layout, onClick }: PriceChipProps) => (
-  <Box
-    component="a"
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    title={title}
-    aria-label={`${title}: ${value}`}
-    onClick={onClick}
-    sx={[
-      allCardsStyles.priceChip,
-      layout.pricesStacked && allCardsStyles.priceChipStacked,
-      { height: layout.priceHeight },
-    ]}
-  >
-    <span className="price-label">{label}</span>
-    <span className="price-value">{value}</span>
-  </Box>
-);
-
 // ─── CardItem ────────────────────────────────────────────────────────────────
 // Defined outside AllCards so React.memo works correctly and getCardPrice/
 // getCardKingdomPrice lookups don't cause unnecessary re-renders of the whole list.
@@ -234,88 +208,48 @@ interface CardItemProps {
   isLoggedIn: boolean;
   layout: CardLayout;
   onToggle: (card: Card, field: string) => void;
-  onPriceClick: (platform: string, cardName: string, cardSet: string) => void;
+  onPriceClick: (platform: PricePlatform, cardName: string, cardSet: string) => void;
 }
 
 const CardItem = memo(({ card, price, ckPrice, collectionItem, isLoggedIn, layout, onToggle, onPriceClick }: CardItemProps) => {
   const [showBack, setShowBack] = useState(false);
   const { m } = layout;
 
-  const formatPrice = (cents: number | null): string => {
-    if (cents === null || cents === undefined) return '-';
-    return `$${(cents / 100).toFixed(2)}`;
-  };
-
-  const cardSlug = card.name
-    ? card.name
-        .toLowerCase()
-        .replace(/[^a-z0-9']+/g, '-')
-        .replace(/^-+|-+$/g, '')
-    : '';
-
+  const chipProps = { stacked: layout.pricesStacked, height: layout.priceHeight };
+  const cardName = card.name || '';
+  const cardSet = card.set || '';
   const manapoolPrice = price?.price_cents_nm || price?.price_cents_lp_plus || price?.price_cents;
 
-  const priceDisplay = cardSlug && (
+  const priceDisplay = cardName && card.set && card.collector_number && (
     <PriceChip
+      {...chipProps}
       label="MP"
-      value={manapoolPrice ? formatPrice(manapoolPrice) : '-'}
+      value={manapoolPrice ? formatCents(manapoolPrice) : '-'}
       title="Buy on Manapool"
-      layout={layout}
-      href={`https://manapool.com/card/${card.set}/${card.collector_number}/${cardSlug}?ref=mtgartistconnection`}
-      onClick={() => {
-        if ((window as any).gtag) {
-          (window as any).gtag("event", "manapool_price_click", {
-            event_category: "affiliate_links",
-            event_label: card.name,
-            card_set: card.set,
-          });
-        }
-        onPriceClick('manapool', card.name || '', card.set || '');
-      }}
+      href={manapoolUrl(card.set, card.collector_number, cardName, 'allcards')}
+      onClick={() => onPriceClick('manapool', cardName, cardSet)}
     />
   );
 
   const tcgplayerDisplay = card.tcgplayer_id && card.prices?.usd && (
     <PriceChip
+      {...chipProps}
       label="TCG"
       value={`$${card.prices.usd}`}
       title="Buy on TCGplayer"
-      layout={layout}
-      href={`https://partner.tcgplayer.com/JkbQGE?u=https://www.tcgplayer.com/product/${card.tcgplayer_id}`}
-      onClick={() => {
-        if ((window as any).gtag) {
-          (window as any).gtag("event", "tcgplayer_price_click", {
-            event_category: "affiliate_links",
-            event_label: card.name,
-            card_set: card.set,
-          });
-        }
-        onPriceClick('tcgplayer', card.name || '', card.set || '');
-      }}
+      href={tcgplayerProductUrl(card.tcgplayer_id, 'allcards')}
+      onClick={() => onPriceClick('tcgplayer', cardName, cardSet)}
     />
   );
 
-  const ckUrl = ckPrice?.url
-    ? `${ckPrice.url}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`
-    : `https://www.cardkingdom.com/mtg/${card.name?.toLowerCase().replace(/\s+/g, '-')}?partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection`;
-
   const cardKingdomDisplay = ckPrice && (
     <PriceChip
+      {...chipProps}
       label="CK"
-      value={formatPrice(ckPrice.price)}
+      value={formatCents(ckPrice.price)}
       title="Buy on Card Kingdom"
-      layout={layout}
-      href={ckUrl}
-      onClick={() => {
-        if ((window as any).gtag) {
-          (window as any).gtag("event", "cardkingdom_price_click", {
-            event_category: "affiliate_links",
-            event_label: card.name,
-            card_set: card.set,
-          });
-        }
-        onPriceClick('cardkingdom', card.name || '', card.set || '');
-      }}
+      href={cardKingdomUrl(ckPrice.url, cardName, 'allcards')}
+      onClick={() => onPriceClick('cardkingdom', cardName, cardSet)}
     />
   );
 
@@ -442,7 +376,7 @@ interface VirtualRowData {
   cardCollection: Map<string, CollectionItem>;
   isLoggedIn: boolean;
   onToggle: (card: Card, field: string) => void;
-  onPriceClick: (platform: string, cardName: string, cardSet: string) => void;
+  onPriceClick: (platform: PricePlatform, cardName: string, cardSet: string) => void;
 }
 
 const VirtualRow = memo(({ index, style, data }: ListChildComponentProps<VirtualRowData>) => {
@@ -475,7 +409,6 @@ const AllCards = () => {
   const { name: artist } = useParams<{ name?: string }>();
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-  const userRole = useSelector((state: RootState) => state.auth.user?.role);
   const [hideReprints, setHideReprints] = useState<boolean>(() => {
     try { return localStorage.getItem('mtgac-hide-reprints') === 'true'; }
     catch { return false; }
@@ -617,12 +550,11 @@ const AllCards = () => {
     },
   });
 
-  const [logPriceClick] = useMutation(LOG_PRICE_CLICK);
+  const logPriceClick = usePriceClickLogger('allcards');
 
-  const handlePriceClick = useCallback((platform: string, cardName: string, cardSet: string) => {
-    if (userRole === 'admin') return;
-    logPriceClick({ variables: { artistName: artist || '', platform, cardName, cardSet } });
-  }, [userRole, artist, logPriceClick]);
+  const handlePriceClick = useCallback((platform: PricePlatform, cardName: string, cardSet: string) => {
+    logPriceClick(platform, { artistName: artist || '', cardName, cardSet });
+  }, [artist, logPriceClick]);
 
   useEffect(() => {
     if (!artist) {

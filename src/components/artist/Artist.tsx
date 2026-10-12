@@ -27,6 +27,8 @@ import Slab from "../shared/Slab";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ExternalLinkCard from './ExternalLinkCard';
+import SigningReports from './SigningReports';
+import { ebaySearchUrl } from "../../utils/affiliateLinks";
 
 interface ArtistSocialLink {
   label: string;
@@ -168,7 +170,8 @@ const Artist = () => {
   const [followArtist] = useMutation(FOLLOW_ARTIST);
   const [unfollowArtist] = useMutation(UNFOLLOW_ARTIST);
   const [updateEmailPreferences] = useMutation(UPDATE_EMAIL_PREFERENCES);
-  const [logLinkClick] = useMutation(LOG_LINK_CLICK);
+  // Click logging is best-effort; a failed log must never surface as an error.
+  const [logLinkClick] = useMutation(LOG_LINK_CLICK, { onError: () => {} });
 
   const trackClick = (linkType: string) => {
     if (userData?.me?.role === 'admin') return;
@@ -303,6 +306,15 @@ const Artist = () => {
     );
   }, [attendingEventIds, pastEvents]);
 
+  // Past events the artist attended, newest first, for linking a signing report to an event.
+  const reportableEvents = useMemo(() => {
+    return pastEvents
+      .filter((e: any) => attendingEventIds.has(e.id))
+      .sort((a: any, b: any) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+      .slice(0, 15)
+      .map((e: any) => ({ id: e.id, name: e.name, startDate: e.startDate }));
+  }, [attendingEventIds, pastEvents]);
+
   const nextSigningEvent = useMemo(() => {
     if (artistEvents.length === 0) return null;
     const today = new Date();
@@ -412,7 +424,7 @@ const Artist = () => {
     }
   };
 
-  const ebayHref = `https://www.ebay.com/sch/i.html?_nkw=${artistByName.name.split(" ").join("+")}+signed+cards+mtg&_sacat=0&_from=R40&_trksid=p2334524.m570.l1313&_odkw=${artistByName.name.split(" ").join("+")}+signed+cards&_osacat=0&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339140903&customid=&toolid=10001&mkevt=1&utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=ebay_artist_search`;
+  const ebayHref = ebaySearchUrl(`${artistByName.name} signed cards mtg`, 'artist_page');
 
   const signingPillLabel = daysUntilEvent === 0
     ? `Signing at ${nextSigningEvent?.name} — today!`
@@ -690,6 +702,8 @@ const Artist = () => {
               )}
             </Box>
           </Box>
+
+          <SigningReports artistName={artistByName.name} events={reportableEvents} />
 
           <EventsSection artistEvents={artistEvents} lastEvent={lastEventAttended} />
         </Box>

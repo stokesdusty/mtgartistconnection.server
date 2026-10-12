@@ -65,7 +65,7 @@ const Footer = () => {
 
       <Box sx={footerStyles.disclosureRow}>
         <Box component="p" sx={footerStyles.disclosure}>
-          MTG Artist Connection is a participant in affiliate programs with eBay, Original Magic Art, and Manapool.
+          MTG Artist Connection is a participant in affiliate programs with eBay, Original Magic Art, Manapool, Card Kingdom, and TCGplayer.
           When you purchase through these links, you support this site at no additional cost to you.
         </Box>
         <Link

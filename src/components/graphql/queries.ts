@@ -146,6 +146,18 @@ export const GET_CARDKINGDOM_PRICES_BY_SCRYFALL_IDS = gql`
     }
 `;
 
+// TCGplayer's naming for products (by TCGplayer product ID), for Mass Entry lines.
+export const GET_TCGPLAYER_PRODUCTS = gql`
+    query tcgplayerProducts($ids: [Int!]!) {
+        tcgplayerProducts(ids: $ids) {
+            productId
+            name
+            setCode
+            number
+        }
+    }
+`;
+
 export const GET_CURRENT_USER = gql`
     query {
         me {
@@ -392,6 +404,65 @@ export const GET_TOP_PAGES_BY_VIEWS = gql`
         topPagesByViews(range: $range, limit: $limit) {
             key
             count
+        }
+    }
+`;
+
+const SIGNING_REPORT_FIELDS = `
+    id
+    artistName
+    signedOn
+    method
+    pricePerSig
+    freeCount
+    perPersonLimit
+    extras { kind price }
+    turnaroundWeeks
+    eventId
+    serviceName
+    note
+`;
+
+export const GET_SIGNING_REPORT_SUMMARY = gql`
+    query signingReportSummary($artistName: String!) {
+        signingReportSummary(artistName: $artistName) {
+            count
+            medianPrice
+            minPrice
+            maxPrice
+            latestSignedOn
+            byMethod { method count medianPrice }
+        }
+    }
+`;
+
+export const GET_RECENT_SIGNING_REPORTS = gql`
+    query recentSigningReports($artistName: String!, $limit: Int) {
+        recentSigningReports(artistName: $artistName, limit: $limit) {
+            ${SIGNING_REPORT_FIELDS}
+        }
+    }
+`;
+
+export const GET_PENDING_SIGNING_REPORTS = gql`
+    query pendingSigningReports($limit: Int) {
+        pendingSigningReports(limit: $limit) {
+            ${SIGNING_REPORT_FIELDS}
+            createdAt
+            submitterName
+            submitterApprovedCount
+            artistMedianPrice
+        }
+    }
+`;
+
+export const GET_MY_SIGNING_REPORTS = gql`
+    query mySigningReports {
+        mySigningReports {
+            ${SIGNING_REPORT_FIELDS}
+            status
+            rejectionReason
+            createdAt
         }
     }
 `;

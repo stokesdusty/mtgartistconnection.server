@@ -50,7 +50,7 @@ const TermsOfService = () => {
             marginBottom: spacing.xxl,
             textAlign: 'center'
           }}>
-            Last Updated: May 24, 2026
+            Last Updated: October 11, 2026
           </Typography>
 
           <Typography sx={contentPageStyles.paragraph}>
@@ -106,6 +106,9 @@ const TermsOfService = () => {
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             Artists may submit profiles, images, contact information, and other materials to be listed on our website. Any content you submit will be considered non-confidential and non-proprietary. By submitting content, you grant MtG Artist Connection a non-exclusive, royalty-free, perpetual right to display and distribute such content on the website. You represent that you own or have the necessary rights to all content you submit.
+          </Typography>
+          <Typography sx={contentPageStyles.paragraph}>
+            Registered users may submit signing reports describing what an artist charged for signatures and related services. You agree that your reports reflect your own first-hand experience and are accurate to the best of your knowledge, and that they will not include personal contact details, private information about any person, or statements you know to be false. Signing reports are shown publicly without your name. We may review, edit, decline to publish, or remove any report at our discretion, including at the request of the artist it describes. Reported prices are provided for general information only and are not confirmed by the artists or by MtG Artist Connection.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>

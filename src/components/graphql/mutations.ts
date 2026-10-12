@@ -122,6 +122,20 @@ export const ADD_ARTISTTOEVENT = gql`
     }
 `;
 
+export const REMOVE_ARTISTFROMEVENT = gql`
+    mutation removeArtistFromEvent(
+        $artistName:String!,
+        $eventId:String!,
+        ){
+            removeArtistFromEvent(
+                artistName: $artistName,
+                eventId: $eventId,
+            ){
+                artistName
+        }
+    }
+`;
+
 export const UPDATE_PASSWORD = gql`
     mutation updatePassword($currentPassword:String!, $newPassword:String!){
         updatePassword(currentPassword: $currentPassword, newPassword: $newPassword){
@@ -457,7 +471,17 @@ export const REORDER_SIGNING_BATCHES = gql`
 `;
 
 export const LOG_PRICE_CLICK = gql`
-    mutation logPriceClick($artistName: String!, $platform: String!, $cardName: String, $cardSet: String) {
+    mutation logPriceClick($artistName: String!, $platform: String!, $cardName: String, $cardSet: String, $placement: String) {
+        logPriceClick(artistName: $artistName, platform: $platform, cardName: $cardName, cardSet: $cardSet, placement: $placement) {
+            success
+        }
+    }
+`;
+
+// Pre-`placement` signature, used only when the API hasn't been deployed with
+// `placement` yet. Delete once the webservice is live everywhere.
+export const LOG_PRICE_CLICK_LEGACY = gql`
+    mutation logPriceClickLegacy($artistName: String!, $platform: String!, $cardName: String, $cardSet: String) {
         logPriceClick(artistName: $artistName, platform: $platform, cardName: $cardName, cardSet: $cardSet) {
             success
         }
@@ -485,6 +509,41 @@ export const UPLOAD_NEWS_IMAGE = gql`
         uploadNewsImage(base64Data: $base64Data, filename: $filename, contentType: $contentType) {
             imageUrl
             key
+        }
+    }
+`;
+export const SUBMIT_SIGNING_REPORT = gql`
+    mutation submitSigningReport($artistName: String!, $input: SigningReportInput!) {
+        submitSigningReport(artistName: $artistName, input: $input) {
+            id
+            status
+        }
+    }
+`;
+
+export const REVIEW_SIGNING_REPORT = gql`
+    mutation reviewSigningReport($id: ID!, $status: String!, $rejectionReason: String) {
+        reviewSigningReport(id: $id, status: $status, rejectionReason: $rejectionReason) {
+            success
+            message
+        }
+    }
+`;
+
+export const DELETE_MY_SIGNING_REPORT = gql`
+    mutation deleteMySigningReport($id: ID!) {
+        deleteMySigningReport(id: $id) {
+            success
+            message
+        }
+    }
+`;
+
+export const DELETE_SIGNING_REPORT = gql`
+    mutation deleteSigningReport($id: ID!) {
+        deleteSigningReport(id: $id) {
+            success
+            message
         }
     }
 `;

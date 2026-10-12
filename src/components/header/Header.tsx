@@ -18,7 +18,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, MagnifyingGlass, ChartBar } from "@phosphor-icons/react";
+import { List as ListIcon, SignOut, GearSix, Heart, Cards, Envelope, Sun, Moon, Shuffle, ClipboardText, UserPlus, MagnifyingGlass, ChartBar, CurrencyDollar } from "@phosphor-icons/react";
 import { headerStyles } from '../../styles/header-styles';
 import { useColorMode } from '../../ColorModeContext';
 import { useSelector, useDispatch } from 'react-redux';
@@ -65,6 +65,7 @@ const adminTools: DrawerLink[] = [
   // { label: "Review Socials", to: "/reviewsocial", icon: <ShareNetwork size={20} /> },
   { label: "Analytics", to: "/analytics", icon: <ChartBar size={20} /> },
   { label: "Scan Event for Artists", to: "/scaneventartists", icon: <MagnifyingGlass size={20} /> },
+  { label: "Review Signing Reports", to: "/reviewsigningreports", icon: <CurrencyDollar size={20} /> },
 ];
 
 const Header = () => {

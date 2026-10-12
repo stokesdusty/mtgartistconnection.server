@@ -50,7 +50,7 @@ const PrivacyPolicy = () => {
             marginBottom: spacing.xxl,
             textAlign: 'center'
           }}>
-            Last Updated: May 24, 2026
+            Last Updated: October 11, 2026
           </Typography>
 
           <Typography sx={contentPageStyles.paragraph}>
@@ -66,6 +66,7 @@ const PrivacyPolicy = () => {
           <Box component="ul" sx={{ paddingLeft: spacing.xxl, marginBottom: spacing.lg, '& li': { marginBottom: spacing.sm, color: colors.text.secondary, lineHeight: 1.6 } }}>
             <li>Personal information such as name and email address when voluntarily provided</li>
             <li>Usage information about your activity on our website</li>
+            <li>Signing reports you choose to submit about artists' prices. These are linked to your account so you can manage them and so we can prevent abuse, but they are shown publicly without your name or any other identifying information</li>
             <li>Device information including your IP address, browser type, and operating system</li>
             <li>Usage data collected via Google Analytics, including pages visited, time on site, and general geographic region — this data is aggregated and not linked to your identity</li>
           </Box>

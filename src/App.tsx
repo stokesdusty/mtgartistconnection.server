@@ -17,6 +17,7 @@ import Artist from "./components/artist/Artist";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import PageViewTracker from "./components/shared/PageViewTracker";
 import CookieConsentBanner from "./components/shared/CookieConsentBanner";
+import SignupPromptModal from "./components/shared/SignupPromptModal";
 
 // ─── Lazy route chunks ───────────────────────────────────────────────────────
 
@@ -45,7 +46,9 @@ const EditArtist = lazy(() => import(/* webpackChunkName: "admin-edit-artist" */
 // const AdminPostReview = lazy(() => import(/* webpackChunkName: "admin-post-review" */ "./components/socialpostreview/AdminPostReview"));
 const AddEvent = lazy(() => import(/* webpackChunkName: "admin-add-event" */ "./components/blogs/AddEvent"));
 const AddArtistToEvent = lazy(() => import(/* webpackChunkName: "admin-add-artist-to-event" */ "./components/blogs/AddArtistToEvent"));
+const RemoveArtistFromEvent = lazy(() => import(/* webpackChunkName: "admin-remove-artist-from-event" */ "./components/blogs/RemoveArtistFromEvent"));
 const AnalyticsDashboard = lazy(() => import(/* webpackChunkName: "admin-analytics" */ "./components/analytics/AnalyticsDashboard"));
+const SigningReportReview = lazy(() => import(/* webpackChunkName: "admin-signing-reports" */ "./components/signingreports/SigningReportReview"));
 const ScanEventArtists = lazy(() => import(/* webpackChunkName: "admin-scan-event-artists" */ "./components/blogs/ScanEventArtists"));
 
 // ─── Suspense fallback ───────────────────────────────────────────────────────
@@ -96,6 +99,7 @@ function App() {
             <ScrollToTop />
             <PageViewTracker />
             <CookieConsentBanner />
+            <SignupPromptModal />
             <header>
               <Header />
             </header>
@@ -131,8 +135,10 @@ function App() {
                     {/* <Route path="/reviewsocial" element={<AdminPostReview />} /> */}
                     <Route path="/addevent" element={<AddEvent />} />
                     <Route path="/addartisttoevent" element={<AddArtistToEvent />} />
+                    <Route path="/removeartistfromevent" element={<RemoveArtistFromEvent />} />
                     <Route path="/analytics" element={<AnalyticsDashboard />} />
                     <Route path="/scaneventartists" element={<ScanEventArtists />} />
+                    <Route path="/reviewsigningreports" element={<SigningReportReview />} />
                   </>}
                 </Routes>
               </Suspense>
