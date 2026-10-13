@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { groupOrderStyles as styles } from "../../styles/group-order-styles";
 import { formatDateRangeWithYear } from "../../utils/eventDates";
-import { cellLabel, formatMoney, GroupOrder, PAYMENT_TIMING_HINTS, PAYMENT_TIMING_LABELS } from "../../utils/groupOrders";
+import { cellLabel, formatMoney, GroupOrder, PAYMENT_TIMING_PARTICIPANT_HINTS, PAYMENT_TIMING_LABELS } from "../../utils/groupOrders";
 import MonoLabel from "../shared/MonoLabel";
 
 const formatCutoff = (iso: string) =>
@@ -22,7 +22,7 @@ const GroupOrderSummary = ({ order }: { order: GroupOrder }) => (
       <Box component="h2" id="order-details" sx={[styles.sectionTitle, { mb: 1 }]}>Details</Box>
       <Box component="dl" sx={styles.summaryList}>
         <SummaryRow label="Organizer">
-          {order.organizerDiscordName ? <>{order.organizerDiscordName} <Box component="span" sx={styles.pill}>Discord (unverified)</Box></> : 'No Discord name given'}
+          {order.organizerDiscordName ? <>{order.organizerDiscordName} <Box component="span" sx={styles.pill}>Discord</Box></> : 'No Discord name given'}
         </SummaryRow>
         {order.event && (
           <SummaryRow label="Event">
@@ -32,7 +32,7 @@ const GroupOrderSummary = ({ order }: { order: GroupOrder }) => (
         )}
         <SummaryRow label="Cutoff">{order.cutoff ? `Join by ${formatCutoff(order.cutoff)}` : 'No cutoff set'}</SummaryRow>
         <SummaryRow label="Payment">
-          {PAYMENT_TIMING_LABELS[order.paymentTiming]}. {PAYMENT_TIMING_HINTS[order.paymentTiming]}
+          {PAYMENT_TIMING_LABELS[order.paymentTiming]}. {PAYMENT_TIMING_PARTICIPANT_HINTS[order.paymentTiming]}
         </SummaryRow>
         {order.participantFee > 0 && <SummaryRow label="Per-person fee">{formatMoney(order.participantFee)}</SummaryRow>}
         {order.maxCardsPerParticipant !== null && <SummaryRow label="Card limit">{order.maxCardsPerParticipant} per person</SummaryRow>}

@@ -152,9 +152,16 @@ export const PAYMENT_TIMING_LABELS: Record<PaymentTiming, string> = {
   'after-signing': 'Pay after signing',
 };
 
-export const PAYMENT_TIMING_HINTS: Record<PaymentTiming, string> = {
+/** For the organizer, in the setup form. */
+export const PAYMENT_TIMING_ORGANIZER_HINTS: Record<PaymentTiming, string> = {
   upfront: 'Participants pay once you approve them.',
   'after-signing': 'Participants pay once the cards are signed, before you ship them back.',
+};
+
+/** For participants and anyone with the invite link. */
+export const PAYMENT_TIMING_PARTICIPANT_HINTS: Record<PaymentTiming, string> = {
+  upfront: 'You pay once the organizer approves you.',
+  'after-signing': 'You pay once your cards are signed, before the organizer ships them back.',
 };
 
 /** The organizer's next step from each status, mirroring the webservice's transitions. */
@@ -207,13 +214,27 @@ export function balanceLabel(balance: Balance): string {
   }
 }
 
-export const inviteUrl = (token: string) => `${window.location.origin}/tracker/join/${token}`;
+const PUBLIC_SITE = 'https://www.mtgartistconnection.com';
 
 /**
- * The link to paste into Discord. It's served by the webservice so Discord can show a preview
- * (order, event, artists, slots), and it forwards people to the invite page.
+ * Where shared links point. Always www on the real site, since the bare domain doesn't open
+ * deep links, even when the page was opened without www. Local testing keeps its own origin.
  */
-export const shareUrl = (token: string) => `${GRAPHQL_URL.replace(/\/graphql\/?$/, '')}/share/group-order/${token}`;
+export const siteOrigin = ({ hostname, origin }: Pick<Location, 'hostname' | 'origin'> = window.location) =>
+  /(^|\.)mtgartistconnection\.com$/i.test(hostname) ? PUBLIC_SITE : origin;
+
+export const inviteUrl = (token: string) => `${siteOrigin()}/tracker/join/${token}`;
+
+/**
+ * The link to paste into Discord. The webservice serves it so Discord can show a preview
+ * (order, event, artists, slots), then it forwards people to the invite page. On the real site
+ * it's www.mtgartistconnection.com/join/<token>, which an Amplify rewrite proxies to the
+ * webservice; local testing has no rewrite, so it points at the webservice directly.
+ */
+export const shareUrl = (token: string, location: Pick<Location, 'hostname' | 'origin'> = window.location) =>
+  siteOrigin(location) === PUBLIC_SITE
+    ? `${PUBLIC_SITE}/join/${token}`
+    : `${GRAPHQL_URL.replace(/\/graphql\/?$/, '')}/share/group-order/${token}`;
 
 // Mirrors the webservice's light check, so mistakes show while typing.
 const DISCORD_USERNAME = /^(?!.*\.\.)[a-z0-9_.]{2,32}$/;

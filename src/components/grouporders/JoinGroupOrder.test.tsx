@@ -51,7 +51,10 @@ describe('JoinGroupOrder', () => {
     renderJoin([inviteMock(null)], loggedOut);
 
     expect(await screen.findByRole('heading', { level: 1, name: 'IX run' })).toBeInTheDocument();
-    expect(screen.getByText('Discord (unverified)')).toBeInTheDocument();
+    expect(screen.getByText('Discord')).toBeInTheDocument();
+    // Written to the person joining, not the organizer.
+    expect(screen.getByText(/You pay once the organizer approves you\./)).toBeInTheDocument();
+    expect(screen.queryByText(/once you approve them/)).not.toBeInTheDocument();
     const prices = within(screen.getByRole('region', { name: 'Prices' }));
     const guay = within(prices.getByRole('row', { name: /Rebecca Guay/ }));
     expect(guay.getByText('$5')).toBeInTheDocument();

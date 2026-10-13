@@ -145,7 +145,7 @@ function JoinForm({ order, token }: { order: InviteOrder; token: string }) {
     <Box component="form" onSubmit={submit} aria-labelledby="join-title" sx={styles.panel}>
       <Box component="h2" id="join-title" sx={[styles.sectionTitle, { mb: 1 }]}>Ask to join</Box>
       <Box component="p" sx={styles.sectionIntro}>
-        The organizer approves everyone. Discord names aren't verified, so confirm the organizer is who you expect in the Discord group
+        The organizer approves everyone. Make sure the organizer is who you expect in the Discord group
         where you found this link.
       </Box>
       <Box sx={styles.fields}>

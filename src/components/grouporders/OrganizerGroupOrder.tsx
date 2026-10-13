@@ -281,7 +281,7 @@ function RequestsPanel({ order }: { order: Order }) {
         <Box component="h2" id="order-requests" sx={styles.sectionTitle}>Join requests</Box>
         <MonoLabel tracking="tight">{requests.length}</MonoLabel>
       </Box>
-      <Box component="p" sx={styles.sectionIntro}>Check each name against your Discord group before approving. Discord names aren't verified.</Box>
+      <Box component="p" sx={styles.sectionIntro}>Check each name against your Discord group before approving.</Box>
       <EmailPreference orderId={order.id} optedOut={order.organizerEmailOptOut} label="Email me when someone asks to join" />
       <ErrorMessage>{error}</ErrorMessage>
       {requests.length === 0 ? (

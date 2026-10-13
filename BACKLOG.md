@@ -65,7 +65,7 @@ UX for the input field:
 
 ## Shared Group Orders (Signing Runs)
 
-**Status (Oct 13, 2026):** v1 is built but not deployed. Test it with `npm run dev:local` (webservice) and `npm run start:local` (here); `npm run test:integration` in the webservice runs the flows against a real MongoDB. **Deploy the webservice before this frontend:** the frontend asks for fields the current production API doesn't have. Follow-ups: an Amplify rewrite so the Discord link can live on www.mtgartistconnection.com instead of the API domain; the v2/v3 items below.
+**Status (Oct 13, 2026):** v1 is built but not deployed. Test it with `npm run dev:local` (webservice) and `npm run start:local` (here); `npm run test:integration` in the webservice runs the flows against a real MongoDB. **Deploy the webservice before this frontend:** the frontend asks for fields the current production API doesn't have. The Discord link is www.mtgartistconnection.com/join/<token>, served through an Amplify rewrite (Hosting → Rewrites and redirects: `/join/<token>` → `https://mtgartistconnectionwebservice-production.up.railway.app/share/group-order/<token>`, 200, above the catch-all). Follow-ups: the v2/v3 items below.
 
 **Goal:** Let an organizer (a "runner") who is going to a signing event carry cards for other people. Participants join through a shared link, add their own cards, and track payment, shipping and signing status. This replaces the spreadsheet + DMs workflow that runners use today. Most discovery will happen by posting the link in Discord groups.
 
@@ -157,7 +157,7 @@ Some things are bought on a participant's behalf rather than signed: artist proo
   - **Organizer setup:** the same nudge applies to the organizer, since their Discord name appears on the join page and the link preview.
   - **Organizer view:** participants without a Discord name are marked "No Discord name", and their account display name is shown instead.
 - **Light validation only:** 2–32 characters, matching Discord's current username rules (lowercase letters, digits, `_` and `.`). Accept legacy `name#1234` names as well.
-- **It is not verified.** Label it "Discord (unverified)" in the UI. See Trust & Safety.
+- **It is not verified,** but the UI doesn't label it that way (decided Oct 13, 2026). The Terms of Service say Discord names are user-entered. See Trust & Safety.
 - **Who sees it:** the organizer sees every participant's Discord name, since that's how they'll contact people. Participants see only the organizer's.
 
 ### Discord Link Previews
@@ -287,7 +287,7 @@ These are transactional, so they're sent regardless of `emailPreferences`, with 
   - Participants can't leave after their package is received.
   - Organizers can cancel an order but can't delete it once any cards have arrived.
 - **Admin controls:** a report button on orders. Admins can view and disable any order.
-- **Discord names are unverified.** Label them that way, and tell participants to confirm the organizer's identity in the Discord group the link came from. Discord OAuth verification is a v3 option.
+- **Discord names are unverified.** The UI shows them without an "unverified" label, but still tells participants to confirm the organizer in the Discord group the link came from, and organizers to check requests against their group. Discord OAuth verification is a v3 option.
 - **Addresses:** shipping addresses only appear in private instructions, shown to approved participants. No participant return addresses are stored in v1.
 
 ### Phasing

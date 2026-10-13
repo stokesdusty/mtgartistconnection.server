@@ -1,4 +1,6 @@
 import {
+  siteOrigin,
+  inviteUrl,
   shareUrl,
   organizerCan,
   artistPickList,
@@ -222,7 +224,27 @@ describe('organizerCan', () => {
 });
 
 describe('shareUrl', () => {
-  it('points at the webservice preview page', () => {
-    expect(shareUrl('tok')).toBe('https://mtgartistconnectionwebservice-production.up.railway.app/share/group-order/tok');
+  it('uses the www /join link on the real site, served through the Amplify rewrite', () => {
+    expect(shareUrl('tok', { hostname: 'www.mtgartistconnection.com', origin: 'https://www.mtgartistconnection.com' }))
+      .toBe('https://www.mtgartistconnection.com/join/tok');
+    expect(shareUrl('tok', { hostname: 'mtgartistconnection.com', origin: 'https://mtgartistconnection.com' }))
+      .toBe('https://www.mtgartistconnection.com/join/tok');
+  });
+
+  it('points straight at the webservice preview page when testing locally', () => {
+    expect(shareUrl('tok', { hostname: 'localhost', origin: 'http://localhost:3001' }))
+      .toBe('https://mtgartistconnectionwebservice-production.up.railway.app/share/group-order/tok');
+  });
+});
+
+describe('siteOrigin', () => {
+  it('always uses www on the real site, since the bare domain fails on deep links', () => {
+    expect(siteOrigin({ hostname: 'mtgartistconnection.com', origin: 'https://mtgartistconnection.com' })).toBe('https://www.mtgartistconnection.com');
+    expect(siteOrigin({ hostname: 'www.mtgartistconnection.com', origin: 'https://www.mtgartistconnection.com' })).toBe('https://www.mtgartistconnection.com');
+  });
+
+  it('keeps the local origin for local testing', () => {
+    expect(siteOrigin({ hostname: 'localhost', origin: 'http://localhost:3001' })).toBe('http://localhost:3001');
+    expect(inviteUrl('tok')).toBe(`${window.location.origin}/tracker/join/tok`);
   });
 });

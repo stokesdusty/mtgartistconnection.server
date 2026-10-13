@@ -9,7 +9,7 @@ import {
   discordNameError,
   newArtistRow,
   newId,
-  PAYMENT_TIMING_HINTS,
+  PAYMENT_TIMING_ORGANIZER_HINTS,
   PAYMENT_TIMING_LABELS,
   PaymentTiming,
   SettingsForm,
@@ -303,7 +303,7 @@ const GroupOrderSettingsForm = ({ initial, submitLabel, onSubmit, onCancel }: Pr
               sx={{ alignSelf: 'flex-start' }}
             />
             <Box component="p" sx={styles.fieldHint}>
-              {form.paymentTiming ? PAYMENT_TIMING_HINTS[form.paymentTiming] : 'Required.'}
+              {form.paymentTiming ? PAYMENT_TIMING_ORGANIZER_HINTS[form.paymentTiming] : 'Required.'}
             </Box>
           </Box>
           <Box sx={styles.fieldRow}>

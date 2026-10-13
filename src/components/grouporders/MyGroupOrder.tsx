@@ -52,7 +52,7 @@ const MyGroupOrder = () => {
           </MonoLabel>
           <Box component="h1" sx={styles.title}>{order.name}</Box>
           <Box component="p" sx={styles.subtitle}>
-            {order.organizerDiscordName ? `Run by ${order.organizerDiscordName} (Discord, unverified)` : 'Group signing run'}
+            {order.organizerDiscordName ? `Run by ${order.organizerDiscordName} on Discord` : 'Group signing run'}
           </Box>
         </Box>
       </Box>

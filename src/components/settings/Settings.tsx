@@ -299,7 +299,7 @@ function DiscordNamePanel({ initial }: { initial: string }) {
         Discord name
       </Box>
       <Box component="p" sx={styles.sectionIntro}>
-        Group orders are coordinated on Discord, so organizers use this to match cards to people. It isn't verified.
+        Group orders are coordinated on Discord, so organizers use this to match cards to people.
       </Box>
       <Message error={error} success={success} />
       <Box sx={styles.fields}>
