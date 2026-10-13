@@ -65,6 +65,8 @@ UX for the input field:
 
 ## Shared Group Orders (Signing Runs)
 
+**Status (Oct 13, 2026):** v1 is built but not deployed. Test it with `npm run dev:local` (webservice) and `npm run start:local` (here); `npm run test:integration` in the webservice runs the flows against a real MongoDB. **Deploy the webservice before this frontend:** the frontend asks for fields the current production API doesn't have. Follow-ups: an Amplify rewrite so the Discord link can live on www.mtgartistconnection.com instead of the API domain; the v2/v3 items below.
+
 **Goal:** Let an organizer (a "runner") who is going to a signing event carry cards for other people. Participants join through a shared link, add their own cards, and track payment, shipping and signing status. This replaces the spreadsheet + DMs workflow that runners use today. Most discovery will happen by posting the link in Discord groups.
 
 ### Context & Findings
@@ -106,7 +108,8 @@ Add a "Share as group order" option on an existing batch, or create a new order 
 - **Pricing (set entirely by the organizer, per artist and signature type):** see Pricing below. Prices are **not** pulled from signing reports or anywhere else.
 - **Other fees:** an optional flat fee per participant, and return shipping options with prices (e.g. `Plain envelope $1`, `Bubble mailer $5`).
 - **Limits:** a cutoff date, and a maximum number of cards per participant.
-- **Join mode:** auto-join, or approval required. Default to approval.
+- **Joining:** every join request waits for the organizer's approval. There is no auto-join.
+- **Payment timing (required):** participants pay either **upfront** (once they're approved) or **after signing** (once the order moves to Returning). The organizer must pick one.
 - **Organizer's Discord name:** shown on the public summary page, so people coming from a Discord group can confirm the runner is who they expect.
 - **Instructions:** public terms that anyone with the link can see, and private instructions (shipping address, PayPal/Venmo handles) that only approved participants see.
 - **Invite link:** `/tracker/join/:token`. The organizer can rotate or revoke it.
@@ -170,7 +173,7 @@ Most discovery will come from pasting the invite link into Discord, so the link 
 ### Participant Journey
 
 1. **Open the link.** Anyone can see the public summary page: event, organizer and their Discord name, artists with remaining slots, the price grid, return shipping options, and the cutoff. If not logged in, show `SignupPromptModal`, then send them back to the link.
-2. **Join.** Accept the terms, and add or confirm their Discord name (optional, but encouraged on the form). Record the acceptance time. Then they are either joined immediately or waiting for approval, depending on join mode.
+2. **Join.** Accept the terms, and add or confirm their Discord name (optional, but encouraged on the form). Record the acceptance time. They then wait for the organizer to approve them.
 3. **Add cards.** Only artists in the order can be chosen. For each card, pick the artist and then a signature type that artist offers. The price fills in from the grid, or shows "Price pending" if that cell is TBD. The server enforces artist caps and the per-participant maximum. Later (v2), offer a quick-add list from their `wishlistSigned` cards by the order's artists.
 4. **Ship the cards.** They click **Ready to ship**, which shows the private instructions and automatically generates their printable artist sheet (see below) to include in the package. Then they enter tracking for the package they send.
 5. **Pay.** Report "I've sent $X" with a note (e.g. a PayPal transaction ID). The organizer confirms it.
@@ -232,7 +235,7 @@ When a participant marks their cards **Ready to ship**, automatically generate t
   - `signatureTypes[] { id, label }`
   - `artists[] { name, cap, prices[] { signatureTypeId, price | null } }`. A `null` price means TBD. A type missing from `prices` means that artist doesn't offer it.
   - `participantFee`, `returnOptions[] { id, label, price }`
-  - `cutoff`, `maxCardsPerParticipant`, `joinMode`
+  - `cutoff`, `maxCardsPerParticipant`, `paymentTiming` (`upfront` / `after-signing`)
   - `inviteToken`
   - `publicTerms`, `privateInstructions`
   - `organizerDiscordName`
@@ -279,7 +282,7 @@ These are transactional, so they're sent regardless of `emailPreferences`, with 
 ### Trust & Safety
 
 - **Terms of Service update:** say the site is not a party to these arrangements. Record each participant's terms acceptance at join.
-- **Who can organize:** only users with a verified email. New accounts are limited to a small number of participants.
+- **Who can organize:** anyone who is logged in.
 - **Account safety:**
   - Participants can't leave after their package is received.
   - Organizers can cancel an order but can't delete it once any cards have arrived.
@@ -311,10 +314,10 @@ These are transactional, so they're sent regardless of `emailPreferences`, with 
   - Discord OAuth to verify Discord names
   - optional Discord webhook that posts order updates to the organizer's server
 
-### Open Questions
-1. **Join mode default:** approval or auto-join? (Recommended: approval.)
-2. **Prepay or pay after signing?** (Recommended: organizer's choice per order.)
-3. **Who can organize:** anyone with a verified email plus limits for new accounts, or an approved list of runners at first?
+### Decisions (Oct 13, 2026)
+1. **Joining:** the organizer approves every join. No auto-join option.
+2. **Payment timing:** the organizer chooses per order, upfront or after signing.
+3. **Who can organize:** anyone who is logged in. No email verification or new-account limits.
 
 ### Effort
 - Data model + row-level mutations + authorization: large. The per-row and per-role permission checks are most of the work.

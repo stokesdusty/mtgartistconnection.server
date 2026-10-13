@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { REFRESH_TOKEN } from '../components/graphql/mutations';
+import { GRAPHQL_URL } from '../config/api';
 
-const GRAPHQL_URL = "https://mtgartistconnectionwebservice-production.up.railway.app/graphql";
 
 interface User {
   id: string;

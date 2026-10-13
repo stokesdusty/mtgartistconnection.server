@@ -45,7 +45,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "start:local": "node -e \"process.env.REACT_APP_GRAPHQL_URL='http://localhost:8080/graphql';process.env.PORT='3001';require('react-scripts/scripts/start')\""
   },
   "eslintConfig": {
     "extends": [

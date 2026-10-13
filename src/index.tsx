@@ -5,6 +5,7 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink, Observable } from "@apollo/client";
+import { GRAPHQL_URL } from "./config/api";
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
@@ -19,7 +20,7 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const cache = new InMemoryCache();
 
 const httpLink = createHttpLink({
-  uri: "https://mtgartistconnectionwebservice-production.up.railway.app/graphql",
+  uri: GRAPHQL_URL,
 });
 
 const authLink = setContext((_, { headers }) => {

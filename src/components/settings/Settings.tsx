@@ -11,12 +11,13 @@ import { Navigate } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { login } from "../../store/auth-slice";
 import { useMutation, useQuery } from "@apollo/client";
-import { UPDATE_PASSWORD, UPDATE_EMAIL_PREFERENCES } from "../graphql/mutations";
+import { UPDATE_PASSWORD, UPDATE_EMAIL_PREFERENCES, UPDATE_DISCORD_NAME } from "../graphql/mutations";
 import { GET_CURRENT_USER } from "../graphql/queries";
 import { settingsStyles as styles } from "../../styles/settings-styles";
 import MonoLabel from "../shared/MonoLabel";
 import { SettingsSkeleton } from "../shared/Skeletons";
 import MySigningReports from "./MySigningReports";
+import { discordNameError } from "../../utils/groupOrders";
 
 const PREFERENCE_LABELS = {
   siteUpdates: "Receive site update emails",
@@ -182,6 +183,8 @@ const Settings = () => {
             </Box>
           </Box>
 
+          <DiscordNamePanel initial={userData?.me?.discordName ?? ""} />
+
           {/* ── Email preferences ───────────────────────────────────────── */}
           <Box component="section" aria-labelledby="settings-email" sx={styles.panel}>
             <Box component="h2" id="settings-email" sx={styles.sectionTitle}>
@@ -265,6 +268,65 @@ const Settings = () => {
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+/** Used to match people up in group orders, which are coordinated on Discord. */
+function DiscordNamePanel({ initial }: { initial: string }) {
+  const [discordName, setDiscordName] = useState(initial);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [updateDiscordName, { loading }] = useMutation(UPDATE_DISCORD_NAME);
+  const inputError = discordNameError(discordName);
+
+  const save = async () => {
+    setError("");
+    setSuccess("");
+    if (inputError) {
+      setError(inputError);
+      return;
+    }
+    try {
+      const { data } = await updateDiscordName({ variables: { discordName: discordName.trim() || null } });
+      setDiscordName(data?.updateDiscordName?.discordName ?? "");
+      setSuccess(discordName.trim() ? "Discord name saved" : "Discord name removed");
+    } catch (err: any) {
+      setError(err.message || "Couldn't save your Discord name");
+    }
+  };
+
+  return (
+    <Box component="section" aria-labelledby="settings-discord" sx={styles.panel}>
+      <Box component="h2" id="settings-discord" sx={styles.sectionTitle}>
+        Discord name
+      </Box>
+      <Box component="p" sx={styles.sectionIntro}>
+        Group orders are coordinated on Discord, so organizers use this to match cards to people. It isn't verified.
+      </Box>
+      <Message error={error} success={success} />
+      <Box sx={styles.fields}>
+        <Box sx={styles.field}>
+          <Box component="label" htmlFor="settings-discord-name" sx={styles.fieldLabel}>
+            <MonoLabel tracking="tight">Discord username</MonoLabel>
+          </Box>
+          <TextField
+            id="settings-discord-name"
+            fullWidth
+            size="small"
+            value={discordName}
+            onChange={(e) => setDiscordName(e.target.value)}
+            placeholder="e.g. card.collector"
+            inputProps={{ maxLength: 40, autoComplete: "off" }}
+            helperText={inputError ?? undefined}
+            error={!!inputError}
+            sx={styles.input}
+          />
+        </Box>
+      </Box>
+      <Button sx={styles.button} onClick={save} disabled={loading}>
+        Save Discord Name
+      </Button>
+    </Box>
+  );
+}
 
 function Message({ error, success }: { error: string; success: string }) {
   if (error) {

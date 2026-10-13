@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import {
   Box,
@@ -12,27 +13,18 @@ import { usePageTitle } from '../../hooks/usePageTitle';
 import { vault, vaultRadii } from '../../styles/design-tokens';
 import { artistSheetStyles as styles } from '../../styles/artist-sheet-styles';
 import MonoLabel from '../shared/MonoLabel';
+import { MAX_SLOTS, paginateSlots, printArtistSheet, SheetSlot, SLOTS_PER_PAGE } from '../../utils/artistSheet';
 
-interface Slot {
-  name: string;
-  artist: string;
-  quantity: number;
-  color: string;
+type Slot = SheetSlot;
+
+/** Group orders open the generator pre-filled, via router state, so people can tweak their slips. */
+interface Prefill {
+  slots?: Slot[];
+  header?: string;
 }
 
 interface ArtistRecord {
   name: string;
-}
-
-const SLOTS_PER_PAGE = 30;
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 // SlotCard always uses light/print colors — it represents content on white paper
@@ -80,7 +72,9 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor: string; c
 const ArtistSheet = () => {
   usePageTitle('Artist Sheet Generator');
 
-  const [slots, setSlots] = useState<Slot[]>([]);
+  const prefill = (useLocation().state ?? null) as Prefill | null;
+  const [slots, setSlots] = useState<Slot[]>(() => prefill?.slots?.slice(0, MAX_SLOTS) ?? []);
+  const header = prefill?.header;
   const [name, setName] = useState('');
   const [artist, setArtist] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -92,7 +86,7 @@ const ArtistSheet = () => {
     .map((a: ArtistRecord) => a.name)
     .sort();
 
-  const canAdd = name.trim() !== '' && artist !== '' && slots.length < SLOTS_PER_PAGE;
+  const canAdd = name.trim() !== '' && artist !== '' && slots.length < MAX_SLOTS;
 
   const handleAdd = () => {
     if (!canAdd) return;
@@ -113,66 +107,18 @@ const ArtistSheet = () => {
   };
 
   const handlePrint = () => {
-    const filled = [...slots, ...Array(SLOTS_PER_PAGE - slots.length).fill(null)];
-    const slotRows = filled.map(slot =>
-      slot
-        ? `<div class="slot filled">
-            <div><strong>Your Name:</strong> ${escapeHtml(slot.name)}</div>
-            <div><strong>Color:</strong> ${escapeHtml(slot.color)}</div>
-            <div><strong>Artist/Quantity:</strong> ${escapeHtml(slot.artist)} ×${slot.quantity}</div>
-           </div>`
-        : `<div class="slot empty">
-            <div><strong>Your Name:</strong></div>
-            <div><strong>Color:</strong></div>
-            <div><strong>Artist/Quantity:</strong></div>
-           </div>`
-    ).join('');
-
-    const win = window.open('', '_blank', 'width=816,height=1056');
-    if (!win) return;
-    win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<style>
-  @page { size: letter portrait; margin: 0.35in; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    width: 100%;
-    height: calc(11in - 0.7in);
-  }
-  .slot {
-    padding: 5px 8px;
-    font-size: 9pt;
-    line-height: 1.7;
-    border-left: 4px solid #ccc;
-  }
-  .slot.filled { border-left-color: #3498db; }
-  .slot strong { font-weight: 600; }
-</style>
-</head>
-<body>
-<div class="grid">${slotRows}</div>
-<script>window.onload = function() { window.print(); window.close(); }${'</script>'}
-</body>
-</html>`);
-    win.document.close();
+    printArtistSheet(slots, header);
   };
 
-  const displaySlots: (Slot | null)[] = [
-    ...slots,
-    ...Array(SLOTS_PER_PAGE - slots.length).fill(null),
-  ];
+  const pages = paginateSlots(slots);
+  const pageLabel = `${pages.length} ${pages.length === 1 ? 'page' : 'pages'}`;
 
   return (
     <Box sx={styles.page}>
       <Box sx={styles.inner}>
         {/* Header */}
         <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
-          {slots.length} / {SLOTS_PER_PAGE} slots filled
+          {slots.length} {slots.length === 1 ? 'slot' : 'slots'} · {pageLabel}
         </MonoLabel>
         <Box component="h1" sx={styles.title}>
           Artist sheet
@@ -268,7 +214,7 @@ const ArtistSheet = () => {
             >
               Add slot
               <Box component="span" sx={styles.slotCount}>
-                {slots.length}/{SLOTS_PER_PAGE}
+                {slots.length}
               </Box>
             </Button>
 
@@ -306,21 +252,28 @@ const ArtistSheet = () => {
               Sheet preview
             </Box>
             <MonoLabel tracking="tight">
-              {slots.length} / {SLOTS_PER_PAGE} filled
+              {pageLabel} · {SLOTS_PER_PAGE} slips per page
             </MonoLabel>
           </Box>
 
-          <Box sx={styles.paperMount}>
-            <Box sx={styles.paper}>
-              {displaySlots.map((slot, i) => (
-                <SlotCard
-                  key={i}
-                  slot={slot}
-                  onDelete={slot !== null ? () => handleDelete(i) : undefined}
-                />
-              ))}
+          {header && (
+            <Box component="p" sx={styles.hint}>
+              Each page is headed: {header}
             </Box>
-          </Box>
+          )}
+          {pages.map((page, p) => (
+            <Box key={p} sx={[styles.paperMount, p > 0 ? { mt: 3 } : {}]}>
+              <Box sx={styles.paper} aria-label={`Page ${p + 1}`}>
+                {page.map((slot, i) => (
+                  <SlotCard
+                    key={i}
+                    slot={slot}
+                    onDelete={slot !== null ? () => handleDelete(p * SLOTS_PER_PAGE + i) : undefined}
+                  />
+                ))}
+              </Box>
+            </Box>
+          ))}
         </Box>
       </Box>
     </Box>

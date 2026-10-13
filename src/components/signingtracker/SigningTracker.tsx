@@ -52,6 +52,7 @@ import {
   trackerSelect,
 } from '../../styles/signing-tracker-styles';
 import MonoLabel from '../shared/MonoLabel';
+import GroupOrdersSection from '../grouporders/GroupOrdersSection';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -944,6 +945,8 @@ const SigningTracker: React.FC = () => {
             You're not logged in — data is saved in your browser only. Log in to sync across devices.
           </Box>
         )}
+
+        {isLoggedIn && <GroupOrdersSection />}
 
         {/* Active batches — sortable */}
         {active.length === 0 ? (

@@ -7,7 +7,7 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Settings from './Settings';
 import authReducer from '../../store/auth-slice';
 import { GET_CURRENT_USER } from '../graphql/queries';
-import { UPDATE_EMAIL_PREFERENCES } from '../graphql/mutations';
+import { UPDATE_DISCORD_NAME, UPDATE_EMAIL_PREFERENCES } from '../graphql/mutations';
 
 const user = { id: 'u1', email: 'test@example.com', name: 'Test User', role: 'user' };
 
@@ -29,7 +29,7 @@ const meMock = (emailPreferences = prefs): MockedResponse => ({
   request: { query: GET_CURRENT_USER },
   result: {
     data: {
-      me: { ...user, emailPreferences, followedArtists: [], monitoredStates: [] },
+      me: { ...user, emailPreferences, followedArtists: [], monitoredStates: [], discordName: '' },
     },
   },
 });
@@ -126,5 +126,33 @@ describe('Settings email preferences', () => {
     userEvent.click(screen.getByRole('button', { name: 'Save Preferences' }));
 
     expect(await screen.findByText('Network down')).toBeInTheDocument();
+  });
+});
+
+describe('Settings Discord name', () => {
+  it('saves a cleaned-up Discord name', async () => {
+    renderSettings([
+      meMock(),
+      {
+        request: { query: UPDATE_DISCORD_NAME, variables: { discordName: 'Card.Collector' } },
+        result: { data: { updateDiscordName: { id: 'u1', discordName: 'card.collector' } } },
+      },
+    ]);
+
+    const input = await screen.findByLabelText('Discord username');
+    userEvent.type(input, 'Card.Collector');
+    userEvent.click(screen.getByRole('button', { name: 'Save Discord Name' }));
+
+    expect(await screen.findByText('Discord name saved')).toBeInTheDocument();
+    expect(input).toHaveValue('card.collector');
+  });
+
+  it('flags a malformed name without sending it', async () => {
+    renderSettings([meMock()]);
+
+    userEvent.type(await screen.findByLabelText('Discord username'), 'has space');
+    userEvent.click(screen.getByRole('button', { name: 'Save Discord Name' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Discord names are 2–32 characters');
   });
 });

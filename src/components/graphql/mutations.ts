@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { ARTIST_DASHBOARD_FIELDS } from "./queries";
+import { ADMIN_GROUP_ORDER_FIELDS, ARTIST_DASHBOARD_FIELDS, ORGANIZER_GROUP_ORDER_FIELDS, PARTICIPANT_GROUP_ORDER_FIELDS } from "./queries";
 
 export const USER_LOGIN = gql`
     mutation login($email:String!, $password:String!){
@@ -553,6 +553,304 @@ export const UPDATE_ARTIST_PROFILE = gql`
     mutation updateArtistProfile($artistId: ID!, $input: ArtistProfileInput!) {
         updateArtistProfile(artistId: $artistId, input: $input) {
             ${ARTIST_DASHBOARD_FIELDS}
+        }
+    }
+`;
+
+// ─── Group orders ───────────────────────────────────────────────────────────
+
+export const CREATE_GROUP_ORDER = gql`
+    mutation createGroupOrder($name: String!, $eventId: ID, $settings: GroupOrderSettingsInput!) {
+        createGroupOrder(name: $name, eventId: $eventId, settings: $settings) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const UPDATE_GROUP_ORDER = gql`
+    mutation updateGroupOrder($orderId: ID!, $name: String!, $eventId: ID, $settings: GroupOrderSettingsInput!) {
+        updateGroupOrder(orderId: $orderId, name: $name, eventId: $eventId, settings: $settings) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const SET_GROUP_ORDER_STATUS = gql`
+    mutation setGroupOrderStatus($orderId: ID!, $status: String!) {
+        setGroupOrderStatus(orderId: $orderId, status: $status) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const RESET_GROUP_ORDER_INVITE = gql`
+    mutation resetGroupOrderInvite($orderId: ID!, $revoke: Boolean) {
+        resetGroupOrderInvite(orderId: $orderId, revoke: $revoke) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const REVIEW_GROUP_ORDER_REQUEST = gql`
+    mutation reviewGroupOrderRequest($participantId: ID!, $approve: Boolean!) {
+        reviewGroupOrderRequest(participantId: $participantId, approve: $approve) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const REMOVE_GROUP_ORDER_PARTICIPANT = gql`
+    mutation removeGroupOrderParticipant($participantId: ID!) {
+        removeGroupOrderParticipant(participantId: $participantId) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const ADD_GROUP_ORDER_GUEST = gql`
+    mutation addGroupOrderGuest($orderId: ID!, $displayName: String!, $discordName: String) {
+        addGroupOrderGuest(orderId: $orderId, displayName: $displayName, discordName: $discordName) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const JOIN_GROUP_ORDER = gql`
+    mutation joinGroupOrder($token: String!, $discordName: String, $acceptTerms: Boolean!) {
+        joinGroupOrder(token: $token, discordName: $discordName, acceptTerms: $acceptTerms) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const LEAVE_GROUP_ORDER = gql`
+    mutation leaveGroupOrder($orderId: ID!) {
+        leaveGroupOrder(orderId: $orderId) {
+            success
+            message
+        }
+    }
+`;
+
+export const UPDATE_DISCORD_NAME = gql`
+    mutation updateDiscordName($discordName: String) {
+        updateDiscordName(discordName: $discordName) {
+            id
+            discordName
+        }
+    }
+`;
+
+// Participants change their own cards; organizers can change anyone's.
+export const ADD_GROUP_ORDER_ROW = gql`
+    mutation addGroupOrderRow($orderId: ID!, $row: GroupOrderRowInput!) {
+        addGroupOrderRow(orderId: $orderId, row: $row) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const UPDATE_GROUP_ORDER_ROW = gql`
+    mutation updateGroupOrderRow($orderId: ID!, $rowId: String!, $row: GroupOrderRowInput!) {
+        updateGroupOrderRow(orderId: $orderId, rowId: $rowId, row: $row) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const DELETE_GROUP_ORDER_ROW = gql`
+    mutation deleteGroupOrderRow($orderId: ID!, $rowId: String!) {
+        deleteGroupOrderRow(orderId: $orderId, rowId: $rowId) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const ORGANIZER_ADD_GROUP_ORDER_ROW = gql`
+    mutation organizerAddGroupOrderRow($participantId: ID!, $row: GroupOrderRowInput!) {
+        organizerAddGroupOrderRow(participantId: $participantId, row: $row) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const ORGANIZER_UPDATE_GROUP_ORDER_ROW = gql`
+    mutation organizerUpdateGroupOrderRow($orderId: ID!, $rowId: String!, $row: GroupOrderRowInput!) {
+        organizerUpdateGroupOrderRow(orderId: $orderId, rowId: $rowId, row: $row) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const ORGANIZER_DELETE_GROUP_ORDER_ROW = gql`
+    mutation organizerDeleteGroupOrderRow($orderId: ID!, $rowId: String!) {
+        organizerDeleteGroupOrderRow(orderId: $orderId, rowId: $rowId) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+// Group order progress: payments, shipping and check-in, custom items, event day.
+export const REPORT_GROUP_ORDER_PAYMENT = gql`
+    mutation reportGroupOrderPayment($orderId: ID!, $amount: Float!, $note: String) {
+        reportGroupOrderPayment(orderId: $orderId, amount: $amount, note: $note) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const WITHDRAW_GROUP_ORDER_PAYMENT = gql`
+    mutation withdrawGroupOrderPayment($orderId: ID!, $paymentId: String!) {
+        withdrawGroupOrderPayment(orderId: $orderId, paymentId: $paymentId) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const MARK_GROUP_ORDER_READY_TO_SHIP = gql`
+    mutation markGroupOrderReadyToShip($orderId: ID!) {
+        markGroupOrderReadyToShip(orderId: $orderId) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const SET_GROUP_ORDER_INBOUND_TRACKING = gql`
+    mutation setGroupOrderInboundTracking($orderId: ID!, $tracking: String) {
+        setGroupOrderInboundTracking(orderId: $orderId, tracking: $tracking) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const SET_GROUP_ORDER_RETURN_OPTION = gql`
+    mutation setGroupOrderReturnOption($orderId: ID!, $returnOptionId: String) {
+        setGroupOrderReturnOption(orderId: $orderId, returnOptionId: $returnOptionId) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const UPDATE_GROUP_ORDER_NOTES = gql`
+    mutation updateGroupOrderNotes($orderId: ID!, $notes: String) {
+        updateGroupOrderNotes(orderId: $orderId, notes: $notes) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const SET_GROUP_ORDER_EMAIL_OPT_OUT = gql`
+    mutation setGroupOrderEmailOptOut($orderId: ID!, $optOut: Boolean!) {
+        setGroupOrderEmailOptOut(orderId: $orderId, optOut: $optOut) {
+            success
+            message
+        }
+    }
+`;
+
+export const RECORD_GROUP_ORDER_PAYMENT = gql`
+    mutation recordGroupOrderPayment($participantId: ID!, $amount: Float!, $note: String) {
+        recordGroupOrderPayment(participantId: $participantId, amount: $amount, note: $note) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const CONFIRM_GROUP_ORDER_PAYMENT = gql`
+    mutation confirmGroupOrderPayment($participantId: ID!, $paymentId: String!) {
+        confirmGroupOrderPayment(participantId: $participantId, paymentId: $paymentId) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const REMOVE_GROUP_ORDER_PAYMENT = gql`
+    mutation removeGroupOrderPayment($participantId: ID!, $paymentId: String!) {
+        removeGroupOrderPayment(participantId: $participantId, paymentId: $paymentId) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const CHECK_IN_GROUP_ORDER_PACKAGE = gql`
+    mutation checkInGroupOrderPackage($participantId: ID!, $counts: [GroupOrderCheckInInput!]!) {
+        checkInGroupOrderPackage(participantId: $participantId, counts: $counts) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const SET_GROUP_ORDER_RETURN_TRACKING = gql`
+    mutation setGroupOrderReturnTracking($participantId: ID!, $tracking: String) {
+        setGroupOrderReturnTracking(participantId: $participantId, tracking: $tracking) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const ADD_GROUP_ORDER_CUSTOM_ITEM = gql`
+    mutation addGroupOrderCustomItem($participantId: ID!, $item: GroupOrderCustomItemInput!) {
+        addGroupOrderCustomItem(participantId: $participantId, item: $item) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const UPDATE_GROUP_ORDER_CUSTOM_ITEM = gql`
+    mutation updateGroupOrderCustomItem($participantId: ID!, $itemId: String!, $item: GroupOrderCustomItemInput!) {
+        updateGroupOrderCustomItem(participantId: $participantId, itemId: $itemId, item: $item) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const REMOVE_GROUP_ORDER_CUSTOM_ITEM = gql`
+    mutation removeGroupOrderCustomItem($participantId: ID!, $itemId: String!) {
+        removeGroupOrderCustomItem(participantId: $participantId, itemId: $itemId) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const SET_GROUP_ORDER_ROW_STATUS = gql`
+    mutation setGroupOrderRowStatus($orderId: ID!, $rowIds: [String!]!, $status: String!, $reason: String) {
+        setGroupOrderRowStatus(orderId: $orderId, rowIds: $rowIds, status: $status, reason: $reason) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+// Group order trust and safety.
+export const REPORT_GROUP_ORDER = gql`
+    mutation reportGroupOrder($orderId: ID!, $reason: String!) {
+        reportGroupOrder(orderId: $orderId, reason: $reason) {
+            success
+            message
+        }
+    }
+`;
+
+export const DELETE_GROUP_ORDER = gql`
+    mutation deleteGroupOrder($orderId: ID!) {
+        deleteGroupOrder(orderId: $orderId) {
+            success
+            message
+        }
+    }
+`;
+
+export const SET_GROUP_ORDER_DISABLED = gql`
+    mutation setGroupOrderDisabled($orderId: ID!, $disabled: Boolean!, $reason: String) {
+        setGroupOrderDisabled(orderId: $orderId, disabled: $disabled, reason: $reason) {
+            ${ADMIN_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const RESOLVE_GROUP_ORDER_REPORTS = gql`
+    mutation resolveGroupOrderReports($orderId: ID!) {
+        resolveGroupOrderReports(orderId: $orderId) {
+            ${ADMIN_GROUP_ORDER_FIELDS}
         }
     }
 `;

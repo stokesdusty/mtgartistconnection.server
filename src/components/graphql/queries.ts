@@ -176,6 +176,7 @@ export const GET_CURRENT_USER = gql`
             }
             followedArtists
             monitoredStates
+            discordName
         }
     }
 `;
@@ -519,6 +520,141 @@ export const GET_MY_SIGNING_REPORTS = gql`
             status
             rejectionReason
             createdAt
+        }
+    }
+`;
+
+// ─── Group orders ───────────────────────────────────────────────────────────
+
+const GROUP_ORDER_FIELDS = `
+            id
+            name
+            status
+            paymentTiming
+            paymentDue
+            disabled
+            disabledReason
+            eventId
+            event { id name city startDate endDate }
+            organizerDiscordName
+            publicTerms
+            cutoff
+            maxCardsPerParticipant
+            participantFee
+            returnOptions { id label price }
+            signatureTypes { id label }
+            artists { name cap used remaining prices { signatureTypeId price } }
+`;
+
+// Group order cards. The price comes from the order's grid (artist + signature type).
+const GROUP_ORDER_ROW_FIELDS = `rowId cardName quantity set foil artist signatureTypeId sigNotes owner participantId status notSignedReason receivedQuantity`;
+
+const GROUP_ORDER_PARTICIPANT_FIELDS = `
+            id
+            isGuest
+            displayName
+            discordName
+            status
+            cardCount
+            createdAt
+            readyToShipAt
+            sheetChanged
+            inboundTracking
+            receivedAt
+            mismatchCount
+            returnOptionId
+            returnTracking
+            notesToOrganizer
+            emailOptOut
+            payments { id amount note source createdAt confirmedAt }
+            customItems { id label artistName quantity price status note }
+            balance { cardsTotal customItemsTotal fee returnShipping pendingCount due confirmedPaid reportedPaid remaining status }
+`;
+
+// Shared with the organizer mutations so every change refreshes the cached order.
+export const ORGANIZER_GROUP_ORDER_FIELDS = `
+            ${GROUP_ORDER_FIELDS}
+            savedStatus
+            organizerEmailOptOut
+            inviteToken
+            privateInstructions
+            rows { ${GROUP_ORDER_ROW_FIELDS} }
+            participants { ${GROUP_ORDER_PARTICIPANT_FIELDS} }
+`;
+
+export const PARTICIPANT_GROUP_ORDER_FIELDS = `
+            ${GROUP_ORDER_FIELDS}
+            privateInstructions
+            rows { ${GROUP_ORDER_ROW_FIELDS} }
+            me { ${GROUP_ORDER_PARTICIPANT_FIELDS} }
+`;
+
+export const GET_GROUP_ORDER_INVITE = gql`
+    query groupOrderByInvite($token: String!) {
+        groupOrderByInvite(token: $token) {
+            ${GROUP_ORDER_FIELDS}
+            viewerStatus
+        }
+    }
+`;
+
+export const GET_ORGANIZED_GROUP_ORDER = gql`
+    query organizedGroupOrder($orderId: ID!) {
+        organizedGroupOrder(orderId: $orderId) {
+            ${ORGANIZER_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+export const GET_MY_GROUP_ORDER = gql`
+    query myGroupOrder($orderId: ID!) {
+        myGroupOrder(orderId: $orderId) {
+            ${PARTICIPANT_GROUP_ORDER_FIELDS}
+        }
+    }
+`;
+
+// The Signing Tracker's "Group orders" section: orders you run and orders you've joined.
+export const GET_GROUP_ORDER_LISTS = gql`
+    query groupOrderLists {
+        organizedGroupOrders {
+            id
+            name
+            status
+            event { id name startDate endDate }
+            participants { id status }
+        }
+        myGroupOrders {
+            id
+            name
+            status
+            organizerDiscordName
+            event { id name startDate endDate }
+            me { id status }
+        }
+    }
+`;
+
+export const GET_MY_DISCORD_NAME = gql`
+    query myDiscordName {
+        me {
+            id
+            discordName
+        }
+    }
+`;
+
+// Admin review of group orders: reports, and disabling.
+export const ADMIN_GROUP_ORDER_FIELDS = `
+            id name status createdAt organizerName organizerEmail organizerDiscordName inviteToken
+            participantCount cardCount openReportCount disabled disabledReason
+            reports { id reason reporterName reporterEmail createdAt resolvedAt }
+`;
+
+export const GET_ADMIN_GROUP_ORDERS = gql`
+    query adminGroupOrders($reportedOnly: Boolean) {
+        adminGroupOrders(reportedOnly: $reportedOnly) {
+            ${ADMIN_GROUP_ORDER_FIELDS}
         }
     }
 `;

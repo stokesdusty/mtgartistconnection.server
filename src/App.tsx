@@ -37,6 +37,11 @@ const Following = lazy(() => import(/* webpackChunkName: "following" */ "./compo
 const YourCards = lazy(() => import(/* webpackChunkName: "your-cards" */ "./components/settings/YourCards"));
 const SigningTracker = lazy(() => import(/* webpackChunkName: "signing-tracker" */ "./components/signingtracker/SigningTracker"));
 const ArtistSheet = lazy(() => import(/* webpackChunkName: "artist-sheet" */ "./components/artistsheet/ArtistSheet"));
+// Group orders ("signing runs"): organizer setup and dashboard, invite links, and the participant view
+const NewGroupOrder = lazy(() => import(/* webpackChunkName: "group-order-new" */ "./components/grouporders/NewGroupOrder"));
+const OrganizerGroupOrder = lazy(() => import(/* webpackChunkName: "group-order-organizer" */ "./components/grouporders/OrganizerGroupOrder"));
+const JoinGroupOrder = lazy(() => import(/* webpackChunkName: "group-order-join" */ "./components/grouporders/JoinGroupOrder"));
+const MyGroupOrder = lazy(() => import(/* webpackChunkName: "group-order-shared" */ "./components/grouporders/MyGroupOrder"));
 const Dashboard = lazy(() => import(/* webpackChunkName: "dashboard" */ "./components/dashboard/Dashboard"));
 // Open to any signed-in user; the API only returns data to the verified artist or an admin
 const ArtistDashboard = lazy(() => import(/* webpackChunkName: "artist-dashboard" */ "./components/artistdashboard/ArtistDashboard"));
@@ -51,6 +56,7 @@ const AddArtistToEvent = lazy(() => import(/* webpackChunkName: "admin-add-artis
 const RemoveArtistFromEvent = lazy(() => import(/* webpackChunkName: "admin-remove-artist-from-event" */ "./components/blogs/RemoveArtistFromEvent"));
 const AnalyticsDashboard = lazy(() => import(/* webpackChunkName: "admin-analytics" */ "./components/analytics/AnalyticsDashboard"));
 const SigningReportReview = lazy(() => import(/* webpackChunkName: "admin-signing-reports" */ "./components/signingreports/SigningReportReview"));
+const AdminGroupOrders = lazy(() => import(/* webpackChunkName: "admin-group-orders" */ "./components/grouporders/AdminGroupOrders"));
 const ScanEventArtists = lazy(() => import(/* webpackChunkName: "admin-scan-event-artists" */ "./components/blogs/ScanEventArtists"));
 
 // ─── Suspense fallback ───────────────────────────────────────────────────────
@@ -131,6 +137,10 @@ function App() {
                   <Route path="/following" element={<Following />} />
                   <Route path="/signingtracker" element={<SigningTracker />} />
                   <Route path="/artistsheet" element={<ArtistSheet />} />
+                  <Route path="/tracker/group/new" element={<NewGroupOrder />} />
+                  <Route path="/tracker/group/:orderId" element={<OrganizerGroupOrder />} />
+                  <Route path="/tracker/join/:token" element={<JoinGroupOrder />} />
+                  <Route path="/tracker/shared/:orderId" element={<MyGroupOrder />} />
                   <Route path="/artist-dashboard" element={<ArtistDashboard />} />
                   <Route path="/artist-dashboard/:artistId" element={<ArtistDashboard />} />
                   {isAdmin && <>
@@ -143,6 +153,7 @@ function App() {
                     <Route path="/analytics" element={<AnalyticsDashboard />} />
                     <Route path="/scaneventartists" element={<ScanEventArtists />} />
                     <Route path="/reviewsigningreports" element={<SigningReportReview />} />
+                    <Route path="/admin/group-orders" element={<AdminGroupOrders />} />
                   </>}
                 </Routes>
               </Suspense>

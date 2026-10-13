@@ -112,7 +112,17 @@ const TermsOfService = () => {
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            7. Content Standards
+            7. Group Orders
+          </Typography>
+          <Typography sx={contentPageStyles.paragraph}>
+            Group orders let one user (the organizer) take other users' (participants') cards to a signing event. MtG Artist Connection provides tools to organize these arrangements and keep a record of them, but is not a party to any group order. Every arrangement, payment, and shipment is solely between the organizer and the participants. We do not hold, transfer, or guarantee any money, cards, or other items, and prices, balances, and payments shown on the website are records entered by users, not confirmed by us. Discord names shown on the website are entered by users and are not verified.
+          </Typography>
+          <Typography sx={contentPageStyles.paragraph}>
+            By joining a group order, you accept that order's terms as set by its organizer and agree that MtG Artist Connection is not responsible for any loss, damage, delay, or dispute arising from it. By organizing a group order, you agree to describe your terms and prices honestly, to take reasonable care of participants' cards, and to use participants' information only to run the order. We may disable or remove any group order at our discretion, for example after reports of misconduct. You can report a group order to us from its page using "Report this order."
+          </Typography>
+
+          <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
+            8. Content Standards
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             User contributions must comply with all applicable laws and regulations. Without limiting the foregoing, user contributions must not:
@@ -125,49 +135,49 @@ const TermsOfService = () => {
           </Box>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            8. Copyright Infringement
+            9. Copyright Infringement
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             If you believe that any content on our website violates your copyright, please contact us directly at mtgartistconnection@gmail.com with details of the alleged infringement. It is our policy to promptly investigate and, where appropriate, remove infringing content.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            9. Limitation of Liability
+            10. Limitation of Liability
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             To the fullest extent provided by law, in no event will MtG Artist Connection, its affiliates, or their licensors, service providers, employees, agents, officers, or directors be liable for damages of any kind, under any legal theory, arising out of or in connection with your use, or inability to use, the website, including any direct, indirect, special, incidental, consequential, or punitive damages.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            10. Indemnification
+            11. Indemnification
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             You agree to defend, indemnify, and hold harmless MtG Artist Connection, its affiliates, licensors, and service providers, and its and their respective officers, directors, employees, contractors, agents, licensors, suppliers, successors, and assigns from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses, or fees (including reasonable attorneys' fees) arising out of or relating to your violation of these Terms or your use of the website.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            11. Governing Law and Jurisdiction
+            12. Governing Law and Jurisdiction
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             These Terms shall be governed by and construed in accordance with the laws of the State of Washington, without giving effect to any principles of conflicts of law. Any legal action or proceeding relating to your access to, or use of, the website or these Terms shall be instituted in a state or federal court in Washington.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            12. Waiver and Severability
+            13. Waiver and Severability
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             No waiver by MtG Artist Connection of any term or condition set out in these Terms shall be deemed a further or continuing waiver of such term or condition or a waiver of any other term or condition, and any failure of MtG Artist Connection to assert a right or provision under these Terms shall not constitute a waiver of such right or provision.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            13. Entire Agreement
+            14. Entire Agreement
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             These Terms and our Privacy Policy constitute the sole and entire agreement between you and MtG Artist Connection regarding the website and supersede all prior and contemporaneous understandings, agreements, representations, and warranties, both written and oral, regarding the website.
           </Typography>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
-            14. Contact Information
+            15. Contact Information
           </Typography>
           <Typography sx={contentPageStyles.paragraph}>
             If you have any questions about these Terms, please contact us at:

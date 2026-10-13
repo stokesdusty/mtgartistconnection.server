@@ -14,6 +14,12 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
 
+### `npm run start:local`
+
+Runs the app against a local copy of the API instead of production, for testing changes end to end.\
+Start the API first with `npm run dev:local` in `mtgartistconnection.webservice` (it prints the test accounts and a sample invite link),\
+then open [http://localhost:3001](http://localhost:3001). It uses port 3001 so local logins never mix with a normal `npm start` session.
+
 ### `npm test`
 
 Launches the test runner in the interactive watch mode.\
