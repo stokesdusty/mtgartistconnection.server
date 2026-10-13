@@ -75,6 +75,11 @@ const AffiliateDisclosure = () => {
               our TCGPlayer affiliate code. We earn a small commission when you purchase cards
               through these links.
             </li>
+            <li>
+              <strong>Expedia:</strong> "Find hotels nearby" links on signing event pages use
+              our Expedia Group affiliate code. We earn a small commission when you book a stay
+              through these links.
+            </li>
           </Box>
 
           <Typography variant="h2" sx={contentPageStyles.sectionTitle}>
@@ -120,7 +125,7 @@ const AffiliateDisclosure = () => {
             paddingTop: spacing.lg,
             borderTop: `1px solid ${themeColors.neutral[200]}`,
           }}>
-            Last updated: May 24, 2026
+            Last updated: October 13, 2026
           </Typography>
         </Paper>
       </Container>

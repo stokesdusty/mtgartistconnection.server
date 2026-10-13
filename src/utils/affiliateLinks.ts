@@ -7,6 +7,9 @@ export type PricePlatform = 'manapool' | 'tcgplayer' | 'cardkingdom';
 const TCGPLAYER_PARTNER = 'https://partner.tcgplayer.com/JkbQGE';
 const EBAY_CAMPAIGN_ID = '5339140903';
 const CK_PARTNER_PARAMS = 'partner=mtgartistconnection&utm_source=mtgartistconnection&utm_medium=affiliate&utm_campaign=mtgartistconnection';
+// From the long form of our Expedia Affiliate Hub link (expedia.com/affiliate?...&camref=…&creativeref=…&adref=…),
+// not the expedia.com/affiliate/XXXX short link. Without a camref, hotel links go to Expedia untracked.
+const EXPEDIA_IDS: ExpediaIds = { camref: '1011l6u9xH', creativeref: '1100l68075', adref: 'PZ1pKCgN5d' };
 
 const cardSlug = (name: string) =>
   name
@@ -75,6 +78,25 @@ export function cardKingdomUrl(productUrl: string | undefined, cardName: string,
 export function ebaySearchUrl(query: string, placement: Placement): string {
   const keywords = query.trim().split(/\s+/).map(encodeURIComponent).join('+');
   return `https://www.ebay.com/sch/i.html?_nkw=${keywords}&_sacat=0&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=${EBAY_CAMPAIGN_ID}&customid=${placement}&toolid=10001&mkevt=1&utm_source=mtgartistconnection&utm_medium=referral&utm_campaign=ebay_${placement}`;
+}
+
+export interface ExpediaIds {
+  camref: string;
+  creativeref?: string;
+  adref?: string;
+}
+
+// Local calendar day as YYYY-MM-DD, matching how event dates are shown on the site.
+const isoDay = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+/** Expedia hotel search around `destination` for the given stay, wrapped in our affiliate link. */
+export function expediaHotelSearchUrl(destination: string, checkIn: Date, checkOut: Date, ids: ExpediaIds = EXPEDIA_IDS): string {
+  const search = `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(destination)}&startDate=${isoDay(checkIn)}&endDate=${isoDay(checkOut)}&rooms=1&adults=2`;
+  if (!ids.camref) return search;
+  const creative = ids.creativeref ? `&creativeref=${ids.creativeref}` : '';
+  const ad = ids.adref ? `&adref=${ids.adref}` : '';
+  return `https://expedia.com/affiliate?siteid=1&landingPage=${encodeURIComponent(search)}&camref=${ids.camref}${creative}${ad}`;
 }
 
 /** GA event for an affiliate click (no-op until the visitor accepts cookies and gtag loads). */

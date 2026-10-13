@@ -222,6 +222,20 @@ describe('EventDetail', () => {
     expect(screen.queryByRole('region', { name: 'Bring cards to get signed' })).not.toBeInTheDocument();
     expect(screen.queryByRole('radiogroup', { name: 'Event sections' })).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Artists attending' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Find hotels nearby/ })).not.toBeInTheDocument();
+  });
+
+  it('links to Expedia hotels in the event city for the event dates', async () => {
+    renderPage();
+
+    const link = await screen.findByRole('link', { name: /Find hotels nearby/ });
+    expect(link).toHaveAttribute('rel', expect.stringContaining('sponsored'));
+    const href = link.getAttribute('href')!;
+    const search = new URL(href.includes('landingPage=') ? new URL(href).searchParams.get('landingPage')! : href);
+    expect(search.searchParams.get('destination')).toBe('Reading, PA');
+    expect(search.searchParams.get('startDate')).toBe('2099-10-21');
+    // Check out the morning after the last day.
+    expect(search.searchParams.get('endDate')).toBe('2099-10-25');
   });
 
   it('shows a not-found message with a way back', async () => {

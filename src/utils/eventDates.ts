@@ -74,3 +74,16 @@ export const eventStatusLabel = (startDate: string, endDate: string, now: Date =
   const end = new Date(endDate);
   return `Ended ${formatShortDate(end)}, ${end.getFullYear()}`;
 };
+
+/**
+ * Hotel stay covering an event: check in on its first day (or today, once it has
+ * started) and check out the morning after it ends. Null once the event is over.
+ */
+export const eventHotelStay = (startDate: string, endDate: string, now: Date = new Date()) => {
+  if (daysUntil(endDate, now) < 0) return null;
+  const start = startOfDay(new Date(startDate));
+  const today = startOfDay(now);
+  const checkOut = startOfDay(new Date(endDate));
+  checkOut.setDate(checkOut.getDate() + 1);
+  return { checkIn: start < today ? today : start, checkOut };
+};

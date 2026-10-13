@@ -152,6 +152,33 @@ export const eventDetailStyles: Record<string, SystemStyleObject<Theme>> = {
     ...focusRing,
     [vaultMedia.mobile]: { padding: '13px 16px', fontSize: 15 },
   },
+  // Secondary to "Add to calendar": outlined, same footprint.
+  hotelButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    width: '100%',
+    minHeight: 38,
+    marginTop: '8px',
+    padding: '8px 16px',
+    border: `1px solid ${vault.lineStrong}`,
+    borderRadius: vaultRadii.input,
+    color: vault.fg,
+    fontSize: 14,
+    fontWeight: 600,
+    textDecoration: 'none',
+    transition: `background-color ${vaultEffects.transition}, border-color ${vaultEffects.transition}`,
+    '&:hover': { backgroundColor: vault.chip, borderColor: vault.faint },
+    ...focusRing,
+    [vaultMedia.mobile]: { padding: '12px 16px', fontSize: 15 },
+  },
+  hotelNote: {
+    margin: '8px 2px 0',
+    fontSize: 12,
+    lineHeight: 1.4,
+    color: vault.faint,
+  },
 
   // ─── Add-to-calendar popover ───────────────────────────────────────────────
   menuPaper: {

@@ -1,6 +1,7 @@
 import {
   cardKingdomUrl,
   ebaySearchUrl,
+  expediaHotelSearchUrl,
   manapoolUrl,
   tcgplayerMassEntryUrl,
   tcgplayerProductUrl,
@@ -92,5 +93,27 @@ describe('affiliateLinks', () => {
     expect(url.searchParams.get('_nkw')).toBe('Rebecca Guay signed mtg');
     expect(url.searchParams.get('campid')).toBe('5339140903');
     expect(url.searchParams.get('customid')).toBe('artist_page');
+  });
+
+  it('builds Expedia hotel searches, wrapped in the affiliate link once configured', () => {
+    const checkIn = new Date(2026, 9, 21);
+    const checkOut = new Date(2026, 9, 25);
+    const direct = new URL(expediaHotelSearchUrl('Reading, PA', checkIn, checkOut, { camref: '' }));
+    expect(direct.origin + direct.pathname).toBe('https://www.expedia.com/Hotel-Search');
+    expect(direct.searchParams.get('destination')).toBe('Reading, PA');
+    expect(direct.searchParams.get('startDate')).toBe('2026-10-21');
+    expect(direct.searchParams.get('endDate')).toBe('2026-10-25');
+
+    const wrapped = new URL(expediaHotelSearchUrl('Reading, PA', checkIn, checkOut, { camref: 'abc', creativeref: 'xyz' }));
+    expect(wrapped.origin + wrapped.pathname).toBe('https://expedia.com/affiliate');
+    expect(wrapped.searchParams.get('camref')).toBe('abc');
+    expect(wrapped.searchParams.get('creativeref')).toBe('xyz');
+    expect(wrapped.searchParams.get('landingPage')).toBe(direct.toString());
+  });
+
+  it('matches the link Expedia\'s Link Builder generates for our account', () => {
+    expect(expediaHotelSearchUrl('Sacramento, CA', new Date(2026, 9, 23), new Date(2026, 9, 26))).toBe(
+      'https://expedia.com/affiliate?siteid=1&landingPage=https%3A%2F%2Fwww.expedia.com%2FHotel-Search%3Fdestination%3DSacramento%252C%2520CA%26startDate%3D2026-10-23%26endDate%3D2026-10-26%26rooms%3D1%26adults%3D2&camref=1011l6u9xH&creativeref=1100l68075&adref=PZ1pKCgN5d',
+    );
   });
 });

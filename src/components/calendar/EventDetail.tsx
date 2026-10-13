@@ -3,12 +3,13 @@ import { Link as RouterLink } from "react-router-dom";
 import { GET_SIGNINGEVENTS, GET_ARTISTSBYEVENTID, GET_ARTIST_NAMES } from "../graphql/queries";
 import { MEDIA_BASE_URL } from "../../config/media";
 import { useQuery } from "@apollo/client";
-import { ArrowLeft, ArrowUpRight, CaretDown, Calendar, DownloadSimple } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowUpRight, Bed, CaretDown, Calendar, DownloadSimple } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { useParams, useSearchParams } from "react-router-dom";
 import { downloadICalFile, generateGoogleCalendarUrl, generateOutlookCalendarUrl } from "../../utils/calendarExport";
-import { daysUntil, eventStatusLabel, formatDateRangeWithYear } from "../../utils/eventDates";
+import { daysUntil, eventHotelStay, eventStatusLabel, formatDateRangeWithYear } from "../../utils/eventDates";
+import { expediaHotelSearchUrl, trackAffiliateEvent } from "../../utils/affiliateLinks";
 import { eventDetailStyles as styles } from "../../styles/event-detail-styles";
 import MonoLabel from "../shared/MonoLabel";
 import Slab from "../shared/Slab";
@@ -167,6 +168,7 @@ const EventDetail = () => {
   const confirmedCount = artistData?.mapArtistToEventByEventId?.length;
   // Shopping only makes sense before the event, once we know who's coming.
   const showShop = !isPast && artistsWithImages.length > 0;
+  const hotelStay = event.city ? eventHotelStay(event.startDate, event.endDate) : null;
 
   return (
     <Box sx={styles.page}>
@@ -225,6 +227,26 @@ const EventDetail = () => {
               Add to calendar
               <CaretDown size={12} weight="fill" aria-hidden />
             </Box>
+            {hotelStay && (
+              <>
+                <Box
+                  component="a"
+                  href={expediaHotelSearchUrl(event.city, hotelStay.checkIn, hotelStay.checkOut)}
+                  target="_blank"
+                  rel="noopener noreferrer sponsored"
+                  onClick={() => trackAffiliateEvent('expedia_hotels_click', 'event', { event_name: event.name })}
+                  sx={styles.hotelButton}
+                >
+                  <Bed size={16} aria-hidden />
+                  Find hotels nearby
+                  <ArrowUpRight size={13} aria-hidden />
+                </Box>
+                <Box component="p" sx={styles.hotelNote}>
+                  Opens Expedia with your dates filled in. We may earn a commission.{' '}
+                  <Box component={RouterLink} to="/affiliate-disclosure" sx={{ color: 'inherit' }}>Learn more</Box>
+                </Box>
+              </>
+            )}
           </Box>
         </Box>
       </Box>

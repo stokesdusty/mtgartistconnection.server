@@ -1,4 +1,4 @@
-import { daysUntil, eventCountdownLabel, eventStatusLabel, formatDateRange, formatDateRangeWithYear, formatWeekdayRange } from './eventDates';
+import { daysUntil, eventHotelStay, eventCountdownLabel, eventStatusLabel, formatDateRange, formatDateRangeWithYear, formatWeekdayRange } from './eventDates';
 
 const now = new Date(2026, 9, 7, 15, 30); // Wed Oct 7 2026, mid-afternoon
 
@@ -78,5 +78,24 @@ describe('eventStatusLabel', () => {
 
   it('shows the end date for past events', () => {
     expect(eventStatusLabel('2026-09-01T12:00:00', '2026-09-03T12:00:00', now)).toBe('Ended Sep 3, 2026');
+  });
+});
+
+describe('eventHotelStay', () => {
+  const day = (d: Date) => d.toDateString();
+
+  it('checks in on the first day and out the morning after the last', () => {
+    const stay = eventHotelStay('2026-10-21T12:00:00', '2026-10-24T12:00:00', now)!;
+    expect(day(stay.checkIn)).toBe(day(new Date('2026-10-21T00:00:00')));
+    expect(day(stay.checkOut)).toBe(day(new Date('2026-10-25T00:00:00')));
+  });
+
+  it('checks in today for events already underway', () => {
+    const stay = eventHotelStay('2026-10-05T12:00:00', '2026-10-09T12:00:00', now)!;
+    expect(day(stay.checkIn)).toBe(day(now));
+  });
+
+  it('has no stay once the event is over', () => {
+    expect(eventHotelStay('2026-09-01T12:00:00', '2026-09-03T12:00:00', now)).toBeNull();
   });
 });
