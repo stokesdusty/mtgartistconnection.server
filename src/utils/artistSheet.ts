@@ -15,6 +15,10 @@ export const SLOTS_PER_PAGE = 30;
 /** Ten pages; more than any one package needs. */
 export const MAX_SLOTS = 300;
 
+/** Slip text size; wordy slips shrink toward the minimum at print time so they fit their cell. */
+const SLOT_FONT_PT = 9;
+const MIN_SLOT_FONT_PT = 6;
+
 export function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -63,15 +67,29 @@ export function buildArtistSheetHtml(slots: SheetSlot[], header?: string): strin
   .page { display: flex; flex-direction: column; height: calc(11in - 0.7in); break-after: page; }
   .page:last-child { break-after: auto; }
   .header { font-size: 9pt; font-weight: 600; padding: 0 0 6px; }
-  .grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(10, 1fr); gap: 6px; }
-  .slot { padding: 5px 8px; font-size: 9pt; line-height: 1.7; border-left: 4px solid #ccc; }
+  /* minmax(0, …) keeps a wordy slip from stretching its row and pushing the last row off the page. */
+  .grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(10, minmax(0, 1fr)); gap: 6px; }
+  .slot { padding: 5px 8px; font-size: ${SLOT_FONT_PT}pt; line-height: 1.7; border-left: 4px solid #ccc; overflow: hidden; overflow-wrap: anywhere; }
   .slot.filled { border-left-color: #3498db; }
   .slot strong { font-weight: 600; }
 </style>
 </head>
 <body>
 ${pages}
-<script>window.onload = function() { window.print(); window.close(); }${'</script>'}
+<script>
+  // Shrink only the slips whose text overflows their cell, so the 3×10 cut grid stays uniform.
+  function fitSlots() {
+    var slots = document.querySelectorAll('.slot');
+    for (var i = 0; i < slots.length; i++) {
+      var pt = ${SLOT_FONT_PT};
+      while (slots[i].scrollHeight > slots[i].clientHeight && pt > ${MIN_SLOT_FONT_PT}) {
+        pt -= 0.5;
+        slots[i].style.fontSize = pt + 'pt';
+      }
+    }
+  }
+  window.onload = function() { fitSlots(); window.print(); window.close(); };
+${'</script>'}
 </body>
 </html>`;
 }

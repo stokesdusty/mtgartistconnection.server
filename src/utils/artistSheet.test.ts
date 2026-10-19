@@ -30,6 +30,28 @@ describe('buildArtistSheetHtml', () => {
     expect(html).not.toContain('<b>me</b>');
   });
 
+  it('keeps rows a fixed height so wordy slips cannot push the last row off the page', () => {
+    const html = buildArtistSheetHtml([slot(1)]);
+    expect(html).toContain('grid-template-rows: repeat(10, minmax(0, 1fr))');
+    expect(html).toMatch(/\.slot \{[^}]*overflow: hidden/);
+  });
+
+  it('shrinks only the slips that overflow their cell before printing', () => {
+    const html = buildArtistSheetHtml([slot(1), { ...slot(2), color: 'Signature, silver ink, personalized to Alice' }]);
+    document.body.innerHTML = html.slice(html.indexOf('<body>') + 6, html.indexOf('<script>'));
+    const [short, wordy] = Array.from(document.querySelectorAll<HTMLElement>('.slot'));
+    // jsdom has no layout: the wordy slip overflows until its text drops to 7pt.
+    const fontPt = (el: HTMLElement) => parseFloat(el.style.fontSize) || 9;
+    for (const el of [short, wordy]) {
+      Object.defineProperty(el, 'clientHeight', { value: 70 });
+      Object.defineProperty(el, 'scrollHeight', { get: () => (el === wordy && fontPt(el) > 7 ? 90 : 70) });
+    }
+    const script = html.slice(html.indexOf('<script>') + 8, html.indexOf('window.onload'));
+    new Function(`${script}; fitSlots();`)();
+    expect(short.style.fontSize).toBe('');
+    expect(wordy.style.fontSize).toBe('7pt');
+  });
+
   it('leaves the header out of the standalone generator', () => {
     expect(buildArtistSheetHtml([slot(1)])).not.toContain('class="header"');
   });
