@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Box, Button, Typography, Link } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { colors, themeColors, spacing, borderRadius, shadows } from "../../styles/design-tokens";
+import { vault, spacing, borderRadius, shadows } from "../../styles/design-tokens";
 import { loadGoogleAnalytics } from "../../utils/analytics";
 
 const CONSENT_KEY = "cookie-consent";
@@ -50,14 +50,14 @@ const CookieConsentBanner = () => {
         justifyContent: "center",
         gap: spacing.md,
         padding: `${spacing.md} ${spacing.lg}`,
-        backgroundColor: themeColors.background.paper,
-        borderTop: `1px solid ${colors.neutral[200]}`,
+        backgroundColor: vault.surface,
+        borderTop: `1px solid ${vault.line}`,
         boxShadow: shadows.lg,
       }}
     >
-      <Typography sx={{ color: themeColors.text.secondary, fontSize: "0.875rem", flex: "1 1 320px" }}>
+      <Typography sx={{ color: vault.muted, fontSize: "0.875rem", flex: "1 1 320px" }}>
         We use cookies to analyze site traffic via Google Analytics. Read our{" "}
-        <Link component={RouterLink} to="/privacypolicy" sx={{ color: colors.primary.main }}>
+        <Link component={RouterLink} to="/privacypolicy" sx={{ color: vault.accentText }}>
           Privacy Policy
         </Link>{" "}
         to learn more. You can accept or decline analytics cookies.
@@ -68,8 +68,8 @@ const CookieConsentBanner = () => {
           variant="outlined"
           size="small"
           sx={{
-            color: colors.text.secondary,
-            borderColor: colors.neutral[300],
+            color: vault.muted,
+            borderColor: vault.lineStrong,
             borderRadius: borderRadius.sm,
             textTransform: "none",
           }}
@@ -80,11 +80,14 @@ const CookieConsentBanner = () => {
           onClick={handleAccept}
           variant="contained"
           size="small"
+          disableElevation
           sx={{
-            backgroundColor: colors.primary.main,
+            backgroundColor: vault.accent,
+            color: vault.onAccent,
+            fontWeight: 600,
             borderRadius: borderRadius.sm,
             textTransform: "none",
-            "&:hover": { backgroundColor: colors.primary.dark },
+            "&:hover": { backgroundColor: vault.accent, opacity: 0.88 },
           }}
         >
           Accept
