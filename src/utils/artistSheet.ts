@@ -1,6 +1,6 @@
 import { GroupOrder, OrderRow, signatureTypeLabel } from './groupOrders';
 
-// Printable artist sheets: letter pages of 3×10 slips that go in a package of cards so the
+// Printable artist sheets: letter pages of 3×9 slips that go in a package of cards so the
 // person at the signing can sort them by artist. Shared by the Artist Sheet Generator and
 // group orders ("Ready to ship").
 
@@ -11,8 +11,10 @@ export interface SheetSlot {
   color: string;
 }
 
-export const SLOTS_PER_PAGE = 30;
-/** Ten pages; more than any one package needs. */
+/** Nine rows of three, which leaves room at the bottom of the page. */
+export const SLOTS_PER_PAGE = 27;
+const ROWS_PER_PAGE = SLOTS_PER_PAGE / 3;
+/** More than any one package needs. */
 export const MAX_SLOTS = 300;
 
 /** Slip text size; wordy slips shrink toward the minimum at print time so they fit their cell. */
@@ -64,11 +66,13 @@ export function buildArtistSheetHtml(slots: SheetSlot[], header?: string): strin
   @page { size: letter portrait; margin: 0.35in; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .page { display: flex; flex-direction: column; height: calc(11in - 0.7in); break-after: page; }
+  /* A hair shorter than the printable area so rounding never spills a page; the bottom padding is
+     breathing room the rows never reach, however wordy the slips. */
+  .page { display: flex; flex-direction: column; height: calc(11in - 0.8in); padding-bottom: 0.5in; break-after: page; }
   .page:last-child { break-after: auto; }
   .header { font-size: 9pt; font-weight: 600; padding: 0 0 6px; }
   /* minmax(0, …) keeps a wordy slip from stretching its row and pushing the last row off the page. */
-  .grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(10, minmax(0, 1fr)); gap: 6px; }
+  .grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(${ROWS_PER_PAGE}, minmax(0, 1fr)); gap: 6px; }
   .slot { padding: 5px 8px; font-size: ${SLOT_FONT_PT}pt; line-height: 1.7; border-left: 4px solid #ccc; overflow: hidden; overflow-wrap: anywhere; }
   .slot.filled { border-left-color: #3498db; }
   .slot strong { font-weight: 600; }
@@ -77,7 +81,7 @@ export function buildArtistSheetHtml(slots: SheetSlot[], header?: string): strin
 <body>
 ${pages}
 <script>
-  // Shrink only the slips whose text overflows their cell, so the 3×10 cut grid stays uniform.
+  // Shrink only the slips whose text overflows their cell, so the 3×9 cut grid stays uniform.
   function fitSlots() {
     var slots = document.querySelectorAll('.slot');
     for (var i = 0; i < slots.length; i++) {

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { MEDIA_BASE_URL } from '../../config/media';
+import { fileToBase64 } from '../../utils/signatureExamples';
 import { useQuery, useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -76,15 +77,6 @@ const ManualArticleSubmit: React.FC = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const uploadImage = async (): Promise<string | null> => {

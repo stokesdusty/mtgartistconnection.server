@@ -17,8 +17,9 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "@apollo/client";
 import { UPDATE_ARTIST_BULK } from "../graphql/mutations";
 import { GET_ARTIST_BY_ID } from "../graphql/queries";
+import SignatureExamplesManager from "../shared/SignatureExamplesManager";
 import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { colors } from "../../styles/design-tokens";
@@ -67,10 +68,13 @@ const EditArtist = () => {
         fetchPolicy: 'network-only',
     });
 
-    // Populate form when data loads
+    // Populate form when data loads. Only once per artist: signature example
+    // changes update the cached artist, and that shouldn't wipe unsaved edits.
+    const populatedId = useRef<string | null>(null);
     useEffect(() => {
-        if (data?.artistById) {
+        if (data?.artistById && populatedId.current !== data.artistById.id) {
             const artist = data.artistById;
+            populatedId.current = artist.id;
             reset({
                 name: artist.name || "",
                 email: artist.email || "",
@@ -96,6 +100,12 @@ const EditArtist = () => {
             setMarks(artist.markssignatureservice || "false");
         }
     }, [data, reset]);
+
+    // Removing the old signature photo clears haveSignature on the server.
+    const savedHaveSignature = data?.artistById?.haveSignature;
+    useEffect(() => {
+        if (savedHaveSignature !== undefined) setSignature(savedHaveSignature || "false");
+    }, [savedHaveSignature]);
 
     const styles = {
         container: {
@@ -519,8 +529,20 @@ const EditArtist = () => {
                             </RadioGroup>
                         </FormControl>
 
+                        <Box sx={styles.formControl}>
+                            <FormLabel sx={styles.formLabel}>Signature Examples</FormLabel>
+                            <Box sx={{ mt: 1 }}>
+                                <SignatureExamplesManager
+                                    artistId={data.artistById.id}
+                                    examples={data.artistById.signatureExamples ?? []}
+                                />
+                            </Box>
+                        </Box>
+
+                        {/* Legacy single image at signatures/<filename>.jpg. Kept until
+                            every artist's image is saved as a signature example. */}
                         <FormControl sx={styles.formControl}>
-                            <FormLabel sx={styles.formLabel}>Have Signature Example</FormLabel>
+                            <FormLabel sx={styles.formLabel}>Have Signature Example (legacy image)</FormLabel>
                             <RadioGroup
                                 row
                                 value={signature}

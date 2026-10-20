@@ -10,8 +10,8 @@ describe('paginateSlots', () => {
     expect(pages[0].filter(Boolean)).toHaveLength(1);
   });
 
-  it('goes past 30 slips onto more pages', () => {
-    const pages = paginateSlots(Array.from({ length: 31 }, (_, i) => slot(i)));
+  it('goes past 27 slips onto more pages', () => {
+    const pages = paginateSlots(Array.from({ length: 28 }, (_, i) => slot(i)));
     expect(pages).toHaveLength(2);
     expect(pages[1].filter(Boolean)).toHaveLength(1);
   });
@@ -23,16 +23,18 @@ describe('paginateSlots', () => {
 
 describe('buildArtistSheetHtml', () => {
   it('escapes text and repeats the header on every page', () => {
-    const html = buildArtistSheetHtml([...Array.from({ length: 30 }, (_, i) => slot(i)), { ...slot(99), name: '<b>me</b>' }], 'IX run · organizer card.runner');
+    const html = buildArtistSheetHtml([...Array.from({ length: 27 }, (_, i) => slot(i)), { ...slot(99), name: '<b>me</b>' }], 'IX run · organizer card.runner');
     expect(html.match(/class="page"/g)).toHaveLength(2);
     expect(html.match(/IX run · organizer card.runner/g)).toHaveLength(2);
     expect(html).toContain('&lt;b&gt;me&lt;/b&gt;');
     expect(html).not.toContain('<b>me</b>');
   });
 
-  it('keeps rows a fixed height so wordy slips cannot push the last row off the page', () => {
+  it('keeps nine fixed-height rows above a blank bottom margin so wordy slips cannot reach the page edge', () => {
     const html = buildArtistSheetHtml([slot(1)]);
-    expect(html).toContain('grid-template-rows: repeat(10, minmax(0, 1fr))');
+    expect(SLOTS_PER_PAGE).toBe(27);
+    expect(html).toContain('grid-template-rows: repeat(9, minmax(0, 1fr))');
+    expect(html).toMatch(/\.page \{[^}]*padding-bottom: 0\.5in/);
     expect(html).toMatch(/\.slot \{[^}]*overflow: hidden/);
   });
 

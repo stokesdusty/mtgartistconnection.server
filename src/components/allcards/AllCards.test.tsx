@@ -56,6 +56,7 @@ describe('AllCards', () => {
             bluesky: null,
             omalink: null,
             inprnt: null,
+            signatureExamples: [],
           },
         },
       },

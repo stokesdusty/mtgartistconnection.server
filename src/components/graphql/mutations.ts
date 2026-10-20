@@ -557,6 +557,43 @@ export const UPDATE_ARTIST_PROFILE = gql`
     }
 `;
 
+// Signature examples. Each returns the artist's list, which Apollo merges into
+// every cached query for that artist.
+const SIGNATURE_EXAMPLES_RESULT = `id signatureExamples { id imageUrl label }`;
+
+export const ADD_SIGNATURE_EXAMPLE = gql`
+    mutation addSignatureExample($artistId: ID!, $base64Data: String!, $contentType: String!, $label: String!) {
+        addSignatureExample(artistId: $artistId, base64Data: $base64Data, contentType: $contentType, label: $label) {
+            ${SIGNATURE_EXAMPLES_RESULT}
+        }
+    }
+`;
+
+export const UPDATE_SIGNATURE_EXAMPLE = gql`
+    mutation updateSignatureExample($artistId: ID!, $exampleId: ID!, $label: String!) {
+        updateSignatureExample(artistId: $artistId, exampleId: $exampleId, label: $label) {
+            ${SIGNATURE_EXAMPLES_RESULT}
+        }
+    }
+`;
+
+export const REMOVE_SIGNATURE_EXAMPLE = gql`
+    mutation removeSignatureExample($artistId: ID!, $exampleId: ID!) {
+        removeSignatureExample(artistId: $artistId, exampleId: $exampleId) {
+            ${SIGNATURE_EXAMPLES_RESULT}
+            haveSignature
+        }
+    }
+`;
+
+export const REORDER_SIGNATURE_EXAMPLES = gql`
+    mutation reorderSignatureExamples($artistId: ID!, $exampleIds: [ID!]!) {
+        reorderSignatureExamples(artistId: $artistId, exampleIds: $exampleIds) {
+            ${SIGNATURE_EXAMPLES_RESULT}
+        }
+    }
+`;
+
 // ─── Group orders ───────────────────────────────────────────────────────────
 
 export const CREATE_GROUP_ORDER = gql`

@@ -62,6 +62,7 @@ export const GET_ARTIST_BY_NAME = gql`
             artistNoteUpdatedAt
             isVerified
             inprnt
+            signatureExamples { id imageUrl label }
         }
     }
 `;
@@ -211,6 +212,7 @@ export const ARTIST_DASHBOARD_FIELDS = `
     artistProofs
     artistNote
     artistNoteUpdatedAt
+    signatureExamples { id imageUrl label }
 `;
 
 export const GET_ARTIST_DASHBOARD = gql`
@@ -259,6 +261,7 @@ export const GET_ARTIST_BY_ID = gql`
             omalink
             inprnt
             scryfall_name
+            signatureExamples { id imageUrl label }
         }
     }
 `;

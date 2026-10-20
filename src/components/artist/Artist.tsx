@@ -22,7 +22,7 @@ import { vault } from "../../styles/design-tokens";
 import PageMeta from "../shared/PageMeta";
 import MonoLabel from "../shared/MonoLabel";
 import GlowPill from "../shared/GlowPill";
-import Slab from "../shared/Slab";
+import SignatureShowcase from "./SignatureShowcase";
 
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -376,11 +376,6 @@ const Artist = () => {
     { label: "Artstation", url: artistByName.artstation, icon: FaArtstation },
     { label: "Bluesky", url: artistByName.bluesky, icon: FaBluesky },
   ];
-
-  const signatureImage =
-    artistByName.haveSignature === "true"
-      ? `${MEDIA_BASE_URL}/signatures/${artistByName.filename}.jpg`
-      : `${MEDIA_BASE_URL}/emptycardframe.jpg`;
 
   const handleFollowToggle = async () => {
     if (!name) return;
@@ -746,16 +741,11 @@ const Artist = () => {
         </Box>
 
         <Box sx={artistStyles.sideColumn}>
-          <Box component="section" aria-labelledby="artist-signature-label" sx={artistStyles.signature}>
-            <MonoLabel component="h2" id="artist-signature-label">Example signature</MonoLabel>
-            <Slab
-              src={signatureImage}
-              alt={`${artistByName.name} signature example`}
-              aspectRatio="63 / 88"
-              size="lg"
-              sx={artistStyles.signatureSlab}
-            />
-          </Box>
+          <SignatureShowcase
+            key={artistByName.id}
+            artistName={artistByName.name}
+            examples={artistByName.signatureExamples ?? []}
+          />
         </Box>
       </Box>
     </Box>

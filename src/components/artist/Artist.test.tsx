@@ -32,6 +32,7 @@ describe('Artist', () => {
       bluesky: null,
       omalink: null,
       inprnt: null,
+      signatureExamples: [],
     };
 
     const mocks = [

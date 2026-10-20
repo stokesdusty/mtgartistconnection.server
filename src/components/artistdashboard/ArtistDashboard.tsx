@@ -9,6 +9,7 @@ import { GET_ARTIST_DASHBOARD, GET_ARTIST_EDIT_LOG } from "../graphql/queries";
 import { UPDATE_ARTIST_PROFILE } from "../graphql/mutations";
 import { artistDashboardStyles as styles } from "../../styles/artist-dashboard-styles";
 import MonoLabel from "../shared/MonoLabel";
+import SignatureExamplesManager from "../shared/SignatureExamplesManager";
 import { SettingsSkeleton } from "../shared/Skeletons";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
@@ -41,6 +42,7 @@ const FIELD_LABELS: Record<string, string> = {
   artistNote: "Note",
   signing: "Signing status",
   artistProofs: "Artist proofs",
+  signatureExamples: "Signature examples",
   ...Object.fromEntries(LINK_FIELDS.map((l) => [l.field, l.label])),
 };
 
@@ -212,6 +214,18 @@ function DashboardForm({ artist }: { artist: any }) {
                 {values.artistNote.length} / {MAX_NOTE_LENGTH}
               </Box>
             </Box>
+          </Box>
+
+          {/* ── Signature examples ──────────────────────────────────────── */}
+          <Box component="section" aria-labelledby="dash-signatures" sx={styles.panel}>
+            <Box component="h2" id="dash-signatures" sx={styles.sectionTitle}>
+              Signature examples
+            </Box>
+            <Box component="p" sx={styles.sectionIntro}>
+              Show collectors each kind of signature you offer, like a regular signature, a shadow signature or a
+              sketch. The first one is shown largest on your page. These save as soon as you add or change them.
+            </Box>
+            <SignatureExamplesManager artistId={artist.id} examples={artist.signatureExamples ?? []} />
           </Box>
 
           {/* ── Signing ─────────────────────────────────────────────────── */}

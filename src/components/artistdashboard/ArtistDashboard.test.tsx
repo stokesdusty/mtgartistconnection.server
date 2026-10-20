@@ -33,6 +33,7 @@ const artist = {
   artistProofs: 'false',
   artistNote: '',
   artistNoteUpdatedAt: null,
+  signatureExamples: [],
 };
 
 const dashboardMock = (artistDashboard: any, artistId?: string): MockedResponse => ({
