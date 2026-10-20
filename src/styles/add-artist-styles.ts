@@ -35,6 +35,21 @@ export const addArtistStyles: Record<string, SystemStyleObject<Theme>> = {
     color: vault.fg,
     [vaultMedia.mobile]: { fontSize: 40 },
   },
+  // Title plus a "View artist page" link (Edit artist).
+  headerRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    flexWrap: 'wrap',
+    gap: '12px 20px',
+  },
+  viewLink: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: vault.accentText,
+    textDecoration: 'none',
+    '&:hover': { textDecoration: 'underline' },
+    ...focusRing,
+  },
   intro: {
     margin: '16px 0 32px',
     maxWidth: 720,
@@ -154,9 +169,16 @@ export const addArtistStyles: Record<string, SystemStyleObject<Theme>> = {
     cursor: 'pointer',
     ...focusRing,
   },
+  // A status message on the left, the submit button pushed to the right.
   actions: {
     display: 'flex',
-    justifyContent: 'flex-end',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '16px',
+    [vaultMedia.mobile]: { flexDirection: 'column-reverse', alignItems: 'stretch' },
+  },
+  actionsButton: {
+    marginLeft: 'auto',
   },
   button: {
     height: 46,

@@ -1,28 +1,18 @@
-import {
-    Box,
-    Button,
-    Radio,
-    RadioGroup,
-    TextField,
-    Typography,
-    Container,
-    Paper,
-    FormControlLabel,
-    FormControl,
-    FormLabel,
-    LinearProgress,
-    Alert
-} from "@mui/material";
-import { useForm } from "react-hook-form";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { Box } from "@mui/material";
+import { useForm, UseFormRegister } from "react-hook-form";
 import { useMutation, useQuery } from "@apollo/client";
+import { useSelector } from "react-redux";
+import { Link as RouterLink, Navigate, useNavigate, useParams } from "react-router-dom";
 import { UPDATE_ARTIST_BULK } from "../graphql/mutations";
 import { GET_ARTIST_BY_ID } from "../graphql/queries";
+import { RootState } from "../../store/store";
+import { addArtistStyles as styles } from "../../styles/add-artist-styles";
+import MonoLabel from "../shared/MonoLabel";
 import SignatureExamplesManager from "../shared/SignatureExamplesManager";
-import { useSelector } from "react-redux";
-import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { SettingsSkeleton } from "../shared/Skeletons";
+import { Field as SharedField, OptionRow, toYesNo, YesNo } from "./artistFormFields";
 
-import { colors } from "../../styles/design-tokens";
 type Inputs = {
     name: string;
     email: string;
@@ -43,556 +33,202 @@ type Inputs = {
     scryfall_name: string;
 }
 
+const TEXT_FIELDS: (keyof Inputs)[] = [
+    "name", "email", "filename", "facebook", "instagram", "patreon", "twitter", "youtube", "artstation",
+    "mountainmage", "url", "location", "signingComment", "bluesky", "omalink", "inprnt", "scryfall_name",
+];
+
+interface FieldProps {
+    name: keyof Inputs;
+    label: string;
+    register: UseFormRegister<Inputs>;
+    type?: string;
+    placeholder?: string;
+    multiline?: boolean;
+    wide?: boolean;
+}
+
+const Field = (props: FieldProps) => <SharedField<Inputs> idPrefix="edit-artist" {...props} />;
+
+const PageShell = ({ children }: { children: ReactNode }) => (
+    <Box sx={styles.page}>
+        <Box sx={styles.inner}>
+            <MonoLabel tone="accent" size={12} tracking="wide" sx={styles.eyebrow}>
+                Admin
+            </MonoLabel>
+            {children}
+        </Box>
+    </Box>
+);
+
 const EditArtist = () => {
     const { artistId } = useParams<{ artistId: string }>();
-    const navigate = useNavigate();
-    const isLoggedIn = useSelector((state: any) => state.auth.isLoggedIn);
+    const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+    const isAdmin = useSelector((state: RootState) => state.auth.user?.role === "admin");
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-    } = useForm<Inputs>();
-
-    const [updateArtist] = useMutation(UPDATE_ARTIST_BULK);
-    const [signature, setSignature] = useState("false");
-    const [artistProof, setArtistProof] = useState("false");
-    const [isSigning, setIsSigning] = useState("false");
-    const [marks, setMarks] = useState("false");
-    const [successMessage, setSuccessMessage] = useState("");
-
-    // Fetch artist data
     const { data, loading, error } = useQuery(GET_ARTIST_BY_ID, {
         variables: { id: artistId },
-        skip: !isLoggedIn || !artistId,
-        fetchPolicy: 'network-only',
+        skip: !isLoggedIn || !isAdmin || !artistId,
+        fetchPolicy: "network-only",
+    });
+    const artist = data?.artistById;
+
+    if (!isLoggedIn || !isAdmin) {
+        return <Navigate to="/" replace />;
+    }
+
+    if (loading) {
+        return <SettingsSkeleton />;
+    }
+
+    if (error || !artist) {
+        return (
+            <PageShell>
+                <Box component="h1" sx={[styles.title, { mb: "24px" }]}>Edit artist</Box>
+                <Box role="alert" sx={[styles.message, styles.messageError]}>
+                    {error?.message || "Artist not found."}
+                </Box>
+            </PageShell>
+        );
+    }
+
+    // Keyed so moving to another artist starts a fresh form. Within one artist
+    // the form keeps its edits when signature example changes refresh `artist`.
+    return <EditArtistForm key={artist.id} artist={artist} />;
+};
+
+function EditArtistForm({ artist }: { artist: any }) {
+    const navigate = useNavigate();
+    const { register, handleSubmit } = useForm<Inputs>({
+        defaultValues: Object.fromEntries(TEXT_FIELDS.map((field) => [field, artist[field] || ""])) as Inputs,
     });
 
-    // Populate form when data loads. Only once per artist: signature example
-    // changes update the cached artist, and that shouldn't wipe unsaved edits.
-    const populatedId = useRef<string | null>(null);
-    useEffect(() => {
-        if (data?.artistById && populatedId.current !== data.artistById.id) {
-            const artist = data.artistById;
-            populatedId.current = artist.id;
-            reset({
-                name: artist.name || "",
-                email: artist.email || "",
-                filename: artist.filename || "",
-                facebook: artist.facebook || "",
-                instagram: artist.instagram || "",
-                patreon: artist.patreon || "",
-                twitter: artist.twitter || "",
-                youtube: artist.youtube || "",
-                artstation: artist.artstation || "",
-                mountainmage: artist.mountainmage || "",
-                url: artist.url || "",
-                location: artist.location || "",
-                signingComment: artist.signingComment || "",
-                bluesky: artist.bluesky || "",
-                omalink: artist.omalink || "",
-                inprnt: artist.inprnt || "",
-                scryfall_name: artist.scryfall_name || "",
-            });
-            setSignature(artist.haveSignature || "false");
-            setArtistProof(artist.artistProofs || "false");
-            setIsSigning(artist.signing || "false");
-            setMarks(artist.markssignatureservice || "false");
-        }
-    }, [data, reset]);
+    const [updateArtist] = useMutation(UPDATE_ARTIST_BULK);
+    const [signature, setSignature] = useState<YesNo>(() => toYesNo(artist.haveSignature));
+    const [artistProof, setArtistProof] = useState<YesNo>(() => toYesNo(artist.artistProofs));
+    const [isSigning, setIsSigning] = useState<YesNo>(() => toYesNo(artist.signing));
+    const [marks, setMarks] = useState<YesNo>(() => toYesNo(artist.markssignatureservice));
+    const [submitting, setSubmitting] = useState(false);
+    const [saveError, setSaveError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     // Removing the old signature photo clears haveSignature on the server.
-    const savedHaveSignature = data?.artistById?.haveSignature;
-    useEffect(() => {
-        if (savedHaveSignature !== undefined) setSignature(savedHaveSignature || "false");
-    }, [savedHaveSignature]);
+    const savedHaveSignature = artist.haveSignature;
+    useEffect(() => setSignature(toYesNo(savedHaveSignature)), [savedHaveSignature]);
 
-    const styles = {
-        container: {
-            backgroundColor: colors.primary.main,
-            minHeight: "100vh",
-            padding: { xs: 2, md: 4 },
-        },
-        contentWrapper: {
-            maxWidth: 800,
-            margin: "0 auto",
-            padding: { xs: 3, md: 4 },
-            backgroundColor: colors.neutral.white,
-            borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-        },
-        pageTitle: {
-            color: colors.primary.main,
-            fontWeight: 700,
-            fontSize: { xs: "2rem", md: "2.5rem" },
-            marginBottom: 3,
-            textAlign: "center",
-        },
-        sectionHeader: {
-            color: colors.primary.main,
-            fontWeight: 600,
-            fontSize: "1.5rem",
-            marginBottom: 2,
-            marginTop: 3,
-            paddingBottom: 1,
-            borderBottom: `2px solid ${colors.primary.main}`,
-        },
-        form: {
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-        },
-        textField: {
-            "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-                "&:hover fieldset": {
-                    borderColor: colors.primary.main,
-                },
-                "&.Mui-focused fieldset": {
-                    borderColor: colors.primary.main,
-                },
-            },
-            "& .MuiInputLabel-root": {
-                "&.Mui-focused": {
-                    color: colors.primary.main,
-                },
-            },
-        },
-        radioGroup: {
-            "& .MuiFormControlLabel-root": {
-                margin: "0 16px 0 0",
-            },
-            "& .MuiRadio-root": {
-                  color: colors.primary.main,
-                "&.Mui-checked": {
-                      color: colors.primary.main,
-                },
-            },
-        },
-        formControl: {
-            marginTop: 2,
-            marginBottom: 1,
-        },
-        formLabel: {
-            color: colors.primary.main,
-            fontWeight: 600,
-            fontSize: "1rem",
-            "&.Mui-focused": {
-                color: colors.primary.main,
-            },
-        },
-        submitButton: {
-            backgroundColor: colors.primary.main,
-            color: colors.neutral.white,
-            marginTop: 3,
-            padding: "12px 24px",
-            fontSize: "1.1rem",
-            fontWeight: 600,
-            borderRadius: "8px",
-            "&:hover": {
-                backgroundColor: colors.primary.dark,
-            },
-        },
-        fieldSection: {
-            marginBottom: 2,
-        },
-        errorMessage: {
-            color: colors.accent.red,
-            textAlign: "center",
-            padding: 4,
-            backgroundColor: colors.accent.redLight,
-            borderRadius: 2,
-            marginBottom: 2,
-        },
-        loadingContainer: {
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "200px",
-        },
-    };
+    // Cancel the post-save redirect if the admin leaves first.
+    const redirectTimer = useRef<ReturnType<typeof setTimeout>>();
+    useEffect(() => () => clearTimeout(redirectTimer.current), []);
 
-    const onSubmit = async({
-        name,
-        email,
-        filename,
-        facebook,
-        instagram,
-        patreon,
-        twitter,
-        youtube,
-        artstation,
-        mountainmage,
-        url,
-        location,
-        signingComment,
-        bluesky,
-        omalink,
-        inprnt,
-        scryfall_name,
-    }: Inputs) => {
+    const onSubmit = async (values: Inputs) => {
+        setSaveError("");
+        setSuccessMessage("");
+        setSubmitting(true);
         try {
             await updateArtist({
                 variables: {
-                    id: artistId,
-                    name,
-                    email,
-                    filename,
-                    facebook,
-                    instagram,
-                    patreon,
-                    twitter,
-                    youtube,
-                    artstation,
-                    mountainmage,
-                    url,
-                    location,
-                    signingComment,
+                    id: artist.id,
+                    ...values,
                     artistProofs: artistProof,
                     haveSignature: signature,
                     signing: isSigning,
                     markssignatureservice: marks,
-                    bluesky,
-                    omalink,
-                    inprnt,
-                    scryfall_name: scryfall_name || undefined,
+                    scryfall_name: values.scryfall_name || undefined,
                 },
             });
-
-            setSuccessMessage("Artist updated successfully!");
-
-            // Navigate back to artist page after 1.5 seconds
-            setTimeout(() => {
-                navigate(`/artist/${name}`);
-            }, 1500);
+            setSuccessMessage("Saved. Taking you to the artist page…");
+            redirectTimer.current = setTimeout(() => navigate(`/artist/${encodeURIComponent(values.name)}`), 1500);
         } catch (err: any) {
-            console.error(err.message);
+            setSaveError(err.message || "Couldn't save the artist. Please try again.");
+            setSubmitting(false);
         }
     };
 
-    if (!isLoggedIn) {
-        return (
-            <Box sx={styles.container}>
-                <Container maxWidth="md">
-                    <Paper elevation={0} sx={styles.contentWrapper}>
-                        <Typography sx={styles.errorMessage}>
-                            Error: You must be logged in to edit an artist
-                        </Typography>
-                    </Paper>
-                </Container>
-            </Box>
-        );
-    }
-
-    if (loading) {
-        return (
-            <Box sx={styles.container}>
-                <Container maxWidth="md">
-                    <Paper elevation={0} sx={styles.contentWrapper}>
-                        <Box sx={styles.loadingContainer}>
-                            <LinearProgress sx={{ color: colors.primary.main, width: "300px" }} />
-                        </Box>
-                    </Paper>
-                </Container>
-            </Box>
-        );
-    }
-
-    if (error || !data?.artistById) {
-        return (
-            <Box sx={styles.container}>
-                <Container maxWidth="md">
-                    <Paper elevation={0} sx={styles.contentWrapper}>
-                        <Typography sx={styles.errorMessage}>
-                            Error: {error?.message || "Artist not found"}
-                        </Typography>
-                    </Paper>
-                </Container>
-            </Box>
-        );
-    }
-
     return (
-        <Box sx={styles.container}>
-            <Container maxWidth="md">
-                <Paper elevation={0} sx={styles.contentWrapper}>
-                    <Typography variant="h2" sx={styles.pageTitle}>
-                        Edit Artist
-                    </Typography>
+        <PageShell>
+            <Box sx={styles.headerRow}>
+                <Box component="h1" sx={styles.title}>Edit artist</Box>
+                <Box component={RouterLink} to={`/artist/${encodeURIComponent(artist.name)}`} sx={styles.viewLink}>
+                    View artist page →
+                </Box>
+            </Box>
+            <Box component="p" sx={styles.intro}>
+                Changes to {artist.name}'s profile go live when you save.
+            </Box>
 
-                    {successMessage && (
-                        <Alert severity="success" sx={{ marginBottom: 2 }}>
-                            {successMessage}
-                        </Alert>
-                    )}
+            <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={styles.form}>
+                <Box component="section" aria-labelledby="edit-artist-basic" sx={styles.panel}>
+                    <Box component="h2" id="edit-artist-basic" sx={styles.sectionTitle}>Basic information</Box>
+                    <Box component="p" sx={styles.sectionIntro}>Name, contact and where the artist's image lives.</Box>
+                    <Box sx={styles.fieldGrid}>
+                        <Field name="name" label="Artist name" register={register} />
+                        <Field name="email" label="Email" type="email" register={register} />
+                        <Field name="filename" label="File name" register={register} />
+                        <Field name="location" label="Location" register={register} />
+                        <Field name="url" label="Website URL" placeholder="https://" wide register={register} />
+                        <Field name="scryfall_name" label="Scryfall name" placeholder="Only if different from the display name" wide register={register} />
+                    </Box>
+                </Box>
 
-                    <form onSubmit={handleSubmit(onSubmit)} style={styles.form as React.CSSProperties}>
-                        <Typography sx={styles.sectionHeader} variant="h4">
-                            Basic Information
-                        </Typography>
+                <Box component="section" aria-labelledby="edit-artist-social" sx={styles.panel}>
+                    <Box component="h2" id="edit-artist-social" sx={styles.sectionTitle}>Social links</Box>
+                    <Box component="p" sx={styles.sectionIntro}>Leave blank anything the artist doesn't use.</Box>
+                    <Box sx={styles.fieldGrid}>
+                        <Field name="facebook" label="Facebook" register={register} />
+                        <Field name="instagram" label="Instagram" register={register} />
+                        <Field name="twitter" label="Twitter" register={register} />
+                        <Field name="bluesky" label="Bluesky" register={register} />
+                        <Field name="youtube" label="YouTube" register={register} />
+                        <Field name="artstation" label="ArtStation" register={register} />
+                        <Field name="patreon" label="Patreon" register={register} />
+                        <Field name="inprnt" label="INPRNT link" register={register} />
+                        <Field name="omalink" label="OMA link" wide register={register} />
+                    </Box>
+                </Box>
 
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Artist Name"
-                                {...register("name")}
-                                sx={styles.textField}
-                            />
-                        </Box>
+                <Box component="section" aria-labelledby="edit-artist-signing" sx={styles.panel}>
+                    <Box component="h2" id="edit-artist-signing" sx={styles.sectionTitle}>Signing</Box>
+                    <Box component="p" sx={styles.sectionIntro}>How collectors can get cards signed.</Box>
+                    <Box sx={styles.fieldGrid}>
+                        <Field name="signingComment" label="Signing comment" multiline wide register={register} />
+                        <Field name="mountainmage" label="MountainMage service" wide register={register} />
+                    </Box>
+                </Box>
 
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Email"
-                                type="email"
-                                {...register("email")}
-                                sx={styles.textField}
-                            />
-                        </Box>
+                <Box component="section" aria-labelledby="edit-artist-options" sx={styles.panel}>
+                    <Box component="h2" id="edit-artist-options" sx={styles.sectionTitle}>Artist options</Box>
+                    <Box component="p" sx={styles.sectionIntro}>Flags used for homepage filters and the artist page.</Box>
+                    <Box sx={styles.optionList}>
+                        <OptionRow label="Artist proofs available" value={artistProof} onChange={setArtistProof} />
+                        <OptionRow label="Offers signing services" value={isSigning} onChange={setIsSigning} />
+                        <OptionRow label="Mark's Signature Service" value={marks} onChange={setMarks} />
+                        <OptionRow label="Legacy signature image" value={signature} onChange={setSignature} />
+                    </Box>
+                </Box>
 
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="File Name"
-                                {...register("filename")}
-                                sx={styles.textField}
-                            />
-                        </Box>
+                <Box sx={styles.actions}>
+                    {saveError ? (
+                        <Box role="alert" sx={[styles.message, styles.messageError]}>{saveError}</Box>
+                    ) : successMessage ? (
+                        <Box role="status" sx={[styles.message, styles.messageSuccess]}>{successMessage}</Box>
+                    ) : null}
+                    <Box component="button" type="submit" disabled={submitting} sx={[styles.button, styles.actionsButton]}>
+                        {submitting ? "Saving…" : "Save changes"}
+                    </Box>
+                </Box>
+            </Box>
 
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Location"
-                                {...register("location")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Website URL"
-                                {...register("url")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Scryfall Name (if different from display name)"
-                                {...register("scryfall_name")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Typography sx={styles.sectionHeader} variant="h4">
-                            Social Media Links
-                        </Typography>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Facebook"
-                                {...register("facebook")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Instagram"
-                                {...register("instagram")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Twitter"
-                                {...register("twitter")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="YouTube"
-                                {...register("youtube")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="ArtStation"
-                                {...register("artstation")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Patreon"
-                                {...register("patreon")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Bluesky"
-                                {...register("bluesky")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="OMA Link"
-                                {...register("omalink")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="INPRNT Link"
-                                {...register("inprnt")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Typography sx={styles.sectionHeader} variant="h4">
-                            Signing Information
-                        </Typography>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Signing Comment"
-                                multiline
-                                rows={3}
-                                {...register("signingComment")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Box sx={styles.fieldSection}>
-                            <TextField
-                                fullWidth
-                                margin="normal"
-                                label="MountainMage Service"
-                                {...register("mountainmage")}
-                                sx={styles.textField}
-                            />
-                        </Box>
-
-                        <Typography sx={styles.sectionHeader} variant="h4">
-                            Artist Options
-                        </Typography>
-
-                        <FormControl sx={styles.formControl}>
-                            <FormLabel sx={styles.formLabel}>Artist Proofs Available</FormLabel>
-                            <RadioGroup
-                                row
-                                value={artistProof}
-                                onChange={(e) => setArtistProof(e.target.value)}
-                                sx={styles.radioGroup}
-                            >
-                                <FormControlLabel value="false" control={<Radio />} label="No" />
-                                <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            </RadioGroup>
-                        </FormControl>
-
-                        <Box sx={styles.formControl}>
-                            <FormLabel sx={styles.formLabel}>Signature Examples</FormLabel>
-                            <Box sx={{ mt: 1 }}>
-                                <SignatureExamplesManager
-                                    artistId={data.artistById.id}
-                                    examples={data.artistById.signatureExamples ?? []}
-                                />
-                            </Box>
-                        </Box>
-
-                        {/* Legacy single image at signatures/<filename>.jpg. Kept until
-                            every artist's image is saved as a signature example. */}
-                        <FormControl sx={styles.formControl}>
-                            <FormLabel sx={styles.formLabel}>Have Signature Example (legacy image)</FormLabel>
-                            <RadioGroup
-                                row
-                                value={signature}
-                                onChange={(e) => setSignature(e.target.value)}
-                                sx={styles.radioGroup}
-                            >
-                                <FormControlLabel value="false" control={<Radio />} label="No" />
-                                <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            </RadioGroup>
-                        </FormControl>
-
-                        <FormControl sx={styles.formControl}>
-                            <FormLabel sx={styles.formLabel}>Offers Signing Services</FormLabel>
-                            <RadioGroup
-                                row
-                                value={isSigning}
-                                onChange={(e) => setIsSigning(e.target.value)}
-                                sx={styles.radioGroup}
-                            >
-                                <FormControlLabel value="false" control={<Radio />} label="No" />
-                                <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            </RadioGroup>
-                        </FormControl>
-
-                        <FormControl sx={styles.formControl}>
-                            <FormLabel sx={styles.formLabel}>Mark's Signature Service</FormLabel>
-                            <RadioGroup
-                                row
-                                value={marks}
-                                onChange={(e) => setMarks(e.target.value)}
-                                sx={styles.radioGroup}
-                            >
-                                <FormControlLabel value="false" control={<Radio />} label="No" />
-                                <FormControlLabel value="true" control={<Radio />} label="Yes" />
-                            </RadioGroup>
-                        </FormControl>
-
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            sx={styles.submitButton}
-                            fullWidth
-                        >
-                            Update Artist
-                        </Button>
-                    </form>
-                </Paper>
-            </Container>
-        </Box>
+            {/* Outside the form: these save on their own, and Enter in a label shouldn't submit the profile. */}
+            <Box component="section" aria-labelledby="edit-artist-signatures" sx={[styles.panel, { mt: "20px" }]}>
+                <Box component="h2" id="edit-artist-signatures" sx={styles.sectionTitle}>Signature examples</Box>
+                <Box component="p" sx={styles.sectionIntro}>
+                    Each kind of signature the artist offers. The first is shown largest on their page. These save as soon
+                    as you add or change them.
+                </Box>
+                <SignatureExamplesManager artistId={artist.id} examples={artist.signatureExamples ?? []} />
+            </Box>
+        </PageShell>
     );
-};
+}
 
 export default EditArtist;

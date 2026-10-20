@@ -3,13 +3,13 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { useForm, UseFormRegister } from "react-hook-form";
 import { useMutation } from "@apollo/client";
-import { Box, TextField } from "@mui/material";
+import { Box } from "@mui/material";
 import { ADD_ARTIST } from "../graphql/mutations";
 import { GET_ARTISTS_PAGE, GET_ARTIST_FILTER_FLAGS } from "../graphql/queries";
 import { RootState } from "../../store/store";
 import { addArtistStyles as styles } from "../../styles/add-artist-styles";
 import MonoLabel from "../shared/MonoLabel";
-import SegmentedControl from "../shared/SegmentedControl";
+import { Field as SharedField, OptionRow, YesNo } from "./artistFormFields";
 
 type Inputs = {
     name: string;
@@ -33,8 +33,6 @@ type Inputs = {
     inprnt: string;
 }
 
-type YesNo = "true" | "false";
-
 const defaultValues: Inputs = {
     name: "",
     email: "",
@@ -57,11 +55,6 @@ const defaultValues: Inputs = {
     inprnt: "",
 };
 
-const YES_NO_OPTIONS = [
-    { value: "false" as const, label: "No" },
-    { value: "true" as const, label: "Yes" },
-];
-
 interface FieldProps {
     name: keyof Inputs;
     label: string;
@@ -72,40 +65,7 @@ interface FieldProps {
     wide?: boolean;
 }
 
-const Field = ({ name, label, register, type, placeholder, multiline, wide }: FieldProps) => {
-    const id = `add-artist-${name}`;
-    return (
-        <Box sx={[styles.field, !!wide && styles.fieldWide]}>
-            <Box component="label" htmlFor={id} sx={styles.fieldLabel}>
-                <MonoLabel tracking="tight">{label}</MonoLabel>
-            </Box>
-            <TextField
-                id={id}
-                type={type}
-                fullWidth
-                size="small"
-                placeholder={placeholder}
-                multiline={multiline}
-                minRows={multiline ? 3 : undefined}
-                {...register(name)}
-                sx={styles.input}
-            />
-        </Box>
-    );
-};
-
-interface OptionRowProps {
-    label: string;
-    value: YesNo;
-    onChange: (value: YesNo) => void;
-}
-
-const OptionRow = ({ label, value, onChange }: OptionRowProps) => (
-    <Box sx={styles.optionRow}>
-        <Box component="span" sx={styles.optionLabel}>{label}</Box>
-        <SegmentedControl options={YES_NO_OPTIONS} value={value} onChange={onChange} aria-label={label} />
-    </Box>
-);
+const Field = (props: FieldProps) => <SharedField<Inputs> idPrefix="add-artist" {...props} />;
 
 interface FormBodyProps {
     onSuccess: (artistName: string) => void;
@@ -229,7 +189,7 @@ const AddArtistFormBody = ({ onSuccess }: FormBodyProps) => {
             </Box>
 
             <Box sx={styles.actions}>
-                <Box component="button" type="submit" disabled={submitting} sx={styles.button}>
+                <Box component="button" type="submit" disabled={submitting} sx={[styles.button, styles.actionsButton]}>
                     {submitting ? "Adding…" : "Add artist"}
                 </Box>
             </Box>
