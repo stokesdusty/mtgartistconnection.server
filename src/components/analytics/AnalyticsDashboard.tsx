@@ -93,9 +93,12 @@ function compact(n: number): string {
 // ── Charts ─────────────────────────────────────────────────────────────────────
 
 /** Single-series daily column chart with a hover/keyboard tooltip and a table view. */
-function ColumnChart({ data, label }: { data: TimeseriesPoint[]; label: string }) {
+function ColumnChart({ data, label, loading }: { data: TimeseriesPoint[]; label: string; loading: boolean }) {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
+    if (loading) {
+        return <Box sx={styles.noData}>Loading…</Box>;
+    }
     if (data.length === 0) {
         return <Box sx={styles.noData}>No data</Box>;
     }
@@ -214,30 +217,32 @@ function Panel({ title, note, aside, children }: { title: string; note?: string;
     );
 }
 
-function TimeseriesPanel({ title, note, data }: { title: string; note: string; data: TimeseriesPoint[] }) {
+function TimeseriesPanel({ title, note, data, loading }: { title: string; note: string; data: TimeseriesPoint[]; loading: boolean }) {
     const total = data.reduce((s, p) => s + p.count, 0);
     const peak = data.reduce<TimeseriesPoint | null>((best, p) => (!best || p.count > best.count ? p : best), null);
     return (
         <Panel
             title={title}
             note={note}
-            aside={data.length > 0 && (
+            aside={!loading && data.length > 0 && (
                 <MonoLabel tracking="tight" sx={styles.peak}>
                     {total.toLocaleString()} total
                     {peak && peak.count > 0 && ` · peak ${peak.count.toLocaleString()} on ${formatAxisDate(peak.date)}`}
                 </MonoLabel>
             )}
         >
-            <ColumnChart data={data} label={title} />
+            <ColumnChart data={data} label={title} loading={loading} />
         </Panel>
     );
 }
 
-function BarList({ title, stats }: { title: string; stats: ClickStat[] }) {
+function BarList({ title, stats, loading }: { title: string; stats: ClickStat[]; loading: boolean }) {
     const max = Math.max(...stats.map(s => s.count), 1);
     return (
         <Panel title={title}>
-            {stats.length === 0 ? (
+            {loading ? (
+                <Box sx={styles.noData}>Loading…</Box>
+            ) : stats.length === 0 ? (
                 <Box sx={styles.noData}>No data</Box>
             ) : (
                 <Box component="ul" sx={styles.barList}>
@@ -266,39 +271,39 @@ export default function AnalyticsDashboard() {
     const [range, setRange] = useState<Range>('30d');
 
     const rangeVar = range === 'all' ? null : range;
-    // cache-and-network: show cached numbers instantly on range switches, but always refetch so
-    // the persisted Apollo cache (up to 24h old) never passes for current stats.
-    const queryOptions = { skip: !isAdmin, fetchPolicy: 'cache-and-network' as const };
+    // network-only: never render cached numbers (the persisted Apollo cache can be up to 24h old);
+    // each section shows a loading placeholder until fresh stats arrive.
+    const queryOptions = { skip: !isAdmin, fetchPolicy: 'network-only' as const };
 
-    const { data: vendorData } = useQuery(GET_CLICK_STATS, {
+    const { data: vendorData, loading: vendorLoading } = useQuery(GET_CLICK_STATS, {
         variables: { range: rangeVar, groupBy: 'vendor' },
         ...queryOptions,
     });
-    const { data: platformData } = useQuery(GET_CLICK_STATS, {
+    const { data: platformData, loading: platformLoading } = useQuery(GET_CLICK_STATS, {
         variables: { range: rangeVar, groupBy: 'platform' },
         ...queryOptions,
     });
-    const { data: placementData } = useQuery(GET_CLICK_STATS, {
+    const { data: placementData, loading: placementLoading } = useQuery(GET_CLICK_STATS, {
         variables: { range: rangeVar, groupBy: 'placement' },
         ...queryOptions,
     });
-    const { data: artistData } = useQuery(GET_TOP_ARTISTS_BY_CLICKS, {
+    const { data: artistData, loading: artistLoading } = useQuery(GET_TOP_ARTISTS_BY_CLICKS, {
         variables: { range: rangeVar, limit: 10 },
         ...queryOptions,
     });
-    const { data: timeseriesData } = useQuery(GET_CLICK_TIMESERIES, {
+    const { data: timeseriesData, loading: timeseriesLoading } = useQuery(GET_CLICK_TIMESERIES, {
         variables: { range: rangeVar },
         ...queryOptions,
     });
-    const { data: pageViewCountData } = useQuery(GET_PAGE_VIEW_COUNT, {
+    const { data: pageViewCountData, loading: pageViewCountLoading } = useQuery(GET_PAGE_VIEW_COUNT, {
         variables: { range: rangeVar },
         ...queryOptions,
     });
-    const { data: pageViewTimeseriesData } = useQuery(GET_PAGE_VIEW_TIMESERIES, {
+    const { data: pageViewTimeseriesData, loading: pageViewTimeseriesLoading } = useQuery(GET_PAGE_VIEW_TIMESERIES, {
         variables: { range: rangeVar },
         ...queryOptions,
     });
-    const { data: topPagesData } = useQuery(GET_TOP_PAGES_BY_VIEWS, {
+    const { data: topPagesData, loading: topPagesLoading } = useQuery(GET_TOP_PAGES_BY_VIEWS, {
         variables: { range: rangeVar, limit: 10 },
         ...queryOptions,
     });
@@ -318,6 +323,7 @@ export default function AnalyticsDashboard() {
     const totalPageViews      = pageViewCountData?.pageViewCount ?? 0;
     const topVendor           = vendorStats[0]?.key ?? '—';
     const topArtistName       = topArtists[0]?.artistName ?? '—';
+    const tileValue = (loading: boolean, value: string) => (loading ? '—' : value);
 
     return (
         <Box sx={styles.page}>
@@ -344,11 +350,11 @@ export default function AnalyticsDashboard() {
 
                 {/* Stat tiles */}
                 <Box sx={styles.tiles}>
-                    <StatTile label="Page loads"      value={compact(totalPageViews)} />
-                    <StatTile label="Outbound clicks" value={compact(totalOutboundClicks)} />
-                    <StatTile label="Price clicks"    value={compact(totalPriceClicks)} />
-                    <StatTile label="Top vendor"      value={topVendor} text />
-                    <StatTile label="Top artist"      value={topArtistName} text />
+                    <StatTile label="Page loads"      value={tileValue(pageViewCountLoading, compact(totalPageViews))} />
+                    <StatTile label="Outbound clicks" value={tileValue(platformLoading, compact(totalOutboundClicks))} />
+                    <StatTile label="Price clicks"    value={tileValue(vendorLoading, compact(totalPriceClicks))} />
+                    <StatTile label="Top vendor"      value={tileValue(vendorLoading, topVendor)} text />
+                    <StatTile label="Top artist"      value={tileValue(artistLoading, topArtistName)} text />
                 </Box>
 
                 <Box sx={styles.stack}>
@@ -356,23 +362,27 @@ export default function AnalyticsDashboard() {
                         title="Daily page loads"
                         note="Every page navigation on the site, logged first-party (independent of Google Analytics/cookie consent)."
                         data={pageViewTimeseries}
+                        loading={pageViewTimeseriesLoading}
                     />
                     <TimeseriesPanel
                         title="Daily clicks"
                         note="Price-comparison vendor clicks plus outbound artist link clicks (social, store, etc.), combined."
                         data={timeseries}
+                        loading={timeseriesLoading}
                     />
 
                     <Box sx={styles.threeUp}>
-                        <BarList title="Top pages by loads"     stats={topPages} />
-                        <BarList title="Price clicks by vendor" stats={vendorStats} />
-                        <BarList title="Outbound by platform"   stats={platformStats} />
+                        <BarList title="Top pages by loads"     stats={topPages}      loading={topPagesLoading} />
+                        <BarList title="Price clicks by vendor" stats={vendorStats}   loading={vendorLoading} />
+                        <BarList title="Outbound by platform"   stats={platformStats} loading={platformLoading} />
                     </Box>
 
-                    <BarList title="Price clicks by placement · vendor" stats={placementStats} />
+                    <BarList title="Price clicks by placement · vendor" stats={placementStats} loading={placementLoading} />
 
                     <Panel title="Top artists by clicks">
-                        {topArtists.length === 0 ? (
+                        {artistLoading ? (
+                            <Box sx={styles.noData}>Loading…</Box>
+                        ) : topArtists.length === 0 ? (
                             <Box sx={styles.noData}>No data</Box>
                         ) : (
                             <Box component="table" sx={styles.table}>
