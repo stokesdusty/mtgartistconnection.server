@@ -266,38 +266,41 @@ export default function AnalyticsDashboard() {
     const [range, setRange] = useState<Range>('30d');
 
     const rangeVar = range === 'all' ? null : range;
+    // cache-and-network: show cached numbers instantly on range switches, but always refetch so
+    // the persisted Apollo cache (up to 24h old) never passes for current stats.
+    const queryOptions = { skip: !isAdmin, fetchPolicy: 'cache-and-network' as const };
 
     const { data: vendorData } = useQuery(GET_CLICK_STATS, {
         variables: { range: rangeVar, groupBy: 'vendor' },
-        skip: !isAdmin,
+        ...queryOptions,
     });
     const { data: platformData } = useQuery(GET_CLICK_STATS, {
         variables: { range: rangeVar, groupBy: 'platform' },
-        skip: !isAdmin,
+        ...queryOptions,
     });
     const { data: placementData } = useQuery(GET_CLICK_STATS, {
         variables: { range: rangeVar, groupBy: 'placement' },
-        skip: !isAdmin,
+        ...queryOptions,
     });
     const { data: artistData } = useQuery(GET_TOP_ARTISTS_BY_CLICKS, {
         variables: { range: rangeVar, limit: 10 },
-        skip: !isAdmin,
+        ...queryOptions,
     });
     const { data: timeseriesData } = useQuery(GET_CLICK_TIMESERIES, {
         variables: { range: rangeVar },
-        skip: !isAdmin,
+        ...queryOptions,
     });
     const { data: pageViewCountData } = useQuery(GET_PAGE_VIEW_COUNT, {
         variables: { range: rangeVar },
-        skip: !isAdmin,
+        ...queryOptions,
     });
     const { data: pageViewTimeseriesData } = useQuery(GET_PAGE_VIEW_TIMESERIES, {
         variables: { range: rangeVar },
-        skip: !isAdmin,
+        ...queryOptions,
     });
     const { data: topPagesData } = useQuery(GET_TOP_PAGES_BY_VIEWS, {
         variables: { range: rangeVar, limit: 10 },
-        skip: !isAdmin,
+        ...queryOptions,
     });
 
     if (!isAdmin) return <Navigate to="/" replace />;
